@@ -1,0 +1,324 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_databases",
+      "tool_name": "mcp_list_databases",
+      "parameters": {},
+      "description": "Happy path: List all databases to verify basic MongoDB connectivity."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_collections_in_test_db",
+      "tool_name": "mcp_list_collections",
+      "parameters": {
+        "database_name": "test_db"
+      },
+      "description": "Edge case: Attempt to list collections in a non-existent database. Expected to return an empty list or fail gracefully."
+    },
+    "substituted_params": {
+      "database_name": "test_db"
+    },
+    "result": {
+      "status": "error",
+      "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_database_and_collection",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "document": {
+          "name": "Test Document",
+          "value": 1
+        }
+      },
+      "description": "Happy path: Insert a document to implicitly create the test database and collection."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "document": {
+        "name": "Test Document",
+        "value": 1
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"inserted_id\": \"686f4a8bb9a03e40427bbe0d\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_collection_created",
+      "tool_name": "mcp_list_collections",
+      "parameters": {
+        "database_name": "test_db"
+      },
+      "description": "Dependent call: Confirm that 'test_collection' now exists in 'test_db'."
+    },
+    "substituted_params": {
+      "database_name": "test_db"
+    },
+    "result": {
+      "status": "error",
+      "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_second_document",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "document": {
+          "name": "Second Document",
+          "value": 2
+        }
+      },
+      "description": "Happy path: Insert a second document into the same collection for query testing."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "document": {
+        "name": "Second Document",
+        "value": 2
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"inserted_id\": \"686f4a8bb9a03e40427bbe0e\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "find_all_documents",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {}
+      },
+      "description": "Happy path: Retrieve all documents from the collection to confirm insertions."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {}
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"_id\": \"6863b76a2f114bff869d5831\", \"name\": \"New Document\", \"content\": \"Created via upsert\"}, {\"_id\": \"686f4a8bb9a03e40427bbe0d\", \"name\": \"Test Document\", \"value\": 1}, {\"_id\": \"686f4a8bb9a03e40427bbe0e\", \"name\": \"Second Document\", \"value\": 2}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "find_specific_document",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Test Document"
+        }
+      },
+      "description": "Happy path: Query for the first inserted document by name."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Test Document"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"_id\": \"686f4a8bb9a03e40427bbe0d\", \"name\": \"Test Document\", \"value\": 1}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "update_first_document",
+      "tool_name": "mcp_update_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Test Document"
+        },
+        "update": {
+          "$set": {
+            "updated_value": 100
+          }
+        }
+      },
+      "description": "Happy path: Update the first document with a new field using $set."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Test Document"
+      },
+      "update": {
+        "$set": {
+          "updated_value": 100
+        }
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"matched_count\": 1, \"modified_count\": 1}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_update",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Test Document"
+        }
+      },
+      "description": "Dependent call: Confirm that the update was applied correctly."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Test Document"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"_id\": \"686f4a8bb9a03e40427bbe0d\", \"name\": \"Test Document\", \"value\": 1, \"updated_value\": 100}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_second_document",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Second Document"
+        }
+      },
+      "description": "Happy path: Delete the second document based on its name."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Second Document"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"deleted_count\": 1}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_deletion",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {}
+      },
+      "description": "Dependent call: Ensure only one document remains after deletion."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {}
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"_id\": \"6863b76a2f114bff869d5831\", \"name\": \"New Document\", \"content\": \"Created via upsert\"}, {\"_id\": \"686f4a8bb9a03e40427bbe0d\", \"name\": \"Test Document\", \"value\": 1, \"updated_value\": 100}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_nonexistent_document",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Nonexistent Document"
+        }
+      },
+      "description": "Edge case: Try deleting a document that does not exist."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Nonexistent Document"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"deleted_count\": 0}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "cleanup_drop_test_collection",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {},
+        "delete_many": true
+      },
+      "description": "Sensitive action: Delete all remaining documents in the test collection as cleanup."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {},
+      "delete_many": true
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"deleted_count\": 2}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_cleanup",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {}
+      },
+      "description": "Dependent call: Confirm that the collection is now empty after cleanup."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {}
+    },
+    "result": {
+      "status": "success",
+      "result": "[]"
+    }
+  }
+]

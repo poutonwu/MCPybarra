@@ -1,0 +1,175 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_content_to_markdown_conver",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_content_to_markdown_conver/refined/server.py",
+  "timestamp": "2025-07-13T00:45:18.362703",
+  "tools": [
+    {
+      "name": "convert_to_markdown",
+      "description": "Converts content from various sources (HTTP/S webpages, local file paths, or Data URIs) into structured Markdown.\n\n    The tool automatically detects the source type and processes it accordingly. It preserves structural\n    elements like headings, lists, tables, and links.\n\n    Args:\n        source (str): The source of the content to be converted. This can be:\n                      - An HTTP or HTTPS URL (e.g., \"https://example.com\").\n                      - A local file path (e.g., \"./my_document.html\").\n                      - A Data URI (e.g., \"data:text/html;base64,PGgxPlRlc3Q8L2gxPg==\").\n\n    Returns:\n        A string containing the content converted to structured Markdown.\n\n    Raises:\n        ValueError: If the source is invalid, content cannot be fetched, or the source type is unsupported.\n        requests.exceptions.RequestException: If a network error occurs while fetching a URL.\n    ",
+      "args_schema": {
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source"
+        ],
+        "title": "convert_to_markdownArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_to_markdown": [
+      {
+        "case_name": "Basic HTML to Markdown Conversion from Local File",
+        "purpose": "验证工具能否正确将本地HTML文件转换为结构化的Markdown格式。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\present.html"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\present.html': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\present.html' is outside the allowed directory."
+        },
+        "execution_time": 0.004999637603759766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Convert Base64 Data URI to Markdown",
+        "purpose": "验证工具是否能解析Base64编码的Data URI并正确转换HTML内容为Markdown。",
+        "args": {
+          "source": "data:text/html;base64,PGgxPlRlc3Q8L2gxPg=="
+        },
+        "response": {
+          "result": "\n# Test\n\n"
+        },
+        "execution_time": 0.004515409469604492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Convert Plain Text File to Markdown",
+        "purpose": "验证工具是否能处理纯文本文件，并将其内容以适当方式转换为Markdown。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt' is outside the allowed directory."
+        },
+        "execution_time": 0.005998373031616211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Convert HTML with Special Characters in Content",
+        "purpose": "验证工具是否能正确处理包含特殊字符的HTML内容并生成正确的Markdown。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_char_content.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_char_content.txt': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_char_content.txt' is outside the allowed directory."
+        },
+        "execution_time": 0.004968881607055664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Convert File with Long Path Name",
+        "purpose": "验证工具是否能处理具有超长路径的文件，确保系统兼容性。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_file_name_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows_systems.html"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_file_name_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows_systems.html': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_file_name_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows_systems.html' is outside the allowed directory."
+        },
+        "execution_time": 0.0069980621337890625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Load Executable as Source",
+        "purpose": "验证工具是否会拒绝尝试加载可执行文件作为内容源，防止潜在安全风险。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\malicious_attempt.exe"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\malicious_attempt.exe': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\malicious_attempt.exe' is outside the allowed directory."
+        },
+        "execution_time": 0.0036008358001708984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling for Invalid URL",
+        "purpose": "验证工具在提供无效URL时是否能优雅地抛出错误而不是崩溃。",
+        "args": {
+          "source": "htp:/invalid-url.example"
+        },
+        "response": {
+          "result": "htp:/invalid-url.example"
+        },
+        "execution_time": 0.007204294204711914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling for Non-Existent Local File",
+        "purpose": "验证工具在指定的本地文件不存在时是否能正确报告错误。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\non_existent_file.html"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\non_existent_file.html': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\non_existent_file.html' is outside the allowed directory."
+        },
+        "execution_time": 0.004459381103515625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling for Unsupported File Type",
+        "purpose": "验证工具是否拒绝不支持的内容类型（如图像文件）作为输入源。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png' is outside the allowed directory."
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test with Empty String Source",
+        "purpose": "验证工具在空字符串作为源参数时是否能正确处理错误。",
+        "args": {
+          "source": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: The 'source' parameter cannot be empty."
+        },
+        "execution_time": 0.004638195037841797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Test UTF-8 and Unicode Characters in HTML",
+        "purpose": "验证工具是否能正确处理包含UTF-8和Unicode字符的HTML文档并保留其结构。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_mskanji.csv"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_mskanji.csv': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_mskanji.csv' is outside the allowed directory."
+        },
+        "execution_time": 0.006592988967895508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Test File with Special Characters in Filename",
+        "purpose": "验证工具是否能处理带有特殊字符的文件名并成功转换内容。",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_@#￥%——&×.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred while processing source 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_@#￥%——&×.docx': Security error: File path 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_@#￥%——&×.docx' is outside the allowed directory."
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 12
+}

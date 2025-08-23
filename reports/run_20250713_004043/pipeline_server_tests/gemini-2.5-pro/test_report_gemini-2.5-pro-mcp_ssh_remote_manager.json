@@ -1,0 +1,790 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_ssh_remote_manager",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_ssh_remote_manager/refined/server.py",
+  "timestamp": "2025-07-13T00:47:13.524334",
+  "tools": [
+    {
+      "name": "connect",
+      "description": "Establishes an SSH connection to a remote server and manages the session.\n\n    This tool creates a secure shell (SSH) connection to a specified host.\n    Authentication can be performed using a password or a private key file.\n    Upon successful connection, a unique session ID is generated and returned,\n    which must be used for all subsequent operations with this connection\n    (e.g., executing commands, transferring files). The session details are\n    stored in-memory for the duration of the server's lifecycle.\n\n    Args:\n        hostname (str): The hostname or IP address of the SSH server.\n        port (int): The port number of the SSH server (standard is 22).\n        username (str): The username for authentication.\n        password (str, optional): The password for password-based authentication.\n            One of `password` or `key_filename` should be provided. Defaults to None.\n        key_filename (str, optional): The local path to the private key for\n            key-based authentication. Defaults to None.\n\n    Returns:\n        str: A JSON string containing the unique 'session_id' on success,\n             or an 'error' message if the connection fails.\n\n    Example:\n        # Connect using a password\n        connect(hostname=\"example.com\", port=22, username=\"user\", password=\"your_password\")\n\n        # Connect using a private key\n        connect(hostname=\"192.168.1.100\", port=22, username=\"admin\", key_filename=\"/home/user/.ssh/id_rsa\")\n    ",
+      "args_schema": {
+        "properties": {
+          "hostname": {
+            "default": "10.70.4.146",
+            "title": "Hostname",
+            "type": "string"
+          },
+          "port": {
+            "default": 26002,
+            "title": "Port",
+            "type": "integer"
+          },
+          "username": {
+            "default": "pengbocheng",
+            "title": "Username",
+            "type": "string"
+          },
+          "password": {
+            "default": "123456",
+            "title": "Password",
+            "type": "string"
+          },
+          "key_filename": {
+            "default": null,
+            "title": "Key Filename",
+            "type": "string"
+          }
+        },
+        "title": "connectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "disconnect",
+      "description": "Disconnects an active SSH session.\n\n    This tool closes a specific SSH connection identified by its session ID.\n    It terminates the connection to the remote server and removes the session\n    from the in-memory store, releasing associated resources.\n\n    Args:\n        session_id (str): The unique ID of the session to disconnect. This ID\n                          is obtained from a successful `connect` call.\n\n    Returns:\n        str: A JSON string confirming the disconnection with a 'status' message,\n             or an 'error' message if the session ID is not found or an issue\n             occurs during disconnection.\n\n    Example:\n        disconnect(session_id=\"a1b2c3d4-e5f6-7890-1234-567890abcdef\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "disconnectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_sessions",
+      "description": "Lists all active SSH sessions.\n\n    This tool retrieves a list of all currently active SSH session IDs that\n    are being managed by the server. This can be useful for tracking open\n    connections.\n\n    Returns:\n        str: A JSON string containing a list of 'active_sessions' IDs.\n\n    Example:\n        list_sessions()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_sessionsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute",
+      "description": "Executes a command on a remote SSH server.\n\n    This tool runs a shell command on the remote server associated with the\n    given session ID. It captures the standard output (stdout), standard\n    error (stderr), and the exit code of the command.\n\n    Args:\n        session_id (str): The ID of the active SSH session.\n        command (str): The shell command to execute on the remote server.\n        timeout (int, optional): The maximum time in seconds to wait for the\n                                 command to complete. Defaults to 60.\n\n    Returns:\n        str: A JSON string containing the 'stdout', 'stderr', and 'exit_code'\n             from the command execution. Returns an 'error' message if the\n             session is not found or an execution error occurs.\n\n    Example:\n        execute(session_id=\"a1b2c3d4-e5f6-7890-1234-567890abcdef\", command=\"ls -l /home/user\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "timeout": {
+            "default": 60,
+            "title": "Timeout",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "title": "executeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "upload",
+      "description": "Uploads a file to a remote SSH server using SFTP.\n\n    This tool transfers a file from the local machine (where this server is\n    running) to the remote server over an SFTP session. The destination path\n    must be an absolute path or a path relative to the user's home directory\n    on the remote server.\n\n    Args:\n        session_id (str): The ID of the active SSH session.\n        local_path (str): The path to the file on the local filesystem to upload.\n        remote_path (str): The destination path on the remote server.\n\n    Returns:\n        str: A JSON string indicating 'status' of the upload on success, or an\n             'error' message if the session is not found or the upload fails.\n\n    Example:\n        upload(session_id=\"a1b2c3d4-e5f6-7890-1234-567890abcdef\", local_path=\"/path/to/local/file.txt\", remote_path=\"/home/user/remote/file.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "local_path",
+          "remote_path"
+        ],
+        "title": "uploadArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download",
+      "description": "Downloads a file from a remote SSH server using SFTP.\n\n    This tool transfers a file from the remote server to the local machine\n    (where this server is running) over an SFTP session. The local path\n    specifies where the downloaded file will be saved.\n\n    Args:\n        session_id (str): The ID of the active SSH session.\n        remote_path (str): The path to the file on the remote server to download.\n        local_path (str): The destination path on the local filesystem.\n\n    Returns:\n        str: A JSON string indicating 'status' of the download on success, or an\n             'error' message if the session is not found or the download fails.\n\n    Example:\n        download(session_id=\"a1b2c3d4-e5f6-7890-1234-567890abcdef\", remote_path=\"/home/user/remote/file.txt\", local_path=\"/path/to/local/downloaded_file.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "remote_path",
+          "local_path"
+        ],
+        "title": "downloadArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "connect": [
+      {
+        "case_name": "成功使用默认参数建立SSH连接",
+        "purpose": "验证工具可以使用默认参数成功建立SSH连接并返回session_id",
+        "args": {
+          "hostname": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "result": "{\"error\": \"[WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\"}"
+        },
+        "execution_time": 21.052541732788086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用私钥文件建立SSH连接",
+        "purpose": "验证工具可以通过指定私钥文件路径进行SSH认证并建立连接",
+        "args": {
+          "hostname": "example.com",
+          "port": 22,
+          "username": "user",
+          "key_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config"
+        },
+        "response": {
+          "result": "{\"error\": \"[WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\"}"
+        },
+        "execution_time": 21.285599946975708,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "同时提供密码和私钥文件的冲突情况",
+        "purpose": "验证工具是否能正确处理同时提供密码和私钥文件的情况，应拒绝连接",
+        "args": {
+          "hostname": "example.com",
+          "port": 22,
+          "username": "user",
+          "password": "your_password",
+          "key_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config"
+        },
+        "response": {
+          "result": "{\"error\": \"[WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\"}"
+        },
+        "execution_time": 21.05499792098999,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未提供认证凭据导致连接失败",
+        "purpose": "验证工具在未提供密码或私钥文件时是否能正确拒绝连接请求",
+        "args": {
+          "hostname": "example.com",
+          "port": 22,
+          "username": "user"
+        },
+        "response": {
+          "result": "{\"error\": \"[WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\"}"
+        },
+        "execution_time": 21.05777621269226,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效主机名导致连接失败",
+        "purpose": "测试当提供错误或无法解析的主机名时，工具能否优雅处理连接失败",
+        "args": {
+          "hostname": "invalid.hostname.example",
+          "port": 22,
+          "username": "user",
+          "password": "your_password"
+        },
+        "response": {
+          "result": "{\"error\": \"[Errno 11001] getaddrinfo failed\"}"
+        },
+        "execution_time": 0.03470611572265625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效端口导致连接失败",
+        "purpose": "测试当提供一个非法或关闭的端口号时，连接是否失败并返回错误信息",
+        "args": {
+          "hostname": "example.com",
+          "port": 99999,
+          "username": "user",
+          "password": "your_password"
+        },
+        "response": {
+          "result": "{\"error\": \"[WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\"}"
+        },
+        "execution_time": 21.0601966381073,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符作为主机名的边界测试",
+        "purpose": "测试包含特殊字符的主机名是否被正确处理（如 @!#$%^&*）",
+        "args": {
+          "hostname": "!@#$%^&*.com",
+          "port": 22,
+          "username": "user",
+          "password": "your_password"
+        },
+        "response": {
+          "result": "{\"error\": \"[Errno 11003] getaddrinfo failed\"}"
+        },
+        "execution_time": 0.006441831588745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空用户名尝试连接",
+        "purpose": "验证工具是否允许空用户名进行SSH连接（某些系统可能允许）",
+        "args": {
+          "hostname": "example.com",
+          "port": 22,
+          "username": "",
+          "password": "your_password"
+        },
+        "response": {
+          "result": "{\"error\": \"[WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\"}"
+        },
+        "execution_time": 21.043827533721924,
+        "is_functional_test": false
+      }
+    ],
+    "list_sessions": [
+      {
+        "case_name": "成功列出所有活跃的SSH会话",
+        "purpose": "验证list_sessions工具能够正确返回当前服务器上管理的所有活跃SSH会话ID列表",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.003997087478637695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无活跃会话时返回空列表",
+        "purpose": "验证当没有活跃的SSH连接时，list_sessions返回一个空的active_sessions数组",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.013539314270019531,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "并发多用户会话下正确列出所有会话",
+        "purpose": "验证在多个SSH连接同时存在的情况下，list_sessions能准确列出所有有效的session_id",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.007992267608642578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "会话超时后不再出现在列表中",
+        "purpose": "验证已超时或关闭的SSH连接不会继续保留在active_sessions列表中",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.0045108795166015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "未授权用户尝试获取会话列表（安全性测试）",
+        "purpose": "验证非管理员或未授权用户无法调用list_sessions工具查看系统级信息",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.007012605667114258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "服务器内部错误导致无法获取会话列表",
+        "purpose": "模拟服务器端异常（如数据库连接失败），验证list_sessions是否能优雅处理并返回错误提示",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "网络中断情况下获取会话列表失败",
+        "purpose": "验证当服务器与客户端之间出现网络问题时，list_sessions能否正确处理连接失败并返回错误信息",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.004528999328613281,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "极端并发压力下的会话列表获取能力",
+        "purpose": "验证在极高并发（例如1000+连接）情况下，list_sessions仍能稳定返回有效结果",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": []}"
+        },
+        "execution_time": 0.005994081497192383,
+        "is_functional_test": true
+      }
+    ],
+    "execute": [
+      {
+        "case_name": "使用有效session_id执行简单命令",
+        "purpose": "验证工具可以使用有效的session_id执行基本shell命令并返回结果",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "command": "echo 'Hello World'"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.009214639663696289,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "执行命令时使用默认超时时间",
+        "purpose": "验证工具在未指定timeout参数时使用默认值（60秒）执行命令",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "command": "sleep 5 && echo 'Completed'"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004509687423706055,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "执行带有特殊字符的命令",
+        "purpose": "测试工具是否能正确处理包含特殊字符（如|, &, >）的命令字符串",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "command": "echo 'test' | grep 'test'"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004870176315307617,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试使用无效session_id执行命令",
+        "purpose": "验证工具在提供无效或不存在的session_id时能否返回错误信息",
+        "args": {
+          "session_id": "invalid-session-id",
+          "command": "ls -l"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.006615877151489258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "执行长时间运行的命令并触发超时",
+        "purpose": "测试工具在超过指定超时时间后是否终止命令执行并返回错误",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "command": "sleep 120",
+          "timeout": 10
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0055119991302490234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "执行命令时省略必填参数",
+        "purpose": "验证工具在缺少必填参数（session_id或command）时是否拒绝执行并报错",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 1 validation error for executeArguments\ncommand\n  Field required [type=missing, input_value={'session_id': 'a1b2c3d4-...7890-1234-567890abcdef'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004515886306762695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "执行高危系统命令的安全限制测试",
+        "purpose": "验证工具是否限制或阻止执行高风险命令（如rm -rf /）",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "command": "rm -rf /tmp/test_dir"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.006504535675048828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "执行命令时传递极大长度的参数",
+        "purpose": "测试工具对极长命令字符串的处理能力及稳定性",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "command": "echo $(seq 1 10000)"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004007816314697266,
+        "is_functional_test": true
+      }
+    ],
+    "upload": [
+      {
+        "case_name": "使用有效会话上传文件到远程服务器",
+        "purpose": "验证upload工具可以使用有效的session_id、local_path和remote_path将文件成功上传至远程SSH服务器",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "remote_path": "/home/user/remote/existing_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004004955291748047,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试上传不存在的本地文件",
+        "purpose": "验证当提供的local_path指向一个不存在的文件时，upload工具能否正确返回错误信息",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "remote_path": "/home/user/remote/nonexistent_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用无效会话ID尝试上传文件",
+        "purpose": "验证当提供无效或未激活的session_id时，upload工具是否拒绝执行上传操作并返回错误",
+        "args": {
+          "session_id": "invalid-session-id",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "remote_path": "/home/user/remote/existing_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.007812023162841797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传带有特殊字符的文件名",
+        "purpose": "测试upload工具是否能正确处理包含特殊字符的local_path和remote_path参数",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special#chars@file!.txt",
+          "remote_path": "/home/user/remote/special#chars@file!.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0075342655181884766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试上传大文件以测试性能边界",
+        "purpose": "验证upload工具在上传大文件（例如超过1GB）时是否能够稳定运行并完成传输",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\multi_merged_output.zip",
+          "remote_path": "/home/user/remote/large_file.zip"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.003995418548583984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传文件到受限制的远程路径",
+        "purpose": "测试当remote_path为系统保护目录（如/etc）时，upload工具是否能正确拒绝写入并返回错误",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "remote_path": "/etc/restricted_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004792690277099609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传空文件进行边界测试",
+        "purpose": "验证upload工具是否能正确处理空文件的上传，并在远程服务器上保留空文件内容",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt",
+          "remote_path": "/home/user/remote/empty_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.006522417068481445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试通过非法路径穿越写入远程服务器",
+        "purpose": "验证upload工具是否阻止了路径穿越攻击（如../../etc/passwd），防止安全漏洞",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "remote_path": "../../etc/passwd"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.00400090217590332,
+        "is_functional_test": false
+      }
+    ],
+    "download": [
+      {
+        "case_name": "成功通过SFTP下载文件",
+        "purpose": "验证download工具能够使用有效的session_id、remote_path和local_path参数成功从远程服务器下载文件",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "remote_path": "/home/user/remote/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.00500178337097168,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用空会话ID尝试下载失败",
+        "purpose": "验证当提供空的session_id时，download工具是否能正确拒绝请求并返回错误信息",
+        "args": {
+          "session_id": "",
+          "remote_path": "/home/user/remote/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.005999326705932617,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效会话ID导致下载失败",
+        "purpose": "测试当提供不存在或无效的session_id时，download工具是否能正确处理并返回错误信息",
+        "args": {
+          "session_id": "invalid-session-id",
+          "remote_path": "/home/user/remote/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "远程文件路径不存在导致下载失败",
+        "purpose": "验证当指定的remote_path在远程服务器上不存在时，download工具是否能优雅地处理错误",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "remote_path": "/nonexistent/path/to/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "本地路径不可写导致下载失败",
+        "purpose": "验证当提供的local_path没有写入权限或不可用时，download工具是否能正确处理错误",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "remote_path": "/home/user/remote/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_output.jpg"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.006000995635986328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "包含特殊字符的远程路径下载",
+        "purpose": "测试包含特殊字符（如空格、#、@、!）的remote_path是否被正确处理",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "remote_path": "/home/user/remote/special#chars@file!.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_chars_downloaded.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0039975643157958984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "超大文件下载性能测试",
+        "purpose": "验证download工具在下载非常大的文件时是否能稳定运行并完成传输",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "remote_path": "/var/data/largefile.iso",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\largefile.iso"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "下载敏感系统文件的安全性测试",
+        "purpose": "验证download工具是否禁止下载受限制或敏感的系统文件（如/etc/shadow）",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+          "remote_path": "/etc/shadow",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\shadow_copy.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004918575286865234,
+        "is_functional_test": false
+      }
+    ],
+    "disconnect": [
+      {
+        "case_name": "成功断开有效SSH会话",
+        "purpose": "验证工具可以使用有效的session_id成功断开一个活跃的SSH连接，并从内存中移除该会话",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004258155822753906,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试断开不存在的SSH会话",
+        "purpose": "验证当提供一个无效或不存在的session_id时，工具是否能返回错误信息而不是崩溃",
+        "args": {
+          "session_id": "invalid-session-id"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.003000974655151367,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空session_id导致断开失败",
+        "purpose": "测试当提供空字符串作为session_id时，工具是否能正确拒绝请求并返回错误信息",
+        "args": {
+          "session_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0050792694091796875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符作为session_id的边界测试",
+        "purpose": "测试包含特殊字符的session_id是否被正确处理（如 !@#$%^&*）",
+        "args": {
+          "session_id": "!@#$%^&*-session-id"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.009458065032958984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "重复调用disconnect对同一session_id",
+        "purpose": "验证对同一个session_id多次调用disconnect是否会优雅处理，第二次应返回错误提示而非异常",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "未授权用户尝试断开会话（安全性测试）",
+        "purpose": "验证非管理员或未授权用户是否无法调用disconnect工具终止其他用户的SSH连接",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.005002021789550781,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "断开处于超时状态的SSH会话",
+        "purpose": "验证即使会话已超时，工具仍能安全地处理断开操作而不引发异常",
+        "args": {
+          "session_id": "expired-session-id"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.005998373031616211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "网络中断情况下断开连接失败",
+        "purpose": "模拟网络中断情况，验证工具能否正确处理服务器端断开连接失败的情况并返回错误信息",
+        "args": {
+          "session_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        },
+        "response": {
+          "result": "{\"error\": \"Session not found\"}"
+        },
+        "execution_time": 0.0030007362365722656,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 48
+}

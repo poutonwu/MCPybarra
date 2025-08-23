@@ -1,0 +1,416 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_image_search_download_icon",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_image_search_download_icon/refined/server.py",
+  "timestamp": "2025-07-13T00:54:22.870043",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    根据用户输入的关键词，在 Pexels 图像源中自动检索相关图片，并返回包含图片链接、作者等信息的结构化结果。\n\n    Args:\n        query: 搜索关键词（例如 \"nature landscape\"），必填。\n        per_page: 每页返回的图片数量，默认为 5，最大值为 10。\n\n    Returns:\n        包含以下字段的 JSON 列表：\n        - url: 高清图片链接\n        - photographer: 摄影师名称\n        - source: 图片来源（Pexels 页面链接）\n\n    Raises:\n        ValueError: 如果查询参数为空或无效\n        requests.exceptions.RequestException: 如果网络请求失败\n        json.JSONDecodeError: 如果响应内容无法解析为 JSON\n\n    示例:\n        >>> search_images(query=\"nature landscape\", per_page=5)\n        [\n            {\n                \"url\": \"https://images.pexels.com/photos/12345/nature-landscape.jpg\",\n                \"photographer\": \"John Doe\",\n                \"source\": \"https://www.pexels.com/photo/12345/\"\n            },\n            ...\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "per_page": {
+            "default": 5,
+            "title": "Per Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    根据用户提供的图片 URL 和文件名，将图片下载并保存到指定目录，返回保存状态和路径信息。\n\n    Args:\n        image_url: 要下载的图片 URL，必填。\n        filename: 保存的文件名，必填。\n        save_dir: 保存图片的目录路径，默认为当前工作目录下的 'downloads/' 文件夹。\n\n    Returns:\n        包含以下字段的 JSON 对象：\n        - status: 下载是否成功\n        - file_path: 图片保存的完整路径（如果失败则为 null）\n\n    Raises:\n        ValueError: 如果 URL 或文件名参数无效\n        requests.exceptions.RequestException: 如果网络请求失败\n        IOError: 如果文件写入失败\n\n    示例:\n        >>> download_image(image_url=\"https://example.com/image.jpg\", filename=\"landscape.jpg\")\n        {\n            \"status\": true,\n            \"file_path\": \"/path/to/downloads/landscape.jpg\"\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "save_dir": {
+            "default": "downloads",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_url",
+          "filename"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    根据用户输入的图标描述词，自动生成指定尺寸的图标图片，并保存到指定目录；如未配置云端生成服务，则用本地样例图标模拟生成。\n\n    Args:\n        description: 图标描述词（例如 \"settings icon blue color\"），必填。\n        size: 图标的宽度和高度，默认为 (64, 64)。\n        use_cloud: 是否使用云端图标生成服务，默认为 False。\n\n    Returns:\n        包含以下字段的 JSON 对象：\n        - status: 生成是否成功\n        - file_path: 图标保存的完整路径（如果失败则为 null）\n\n    Raises:\n        ValueError: 如果描述词参数无效\n        IOError: 如果文件写入失败\n        Exception: 其他未知错误\n\n    示例:\n        >>> generate_icon(description=\"settings icon blue color\", size=(64, 64))\n        {\n            \"status\": true,\n            \"file_path\": \"/path/to/icons/settings_icon_blue_color.png\"\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "default": [
+              64,
+              64
+            ],
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Size",
+            "type": "array"
+          },
+          "use_cloud": {
+            "default": false,
+            "title": "Use Cloud",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search with Default Per Page",
+        "purpose": "验证使用默认每页数量的基本图片搜索功能是否正常工作。",
+        "args": {
+          "query": "nature landscape"
+        },
+        "response": {
+          "result": "[{\"url\": \"https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Ákos Szabó\", \"source\": \"https://www.pexels.com/photo/panoramic-photography-of-green-field-440731/\"}, {\"url\": \"https://images.pexels.com/photos/3727271/pexels-photo-3727271.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"André Ulysses De Salis\", \"source\": \"https://www.pexels.com/photo/brown-field-near-mountain-under-cloudy-sky-3727271/\"}, {\"url\": \"https://images.pexels.com/photos/443446/pexels-photo-443446.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"eberhard grossgasteiger\", \"source\": \"https://www.pexels.com/photo/lake-and-mountain-under-white-sky-443446/\"}, {\"url\": \"https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"James Wheeler\", \"source\": \"https://www.pexels.com/photo/lake-and-mountain-417074/\"}, {\"url\": \"https://images.pexels.com/photos/709552/pexels-photo-709552.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Ian Turnell\", \"source\": \"https://www.pexels.com/photo/body-of-water-between-green-leaf-trees-709552/\"}]"
+        },
+        "execution_time": 3.0167953968048096,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search with Custom Per Page Value",
+        "purpose": "验证指定每页返回图片数量（非默认值）时的搜索功能是否正常。",
+        "args": {
+          "query": "city skyline",
+          "per_page": 8
+        },
+        "response": {
+          "result": "[{\"url\": \"https://images.pexels.com/photos/7613/pexels-photo.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Life Of Pix\", \"source\": \"https://www.pexels.com/photo/photography-of-empire-state-new-york-7613/\"}, {\"url\": \"https://images.pexels.com/photos/290595/pexels-photo-290595.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Pixabay\", \"source\": \"https://www.pexels.com/photo/cityscape-photography-near-water-290595/\"}, {\"url\": \"https://images.pexels.com/photos/421927/pexels-photo-421927.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Chris Schippers\", \"source\": \"https://www.pexels.com/photo/body-of-water-near-city-buildings-421927/\"}, {\"url\": \"https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Aleksandar Pasaric\", \"source\": \"https://www.pexels.com/photo/view-of-cityscape-325185/\"}, {\"url\": \"https://images.pexels.com/photos/169647/pexels-photo-169647.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Peng LIU\", \"source\": \"https://www.pexels.com/photo/raised-building-frame-169647/\"}, {\"url\": \"https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Lukas Kloeppel\", \"source\": \"https://www.pexels.com/photo/empire-state-building-new-york-466685/\"}, {\"url\": \"https://images.pexels.com/photos/3052361/pexels-photo-3052361.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=9...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1875字符，剩余375字符"
+        },
+        "execution_time": 2.061176300048828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "测试当查询关键词为空时，工具是否正确抛出 ValueError 异常。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "{\"error\": \"未知错误: 'query' 参数不能为空且必须是字符串类型\"}"
+        },
+        "execution_time": 0.12206697463989258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Query Type",
+        "purpose": "测试传入非字符串类型查询参数时是否能正确处理错误。",
+        "args": {
+          "query": 12345
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: 1 validation error for search_imagesArguments\nquery\n  Input should be a valid string [type=string_type, input_value=12345, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.07607460021972656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Per Page Exceeds Maximum Limit",
+        "purpose": "测试每页数量超过最大限制（10）时是否仍能处理请求或报错。",
+        "args": {
+          "query": "mountains",
+          "per_page": 15
+        },
+        "response": {
+          "result": "[{\"url\": \"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Creative Vix\", \"source\": \"https://www.pexels.com/photo/aerial-photography-of-pine-trees-on-the-mountain-9754/\"}, {\"url\": \"https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Sagui Andrea\", \"source\": \"https://www.pexels.com/photo/snow-covered-mountain-during-sunrise-618833/\"}, {\"url\": \"https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Joyston Judah\", \"source\": \"https://www.pexels.com/photo/white-and-black-mountain-wallpaper-933054/\"}, {\"url\": \"https://images.pexels.com/photos/210243/pexels-photo-210243.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Pixabay\", \"source\": \"https://www.pexels.com/photo/green-fields-near-brown-mountain-210243/\"}, {\"url\": \"https://images.pexels.com/photos/1666012/pexels-photo-1666012.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Philip Ackermann\", \"source\": \"https://www.pexels.com/photo/mountain-under-cloudy-sky-1666012/\"}, {\"url\": \"https://images.pexels.com/photos/772803/pexels-photo-772803.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Tyler Lastovich\", \"source\": \"https://www.pexels.com/photo/snow-coated-rocky-mountains-772803/\"}, {\"url\": \"https://images.pexels.com/photos/808465/pexels-photo-80...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2435字符，剩余935字符"
+        },
+        "execution_time": 2.609609842300415,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "测试包含特殊字符的查询关键词是否能被正确处理。",
+        "args": {
+          "query": "sun@beach!#"
+        },
+        "response": {
+          "result": "{\"error\": \"API 请求失败: HTTPSConnectionPool(host='api.pexels.com', port=443): Read timed out. (read timeout=3.05)\"}"
+        },
+        "execution_time": 3.08670973777771,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Network Failure Simulation",
+        "purpose": "模拟网络请求失败场景，验证工具是否能正确捕获 RequestException。",
+        "args": {
+          "query": "test image",
+          "per_page": 5
+        },
+        "response": {
+          "result": "[{\"url\": \"https://images.pexels.com/photos/5982134/pexels-photo-5982134.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"Nataliya Vaitkevich\", \"source\": \"https://www.pexels.com/photo/person-holding-black-iphone-5-5982134/\"}, {\"url\": \"https://images.pexels.com/photos/6202736/pexels-photo-6202736.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"cottonbro studio\", \"source\": \"https://www.pexels.com/photo/boy-holding-an-x-ray-picture-torn-in-half-6202736/\"}, {\"url\": \"https://images.pexels.com/photos/6213644/pexels-photo-6213644.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"olia danilevich\", \"source\": \"https://www.pexels.com/photo/close-up-shot-of-positive-pregnancy-test-strips-6213644/\"}, {\"url\": \"https://images.pexels.com/photos/7089009/pexels-photo-7089009.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"MART  PRODUCTION\", \"source\": \"https://www.pexels.com/photo/photo-of-woman-holding-the-printed-image-of-her-baby-7089009/\"}, {\"url\": \"https://images.pexels.com/photos/7089047/pexels-photo-7089047.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\", \"photographer\": \"MART  PRODUCTION\", \"source\": \"https://www.pexels.com/photo/people-woman-sitting-technology-7089047/\"}]"
+        },
+        "execution_time": 2.3698649406433105,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Malformed JSON Response",
+        "purpose": "测试工具在接收到无法解析为JSON的响应时是否能正确抛出 JSONDecodeError。",
+        "args": {
+          "query": "corrupted response"
+        },
+        "response": {
+          "result": "{\"error\": \"API 请求失败: HTTPSConnectionPool(host='api.pexels.com', port=443): Read timed out. (read timeout=3.05)\"}"
+        },
+        "execution_time": 3.059835433959961,
+        "is_functional_test": false
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download with Default Directory",
+        "purpose": "验证使用默认保存目录的基本图片下载功能是否正常工作。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "landscape.jpg"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: HTTPSConnectionPool(host='example.com', port=443): Read timed out. (read timeout=3.05)\"}"
+        },
+        "execution_time": 3.0631492137908936,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Download to Custom Directory",
+        "purpose": "验证将图片下载到指定自定义目录的功能是否正常工作。",
+        "args": {
+          "image_url": "https://example.com/image.png",
+          "filename": "screenshot.png",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloads"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: 404 Client Error: Not Found for url: https://example.com/image.png\"}"
+        },
+        "execution_time": 2.306169271469116,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Image with Special Characters in Filename",
+        "purpose": "测试包含特殊字符的文件名是否能被正确处理并成功保存。",
+        "args": {
+          "image_url": "https://example.com/photo.jpg",
+          "filename": "photo@#test!.jpg"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: 404 Client Error: Not Found for url: https://example.com/photo.jpg\"}"
+        },
+        "execution_time": 1.8183600902557373,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Image URL Format",
+        "purpose": "测试无效的图片 URL 是否能被正确捕获并抛出 ValueError。",
+        "args": {
+          "image_url": "not-a-url",
+          "filename": "invalid_url.jpg"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: Invalid URL 'not-a-url': No scheme supplied. Perhaps you meant https://not-a-url?\"}"
+        },
+        "execution_time": 0.0043146610260009766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Parameters",
+        "purpose": "测试未提供必填参数时是否能正确抛出参数验证错误。",
+        "args": {
+          "image_url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: 1 validation error for download_imageArguments\nfilename\n  Field required [type=missing, input_value={'image_url': ''}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0035123825073242188,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download to Non-Writable Directory",
+        "purpose": "测试尝试将图片保存到无写入权限的目录时是否会抛出 IOError。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "locked.jpg",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: 404 Client Error: Not Found for url: https://example.com/image.jpg\"}"
+        },
+        "execution_time": 2.224503993988037,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long File Name Boundary Test",
+        "purpose": "测试使用超长文件名是否能被正确处理（系统限制边界值）。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "very_long_filename_that_tests_the_maximum_allowed_length_for_windows_systems_saved.jpg"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: 404 Client Error: Not Found for url: https://example.com/image.jpg\"}"
+        },
+        "execution_time": 2.0161550045013428,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Image with Unicode Characters in Filename",
+        "purpose": "验证文件名中包含 Unicode 字符（如中文）是否能被正确处理。",
+        "args": {
+          "image_url": "https://example.com/photo.jpg",
+          "filename": "照片.jpg"
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"图片下载失败: 404 Client Error: Not Found for url: https://example.com/photo.jpg\"}"
+        },
+        "execution_time": 1.9282233715057373,
+        "is_functional_test": true
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation with Default Parameters",
+        "purpose": "验证使用默认参数生成图标的正常功能是否工作。",
+        "args": {
+          "description": "settings icon blue color"
+        },
+        "response": {
+          "result": "{\"status\": true, \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_image_search_download_icon\\\\refined\\\\icons\\\\settings_icon_blue_color_64x64.png\"}"
+        },
+        "execution_time": 0.2011580467224121,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Size",
+        "purpose": "验证指定自定义尺寸的图标生成是否正常工作。",
+        "args": {
+          "description": "user profile icon",
+          "size": [
+            128,
+            128
+          ]
+        },
+        "response": {
+          "result": "{\"status\": true, \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_image_search_download_icon\\\\refined\\\\icons\\\\user_profile_icon_128x128.png\"}"
+        },
+        "execution_time": 0.17542529106140137,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation Using Cloud Service",
+        "purpose": "验证启用云端服务时图标是否能通过云端生成。",
+        "args": {
+          "description": "cloud upload icon green",
+          "use_cloud": true
+        },
+        "response": {
+          "result": "{\"status\": true, \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_image_search_download_icon\\\\refined\\\\icons\\\\cloud_upload_icon_green_64x64.png\"}"
+        },
+        "execution_time": 0.1664888858795166,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Description Input",
+        "purpose": "测试当描述词为空时，工具是否抛出 ValueError 异常。",
+        "args": {
+          "description": ""
+        },
+        "response": {
+          "result": "{\"status\": false, \"file_path\": null, \"error\": \"未知错误: 'description' 参数不能为空且必须是字符串类型\"}"
+        },
+        "execution_time": 0.18955588340759277,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Description Type",
+        "purpose": "测试传入非字符串类型的描述词是否被正确拒绝。",
+        "args": {
+          "description": 12345
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 1 validation error for generate_iconArguments\ndescription\n  Input should be a valid string [type=string_type, input_value=12345, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.25658535957336426,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Size Values Handling",
+        "purpose": "测试负数尺寸输入是否导致错误或使用默认值。",
+        "args": {
+          "description": "error icon red",
+          "size": [
+            -64,
+            -64
+          ]
+        },
+        "response": {
+          "result": "{\"status\": true, \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_image_search_download_icon\\\\refined\\\\icons\\\\error_icon_red_1x1.png\"}"
+        },
+        "execution_time": 0.16517066955566406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Description",
+        "purpose": "验证包含特殊字符的描述词是否能被正确处理并生成图标。",
+        "args": {
+          "description": "settings@icon!#color:blue"
+        },
+        "response": {
+          "result": "{\"status\": true, \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_image_search_download_icon\\\\refined\\\\icons\\\\_64x64.png\"}"
+        },
+        "execution_time": 0.13363957405090332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Very Long Description Boundary Test",
+        "purpose": "测试超长描述词是否能被正确处理。",
+        "args": {
+          "description": "very long description that tests the maximum allowed length for icon generation input fields and ensures that the tool can handle it without crashing or truncating unexpectedly"
+        },
+        "response": {
+          "result": "{\"status\": true, \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_image_search_download_icon\\\\refined\\\\icons\\\\very_long_description_that_tests_the_maximum_allowed_length_for_icon_generation_input_fields_and_ensures_that_the_tool_can_handle_it_without_crashing_or_truncating_unexpectedly_64x64.png\"}"
+        },
+        "execution_time": 0.1629807949066162,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

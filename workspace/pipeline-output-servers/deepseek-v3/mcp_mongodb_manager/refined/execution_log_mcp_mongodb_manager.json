@@ -1,0 +1,384 @@
+[
+  {
+    "step": {
+      "step_id": "health_check",
+      "tool_name": "mcp_health_check",
+      "parameters": {},
+      "description": "Happy path: Check if the MongoDB server is reachable and responsive."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "MongoDB connection is healthy"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_initial_databases",
+      "tool_name": "mcp_list_databases",
+      "parameters": {},
+      "description": "Happy path: List all available databases before any operations."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "error",
+      "result": "admin, config, db@#_测试, does_not_exist_db, invalid_database, large_db, local, mcp-test, new_db, offline_db, restricted_db, test_db, users, 智能软件工"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_database",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "document": {
+          "name": "Test Document",
+          "value": "Initial test data"
+        }
+      },
+      "description": "Happy path: Create a new database and collection by inserting a document."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "document": {
+        "name": "Test Document",
+        "value": "Initial test data"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "Document inserted successfully with ID: 6876719604fa248a1523b1aa"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_databases_after_creation",
+      "tool_name": "mcp_list_databases",
+      "parameters": {},
+      "description": "Dependent call: Verify that 'test_db' appears in the list of databases after creation."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "error",
+      "result": "admin, config, db@#_测试, does_not_exist_db, invalid_database, large_db, local, mcp-test, new_db, offline_db, restricted_db, test_db, users, 智能软件工"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_collections_in_test_db",
+      "tool_name": "mcp_list_collections",
+      "parameters": {
+        "database_name": "test_db"
+      },
+      "description": "Dependent call: Ensure 'test_collection' exists in the 'test_db' database."
+    },
+    "substituted_params": {
+      "database_name": "test_db"
+    },
+    "result": {
+      "status": "error",
+      "result": "a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it, new_collection, test_collection, empty_docs, invalid/collection*name, user_profiles, long_key_collection, test_collection'; DROP COLLECTION test_collection;--, large_data, special_chars_collection, binary_data_collection, nonexistent_collection, a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues, users"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_additional_document",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "document": {
+          "name": "Another Document",
+          "value": "Additional test data"
+        }
+      },
+      "description": "Happy path: Insert another document into the same collection to verify insertions."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "document": {
+        "name": "Another Document",
+        "value": "Additional test data"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "Document inserted successfully with ID: 6876719604fa248a1523b1ab"
+    }
+  },
+  {
+    "step": {
+      "step_id": "find_all_documents",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection"
+      },
+      "description": "Dependent call: Retrieve all documents from the test collection to confirm insertion."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"_id\": \"687291c80d1fbb52f4c8c1b2\",\n  \"name\": \"Test User\",\n  \"age\": 30,\n  \"email\": \"test@example.com\"\n}, {\n  \"_id\": \"687291c80d1fbb52f4c8c1b3\",\n  \"name\": \"\",\n  \"age\": null,\n  \"email\": \"\"\n}, {\n  \"_id\": \"6872af6d9da8b940f807d366\",\n  \"name\": \"John Doe\",\n  \"age\": 30,\n  \"email\": \"johndoe@example.com\"\n}, {\n  \"_id\": \"6872af6d9da8b940f807d368\",\n  \"user@name\": \"Alice\",\n  \"age#value\": 25\n}, {\n  \"_id\": \"6872bf1e0e2fc95fbcc97acd\",\n  \"name\": \"John Doe\",\n  \"age\": 30,\n  \"email\": \"john.doe@example.com\"\n}, {\n  \"_id\": \"6872bf1e0e2fc95fbcc97ace\",\n  \"name\": \"\",\n  \"age\": null,\n  \"email\": \"empty.fields@example.com\"\n}, {\n  \"_id\": \"6872bf1e0e2fc95fbcc97ad3\",\n  \"key\": \"value\"\n}, {\n  \"_id\": \"6876719604fa248a1523b1aa\",\n  \"name\": \"Test Document\",\n  \"value\": \"Initial test data\"\n}, {\n  \"_id\": \"6876719604fa248a1523b1ab\",\n  \"name\": \"Another Document\",\n  \"value\": \"Additional test data\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "update_document",
+      "tool_name": "mcp_update_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Test Document"
+        },
+        "update": {
+          "$set": {
+            "value": "Updated test data"
+          }
+        },
+        "multi": false
+      },
+      "description": "Dependent call: Update one document in the collection using a query."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Test Document"
+      },
+      "update": {
+        "$set": {
+          "value": "Updated test data"
+        }
+      },
+      "multi": false
+    },
+    "result": {
+      "status": "success",
+      "result": "Successfully updated 1 document(s)"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_update",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Test Document"
+        }
+      },
+      "description": "Dependent call: Query again to ensure the update was applied correctly."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Test Document"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"_id\": \"6876719604fa248a1523b1aa\",\n  \"name\": \"Test Document\",\n  \"value\": \"Updated test data\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_one_document",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection",
+        "query": {
+          "name": "Another Document"
+        },
+        "multi": false
+      },
+      "description": "Dependent call: Delete one document to verify deletion functionality."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection",
+      "query": {
+        "name": "Another Document"
+      },
+      "multi": false
+    },
+    "result": {
+      "status": "success",
+      "result": "Successfully deleted 1 document(s)"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_deletion",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection"
+      },
+      "description": "Dependent call: Confirm that only one document remains after deletion."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"_id\": \"687291c80d1fbb52f4c8c1b2\",\n  \"name\": \"Test User\",\n  \"age\": 30,\n  \"email\": \"test@example.com\"\n}, {\n  \"_id\": \"687291c80d1fbb52f4c8c1b3\",\n  \"name\": \"\",\n  \"age\": null,\n  \"email\": \"\"\n}, {\n  \"_id\": \"6872af6d9da8b940f807d366\",\n  \"name\": \"John Doe\",\n  \"age\": 30,\n  \"email\": \"johndoe@example.com\"\n}, {\n  \"_id\": \"6872af6d9da8b940f807d368\",\n  \"user@name\": \"Alice\",\n  \"age#value\": 25\n}, {\n  \"_id\": \"6872bf1e0e2fc95fbcc97acd\",\n  \"name\": \"John Doe\",\n  \"age\": 30,\n  \"email\": \"john.doe@example.com\"\n}, {\n  \"_id\": \"6872bf1e0e2fc95fbcc97ace\",\n  \"name\": \"\",\n  \"age\": null,\n  \"email\": \"empty.fields@example.com\"\n}, {\n  \"_id\": \"6872bf1e0e2fc95fbcc97ad3\",\n  \"key\": \"value\"\n}, {\n  \"_id\": \"6876719604fa248a1523b1aa\",\n  \"name\": \"Test Document\",\n  \"value\": \"Updated test data\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "drop_collection",
+      "tool_name": "mcp_drop_collection",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "test_collection"
+      },
+      "description": "Dependent call: Drop the test collection to clean up."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "test_collection"
+    },
+    "result": {
+      "status": "success",
+      "result": "Collection 'test_collection' has been dropped successfully from database 'test_db'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "drop_database",
+      "tool_name": "mcp_drop_database",
+      "parameters": {
+        "database_name": "test_db"
+      },
+      "description": "Dependent call: Drop the test database to finalize cleanup."
+    },
+    "substituted_params": {
+      "database_name": "test_db"
+    },
+    "result": {
+      "status": "success",
+      "result": "Database 'test_db' has been dropped successfully"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_final_databases",
+      "tool_name": "mcp_list_databases",
+      "parameters": {},
+      "description": "Edge case: Ensure 'test_db' has been removed from the database list."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "error",
+      "result": "admin, config, db@#_测试, does_not_exist_db, invalid_database, large_db, local, mcp-test, new_db, offline_db, restricted_db, users, 智能软件工"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_list_nonexistent_collections",
+      "tool_name": "mcp_list_collections",
+      "parameters": {
+        "database_name": "non_existent_db"
+      },
+      "description": "Edge case: Attempt to list collections in a non-existent database."
+    },
+    "substituted_params": {
+      "database_name": "non_existent_db"
+    },
+    "result": {
+      "status": "success",
+      "result": "Database 'non_existent_db' does not exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_find_in_nonexistent_collection",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "non_existent_db",
+        "collection_name": "non_existent_collection"
+      },
+      "description": "Edge case: Try to find documents in a non-existent collection."
+    },
+    "substituted_params": {
+      "database_name": "non_existent_db",
+      "collection_name": "non_existent_collection"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Database 'non_existent_db' does not exist\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_delete_from_nonexistent_collection",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "non_existent_db",
+        "collection_name": "non_existent_collection",
+        "query": {
+          "name": "dummy"
+        }
+      },
+      "description": "Edge case: Attempt to delete from a non-existent collection."
+    },
+    "substituted_params": {
+      "database_name": "non_existent_db",
+      "collection_name": "non_existent_collection",
+      "query": {
+        "name": "dummy"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "Successfully deleted 0 document(s)"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_update_nonexistent_collection",
+      "tool_name": "mcp_update_document",
+      "parameters": {
+        "database_name": "non_existent_db",
+        "collection_name": "non_existent_collection",
+        "query": {
+          "name": "dummy"
+        },
+        "update": {
+          "$set": {
+            "value": "updated"
+          }
+        }
+      },
+      "description": "Edge case: Attempt to update in a non-existent collection."
+    },
+    "substituted_params": {
+      "database_name": "non_existent_db",
+      "collection_name": "non_existent_collection",
+      "query": {
+        "name": "dummy"
+      },
+      "update": {
+        "$set": {
+          "value": "updated"
+        }
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "Successfully updated 0 document(s)"
+    }
+  }
+]

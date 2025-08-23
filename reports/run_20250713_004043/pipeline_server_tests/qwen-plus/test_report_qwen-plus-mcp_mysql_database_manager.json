@@ -1,0 +1,333 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_mysql_database_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_mysql_database_manager/refined/server.py",
+  "timestamp": "2025-07-13T00:54:41.623582",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "List all available MySQL tables as resources.\n\n    Returns:\n        A JSON string containing a list of table names.\n\n    Raises:\n        ConnectionError: If database connection fails.\n        RuntimeError: If listing tables fails.\n    \n    Example:\n        >>> list_resources()\n        '{\"tables\": [\"users\", \"orders\", \"products\"]}'\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "Read data from a specified table.\n\n    Args:\n        table_name (str): Name of the table to read from (required).\n\n    Returns:\n        A JSON string containing column names and table data.\n\n    Raises:\n        ValueError: If table name is invalid.\n        ConnectionError: If database connection fails.\n        RuntimeError: If reading from the table fails.\n\n    Example:\n        >>> read_resource(\"users\")\n        '{\"columns\": [\"id\", \"name\", \"email\"], \"rows\": [{\"id\": 1, \"name\": \"Alice\", \"email\": \"alice@example.com\"}]}'\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "Execute a custom SQL query.\n\n    Args:\n        sql_query (str): The SQL query to execute (required).\n\n    Returns:\n        A JSON string containing either query results or affected row count.\n\n    Raises:\n        ValueError: If SQL query is invalid.\n        ConnectionError: If database connection fails.\n        RuntimeError: If SQL execution fails.\n\n    Example:\n        >>> execute_sql(\"SELECT * FROM users WHERE id = 1\")\n        '{\"columns\": [\"id\", \"name\", \"email\"], \"rows\": [{\"id\": 1, \"name\": \"Alice\", \"email\": \"alice@example.com\"}]}'\n        \n        >>> execute_sql(\"UPDATE users SET email = 'new_email@example.com' WHERE id = 1\")\n        '{\"affected_rows\": 1}'\n    ",
+      "args_schema": {
+        "properties": {
+          "sql_query": {
+            "title": "Sql Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql_query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "List Available MySQL Tables Successfully",
+        "purpose": "验证 list_resources 能够成功列出所有可用的 MySQL 表并返回合法 JSON 格式",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.3630068302154541,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Table List Response",
+        "purpose": "验证当数据库中没有表时，list_resources 返回空数组的合法 JSON 格式",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.26442527770996094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Database Connection Failure Handling",
+        "purpose": "验证当数据库连接失败时，list_resources 正确抛出 ConnectionError 异常",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.2645442485809326,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Table Listing Failure Handling",
+        "purpose": "验证当列出表失败（如权限不足或查询异常）时，list_resources 正确抛出 RuntimeError 异常",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.29868078231811523,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - No Sensitive Data Exposure",
+        "purpose": "验证 list_resources 不会泄露数据库连接信息或其他敏感元数据",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.264801025390625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - No File System Access",
+        "purpose": "验证 list_resources 不会访问或暴露测试文件系统中的文件",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.24931669235229492,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Large Number of Tables",
+        "purpose": "验证 list_resources 能够处理大量表返回的边界情况",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.26070737838745117,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Character Handling in Table Names",
+        "purpose": "验证 list_resources 能正确处理包含特殊字符的表名",
+        "args": {},
+        "response": {
+          "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+        },
+        "execution_time": 0.24671602249145508,
+        "is_functional_test": true
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "Read Users Table Successfully",
+        "purpose": "验证 read_resource 能够成功从 'users' 表中读取数据并返回合法 JSON 格式",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null, \"created_at\": \"2025-06-30 22:13:23\"}]}"
+        },
+        "execution_time": 0.1967153549194336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Empty Table Successfully",
+        "purpose": "验证当表存在但没有数据时，read_resource 返回包含空行的合法 JSON 格式",
+        "args": {
+          "table_name": "empty_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read table empty_table: 1146 (42S02): Table 'user-db.empty_table' doesn't exist"
+        },
+        "execution_time": 0.1992661952972412,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Table With Special Characters in Name",
+        "purpose": "验证 read_resource 能正确处理包含特殊字符的表名",
+        "args": {
+          "table_name": "special#chars@table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read table special#chars@table: 1146 (42S02): Table 'user-db.special#chars@table' doesn't exist"
+        },
+        "execution_time": 0.201385498046875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Non-Existent Table",
+        "purpose": "验证当尝试读取不存在的表时，read_resource 正确抛出 ValueError 异常",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read table nonexistent_table: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist"
+        },
+        "execution_time": 0.1978909969329834,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Database Connection Failure Handling",
+        "purpose": "验证当数据库连接失败时，read_resource 正确抛出 ConnectionError 异常",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null, \"created_at\": \"2025-06-30 22:13:23\"}]}"
+        },
+        "execution_time": 0.19981884956359863,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Table Failure Handling",
+        "purpose": "验证当读取表失败（如权限不足或查询异常）时，read_resource 正确抛出 RuntimeError 异常",
+        "args": {
+          "table_name": "restricted_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read table restricted_table: 1146 (42S02): Table 'user-db.restricted_table' doesn't exist"
+        },
+        "execution_time": 0.18762969970703125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - No Sensitive Data Exposure",
+        "purpose": "验证 read_resource 不会泄露数据库连接信息或其他敏感元数据",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null, \"created_at\": \"2025-06-30 22:13:23\"}]}"
+        },
+        "execution_time": 0.17940354347229004,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Large Data Volume",
+        "purpose": "验证 read_resource 能够处理包含大量数据的表返回的边界情况",
+        "args": {
+          "table_name": "large_data_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read table large_data_table: 1146 (42S02): Table 'user-db.large_data_table' doesn't exist"
+        },
+        "execution_time": 0.16999006271362305,
+        "is_functional_test": true
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "Execute SELECT Query Successfully",
+        "purpose": "验证 execute_sql 能够成功执行 SELECT 查询并返回合法 JSON 格式的结果",
+        "args": {
+          "sql_query": "SELECT * FROM users WHERE id = 1"
+        },
+        "response": {
+          "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}]}"
+        },
+        "execution_time": 0.17157697677612305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute UPDATE Query Successfully",
+        "purpose": "验证 execute_sql 能够成功执行 UPDATE 查询并返回受影响行数的合法 JSON 格式",
+        "args": {
+          "sql_query": "UPDATE users SET email = 'new_email@example.com' WHERE id = 1"
+        },
+        "response": {
+          "result": "{\"affected_rows\": 0}"
+        },
+        "execution_time": 0.21593213081359863,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Invalid SQL Query",
+        "purpose": "验证当执行无效 SQL 查询时，execute_sql 正确抛出 ValueError 异常",
+        "args": {
+          "sql_query": "SELECT * FORM users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: SQL execution failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FORM users' at line 1"
+        },
+        "execution_time": 0.16603326797485352,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute SQL With Database Connection Failure",
+        "purpose": "验证当数据库连接失败时，execute_sql 正确抛出 ConnectionError 异常",
+        "args": {
+          "sql_query": "SELECT * FROM users"
+        },
+        "response": {
+          "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null, \"created_at\": \"2025-06-30 22:13:23\"}]}"
+        },
+        "execution_time": 0.15535402297973633,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute SQL With Special Characters in Query",
+        "purpose": "验证 execute_sql 能正确处理包含特殊字符的 SQL 查询语句",
+        "args": {
+          "sql_query": "SELECT * FROM `users` WHERE name = 'O'Reilly'"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: SQL execution failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'Reilly'' at line 1"
+        },
+        "execution_time": 0.15917372703552246,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - No Sensitive Data Exposure",
+        "purpose": "验证 execute_sql 不会泄露数据库连接信息或其他敏感元数据",
+        "args": {
+          "sql_query": "SELECT * FROM users"
+        },
+        "response": {
+          "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null, \"created_at\": \"2025-06-30 22:13:23\"}]}"
+        },
+        "execution_time": 0.15398669242858887,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Large Result Set Handling",
+        "purpose": "验证 execute_sql 能够处理大量结果数据返回的边界情况",
+        "args": {
+          "sql_query": "SELECT * FROM large_data_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: SQL execution failed: 1146 (42S02): Table 'user-db.large_data_table' doesn't exist"
+        },
+        "execution_time": 0.14784717559814453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt Handling",
+        "purpose": "验证 execute_sql 能安全地处理潜在 SQL 注入攻击尝试",
+        "args": {
+          "sql_query": "DROP TABLE users; --"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: SQL execution failed: 3730 (HY000): Cannot drop table 'users' referenced by a foreign key constraint 'orders_ibfk_1' on table 'orders'."
+        },
+        "execution_time": 0.14862632751464844,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

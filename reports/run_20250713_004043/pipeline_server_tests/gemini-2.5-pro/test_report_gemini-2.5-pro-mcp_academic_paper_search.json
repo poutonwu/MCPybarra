@@ -1,0 +1,405 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_academic_paper_search",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_academic_paper_search/refined/server.py",
+  "timestamp": "2025-07-13T00:44:04.235969",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Concurrently searches for academic papers on Semantic Scholar and Crossref\n    and returns a combined list of results. This tool is useful for broad\n    searches across multiple academic databases to get a comprehensive overview\n    of the literature on a given topic.\n\n    Args:\n        query (str): The search keywords for finding papers. This can be a\n            paper title, author names, or general topics.\n        limit (int): The maximum number of papers to return from each source.\n            The total number of results may be up to 2 * limit. Defaults to 10.\n\n    Returns:\n        str: A JSON string representing a list of dictionaries. Each dictionary\n            represents a found paper and contains keys for 'title', 'authors',\n            'year', 'doi', and 'source' (either 'Semantic Scholar' or 'Crossref').\n            If an error occurs, a JSON string with an 'error' key is returned.\n\n    Example:\n        search_papers(query=\"reinforcement learning from human feedback\", limit=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    Fetches detailed information for a specific paper from either Semantic\n    Scholar or Crossref. This is an async function to better handle API requests.\n\n    Args:\n        paper_id (str): The identifier of the paper. For Crossref, this should\n            be a DOI. For Semantic Scholar, it can be a DOI or its specific ID.\n        source (str): The data source to query. Must be either 'Semantic Scholar'\n            or 'Crossref'.\n\n    Returns:\n        str: A JSON string containing the paper's details, including 'title',\n            'authors', 'abstract', and 'venue'. Returns a JSON object with an\n            'error' key if the paper is not found or an API error occurs.\n\n    Example:\n        fetch_paper_details(paper_id=\"10.1109/5.771073\", source=\"Crossref\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    Searches for papers on a specific topic, with an optional filter for a\n    range of years. This tool prioritizes Semantic Scholar for its relevance\n    ranking and falls back to Crossref if needed. It's ideal for focused\n    literature reviews within a specific timeframe.\n\n    Args:\n        topic_keywords (str): The topic keywords to search for (e.g., \"quantum computing\").\n        year_range (str, optional): A string representing the year range in\n            \"YYYY-YYYY\" format (e.g., \"2020-2023\"). Defaults to None, which\n            means no year filter is applied.\n        limit (int): The maximum number of results to return. Defaults to 10.\n\n    Returns:\n        str: A JSON string representing a list of dictionaries, where each\n            dictionary is a paper. Returns a JSON object with an 'error' key\n            if an issue occurs.\n\n    Example:\n        search_by_topic(topic_keywords=\"large language models\", year_range=\"2021-2022\", limit=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "topic_keywords": {
+            "title": "Topic Keywords",
+            "type": "string"
+          },
+          "year_range": {
+            "default": null,
+            "title": "Year Range",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic_keywords"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search with Default Limit",
+        "purpose": "验证使用默认 limit 值搜索论文的基本功能是否正常工作",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 40.013251066207886,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Limit",
+        "purpose": "验证指定 limit 参数时工具能否正确从两个来源获取结果",
+        "args": {
+          "query": "deep learning",
+          "limit": 5
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 40.00518298149109,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证空查询字符串时的错误处理行为",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Query must be a non-empty string."
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long Query String",
+        "purpose": "测试工具对超长查询字符串的边界处理能力",
+        "args": {
+          "query": "a very long query that exceeds typical length limits for search engines and academic databases which may cause unexpected behavior in the backend processing pipeline"
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 40.013020753860474,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Limit Value",
+        "purpose": "验证 limit 参数为 0 时的行为是否符合预期",
+        "args": {
+          "query": "natural language processing",
+          "limit": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Limit must be a positive integer."
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Negative Limit Value",
+        "purpose": "验证负数 limit 参数时的错误处理机制",
+        "args": {
+          "query": "computer vision",
+          "limit": -5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Limit must be a positive integer."
+        },
+        "execution_time": 0.004999876022338867,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "测试包含特殊字符的查询是否能被正确处理",
+        "args": {
+          "query": "reinforcement learning & AI @ 2023"
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 39.9956910610199,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-English Query",
+        "purpose": "验证非英文查询语句（如中文）是否能被正确处理",
+        "args": {
+          "query": "人工智能的发展趋势"
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 40.01130127906799,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "Basic Paper Details Fetch from Semantic Scholar",
+        "purpose": "验证使用有效的 Semantic Scholar ID 能否成功获取论文详细信息",
+        "args": {
+          "paper_id": "10.48550/arXiv.2106.15647",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: Paper with id 10.48550/arXiv.2106.15647 not found\"}"
+        },
+        "execution_time": 2.412874698638916,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper with DOI from Crossref",
+        "purpose": "验证使用标准 DOI 格式从 Crossref 成功获取论文详情",
+        "args": {
+          "paper_id": "10.1109/5.771073",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"title\": \"Toward unique identifiers\", \"authors\": [\"N. Paskin\"], \"abstract\": null, \"venue\": \"Proceedings of the IEEE\"}"
+        },
+        "execution_time": 2.8073923587799072,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Source Input Handling",
+        "purpose": "验证当提供非法数据源时工具能否正确返回错误信息",
+        "args": {
+          "paper_id": "10.1109/5.771073",
+          "source": "InvalidSource"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Source must be either 'Semantic Scholar' or 'Crossref'."
+        },
+        "execution_time": 0.004510402679443359,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Paper ID Error Handling",
+        "purpose": "验证空 paper_id 参数是否被正确检测并返回错误",
+        "args": {
+          "paper_id": "",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Paper ID must be a non-empty string."
+        },
+        "execution_time": 0.005012989044189453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper Not Found Handling",
+        "purpose": "验证当提供的 paper_id 在指定来源中不存在时的错误处理",
+        "args": {
+          "paper_id": "nonexistent-paper-id-12345",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"error\": \"Paper not found on Crossref.\"}"
+        },
+        "execution_time": 3.5380797386169434,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Paper ID",
+        "purpose": "测试包含特殊字符的 paper_id 是否能被正确解析或返回适当错误",
+        "args": {
+          "paper_id": "10.1109/@invalid_chars",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"error\": \"Paper not found on Crossref.\"}"
+        },
+        "execution_time": 2.427907705307007,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Paper with Non-Standard ID Format",
+        "purpose": "验证非标准格式的 paper_id（如纯字符串）是否能被正确拒绝",
+        "args": {
+          "paper_id": "this-is-not-a-valid-paper-id",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"error\": \"Paper not found on Crossref.\"}"
+        },
+        "execution_time": 3.34332275390625,
+        "is_functional_test": false
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Search Without Year Filter",
+        "purpose": "验证在不指定年份范围时，工具能否使用默认 limit 值正确搜索论文",
+        "args": {
+          "topic_keywords": "machine learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"Machine Learning as an Experimental Science\", \"authors\": [\"Pat Langley\"], \"year\": 1988, \"doi\": \"10.1023/a:1022623814640\", \"source\": \"Crossref\"}, {\"title\": \"Chapter 3: Classifiers in Machine Learning\", \"authors\": [], \"year\": 2020, \"doi\": \"10.1515/9781683924654-004\", \"source\": \"Crossref\"}, {\"title\": \"Machine Learning\", \"authors\": [\"Peter Wittek\"], \"year\": 2014, \"doi\": \"10.1016/b978-0-12-800953-6.00002-5\", \"source\": \"Crossref\"}, {\"title\": \"Operationalizing Machine Learning Models for Strategic Planning\", \"authors\": [], \"year\": 2023, \"doi\": \"10.2514/6.2023-4213.vid\", \"source\": \"Crossref\"}, {\"title\": \"Learning Curves in Machine Learning\", \"authors\": [\"Claudia Perlich\"], \"year\": 2011, \"doi\": \"10.1007/978-0-387-30164-8_452\", \"source\": \"Crossref\"}, {\"title\": \"Conformal Prediction for Reliable Machine Learning\", \"authors\": [], \"year\": 2014, \"doi\": \"10.1016/b978-0-12-398537-8.00014-6\", \"source\": \"Crossref\"}, {\"title\": \"Editorial: Advice to Machine Learning Authors\", \"authors\": [\"Pat Langley\"], \"year\": 1990, \"doi\": \"10.1023/a:1022647305786\", \"source\": \"Crossref\"}, {\"title\": \"Classification Techniques in Machine Learning\", \"authors\": [\"Noel JAKSE\"], \"year\": 2024, \"doi\": \"10.1002/9781394325634.ch4\", \"source\": \"Crossref\"}, {\"title\": \"Learning Logical Definitions from Relations\", \"authors\": [\"J.R. Quinlan\"], \"year\": 1990, \"doi\": \"10.1023/a:1022699322624\", \"source\": \"Crossref\"}, {\"title\": \"Chapter 2: Introduction to Machine Learning\", \"authors\": [], \"year\": 2020, \"doi\": \"10.1515/...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1542字符，剩余42字符"
+        },
+        "execution_time": 14.126223087310791,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Limit and Year Range",
+        "purpose": "验证指定 topic、year_range 和 limit 参数时工具能否正常返回结果",
+        "args": {
+          "topic_keywords": "deep learning",
+          "year_range": "2018-2022",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Computer Vision, Deep Learning, Deep Reinforcement Learning\", \"authors\": [\"Farshid PirahanSiah\"], \"year\": 2019, \"doi\": \"10.14293/s2199-1006.1.sor-uncat.clzwyuz.v1\", \"source\": \"Crossref\"}, {\"title\": \"Foundations of Deep Learning\", \"authors\": [], \"year\": 2021, \"doi\": \"10.1017/9781108924184.006\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning for Ophthalmological Images\", \"authors\": [\"Safiye Pelin Ta\\u015f\", \"Sezin Barin\", \"G\\u00fcr Emre G\\u00fcraksin\"], \"year\": 2021, \"doi\": \"10.1201/9780367855611-6\", \"source\": \"Crossref\"}, {\"title\": \"Popular deep learning image classifiers\", \"authors\": [\"Habib Izadkhah\"], \"year\": 2022, \"doi\": \"10.1016/b978-0-12-823822-6.00016-0\", \"source\": \"Crossref\"}, {\"title\": \"What Is Deep Learning?\", \"authors\": [\"Michael Paluszek\", \"Stephanie Thomas\"], \"year\": 2020, \"doi\": \"10.1007/978-1-4842-5124-9_1\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 15.112862825393677,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Topic Keywords Handling",
+        "purpose": "验证空 topic_keywords 参数是否被正确检测并返回错误信息",
+        "args": {
+          "topic_keywords": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Topic keywords must be a non-empty string."
+        },
+        "execution_time": 0.003900766372680664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Year Range Handling",
+        "purpose": "验证非法负数年份范围输入时的错误处理机制",
+        "args": {
+          "topic_keywords": "neural networks",
+          "year_range": "-2020-2023"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Year range must be in 'YYYY-YYYY' format."
+        },
+        "execution_time": 0.005209207534790039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Year Range Format Handling",
+        "purpose": "验证格式错误的 year_range 参数是否能触发正确的参数验证失败",
+        "args": {
+          "topic_keywords": "data science",
+          "year_range": "2020/2023"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Year range must be in 'YYYY-YYYY' format."
+        },
+        "execution_time": 0.005991935729980469,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Limit Value Handling",
+        "purpose": "验证 limit 参数为 0 时的行为是否符合预期（应抛出错误）",
+        "args": {
+          "topic_keywords": "natural language processing",
+          "limit": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Limit must be a positive integer."
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Topic Keywords",
+        "purpose": "测试包含特殊字符的 topic_keywords 是否能被正确解析或安全拒绝",
+        "args": {
+          "topic_keywords": "AI & Robotics @ 2023"
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic' was cancelled."
+        },
+        "execution_time": 40.01104497909546,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-English Topic Search",
+        "purpose": "验证非英文关键词（如中文）是否能被正确处理并返回相关论文",
+        "args": {
+          "topic_keywords": "人工智能的发展趋势"
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic' was cancelled."
+        },
+        "execution_time": 40.015997648239136,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Very Long Topic Keywords Input",
+        "purpose": "测试超长 topic_keywords 字符串对系统稳定性的影响",
+        "args": {
+          "topic_keywords": "a very long query that exceeds typical length limits for search engines and academic databases which may cause unexpected behavior in the backend processing pipeline"
+        },
+        "response": {
+          "result": "[{\"title\": \"Spatial Query Processing over Uncertain Databases\", \"authors\": [\"Lei Chen\", \"Xiang Lian\"], \"year\": 2013, \"doi\": \"10.1007/978-3-031-01896-1_4\", \"source\": \"Crossref\"}, {\"title\": \"Peer Review #2 of \\\"Query sampler: generating query sets for analyzing search engines using keyword research tools (v0.1)\\\"\", \"authors\": [\"K Peddireddy\"], \"year\": 2023, \"doi\": \"10.7287/peerj-cs.1421v0.1/reviews/2\", \"source\": \"Crossref\"}, {\"title\": \"Batch query processing for web search engines\", \"authors\": [\"Shuai Ding\", \"Josh Attenberg\", \"Ricardo Baeza-Yates\", \"Torsten Suel\"], \"year\": 2011, \"doi\": \"10.1145/1935826.1935858\", \"source\": \"Crossref\"}, {\"title\": \"Front matter\", \"authors\": [], \"year\": 2014, \"doi\": \"10.1016/b978-1-84334-791-0.50010-x\", \"source\": \"Crossref\"}, {\"title\": \"A Novel Search Engine for Virtual Screening of Very Large Databases\", \"authors\": [], \"year\": 2020, \"doi\": \"10.1021/ci050458q.s002\", \"source\": \"Crossref\"}, {\"title\": \"Caching Scores for Faster Query Processing with Dynamic Pruning in Search Engines\", \"authors\": [\"Erman Yafay\", \"Ismail Sengor Altingovde\"], \"year\": 2019, \"doi\": \"10.1145/3357384.3358154\", \"source\": \"Crossref\"}, {\"title\": \"Integrated Proteomic Pipeline Using Multiple Search Engines for a Proteogenomic Study with a Controlled Protein False Discovery Rate\", \"authors\": [], \"year\": 2020, \"doi\": \"10.1021/acs.jproteome.6b00376.s004\", \"source\": \"Crossref\"}, {\"title\": \"Voronoi-Based Query Processing in Road Network Databases\", \"authors\": [], \"year\": 2011, \"doi\":...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1979字符，剩余479字符"
+        },
+        "execution_time": 9.636986494064331,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Year Range Outside Valid Bounds",
+        "purpose": "验证超出合理时间范围的 year_range 输入是否被正确拒绝",
+        "args": {
+          "topic_keywords": "quantum computing",
+          "year_range": "1800-3000"
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic' was cancelled."
+        },
+        "execution_time": 40.01584076881409,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 25
+}

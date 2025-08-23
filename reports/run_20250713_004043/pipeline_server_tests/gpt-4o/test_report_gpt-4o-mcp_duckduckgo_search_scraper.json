@@ -1,0 +1,183 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_duckduckgo_search_scraper",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_duckduckgo_search_scraper/refined/server.py",
+  "timestamp": "2025-07-13T00:40:47.876774",
+  "tools": [
+    {
+      "name": "wrapper",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "args": {
+            "title": "args",
+            "type": "string"
+          },
+          "kwargs": {
+            "title": "kwargs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "args",
+          "kwargs"
+        ],
+        "title": "wrapperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Extracts the main textual content from a webpage given its URL.\n\n    Args:\n        url (str): The URL of the webpage to scrape.\n            Example: \"https://example.com/article\"\n\n    Returns:\n        str: A JSON string containing the main textual content of the webpage, stripped of irrelevant elements.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        Exception: If the webpage content cannot be fetched or parsed.\n\n    Example:\n        fetch_content(url=\"https://example.com/article\")\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "fetch_content": [
+      {
+        "case_name": "Empty URL Input",
+        "purpose": "测试当提供空URL时是否抛出ValueError",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "result": "{\"error\": \"URL cannot be empty.\"}"
+        },
+        "execution_time": 0.004997730255126953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "测试非法格式的URL是否会触发异常处理",
+        "args": {
+          "url": "htp:/invalid-url-format"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: No connection adapters were found for 'htp:/invalid-url-format'\"}"
+        },
+        "execution_time": 0.008027076721191406,
+        "is_functional_test": false
+      }
+    ],
+    "wrapper": [
+      {
+        "case_name": "Basic Wrapper Execution with Valid Args",
+        "purpose": "测试使用有效参数时 wrapper 是否能正确执行并返回结果",
+        "args": {
+          "args": "echo 'Hello World'",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Wrapper with Empty Args",
+        "purpose": "测试当 args 为空字符串时是否抛出错误信息",
+        "args": {
+          "args": "",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0024209022521972656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Wrapper with Special Characters in Args",
+        "purpose": "测试包含特殊字符的命令参数是否被正确处理",
+        "args": {
+          "args": "echo \"!@#$%^&*()\" | tr '!@#' 'abc'",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Wrapper with Long Command Input",
+        "purpose": "测试超长命令输入是否能被正常处理或触发合理限制",
+        "args": {
+          "args": "echo 'This is a very long command input that may test the buffer size or system limitations.' && sleep 1",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.006002902984619141,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Wrapper with Dangerous Shell Commands",
+        "purpose": "测试敏感操作（如删除命令）是否被限制或安全拦截",
+        "args": {
+          "args": "rm -rf /tmp/test_dir",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0050067901611328125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Wrapper with Invalid JSON Kwargs",
+        "purpose": "测试无效格式的 kwargs 是否被正确识别并报错",
+        "args": {
+          "args": "echo 'Valid Command'",
+          "kwargs": "invalid-json"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.004004240036010742,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Wrapper with File Path as Argument",
+        "purpose": "测试 wrapper 能否正确处理包含文件路径的参数",
+        "args": {
+          "args": "cat D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonname.html",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0065076351165771484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Wrapper with Environment Variables Injection",
+        "purpose": "测试环境变量注入是否被限制以防止安全风险",
+        "args": {
+          "args": "echo $PATH",
+          "kwargs": "{\"env\": {\"PATH\": \"/malicious/path\"}}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 10
+}

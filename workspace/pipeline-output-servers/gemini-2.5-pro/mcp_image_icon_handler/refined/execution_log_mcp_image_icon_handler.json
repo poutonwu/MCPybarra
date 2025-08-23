@@ -1,0 +1,267 @@
+[
+  {
+    "step": {
+      "step_id": "search_images_happy_path",
+      "tool_name": "search_images",
+      "parameters": {
+        "query": "nature landscape"
+      },
+      "description": "Happy path: Search for images using a common keyword. Assumes this returns a list of image results, e.g., `[{\"url\": \"https://example.com/image.jpg\", \"source\": \"unsplash\"}]`."
+    },
+    "substituted_params": {
+      "query": "nature landscape"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_images: "
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_first_image",
+      "tool_name": "download_image",
+      "parameters": {
+        "image_url": "$outputs.search_images_happy_path.results[0].url",
+        "filename": "landscape.jpg"
+      },
+      "description": "Dependent call (list access): Download the first image from the previous search results. Uses `.url` from the first item in the list."
+    },
+    "substituted_params": {
+      "image_url": null,
+      "filename": "landscape.jpg"
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_images_happy_path.results[0].url'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_icon_happy_path",
+      "tool_name": "generate_icon",
+      "parameters": {
+        "description": "AI App"
+      },
+      "description": "Happy path: Generate an icon with a simple description. Assumes this returns a file path like `{\"file_path\": \"/absolute/path/to/ai_app_icon.png\"}`."
+    },
+    "substituted_params": {
+      "description": "AI App"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\ai_app_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\ai_app_icon.png\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_local_file",
+      "tool_name": "download_image",
+      "parameters": {
+        "image_url": "$outputs.generate_icon_happy_path.file_path",
+        "filename": "local_icon.png"
+      },
+      "description": "Dependent call (raw string): Use the generated icon's absolute file path as input to download it again locally. Note the use of `$outputs.generate_icon_happy_path.file_path` directly."
+    },
+    "substituted_params": {
+      "image_url": "D:\\devWorkspace\\MCPServer-Generator\\icons\\ai_app_icon.png",
+      "filename": "local_icon.png"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\downloads\\\\local_icon.png\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\downloads\\\\local_icon.png\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_specific_sources",
+      "tool_name": "search_images",
+      "parameters": {
+        "query": "sunset beach",
+        "sources": [
+          "pexels",
+          "pixabay"
+        ]
+      },
+      "description": "Test specifying only certain sources. Ensures that the tool respects the `sources` parameter and excludes Unsplash."
+    },
+    "substituted_params": {
+      "query": "sunset beach",
+      "sources": [
+        "pexels",
+        "pixabay"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"results\": [{\"source\": \"pexels\", \"id\": \"1032650\", \"url\": \"https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg\", \"photographer\": \"Travis Rupert\", \"description\": \"Experience the serene sunset over Ludington Beach with vibrant colors and tranquil waves.\"}, {\"source\": \"pexels\", \"id\": \"221387\", \"url\": \"https://images.pexels.com/photos/221387/pexels-photo-221387.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Captivating tropical beach sunset with silhouettes of palm trees and a bench facing the ocean.\"}, {\"source\": \"pexels\", \"id\": \"3106799\", \"url\": \"https://images.pexels.com/photos/3106799/pexels-photo-3106799.jpeg\", \"photographer\": \"Sides Imagery\", \"description\": \"Stunning sunset view over the ocean with a vibrant sky and serene shoreline.\"}], \"__truncation_alert__\": \"This JSON object has been intelligently truncated to save space. Lists may be shortened.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_zero_per_page",
+      "tool_name": "search_images",
+      "parameters": {
+        "query": "forest",
+        "per_page": 0
+      },
+      "description": "Edge case: Test behavior when per_page is set to zero. Expected result is an empty list or minimal response."
+    },
+    "substituted_params": {
+      "query": "forest",
+      "per_page": 0
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"sp-p7uuT0tw\", \"url\": \"https://images.unsplash.com/photo-1448375240586-882707db888b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxmb3Jlc3R8ZW58MHx8fHwxNzUxOTg1NzEyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Sebastian Unrau\", \"description\": \"Entering another dimension...\"}, {\"source\": \"unsplash\", \"id\": \"wQImoykAwGs\", \"url\": \"https://images.unsplash.com/photo-1507041957456-9c397ce39c97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxmb3Jlc3R8ZW58MHx8fHwxNzUxOTg1NzEyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Degleex Ganzorig\", \"description\": \"Forest during daytime\"}, {\"source\": \"unsplash\", \"id\": \"QsWG0kjPQRY\", \"url\": \"https://images.unsplash.com/photo-1503435980610-a51f3ddfee50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxmb3Jlc3R8ZW58MHx8fHwxNzUxOTg1NzEyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Filip Zrnzević\", \"description\": \"Fade ↟\"}], \"__truncation_alert__\": \"This JSON object has been intelligently truncated to save space. Lists may be shortened.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_invalid_query",
+      "tool_name": "search_images",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Test behavior when query is an empty string. Should return an error or empty result."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"results\": [{\"source\": \"pixabay\", \"id\": \"9696952\", \"url\": \"https://pixabay.com/get/gb13148a254fd4c74056c1d3695cafa6267c5c538a60e7254f92e3fa3a9f8ebd3d293c3ec460138f5e84bb609a18b23d1fe892ae276dc4898904584782549bede_640.jpg\", \"photographer\": \"anselmo7511\", \"description\": \"butterfly, nature, insect, flower, pollination, wings\"}, {\"source\": \"pixabay\", \"id\": \"9696938\", \"url\": \"https://pixabay.com/get/g6711ccba14cd0a8fc656b6cf3e5e277641e4fd66fad211e3e21834dd65ffb0c479491c5bb10dfcc4bd4e2c5c2c893d588dc8bcd9a92ee410ce14ab0f1374f2ba_640.jpg\", \"photographer\": \"anselmo7511\", \"description\": \"lizard, reptile, nature, wildlife, garden, animal\"}, {\"source\": \"pixabay\", \"id\": \"9696950\", \"url\": \"https://pixabay.com/get/gfbe5139b08874ee8dac5e8bbe6c45255d2641f312534f5cc98cd9060c9cc98baa931bfeba33e5081d5851e2da8922a0aa1913608c101a94a662c7f186e89a36e_640.jpg\", \"photographer\": \"anselmo7511\", \"description\": \"squirrel, nature, animal, wildlife, rodent, mammal\"}], \"__truncation_alert__\": \"This JSON object has been intelligently truncated to save space. Lists may be shortened.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_invalid_url",
+      "tool_name": "download_image",
+      "parameters": {
+        "image_url": "http://invalid.url/image.jpg",
+        "filename": "invalid.jpg"
+      },
+      "description": "Edge case: Attempt to download from an invalid URL to test error handling."
+    },
+    "substituted_params": {
+      "image_url": "http://invalid.url/image.jpg",
+      "filename": "invalid.jpg"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Server error '502 Bad Gateway' for url 'http://invalid.url/image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/502\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_with_path_traversal",
+      "tool_name": "download_image",
+      "parameters": {
+        "image_url": "https://example.com/image.jpg",
+        "filename": "../malicious.jpg"
+      },
+      "description": "Edge case: Test security check by attempting to write outside the save directory using path traversal."
+    },
+    "substituted_params": {
+      "image_url": "https://example.com/image.jpg",
+      "filename": "../malicious.jpg"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid filename. It cannot contain path traversal elements.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_icon_with_custom_size",
+      "tool_name": "generate_icon",
+      "parameters": {
+        "description": "Settings",
+        "size": [
+          64,
+          64
+        ]
+      },
+      "description": "Test custom size generation. Ensures that the icon is created with non-default dimensions."
+    },
+    "substituted_params": {
+      "description": "Settings",
+      "size": [
+        64,
+        64
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\settings_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\settings_icon.png\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_icon_with_custom_filename",
+      "tool_name": "generate_icon",
+      "parameters": {
+        "description": "User Profile",
+        "filename": "profile_icon.png"
+      },
+      "description": "Test explicit filename assignment. Verifies that the icon is saved with the specified name."
+    },
+    "substituted_params": {
+      "description": "User Profile",
+      "filename": "profile_icon.png"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\profile_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\profile_icon.png\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_icon_with_large_dimensions",
+      "tool_name": "generate_icon",
+      "parameters": {
+        "description": "Large Icon",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      "description": "Edge case: Test generating an icon with large dimensions to ensure performance and memory constraints are handled."
+    },
+    "substituted_params": {
+      "description": "Large Icon",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\large_icon_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\icons\\\\large_icon_icon.png\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_icon_with_invalid_size",
+      "tool_name": "generate_icon",
+      "parameters": {
+        "description": "Bad Size Icon",
+        "size": [
+          -32,
+          32
+        ]
+      },
+      "description": "Edge case: Test with negative dimension to validate input validation logic."
+    },
+    "substituted_params": {
+      "description": "Bad Size Icon",
+      "size": [
+        -32,
+        32
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Icon dimensions must be positive integers\"}"
+    }
+  }
+]

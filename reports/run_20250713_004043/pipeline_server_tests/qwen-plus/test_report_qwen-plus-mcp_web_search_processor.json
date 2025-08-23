@@ -1,0 +1,569 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_web_search_processor",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_web_search_processor/refined/server.py",
+  "timestamp": "2025-07-13T00:53:58.318136",
+  "tools": [
+    {
+      "name": "tavily_web_search",
+      "description": "\n    执行全面的网络搜索，支持基础或高级搜索深度，可通过包含或排除特定域名精确控制搜索范围。\n\n    Args:\n        query: 搜索查询字符串 (必填)。\n        search_depth: 搜索深度，可选 \"basic\" 或 \"advanced\", 默认 \"basic\"。\n        include_domains: 包含在结果中的域名列表 (可选)。\n        exclude_domains: 排除的域名列表 (可选)。\n        max_results: 返回的最大结果数 (1-5), 默认 5。\n\n    Returns:\n        List[Dict[str, str]]: 包含标题、URL 和内容摘要的搜索结果列表。\n\n    示例:\n        >>> tavily_web_search(query=\"Python 3.10 features\", search_depth=\"advanced\", \n                             include_domains=[\"python.org\"], max_results=3)\n        [\n            {\n                \"title\": \"Python 3.10 新特性详解\",\n                \"url\": \"https://docs.python.org/3.10/whatsnew/3.10.html\",\n                \"content\": \"Python 3.10 的新特性包括模式匹配、更好的类型提示等...\"\n            },\n            {\n                \"title\": \"Python 3.10 发布说明\",\n                \"url\": \"https://www.python.org/downloads/release/python-3100/\",\n                \"content\": \"Python 3.10 正式版发布，包含多项性能改进和错误修复...\"\n            },\n            {\n                \"title\": \"Python 3.10：面向未来的编程语言\",\n                \"url\": \"https://realpython.com/python310-new-features/\",\n                \"content\": \"探索 Python 3.10 中最令人期待的新特性和改进...\"\n            }\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "basic",
+            "title": "Search Depth",
+            "type": "string"
+          },
+          "include_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Domains"
+          },
+          "exclude_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Exclude Domains"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_web_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_answer_search",
+      "description": "\n    根据查询内容直接生成回答并附带支持证据，适用于需要具体答案的问题。\n\n    Args:\n        query: 要回答的问题 (必填)。\n        search_depth: 搜索深度，可选 \"basic\" 或 \"advanced\", 默认 \"advanced\".\n\n    Returns:\n        Dict[str, Union[str, List[Dict[str, str]]]]: 包含答案和证据的字典.\n\n    示例:\n        >>> tavily_answer_search(query=\"地球的卫星是什么？\")\n        {\n            \"answer\": \"地球的卫星是月球。\",\n            \"evidence\": [\n                {\n                    \"title\": \"月球 - 维基百科\",\n                    \"url\": \"https://zh.wikipedia.org/wiki/%E6%9C%88%E7%90%83\",\n                    \"content\": \"月球是地球唯一的天然卫星，也是太阳系中第五大的卫星...\"\n                }\n            ]\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "advanced",
+            "title": "Search Depth",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_answer_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_news_search",
+      "description": "\n    专门搜索近期新闻文章，支持限定查询时效性（最多可追溯365天），并可指定包含或排除的新闻源。\n\n    Args:\n        query: 新闻搜索查询 (必填)。\n        days: 查询回溯的天数 (1-365), 默认 7。\n        include_domains: 包含的新闻源域名列表 (可选)。\n        exclude_domains: 排除的新闻源域名列表 (可选)。\n        max_results: 返回的最大结果数 (1-5), 默认 5。\n\n    Returns:\n        List[Dict[str, str]]: 包含标题、URL 和内容摘要的新闻结果列表.\n\n    示例:\n        >>> tavily_news_search(query=\"人工智能最新进展\", days=3, \n                              include_domains=[\"techcrunch.com\"], max_results=2)\n        [\n            {\n                \"title\": \"AI 领域的三大突破：2024 年第一季度\",\n                \"url\": \"https://techcrunch.com/2024/03/15/ai-breakthroughs-q1-2024/\",\n                \"content\": \"本文总结了 2024 年第一季度人工智能领域的三项重大突破...\"\n            },\n            {\n                \"title\": \"大模型训练成本降低 80%，新技术革新 AI 行业\",\n                \"url\": \"https://techcrunch.com/2024/03/14/ai-training-cost-reduction/\",\n                \"content\": \"一项新技术使大模型训练成本大幅降低，为人工智能发展带来新的可能...\"\n            }\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "days": {
+            "default": 7,
+            "title": "Days",
+            "type": "integer"
+          },
+          "include_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Domains"
+          },
+          "exclude_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Exclude Domains"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_news_searchArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "tavily_web_search": [
+      {
+        "case_name": "Basic Web Search",
+        "purpose": "验证基本网络搜索功能在默认参数下正常工作",
+        "args": {
+          "query": "Python programming"
+        },
+        "response": [
+          "{\n  \"title\": \"Python (programming language) - Wikipedia\",\n  \"url\": \"https://en.wikipedia.org/wiki/Python_(programming_language)\",\n  \"content\": \"Python (programming language) - Wikipedia # Python (programming language) - Cebuano \\\"Python (programming language) – Cebuano\\\") - မြန်မာဘာသာ \\\"Python (programming language) – Burmese\\\") - Simple English \\\"Python (programming language) – Simple English\\\") - တႆး \\\"Python (programming language) – Shan\\\") - Winaray \\\"Python (programming language) – Waray\\\") | Python | | | - Python Programming at Wikibooks | | **Python** is a high-level, general-purpose programming language. Python consistently ranks as one of the most popular programming languages, and it has gained widespread use in the machine learning community. - Media \\\"c:Category:Python (programming language)\\\") from Commons - Python (programming language) \\\"Category:Python (programming language)\\\") - Articles with example Python (programming language) code_code \\\"Category:Articles with example Python (programming language) code\\\") Python (programming language)\"\n}",
+          "{\n  \"title\": \"Python Full Course for Beginners [2025] - YouTube\",\n  \"url\": \"https://www.youtube.com/watch?v=K5KVEU3aaeQ\",\n  \"content\": \"Python Full Course for Beginners [2025]\\nProgramming with Mosh\\n4610000 subscribers\\n44255 likes\\n1641438 views\\n12 Feb 2025\\nMaster Python from scratch 🚀 No fluff—just clear, practical coding skills to kickstart your journey! \\n\\n❤️ Join this channel to get access to perks:\\nhttps://www.youtube.com/channel/UCWv7vMbMWH4-V0ZXdmDpPBA/join\\n\\n🚀 Want to dive deeper?\\n- Check out my Python mastery course: https://mosh.link/python-course\\n- Subscribe for more awesome Python content: https://goo.gl/6PYaGF\\n\\n🔗 Related videos \\nhttps://youtu.be/yVl_G-F7m8c?si=aoIiT6CyaRRfBsRM\\n\\n✋ Stay connected:\\n- Full Courses: https://codewithmosh.com\\n- Twitter: https://twitter.com/moshhamedani\\n- Facebook: https://www.facebook.com/programmingwithmosh/\\n- Instagram: https://www.instagram.com/codewithmosh.official/\\n- LinkedIn: https://www.linkedin.com/school/codewithmosh/\\n\\n📖 Table of Content\\n0:00:00 Introduction\\n0:00:56 What is Python?\\n0:04:11 Installing Python\\n0:05:36 Python Interpreter\\n0:07:30 Code Editors\\n0:08:49 Your First Python Program\\n0:12:25 Python Extension\\n0:14:26 Linting Python Code\\n0:18:40 Formatting Python Code\\n0:22:51 Running Python Code\\n0:24:30 Python Implementations\\n0:26:59 How Python Code is Executed\\n0:29:45 Quiz\\n0:31:17 Python Mastery Course\\n0:31:44 Variables\\n0:34:48 Variable Names\\n0:37:51 Strings\\n0:43:20 Escape Sequences\\n0:46:01 Formatted Strings\\n0:48:09 String Methods\\n0:54:03 Numbers\\n0:56:50 Working With Numbers\\n0:58:59 Type Conversion\\n1:04:03 Quiz\\n1:06:43 Comparison Operators\\n1:08:46 Conditional Statements\\n1:12:56 Ternary Operator\\n1:15:04 Logical Operators\\n1:19:07 Short-circuit Evaluations\\n1:21:13 Chaining Comparison Operators\\n1:22:35 Quiz\\n1:24:18 For Loops\\n1:27:56 For..Else\\n1:30:42 Nested Loops\\n1:33:26 Iterables\\n1:36:34 While Loops\\n1:41:33 Infinite Loops\\n1:43:10 Exercise\\n1:45:13 Defining Functions\\n1:47:37 Arguments\\n1:49:57 Types of Functions\\n1:53:59 Keyword Arguments\\n1:55:59 Default Arguments\\n1:57:34 xargs\\n\\n#Python #AI #MachineLearning #WebDevelopment\\n1100 comments\\n\"\n}",
+          "{\n  \"title\": \"Introduction to Python - W3Schools\",\n  \"url\": \"https://www.w3schools.com/python/python_intro.asp\",\n  \"content\": \"Introduction to Python Tutorials \\\"Tutorials and References\\\")Exercises \\\"Exercises and Quizzes\\\")Certificates \\\"Certificates\\\")Services \\\"Our Services\\\")Menu \\\"Menu\\\") Certificates Learn ChatGPT-3.5Tutorial Learn ChatGPT-4Tutorial Learn C#Tutorial Learn ChatGPT-3.5Tutorial Learn ChatGPT-4Tutorial Certificates What is a Certificate? #### Log in / Sign Up Create a free W3Schools Account to Improve Your Learning Experience Python Tutorial Python Tuples Python Sets Python Dictionaries Python Modules Python Matplotlib Python DSA Python MySQL Python MongoDB Python Reference Python How To Python Examples Python Introduction What is Python? Python is a popular programming language. ### What can Python do? Python can be used on a server to create web applications. Why Python? In this tutorial Python will be written in a text editor. Python Tutorial Python Reference Python Examples Python Certificate\"\n}",
+          "{\n  \"title\": \"Welcome to Python.org\",\n  \"url\": \"https://www.python.org/\",\n  \"content\": \"*   Python *   Python Brochure Learn more about Python. *   ### Python Source Python 3.13.5 Python 3.13.5 Python 3.13.5 #### Download Python for Any OS *   Python Books *   Python Essays Python Docs *   Python Logo *   Python Wiki *   #### The Python Community *   Python News *   Python Events *   Python Events Archive *   Find events from the Python Community around the world! More about defining functions in Python 3  # Python 3: List comprehensions More about lists in Python 3  Python Hi, Python. Latest: Python 3.13.5 *   2025-06-17Python 3.14.0 beta 3 is here! *   Python Brochure *   Python Books *   Python Essays *   Python Wiki *   Python News *   Python Events *   Python Events Archive *   python-dev list\"\n}"
+        ],
+        "execution_time": 5.502279043197632,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Advanced Web Search",
+        "purpose": "验证高级搜索深度选项是否能返回更全面的结果",
+        "args": {
+          "query": "machine learning applications",
+          "search_depth": "advanced"
+        },
+        "response": [
+          "{\n  \"title\": \"Machine learning - Wikipedia\",\n  \"url\": \"https://en.wikipedia.org/wiki/Machine_learning\",\n  \"content\": \"ML finds application in many fields, including natural language processing, computer vision, speech recognition, email filtering, agriculture, and medicine.( The application of ML to business problems is known as predictive analytics.\\n\\nStatistics and mathematical optimisation (mathematical programming) methods comprise the foundations of machine learning. Data mining is a related field of study, focusing on exploratory data analysis (EDA) via unsupervised learning.( [...] Unsupervised learning algorithms find structures in data that has not been labelled, classified or categorised. Instead of responding to feedback, unsupervised learning algorithms identify commonalities in the data and react based on the presence or absence of such commonalities in each new piece of data. Central applications of unsupervised machine learning include clustering, dimensionality reduction,( and density estimation.( [...] Machine learning (ML) is a field of study in artificial intelligence concerned with the development and study of statistical algorithms that can learn from data and generalise to unseen data, and thus perform tasks \\\"Task (computing)\\\") without explicit instructions.( Within a subdiscipline in machine learning, advances in the field of deep learning have allowed neural networks \\\"Neural network (machine learning)\\\"), a class of statistical algorithms, to surpass many previous machine learning\"\n}",
+          "{\n  \"title\": \"Machine Learning in Finance - Overview, Applications\",\n  \"url\": \"https://corporatefinanceinstitute.com/resources/data-science/machine-learning-in-finance/\",\n  \"content\": \"As an application of artificial intelligence, machine learning focuses on developing systems that can access pools of data, and the system automatically adjusts its parameters to improve experiences. Computer systems run operations in the background and produce outcomes automatically according to how it is trained. [...] Robo-advisors are online applications that are built using machine learning, and they provide automated financial advice to investors. The applications use algorithms to establish a financial portfolio according to an investor’s goals and their risk tolerance. [...] Machine learning in finance is now considered a key aspect of several financial services and applications, including managing assets, evaluating levels of risk, calculating credit scores, and even approving loans. Machine learning is a subset of data science that provides the ability to learn and improve from experience without being programmed.\\n\\nImage 4\"\n}",
+          "{\n  \"title\": \"Machine Learning in Finance: 10 Applications and Use Cases\",\n  \"url\": \"https://www.coursera.org/articles/machine-learning-in-finance\",\n  \"content\": \"Regression Analysis, Applied Machine Learning, Unsupervised Learning, Feature Engineering, Deep Learning, Predictive Modeling, Machine Learning, Exploratory Data Analysis, Statistical Analysis, Generative AI, Machine Learning Algorithms, Data Access, Statistical Inference, Supervised Learning, Dimensionality Reduction, Data Science, Data Cleansing, Python Programming, Data Analysis, Reinforcement Learning, Artificial Neural Networks, Keras (Neural Network Library), Tensorflow, Technical [...] Regression Analysis, Applied Machine Learning, Unsupervised Learning, Feature Engineering, Deep Learning, Predictive Modeling, Machine Learning, Exploratory Data Analysis, Statistical Analysis, Generative AI, Machine Learning Algorithms, Data Access, Statistical Inference, Supervised Learning, Dimensionality Reduction, Data Science, Data Cleansing, Python Programming, Data Analysis, Reinforcement Learning, Artificial Neural Networks, Keras (Neural Network Library), Tensorflow, Technical [...] Regression Analysis, Applied Machine Learning, Unsupervised Learning, Feature Engineering, Deep Learning, Predictive Modeling, Machine Learning, Exploratory Data Analysis, Statistical Analysis, Generative AI, Machine Learning Algorithms, Data Access, Statistical Inference, Supervised Learning, Dimensionality Reduction, Data Science, Data Cleansing, Python Programming, Data Analysis, Reinforcement Learning, Artificial Neural Networks, Keras (Neural Network Library), Tensorflow, Technical\"\n}",
+          "{\n  \"title\": \"Machine Learning in Healthcare - PMC\",\n  \"url\": \"https://pmc.ncbi.nlm.nih.gov/articles/PMC8822225/\",\n  \"content\": \"trends, and develop disease prediction models. In large medical organizations, machine learning-based approaches have also been implemented to achieve increased efficiency in the organization of electronic health records , identification of irregularities in the blood samples , organs [6-8], and bones  using medical imaging and monitoring, as well as in robot-assisted surgeries [9, 13]. Machine learning applications have recently enabled the acceleration of testing and hospital response in the [...] data used in the ML-based approaches and their clear implementation of learning approaches with clinical applications and experiments. In the current review, we focused on ML application to healthcare in the fields of electronic health records, medical imaging, and genetic engineering. These areas also represent healthcare’s “BIG” data, or the structured and unstructured data of the field, and have shown significant promise in relation to clinical applications. [...] application of genetic modification to provide treatment for genetic disorders and mutations . With its application, ML can augment the role of physicians and redefine patient care. While the risks and challenges of the future application are addressed and corrected, the current ML algorithms can provide an excellent framework for future advancements and applications of ML in healthcare.\"\n}",
+          "{\n  \"title\": \"Machine Learning in Healthcare: Guide to Applications & Benefits\",\n  \"url\": \"https://www.foreseemed.com/blog/machine-learning-in-healthcare\",\n  \"content\": \"In contrast, deep learning has enabled the development of more advanced applications, such as automatic detection of cancerous lesions in mammograms or predicting cardiovascular risks from retinal images. These applications illustrate the potential of deep learning to perform tasks that were previously thought to be the exclusive domain of human experts. [...] Machine learning in healthcare examples include diagnostic support systems, risk assessment tools, and patient monitoring applications. These systems can help clinicians make better decisions by providing them with insights derived from vast datasets. For instance, a machine learning model might analyze electronic health records (EHRs) to predict which patients are at risk of developing a particular condition, allowing for early intervention. [...] Machine learning is a specific type of artificial intelligence that allows systems to learn from data and detect patterns without much human intervention. Instead of being told what to do, computers that use machine learning are shown patterns and data which then allows them to reach their own conclusions.\"\n}"
+        ],
+        "execution_time": 16.301502227783203,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Include Domains",
+        "purpose": "验证包含特定域名的搜索功能是否有效",
+        "args": {
+          "query": "climate change research",
+          "include_domains": [
+            "epa.gov",
+            "noaa.gov"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"Climate Change Research | US EPA\",\n  \"url\": \"https://www.epa.gov/climate-research\",\n  \"content\": \"Climate Change Research | US EPA Climate Change Research EPA’s Climate Change Research seeks to improve our understanding of how climate change impacts human health and the environment. Researching how changes in climate can affect air quality. Explore Air Quality & Climate Research   Image 5: Aerial view of Chicago cityscape on a sunny day  Research to empower communities to become more resilient to climate change. Explore Energy & Climate Research   Image 8: Family silhouette and a sunset sky  Research to understand how a changing climate will impact human health. Explore Human Health & Climate Research   Access Climate Change Research Tools & Resources   www.epa.gov Feedback Survey How can we make www.epa.gov a more helpful website?\"\n}",
+          "{\n  \"title\": \"Climate Change Research - US EPA\",\n  \"url\": \"https://19january2021snapshot.epa.gov/climate-research\",\n  \"content\": \"EPA research improves knowledge of the impacts of climate change on human health and the environment.\"\n}",
+          "{\n  \"title\": \"Human Health and Climate Change Research | US EPA\",\n  \"url\": \"https://www.epa.gov/climate-research/human-health-and-climate-change-research\",\n  \"content\": \"EPA is conducting research to understand the impacts of climate change on human health with a focus on vulnerable populations.\"\n}",
+          "{\n  \"title\": \"Air Quality and Climate Change Research | US EPA\",\n  \"url\": \"https://www.epa.gov/air-research/air-quality-and-climate-change-research\",\n  \"content\": \"EPA is conducting research to understand the relationships between climate change and air quality by advancing the understanding of temperature changs on\"\n}",
+          "{\n  \"title\": \"Climate | National Oceanic and Atmospheric Administration\",\n  \"url\": \"https://www.noaa.gov/climate\",\n  \"content\": \"www.noaa.gov # This site can’t be reached The webpage at **https://www.noaa.gov/climate** might be temporarily down or it may have moved permanently to a new web address. ERR\\\\_TUNNEL\\\\_CONNECTION\\\\_FAILED The webpage at **https://www.noaa.gov/climate** might be temporarily down or it may have moved permanently to a new web address.\"\n}"
+        ],
+        "execution_time": 5.06032395362854,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Exclude Domains",
+        "purpose": "验证排除特定域名的搜索功能是否有效",
+        "args": {
+          "query": "coronavirus updates",
+          "exclude_domains": [
+            "fake-news-site.com",
+            "unreliable-source.org"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"COVID - Coronavirus Statistics\",\n  \"url\": \"https://www.worldometers.info/coronavirus/\",\n  \"content\": \"# Coronavirus Cases: ### Reported Cases and Deaths by Country or Territory As of April 13, 2024, the Coronavirus Tracker is no longer being updated due to the unfeasibility of providing statistically valid global totals, as the majority of countries have now stopped reporting. Effective February 1, 2023, the Coronavirus Tracker had switched from LIVE to Daily Updates. As a number of major countries had transitioned to weekly updates, there was no need anymore for immediate updates throughout the day as soon as a new report is released. Report coronavirus cases North America South America Highlighted in green = all cases have recovered from the infection Highlighted in grey = all cases have had an outcome (there are no active cases) #### Report Changes in Numbers\"\n}",
+          "{\n  \"title\": \"Global COVID-19 Tracker\",\n  \"url\": \"https://www.kff.org/coronavirus-covid-19/issue-brief/global-covid-19-tracker/\",\n  \"content\": \"As of March 7, 2023, all data on COVID-19 cases and deaths are drawn from the World Health Organization’s (WHO) Coronavirus (COVID-19) Dashboard. Prior to March 7, 2023, this tracker relied on data provided by the Johns Hopkins University (JHU) Coronavirus Resource Center’s COVID-19 Map, which ended on March 10, 2023. While the tracker provides the most recent data available, there is a two-week lag in the data reporting. Note: The data in this tool were corrected on March 18, 2024, to clarify that they represent new cases and deaths over a full week rather than the average per day over a seven-day period. The independent source for health policy research, polling, and news, KFF is a nonprofit organization based in San Francisco, California.\"\n}",
+          "{\n  \"title\": \"COVID-19 epidemiology update: Summary — Canada.ca\",\n  \"url\": \"https://health-infobase.canada.ca/covid-19/\",\n  \"content\": \"Summary of COVID-19 cases, hospitalizations and deaths, testing and variants of concern, and outbreaks across Canada and over time.\"\n}",
+          "{\n  \"title\": \"WHO COVID-19 dashboard - WHO Data\",\n  \"url\": \"https://data.who.int/dashboards/covid19/cases\",\n  \"content\": \"In addition, countries differ in how they choose to report statistics; some countries provide their data attributed to specific dates while others who report less frequently may group data from 7 days into a single statistic attributed to a week in their reporting.As of 25 August 2023, WHO declared that it is no longer necessary for Member States to report daily counts of cases and deaths to WHO and requested strengthening of weekly reporting. New case and death counts from the Region of the Americas Starting from the week commencing on 11 September 2023, the source of the data from the Region of the Americas was switched to the aggregated national surveillances, received through the COVID-19, Influenza, RSV and Other Respiratory Viruses program in the Americas.\"\n}",
+          "{\n  \"title\": \"COVID-19 Map - Johns Hopkins Coronavirus Resource Center\",\n  \"url\": \"https://coronavirus.jhu.edu/map.html\",\n  \"content\": \"COVID-19 Map - Johns Hopkins Coronavirus Resource Center Home Topics * Tracking * Contact Tracing * Vaccines * Pandemic Data Initiative By Region Events & News About Show All Regions Tracking Home Data Visualizations Global Map U.S. Map Data in Motion Tracking FAQ Search data by region... JHU has stopped collecting data as of 03 / 10 / 2023 Show More After three years of around-the-clock tracking of COVID-19 data from... Show More Johns Hopkins experts in global public health, infectious disease, and emergency preparedness have been at the forefront of the international response to COVID-19. This website is a resource to help advance the understanding of the virus, inform the public, and brief policymakers in order to guide a response, improve care, and save lives.\"\n}"
+        ],
+        "execution_time": 4.377309799194336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limited Results Search",
+        "purpose": "验证最大结果数参数是否正确限制返回结果数量",
+        "args": {
+          "query": "best restaurants in New York",
+          "max_results": 2
+        },
+        "response": [
+          "{\n  \"title\": \"Where to Eat in New York City Right Now - Austin's Best Food Guides\",\n  \"url\": \"https://alexreichek.com/top-nyc-restaurants/\",\n  \"content\": \"We shared the Fattoush Salad – how fun to have pita chips in your greens!—I recommend the Chicken with crispy skin and tender meat, but my absolute favorite dish was the Roasted Sweet Potato with Hazelnut and Dukkah melted perfectly into it with blackened edges that allowed it’s insides to melt in your mouth. 7. Leo (BK) – This sourdough pizza joint in Williamsburg gave me the best restaurant pizza I’ve had in New York with its sturdy, but still doughy and crunchy crust, plus great cocktails and a solid wine list. Planta Queen (Flatiron) – is really the only fancy feeling plant-based restaurant I’ve been to that feels like it could be a special night out due to the Miami-style palm wall paper greenery and open kitchen.\"\n}",
+          "{\n  \"title\": \"NEW YORK CITY by The MICHELIN Guide\",\n  \"url\": \"http://guide.michelin.com/us/en/travel-guide/new-york-city\",\n  \"content\": \"Explore our Restaurants · Crown Shy · Jeju Noodle Bar · Tuome · Semma · Casa Mono · Oxomoco · Icca · Atera.\"\n}"
+        ],
+        "execution_time": 3.062288999557495,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Advanced Search",
+        "purpose": "验证所有参数组合使用时搜索功能是否正常",
+        "args": {
+          "query": "quantum computing breakthroughs",
+          "search_depth": "advanced",
+          "include_domains": [
+            "nature.com"
+          ],
+          "exclude_domains": [
+            "wikipedia.org"
+          ],
+          "max_results": 3
+        },
+        "response": [
+          "{\n  \"title\": \"Quantum computers tackle unexplored particle physics\",\n  \"url\": \"https://www.nature.com/articles/d41586-025-01797-3\",\n  \"content\": \"Subatomic particles such as quarks can pair up when linked by ‘strings’ of force fields — and release energy when the strings are pulled to the point of breaking. Two teams of physicists have now used quantum computers to mimic this phenomenon and watch it unfold in real time.\\n\\nThe results, described in two _Nature_ papers on 4 June1,2, are the latest in a series of breakthroughs towards using quantum computers for simulations that are beyond the ability of any ordinary computers.\"\n}",
+          "{\n  \"title\": \"Microsoft claims quantum-computing breakthrough\",\n  \"url\": \"https://www.nature.com/articles/d41586-025-00527-z\",\n  \"content\": \"The tech giant aims to make ‘topological’ quantum computers that will reach useful scales faster than competing technologies. \\n\\nBy\\n   Davide Castelvecchi\\n\\n1.   Davide CastelvecchiView author publications Search author on:PubMedGoogle Scholar   \\n\\n   Twitter\\n   Facebook\\n   Email\\n\\nAccess through your institution\\n\\nBuy or subscribe [...] Image 25 ‘A truly remarkable breakthrough’: Google’s new quantum chip achieves accuracy milestone\\n\\n   Quantum-computing technology that makes qubits from atoms wins mega investment\\n\\n   Image 26 IBM releases first-ever 1,000-qubit quantum chip\\n\\nSubjects\\n--------\\n\\n   Quantum information\\n   Quantum physics\\n   Mathematics and computing\\n\\nSign up to Nature Briefing\\n--------------------------\\n\\nAn essential round-up of science news, opinion and analysis, delivered to your inbox every weekday. [...] Image 4 ‘A truly remarkable breakthrough’: Google’s new quantum chip achieves accuracy milestone\\n\\n   Quantum-computing technology that makes qubits from atoms wins mega investment\\n\\n   Image 5 IBM releases first-ever 1,000-qubit quantum chip\\n\\nSubjects\\n--------\\n\\n   Quantum information\\n   Quantum physics\\n   Mathematics and computing\\n\\nLatest on:\\n----------\\n\\nQuantum information\"\n}",
+          "{\n  \"title\": \"Can quantum computing crack the biggest challenges in ...\",\n  \"url\": \"https://www.nature.com/articles/s41591-024-03369-w\",\n  \"content\": \"Quantum computing for health received a boost when funder Wellcome Leap initiated the Quantum for Bio challenge in September 2023. The non-profit organization, which was launched with $300 million from the Wellcome Trust in 2020 and aims to invest in high-risk breakthrough technologies, challenged 12 teams to identify, develop and demonstrate biology and health applications that can be run on quantum computers expected to emerge in the next 3–5 years. [...] Still, this year, Cleveland Clinic and IBM were able to demonstrate the potential of quantum computing in an early proof of concept. They ran a hybrid model that combines quantum and classical computing methods to model the structure of a catalytic loop of the Zika virus NS3 helicase. The result was published as part of a perspective in the Journal of Chemical Theory and Computation in May 2024 (ref. 2.\\\")). The authors assert that this model outperformed both a classical physics-based method [...] One strength of quantum computers is that they could soon become much better than classical computers at simulating quantum mechanics. Cracking how to use quantum computers to calculate steps that rely heavily on quantum chemistry, for instance, could unlock faster and more accurate modeling. Cleveland Clinic and IBM are looking to use quantum simulations to improve the current models of biochemical reactions. These first-of-their-kind algorithms could lead to new therapies, the researchers\"\n}"
+        ],
+        "execution_time": 4.475904703140259,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "验证包含特殊字符的查询是否能被正确处理",
+        "args": {
+          "query": "C++ vs C# comparison 2023",
+          "search_depth": "basic",
+          "max_results": 4
+        },
+        "response": [
+          "{\n  \"title\": \"C++ or C# in 2023 : r/AskProgramming - Reddit\",\n  \"url\": \"https://www.reddit.com/r/AskProgramming/comments/10fmkw9/c_or_c_in_2023/\",\n  \"content\": \"C# and C++ are fairly close in most programming language popularity indices, with C# having a slight edge. I think developers generally like\"\n}",
+          "{\n  \"title\": \"C# Vs C++: Difference Between C# and C++ - InterviewBit\",\n  \"url\": \"https://www.interviewbit.com/blog/c-sharp-vs-cpp/\",\n  \"content\": \"C++ is known as an intermediate-level language that adds object-oriented features to its base C, whereas C# is a high-level language. C++\"\n}",
+          "{\n  \"title\": \"C# vs C++: Head to Head Comparison [2025] - Hackr.io\",\n  \"url\": \"https://hackr.io/blog/c-sharp-vs-cpp\",\n  \"content\": \"C++ is more popular for games and other software requiring fast performance, while C# is better suited to web and desktop apps less reliant on speed.\"\n}",
+          "{\n  \"title\": \"Difference Between C and C# - Olibr\",\n  \"url\": \"https://olibr.com/blog/c-vs-csharp-difference/\",\n  \"content\": \"One major difference between these two is C is a procedural language and C# is an object-oriented language.\"\n}"
+        ],
+        "execution_time": 3.1335010528564453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证空查询是否能被正确处理并返回错误",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: tavily_web_search 发生错误: 搜索查询不能为空"
+        },
+        "execution_time": 0.004431724548339844,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_answer_search": [
+      {
+        "case_name": "Basic Answer Search",
+        "purpose": "验证在默认参数下工具能否正确返回基础问题的答案和证据",
+        "args": {
+          "query": "地球的卫星是什么？"
+        },
+        "response": {
+          "result": "Earth's natural satellite is the Moon. Earth also has a minor natural satellite, Cruithne. There are also numerous human-made satellites orbiting Earth."
+        },
+        "execution_time": 4.490648031234741,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Advanced Answer Search",
+        "purpose": "验证高级搜索深度是否能提供更详细准确的答案和证据",
+        "args": {
+          "query": "量子计算的基本原理是什么？",
+          "search_depth": "advanced"
+        },
+        "response": {
+          "result": "量子计算基于量子叠加、纠缠和干涉原理，利用量子比特进行计算。量子计算比经典计算机更高效，能够并行处理信息。量子计算在特定问题上展现出超越传统计算的潜力。"
+        },
+        "execution_time": 8.038336515426636,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证空查询是否被正确拒绝并返回错误信息",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: 查询内容不能为空"
+        },
+        "execution_time": 0.0037202835083007812,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "验证包含特殊字符的查询是否能被正确处理",
+        "args": {
+          "query": "C++与Python性能对比分析",
+          "search_depth": "basic"
+        },
+        "response": {
+          "result": "C++通常比Python快，尤其在底层系统编程和高性能计算中。C++的编译型特性和硬件优化使其在速度上占优。Python的解释性和动态特性导致其运行速度较慢。"
+        },
+        "execution_time": 4.343155384063721,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-Existent Topic Search",
+        "purpose": "验证对不存在主题的查询是否能优雅处理（无结果）",
+        "args": {
+          "query": "火星上的电话号码是多少？"
+        },
+        "response": {
+          "result": "There is no telephone number for Mars on Mars as it is not a place with conventional communication infrastructure. Mars has no established phone service. Future plans involve advanced communication systems."
+        },
+        "execution_time": 8.868119716644287,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Query Handling",
+        "purpose": "验证长文本查询是否能被正确解析并返回合理答案",
+        "args": {
+          "query": "请解释爱因斯坦相对论的核心概念及其对现代物理学的影响"
+        },
+        "response": {
+          "result": "Einstein's relativity theory introduced the concepts of spacetime, time dilation, and gravity as spacetime curvature. It revolutionized physics, laying the foundation for modern cosmology and predicting phenomena like black holes. Relativity replaced Newtonian mechanics, fundamentally changing 20th-century physics."
+        },
+        "execution_time": 6.73267126083374,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Malicious Input",
+        "purpose": "验证工具能否安全处理潜在恶意输入（如脚本注入尝试）",
+        "args": {
+          "query": "<script>alert('xss')</script> 这是一个测试问题吗？"
+        },
+        "response": {
+          "result": "The `<script>alert('xss')</script>` is a common XSS test payload. It executes JavaScript code in the browser. XSS vulnerabilities can be prevented by escaping untrusted data."
+        },
+        "execution_time": 6.053319692611694,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_news_search": [
+      {
+        "case_name": "Basic News Search",
+        "purpose": "验证基本新闻搜索功能在默认参数下是否正常工作",
+        "args": {
+          "query": "人工智能最新进展"
+        },
+        "response": [
+          "{\n  \"title\": \"人工智能最新动态 - IT之家\",\n  \"url\": \"https://www.ithome.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/\",\n  \"content\": \"Image 1 Image 2 华为 Pura 80 Pro 系列真机亮相微软 ROG Xbox Ally / X 掌机发布 两名徒步者依赖 ChatGPT 和谷歌规划路线，未预料会下雪，仅穿普通鞋便上山，最终无法下山，只能呼叫救援。此外，在三天内发生两起因 AI 导航误导致使登山者被困雪地的事故，显示出完全依赖 AI 的危险性。 **Tags：**人工智能 06月07日    *   Image 8: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半谷歌 Gemini 上线“计划操作”功能：动动手就能让“AI 秘书”帮你完成任务 *   Image 9: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半马斯克 X 更新开发者协议，禁止第三方使用平台帖子训练 AI 模型 X 的隐私政策仍允许第三方“合作伙伴”在用户未选择退出的情况下，基于该平台的数据进行 AI 模型训练。此外，X 还会将用户数据输入其 AI 模型 Grok，用于训练目的。 **Tags：**X，推特，马斯克，人工智能 06月06日    *   Image 12: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半创新还是噱头？米其林主厨用 ChatGPT 设计菜谱 *   Image 13: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半《华盛顿邮报》酝酿推出 AI 辅助写作：非专业作者也能投稿畅谈观点 *   Image 16: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半密歇根大学首次用无线脑机接口在人脑中记录神经信号，或可辅助治疗心理疾病 *   Image 17: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半OpenAI 首席执行官奥尔特曼：AI 很快就能帮助人们发现新知识 *   Image 20: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半在法庭摘要中使用 ChatGPT 生成不存在案例，美国一名律师遭法院制裁 *   Image 21: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半AI 智能体已具备与人类黑客正面较量的能力，部分情况甚至能取胜 *   Image 22: 软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半软银、英特尔合作研发新型 AI 内存芯片，耗电量有望减半 *   华为 Pura80 Pro / Pro + 今日开启预约 *   1999 元买买买买买：苹果 Mac mini M4 万兆网口国补 + 换新补贴随时结束\"\n}",
+          "{\n  \"title\": \"人工智能应用引人注目——国际原子能机构专家组肯定中国核安全 ...\",\n  \"url\": \"https://news.un.org/zh/story/2025/07/1140330\",\n  \"content\": \"Published Time: 2025-07-11T11:04:21-04:00 人工智能应用引人注目——国际原子能机构专家组肯定中国核安全监管进展 | | 1联合国新闻 跳至主要内容/导航 欢迎来到联合国，您的世界！ Language *   العربية *   中文 *   English *   Français *   Русский *   Español *   Português *   Kiswahili *   其它 *   Hindi हिंदी *   Urdu اردو *   Global Image 1: United Nations 联合国新闻 全球视野, 常人故事  搜索 搜索 高级搜索 语言 *   العربية *   中文 *   English *   Français *   Русский *   Español *   Português *   Kiswahili *   其它 *   Hindi हिंदी *   Urdu اردو *   Global 联合国新闻 人工智能应用引人注目——国际原子能机构专家组肯定中国核安全监管进展 Image 2: 核电站 核电站 人工智能应用引人注目——国际原子能机构专家组肯定中国核安全监管进展 国际原子能机构\\\")专家组周五表示，中国在加强核安全监管方面取得显著进展，特别是在人工智能和数字技术的创新应用上成果突出。这一评估是在国际原子能机构综合监管审查服务专家组对中国进行了为期12天全面评估访问后做出的。 *   国际原子能机构 Image 3: media:entermedia_image:edb9ef13-dea0-4817-9d38-93ea14e4df44 Image 4: 国际原子能机构执行董事会会议现场。原子能机构/Dean Calma Image 5: 国际原子能机构验证捷克共和国一处核电站内的核材料。 Image 6: 国际原子能机构总干事拉斐尔·马里亚诺·格罗西在维也纳该机构总部举行的理事会会议上发表讲话。 国际原子能机构\\\")总干事格罗西周三表示，重启对伊朗核设施的核查工作是该机构当前的首要任务，其中包括评估近期空袭造成的破坏情况，并核实高浓缩铀的库存状态。 Image 7: 乌克兰扎波罗热核电站。 国际原子能机构\\\")总干事格罗西表示，驻扎在乌克兰扎波罗热核电站的专家团队周三早晨听到多轮枪声，据称核电站的培训中心当天遭遇无人机袭击。 媒体资讯  Button collapse 联合国秘书长  Button collapse 发言人办公室  Button collapse 联系我们  Button collapse Footer menu Social Media Links Footer buttons\"\n}",
+          "{\n  \"title\": \"2025世界人工智能大会将发布《国际人工智能开源合作倡议》\",\n  \"url\": \"https://finance.sina.com.cn/stock/t/2025-07-10/doc-infeyhup3844051.shtml\",\n  \"content\": \"为进一步推动全球共建开源生态，工信部将推动中国—金砖国家人工智能发展与合作中心建设，联合开放原子开源基金会、中国开发者网络、开源中国等机构，在大会上发布《国际人工\"\n}",
+          "{\n  \"title\": \"共绘AI创新未来图景2025人工智能创新创业大会在杭举办 - 新华网浙江\",\n  \"url\": \"http://www.zj.xinhuanet.com/20250712/c93b956c9dd842ab9dc951f5061f1756/c.html\",\n  \"content\": \"拱墅区政府发布人工智能产业发展实施方案（2025），推出“人工智能22条”惠企政策包，明确提出以“科技驱动+场景牵引”为核心路径，聚焦“AI+”重点赛道方向给予更大力度的创新创业\"\n}",
+          "{\n  \"title\": \"教科文组织新报告： 调整人工智能大语言模型可降低90%能耗\",\n  \"url\": \"https://www.un.org/sustainabledevelopment/zh/2025/07/%E6%95%99%E7%A7%91%E6%96%87%E7%BB%84%E7%BB%87%E6%96%B0%E6%8A%A5%E5%91%8A%EF%BC%9A-%E8%B0%83%E6%95%B4%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8F%AF%E9%99%8D/\",\n  \"content\": \"教科文组织新报告： 调整人工智能大语言模型可降低90%能耗 - 可持续发展 Image 1: 可持续发展 Logo *   目标 1：无贫穷 *   目标 2：零饥饿 *   目标 3：良好健康与福祉 *   目标 4：优质教育 *   目标 5：性别平等 *   目标 6：清洁饮水和卫生设施 *   目标 7：经济适用的清洁能源 *   目标 8：体面工作和经济增长 *   目标 9：产业、创新和基础设施 *   目标 10：减少不平等 *   目标 11：可持续城市和社区 *   目标 12：负责任消费和生产 *   目标 13：气候行动 *   目标 14：水下生物 *   目标 15：陆地生物 *   目标 16：和平、正义与强大机构 *   目标 17：促进目标实现的伙伴关系 *   目标 2：零饥饿 *   目标 3：良好健康与福祉 *   目标 4：优质教育 *   目标 5：性别平等 *   目标 6：清洁饮水和卫生设施 *   目标 7：经济适用的清洁能源 *   目标 8：体面工作和经济增长 *   目标 9：产业、创新和基础设施 *   目标 10：减少不平等 *   目标 11：可持续城市和社区 *   目标 12：负责任消费和生产 *   目标 13：气候行动 *   目标 14：水下生物 *   目标 15：陆地生物 *   目标 16：和平、正义与强大机构 *   目标 17：促进目标实现的伙伴关系 教科文组织新报告： 调整人工智能大语言模型可降低90%能耗 教科文组织新报告： 调整人工智能大语言模型可降低90%能耗 *   教科文组织新报告： 调整人工智能大语言模型可降低90%能耗 #### Image 3: RSS联合国新闻 *   教科文组织新报告： 调整人工智能大语言模型可降低90%能耗\"\n}"
+        ],
+        "execution_time": 3.6030166149139404,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Time Range Search",
+        "purpose": "验证工具能否正确处理指定天数范围的新闻搜索请求",
+        "args": {
+          "query": "气候变化峰会",
+          "days": 30
+        },
+        "response": [
+          "{\n  \"title\": \"首届中德城市峰会探讨城市可持续发展之路 - 新华网\",\n  \"url\": \"http://www.news.cn/world/20250617/0bd8bdeb69834516a2ca800be6ff412b/c.html\",\n  \"content\": \"... 气候变化、提升生活质量和推动绿色转型方面发挥关键作用。本届峰会为中德城市提供了学习与合作的平台，推动双方在低碳和气候适应型发展与创新等领域开展务实交流。\"\n}",
+          "{\n  \"title\": \"第29届气候变化大会：投资建设人人宜居的地球| 联合国\",\n  \"url\": \"https://www.un.org/zh/climatechange/cop29\",\n  \"content\": \"在阿塞拜疆巴库举行的《联合国气候变化框架公约》缔约方会议第二十九届会议于11月24日闭幕并达成协议，呼吁发达国家到2035年每年向发展中国家提供3000亿美元，以大幅减少\"\n}",
+          "{\n  \"title\": \"BRICS峰会发出强烈呼声：要求发达国家大幅增加气候资金 - 旅日侨网\",\n  \"url\": \"http://www.jpchinapress.com/static/content/SS/2025-07-08/1392212925036904448.html\",\n  \"content\": \"此次会议以气候变化为核心议题，最终通过了一项强烈敦促发达国家“显著提高气候资金支持”的联合宣言，强调对发展中国家应承担的义务，并间接批评了美国特朗普政府宣布退出《\"\n}",
+          "{\n  \"title\": \"第28届联合国气候变化大会：气候行动刻不容缓\",\n  \"url\": \"https://www.un.org/zh/climatechange/cop28\",\n  \"content\": \"《联合国气候变化框架公约》缔约方会议第二十八届会议已于2023年11月30日至12月12日在阿拉伯联合酋长国迪拜举办。 第28届联合国气候变化大会：气候行动刻不容缓. 随着全球\"\n}",
+          "{\n  \"title\": \"中国气象灾害预警项目获“2025年信息社会世界峰会奖” - 新华网\",\n  \"url\": \"http://www.xinhuanet.com/world/20250707/21860fe53b9e49d7aca55eea0748998c/c.html\",\n  \"content\": \"新华社日内瓦7月7日电（记者王其冰）中国信息通信研究院“气象灾害预警信息的精准、快速、安全制作和发布”项目7日在日内瓦获得国际电信联盟“2025年信息社会世界峰会奖”\"\n}"
+        ],
+        "execution_time": 11.042057514190674,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Include Specific Domains",
+        "purpose": "验证包含特定新闻源域名的搜索功能是否有效",
+        "args": {
+          "query": "科技行业趋势",
+          "include_domains": [
+            "techcrunch.com",
+            "theverge.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: ('Connection aborted.', ConnectionResetError(10054, '远程主机强迫关闭了一个现有的连接。', None, 10054, None))"
+        },
+        "execution_time": 0.287764310836792,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Exclude Specific Domains",
+        "purpose": "验证排除特定新闻源域名的搜索功能是否有效",
+        "args": {
+          "query": "国际政治新闻",
+          "exclude_domains": [
+            "fake-news-site.com"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"国际新闻\",\n  \"url\": \"https://www.voachinese.com/z/1740\",\n  \"content\": \"国际新闻 - 美国之音中文网 تدعمه ترجمة 无障碍链接 跳转到内容 跳转到导航 跳转到检索 国际  最新国际新闻印太中东欧洲非洲美洲全球议题  中国时间 20:00 2025年5月28日 星期三  国际 2025年5月28日#### 美国土安全部长诺姆向以色列转达特朗普有关美伊会谈的“坦诚”讯息 美国国土安全部长克里斯蒂·诺姆(Kristi Noem)表示，在访问以色列期间，她向以色列总理本雅明·内塔尼亚胡(Benjamin Netanyahu)转达了唐纳德·特朗普(Donald Trump)总统关于正在进行的美伊谈判的“非常坦诚”的信息。她告诉福克斯新闻，美国理解以色列不信任伊朗，但特朗普也希望内塔尼亚胡“与他达成共识”。  2025年5月28日#### 马来西亚总理安瓦尔：东盟不会背弃美国，支持中国 东南亚国家联盟峰会在马来西亚闭幕。东道主马来西亚的领导人表示，即使东盟深化与北京的关系，东盟十国也不会背弃美国，转而支持中国。  2025年5月28日#### 美国土安全部长诺姆向以色列转达特朗普有关美伊会谈的“坦诚”讯息 美国国土安全部长克里斯蒂·诺姆(Kristi Noem)表示，在访问以色列期间，她向以色列总理本雅明·内塔尼亚胡(Benjamin Netanyahu)转达了唐纳德·特朗普(Donald Trump)总统关于正在进行的美伊谈判的“非常坦诚”的信息。她告诉福克斯新闻，美国理解以色列不信任伊朗，但特朗普也希望内塔尼亚胡“与他达成共识”。  2025年5月27日#### 俄军攻占乌克兰东北部地区四座边境村庄 乌克兰官员说，俄罗斯军队夺取了对东北地区苏梅州四座村庄的控制权，这片地区与俄罗斯的库尔斯克州接壤。  2025年5月27日#### 智库新报告：中国从贷款方变身收债人，穷国面临“海啸般”债务成本 澳大利亚智库洛伊研究所星期二(5月27日)发布新报告说，2025年，随着还债额飙升和贷款大幅减少，中国在发展中国家融资中的角色已从贷款人变身为收债人，发展中国家疲于应对积欠中国的“海啸般”债务和利息成本。世界上许多最贫穷、最脆弱的国家的债务压力尤其深重。  2025年5月27日#### 特朗普：美伊核会谈可能会有“好消息” 唐纳德·特朗普(Donald Trump)总统星期天对记者表示，他对与伊朗核谈判的前景感到乐观。 特朗普说：“重要的是，我们昨天和今天与伊朗进行了一些不错的对话。让我们拭目以待，但我认为我们可以在伊朗问题上有一些好消息……与核问题有关。我们与伊朗进行了一些非常非常好的谈判。我不知道接下来两天我会告诉你们好消息还是坏消息，但我感觉我可能会告诉你们一些好消息。”  2025年5月27日#### 特朗普：美伊核会谈可能会有“好消息” 唐纳德·特朗普(Donald Trump)总统星期天对记者表示，他对与伊朗核谈判的前景感到乐观。  2025年5月26日#### 俄罗斯大规模袭击乌克兰；特朗普：普京“发疯了” 特朗普总统说，俄罗斯总统普京“绝对发疯了”，正在“毫无必要地杀戮很多人”。在此之前，俄罗斯星期日(5月25日)对基辅和乌克兰其他地区发动了一次大规模无人机和导弹袭击并造成人员伤亡。  2025年5月26日#### 关岛总督访问台湾 美国太平洋领地关岛的总督正在对台湾进行访问。  2025年5月24日#### 美国与伊朗第五轮核谈判结束，铀浓缩问题悬而未决 美国与伊朗的第五轮核谈判在罗马结束，但双方的核心争议点--铀浓缩问题--依然没有得到解决。  2025年5月24日#### 美国与伊朗第五轮核谈判结束，铀浓缩问题悬而未决 伊朗与美国第五轮核谈判在罗马结束，但双方的核心争议点--铀浓缩问题依然没有得到解决。  2025年5月23日#### 乌克兰、俄罗斯开始大规模交换战俘 俄罗斯和乌克兰于星期五(5月23日)开始大规模交换战俘，双方上个星期在土耳其的直接会谈中达成了这项协议。  2025年5月23日#### 伊朗警告将采取“特殊措施”保护核设施免受以色列威胁 伊朗外交部长表示，德黑兰将采取特殊措施保护其核设施, 如果国际社会不遏制以色列威胁袭击伊朗核设施的话。他并没有指明是什么特殊措施。耶路撒冷担心这些设施可能被用来制造核弹。  2025年5月23日#### 中国寻求与欧盟建立战略关系，分化美国盟友 中国正推动与美国在欧洲的盟友建立战略联盟，以利用大西洋两岸的任何分歧，增强其全球贸易影响力。  2025年5月22日#### 美菲海岸警卫队首次参与军演，向中国发出警告？ 菲律宾武装部队星期三（5月21日）说，菲律宾和美国在南中国海有争议水域附近举行联合海上军演，两国海岸警卫队首次参与其中。演习正值中国与菲律宾关系因南中国海领土争端局势持续紧张之际。  2025年5月22日#### 卢比奥：美伊若达成“可以接受的协议”,必须包括伊朗不能铀浓缩 美国国务卿马尔科·卢比奥说，不应允许伊朗浓缩铀。他重申了美国在和谈判问题上的立场。双方最近几个星期已经进行了四轮会谈。  2025年5月21日#### 巴基斯坦发生校车遭自杀炸弹袭击事件，五人丧生 巴基斯坦军方表示，一名疑似自杀炸弹手星期三(5月21日)在巴基斯坦西南地区袭击了一辆陆军校车，造成五人丧生，包括三名儿童。  2025年5月21日#### 哈梅内伊的言论令人对美伊核会谈前景生疑 伊朗最高领袖阿里·哈梅内伊星期二(5月20日)称美国提出的彻底禁止铀浓缩的要求“荒唐透顶”。他的这番话使德黑兰与华盛顿之际的核会谈前景变得难料。  2025年5月20日#### 特朗普总统星期三将在白宫会晤南非总统拉马福萨 南非总统西里尔·拉马福萨(Cyril Ramaphosa)定于星期三在白宫与美国总统唐纳德·特朗普(Donald Trump)会面，旨在重启两国关系。  2025年5月20日#### 泽连斯基指责俄罗斯“试图拖延时间继续战争” 乌克兰总统弗拉基米尔·泽连斯基(Volodymyr Zelenskyy)指责俄罗斯“试图拖延时间，继续战争并侵占(乌克兰)”。此前，美国总统唐纳德·特朗普 (Donald Trump)宣布俄乌双方同意立即开始停火谈判。  2025年5月20日#### 苹果手机供应商富士康在印度注资近15亿美元 苹果公司智能手机的关键供应商富士康在印度注资近15亿美元。  2025年5月20日#### 特朗普：俄罗斯与乌克兰将“立即”开始停火会谈 美国总统唐纳德·特朗普宣布俄罗斯和乌克兰将就停火并结束冲突“立即开始谈判”。在此之前，特朗普与俄罗斯总统弗拉基米尔·普京通了电话。  2025年5月20日#### 内塔尼亚胡：以色列将控制“加沙所有地区” 以色列总理本雅明·内塔尼亚胡在决定恢复对巴勒斯坦人聚居的加沙地带的有限援助的第二天表示，以色列将控制“加沙所有地区”  2025年5月20日#### 俄罗斯将国际特赦列入“不良组织”名单 俄罗斯官员星期一(5月19日)表示，已将国际特赦组织列为“不良组织”。国际特赦组织追踪记录世界各地侵犯人权的行为。  2025年5月20日#### 美副总统万斯在梵蒂冈会晤教宗良十四世 美国副总统JD·万斯向罗马天主教教宗良十四世转交了唐纳德·特朗普总统的信函，邀请他访问美国。  VOA+ VOA English 中国时间 سيتم استخدام ملاحظاتك وآرائك للمساعدة في تحسين \\\"ترجمة Google\\\".\"\n}",
+          "{\n  \"title\": \"國際| 世界新聞網\",\n  \"url\": \"https://www.worldjournal.com/wj/cate/world\",\n  \"content\": \"國際最新 · 南韓成美國盟友「重要武器供應國」 大客戶卻面臨戰爭邊緣. 台灣製火箭在日本北海道試射未達目標「卡門線」失控墜落 ; 俄烏戰爭 · 川普上任首次將透過北約軍援烏總\"\n}",
+          "{\n  \"title\": \"国际- BBC News 中文\",\n  \"url\": \"https://www.bbc.com/zhongwen/topics/c83plve5vmjt/simp\",\n  \"content\": \"国际 - BBC News 中文 BBC News, 中文跳过此内容 - 视频 - 视频 # 国际 ## 视频, 伊朗与美国民众抗议空袭核设施 示威者：担忧引发第三次世界大战, 节目全长 5,05 - An Iranian woman holds a poster of Iranian supreme leader Ayatollah Ali Khamenei during an anti-Israel rally in Tehran, Iran, 14 June 2025. ## 视频, 伊朗副外长：将持续自卫行动 警告特朗普勿卷入这场战争, 节目全长 15,56 - The Iron Dome, the Israeli air defense system, intercepts missiles fired from Iran, over Tel Aviv, Israel, 17 June 2025. Israel and Iran have been exchanging fire since Israel attacked Iran on 13 June 2025 as part of operation 'Rising Lion'. Iranian ballistic missile attack on Tel Aviv, Israel - 17 Jun 2025 ## 视频, 特朗普考虑加入以色列打撃伊朗核设施 称“目前”不会击杀哈梅内伊, 节目全长 13,22 ## 视频, 以色列伊朗冲突升级：伊朗国家电视台遇袭 G7峰会聚焦中东危机, 节目全长 9,22 BBC News, 中文\"\n}",
+          "{\n  \"title\": \"國際- BBC News 中文\",\n  \"url\": \"https://www.bbc.com/zhongwen/topics/c83plve5vmjt/trad\",\n  \"content\": \"國際 - BBC News 中文 BBC News, 中文跳過此內容 - 目前頁面, 國際 - 目前頁面, 國際 # 國際 ## 視頻, 伊朗與美國民眾抗議空襲核設施 示威者：擔憂引發第三次世界大戰, 節目全長 5,05 - An Iranian woman holds a poster of Iranian supreme leader Ayatollah Ali Khamenei during an anti-Israel rally in Tehran, Iran, 14 June 2025. ## 視頻, 伊朗副外長：將持續自衛行動 警告特朗普勿捲入這場戰爭, 節目全長 15,56 - The Iron Dome, the Israeli air defense system, intercepts missiles fired from Iran, over Tel Aviv, Israel, 17 June 2025. Israel and Iran have been exchanging fire since Israel attacked Iran on 13 June 2025 as part of operation 'Rising Lion'. Iranian ballistic missile attack on Tel Aviv, Israel - 17 Jun 2025 ## 視頻, 特朗普考慮加入以色列打撃伊朗核設施 稱「目前」不會擊殺哈梅內伊, 節目全長 13,22 ## 視頻, 以色列伊朗衝突升級：伊朗國家電視台遇襲 G7峰會聚焦中東危機, 節目全長 9,22 BBC News, 中文\"\n}",
+          "{\n  \"title\": \"法广- 时事与新闻直播- RFI - 法国国际广播电台\",\n  \"url\": \"https://www.rfi.fr/cn/\",\n  \"content\": \"印度空难调查：两台发动机燃油开关几乎同时“关闭” · 美国要求盟友表明在台湾爆发战争时会采取什么行动 · 澳洲总理访华引国内批评中国大使称工党上台后双边关系“全面好转”.\"\n}"
+        ],
+        "execution_time": 3.760821580886841,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limited Results Count",
+        "purpose": "验证最大结果数参数是否能正确限制返回结果数量",
+        "args": {
+          "query": "股市行情分析",
+          "max_results": 3
+        },
+        "response": [
+          "{\n  \"title\": \"股票行情_今日股市行情走势 - 英为财情\",\n  \"url\": \"https://cn.investing.com/equities\",\n  \"content\": \"股票行情\\\\_今日股市行情走势\\\\_英为财情Investing.com Investing.com - 领先金融门户 - English (USA) - English (UK) - English (India) - English (Canada) - English (Australia) - English (South Africa) - English (Philippines) - English (Nigeria) - 比特币/美元 - 指数 - 中国 - 指数 - Vanguard Total Stock Mkt Idx Instl Sel - Vanguard Total Bond Market Index Adm - Vanguard 500 Index Investor - 比特币/美元 - 以太坊/美元 - SG FTSE MIB Gross TR 5x Daily Short Strategy RT 18 - 商品&期货 FTSE ADX General NZX MidCap S&P Merval 欧洲斯托克(Eurostoxx)50指数 |  | 海天味业 | 38.44 | 38.60 | 37.92 | -0.07 | -0.18% | 15.87M | 23/06 | Investing.com -- 尽管安进公司( Amgen Inc )(NASDAQ:AMGN)的肥胖治疗候选药物MariTid... Investing.com - 摩根士丹利重申了对诺和诺德公司(NOVOB:DC)(NYSE:NVO)股票的\\\"持平\\\"评级和DKK5... Investing.com - 据路透社周一报道，美国卫生部长罗伯特·F·肯尼迪将于周三在布鲁塞尔举行的Gavi筹款活动上代表美国... WTI原油 (F)\\\") 伦敦布伦特原油 (F)\\\") 黄金 (F)\\\") 白银 (F)\\\") 天然气 (F)\\\") 铜 (F)\\\") 美国大豆 (F)\\\") 美元/人民币\"\n}",
+          "{\n  \"title\": \"股市_金融市场 - 华尔街日报\",\n  \"url\": \"https://cn.wsj.com/zh-hans/news/markets?gaa_at=eafs&gaa_n=ASWzDAjBeNalU7mZaZ4ALdFHHA2BLra_JnVHishIdQdxNHSXotf_4jXxMngg&gaa_ts=6872975b&gaa_sig=imVM-H9KXb_mVGqFhHX6LWuuNp5A4IQSEuJbS8Ugg8o4KU81UWFY1npzgDXebn8U6KhuL66YZMIZUfRiM5Jt2w%3D%3D\",\n  \"content\": \"隔夜市场回顾：美国国债拍卖获得强劲需求，之后收益率延续跌势 ; 道琼斯指数. 44,458.30. 217.54 ; 标普500指数. 6,263.26. 37.74 ; 纳斯达克指数. 20,611.34. 192.87 ; 罗素2000\"\n}",
+          "{\n  \"title\": \"股票频道- 东方财富网\",\n  \"url\": \"https://stock.eastmoney.com/\",\n  \"content\": \"股票频道 - 东方财富网 - 股吧 | 代码 | 名称 | 相关链接 | 最新价 | 涨跌幅 | 振幅 | 成交额 | 换手率 | | 代码 | 名称 | 相关链接 | 最新价 | 涨跌幅 | 振幅 | 成交额 | 换手率 | | 代码 | 名称 | 涨跌幅 | 最新价 | | 日期 | 名称 | 相关链接 | 研报 | 评级 | 机构 | | 日期 | 名称 | 相关链接 | 涨跌幅 | 龙虎榜净买额(万) | 上榜原因 | | 2025-06-24 | 国轩高科 | 股吧详细 | 10.02% | 31807.02 | 日涨幅偏离值达到7%的前5... | 日期 | 名称 | 相关链接 | 涨跌幅 | 行业研报 | | 排名 | 代码 | 名称 | 相关链接 | 最新价 | 涨跌幅 | 振幅 | 成交量(手) | 成交额 | 股吧\"\n}"
+        ],
+        "execution_time": 2.502845287322998,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Advanced Search",
+        "purpose": "验证所有参数组合使用时搜索功能是否正常",
+        "args": {
+          "query": "量子计算突破性研究",
+          "days": 90,
+          "include_domains": [
+            "nature.com"
+          ],
+          "exclude_domains": [
+            "wikipedia.org"
+          ],
+          "max_results": 4
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: Invalid time range. Must be 'day', 'week', 'month', 'year' (or 'd', 'w', 'm', 'y')."
+        },
+        "execution_time": 1.6033217906951904,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "验证包含特殊字符的查询是否能被正确处理",
+        "args": {
+          "query": "C++ vs Python 性能对比",
+          "days": 7,
+          "max_results": 5
+        },
+        "response": [
+          "{\n  \"title\": \"Python 潮流周刊#110：JIT 编译器两年回顾，AI 智能体工具大爆发 ...\",\n  \"url\": \"https://www.cnblogs.com/pythonista/p/18980841\",\n  \"content\": \"最新随笔. 1.让Python 代码飙升330倍：从入门到精通的四种性能优化实践 · 2.Python 潮流周刊#109：Python 性能优化技巧 ... 对比C++ 和Python，谈谈指针与引用(8335) · 2.\"\n}",
+          "{\n  \"title\": \"腾讯太极团队实现DeepSeek模型业内H20最高性能15800+ tokens/s\",\n  \"url\": \"https://zhuanlan.zhihu.com/p/1927002497173656728\",\n  \"content\": \"二、多机性能优化方案. 考虑到新模型快速支持的需求， 也吸收参考了开源众多优秀的方案和设计，我们从纯C++框架转型到Python Runtime 加C++ Kernel方案。 并花费3个月从\"\n}",
+          "{\n  \"title\": \"求助｜刷题用什么语言- 讨论- 力扣（LeetCode）\",\n  \"url\": \"https://leetcode.cn/circle/discuss/TfmAa2/\",\n  \"content\": \"我用的是java，如果是刷题，在我看来绝对是python。就api的简洁程度来说，python吊打大部分语言。如果是笔试，python会＊＊＊缩短coding时间，不用写java裹脚布一样长的代码。但是\"\n}",
+          "{\n  \"title\": \"让Python 代码飙升330倍：从入门到精通的四种性能优化实践 - 博客园\",\n  \"url\": \"https://www.cnblogs.com/pythonista/p/18975905\",\n  \"content\": \"花下猫语：性能优化是每个程序员的必修课，但你是否想过，除了更换算法，还有哪些“大招”？这篇文章堪称典范，它将一个普通的函数，通过四套组合拳，硬生生把性能提升了330 倍！\"\n}",
+          "{\n  \"title\": \"编程语言排名 - HelloGitHub\",\n  \"url\": \"https://hellogithub.com/report/tiobe\",\n  \"content\": \"Programming Language Ranking - HelloGitHub Ranking Home Monthly Ranking Articles June 2025 Programming Language Ranking Language Language Contribution Server Database Image 2: rank_logo Jun Jun May Apr Mar Feb Jan | Rank | Language | Popularity | 📊 | | 18 | Rust | 0.97% |  | | 19 | Assembly language | 0.91% |  | | Rank | Language | Popularity | Change | 🏅️Year | | 18 | Rust | 0.97% | 0.03% | - | | 19 | Assembly language | 0.91% | -0.06% | - | **The TIOBE Programming Community Index** is an indicator of the popularity of programming languages, created and maintained by TIOBE Software BV, founded in October 2000 and based in Eindhoven, the Netherlands. build-lua-in-rust Rust\"\n}"
+        ],
+        "execution_time": 3.772071123123169,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证空查询是否能被正确拒绝并返回错误信息",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: 新闻查询不能为空"
+        },
+        "execution_time": 0.005345344543457031,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Days Range Test",
+        "purpose": "验证工具是否能正确处理超出允许范围的天数输入",
+        "args": {
+          "query": "网络安全事件",
+          "days": 400
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: days 必须是 1 到 365 之间的整数"
+        },
+        "execution_time": 0.006000995635986328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Boundary",
+        "purpose": "验证最大结果数边界值（最小值和最大值）是否被正确处理",
+        "args": {
+          "query": "体育赛事报道",
+          "max_results": 5
+        },
+        "response": [
+          "{\n  \"title\": \"央视网体育\",\n  \"url\": \"https://sports.cctv.com/\",\n  \"content\": \"央视网(cctv.com)体育提供最全面专业的体育赛事直播点播、图文资讯、评论报道，内容涵盖世界杯、国足、NBA、CBA、篮球、欧冠、亚冠、英超、意甲、法甲、欧洲国家联赛、\"\n}",
+          "{\n  \"title\": \"体育新闻滚动新闻-中国新闻网-梳理天下新闻\",\n  \"url\": \"https://www.chinanews.com.cn/sports.shtml\",\n  \"content\": \"[体育]. 2025崇礼168超级越野赛鸣枪开跑153名外籍选手参赛. 7-11 21:47. [体育]. 陕西：散打赛事流量变经济增量促“体育+文旅”深度融合. 7-11 21:41. [体育]. 2025年大兴安岭\"\n}",
+          "{\n  \"title\": \"奥运新闻- 焦点、视频、播客、体育赛事和最新动态 - Olympics.com\",\n  \"url\": \"https://olympics.com/zh/news\",\n  \"content\": \"全部新闻 · 摆出“比赛脸”：世界顶尖短跑选手通往巅峰的大胆 · 乒乓球、篮球跨界联动：NBA球员杨瀚森惊喜亮相WTT美国大 · 2025年WTT美国大满贯赛第五日综述：林诗栋/蒯 · 2025\"\n}",
+          "{\n  \"title\": \"体育新闻_中国体育传播与产业整合运营商\",\n  \"url\": \"http://www.xinhuanet.com/sports/news.htm\",\n  \"content\": \"全运会香港赛区官方特许商品14日开售 · 东亚杯中国男足0:2不敌日本队 · 女篮亚洲杯丨前瞻：新奥运周期第一战中国女篮着眼长远 · 女篮亚洲杯中国队名单公布内线新星张子宇在列\"\n}",
+          "{\n  \"title\": \"网易体育_手机网易网\",\n  \"url\": \"https://sports.163.com/\",\n  \"content\": \"体育频道,包含体育新闻,NBA,CBA,英超,意甲,西甲,冠军杯,体育比分,足彩,福彩,体育秀色,网球,F1,棋牌,乒羽,体育论坛,中超,中国足球,综合体育等专业体育门户网站。\"\n}"
+        ],
+        "execution_time": 8.004103660583496,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Min Results Boundary",
+        "purpose": "验证最小结果数边界值是否被正确处理",
+        "args": {
+          "query": "娱乐明星动态",
+          "max_results": 1
+        },
+        "response": {
+          "result": "{\n  \"title\": \"明星爆料客 - 知乎\",\n  \"url\": \"https://www.zhihu.com/people/yulequanbaoliaoke\",\n  \"content\": \"一、娱乐动态： 1、檀健次第八个高奢还没宣，亲签已经被预定完了，七层楼大瀑布地广也安排上了。 2、欢娱出品的古装剧《行止晚》男二在接触柯淳。 3、王一博主演的《追风者》7\"\n}"
+        },
+        "execution_time": 13.129105567932129,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - XSS Attempt",
+        "purpose": "验证工具能否安全处理潜在恶意输入（如脚本注入尝试）",
+        "args": {
+          "query": "<script>alert('xss')</script> 测试新闻查询"
+        },
+        "response": [
+          "{\n  \"title\": \"xss-labs-CSDN博客\",\n  \"url\": \"https://blog.csdn.net/skn57/article/details/148950440\",\n  \"content\": \"操作步骤： 在输入框输入：<script>alert (1)</script> 提交表单，页面立即弹出alert (1)。 原理： 漏洞点：输入直接嵌入 HTML 且未过滤<script>标签。 类型：反射型 XSS（非持久化，仅当前请求生效）。 风险：攻击者可注入任意 JavaScript 代码，窃取用户 Cookie 或执行其他\"\n}",
+          "{\n  \"title\": \"常见的xss缺陷代码和修复方案 - 小碗吃不胖的 - 博客园\",\n  \"url\": \"https://www.cnblogs.com/ZeroITStudy/p/18978823\",\n  \"content\": \"利用场景：firefox http://localhost/test/reflection_xss/xss_simple_html.php?name=%3cscript%3Ealert(11)%3C/script%3E 修复方案：在html标签中输出（使用\"\n}",
+          "{\n  \"title\": \"XSS (跨站脚本攻击)-EW帮帮网 - ewbang.com\",\n  \"url\": \"https://www.ewbang.com/community/article/details/1000278618.html\",\n  \"content\": \"XSS_PATTERN 的定义 这是一个大小写不敏感，严格匹配 <script>...</script> 结构以及只判断alert和console.log ()两个特定函数的用于XSS过滤的正则表达式\"\n}",
+          "{\n  \"title\": \"Mastering Advanced XSS Exploitation Techniques: Beyond Basic Alert ...\",\n  \"url\": \"https://undercodetesting.com/mastering-advanced-xss-exploitation-techniques-beyond-basic-alert-boxes/\",\n  \"content\": \"Introduction: Cross-Site Scripting (XSS) remains a critical web vulnerability, allowing attackers to execute malicious scripts in victims' browsers. While basic `alert ()` demonstrations are common, advanced exploitation requires sophisticated payloads and evasion tactics.\"\n}",
+          "{\n  \"title\": \"揭秘JavaScript网络安全：如何有效防范XSS攻击的实战指南 - 云原生实践\",\n  \"url\": \"https://www.oryoy.com/news/jie-mi-javascript-wang-luo-an-quan-ru-he-you-xiao-fang-fan-xss-gong-ji-de-shi-zhan-zhi-nan.html\",\n  \"content\": \"引言 随着互联网的普及和Web应用的日益增多，网络安全问题变得愈发重要。XSS（跨站脚本攻击）是Web应用中最常见的网络安全威胁之一。本文将深入探讨XSS攻击的原理、类型及其防范措施，并通过实战案例帮助开发者了解如何有效防范XSS攻击。 XSS攻击概述 1. XSS攻击定义 XSS攻击是指攻击者利用Web\"\n}"
+        ],
+        "execution_time": 7.8661720752716064,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 27
+}

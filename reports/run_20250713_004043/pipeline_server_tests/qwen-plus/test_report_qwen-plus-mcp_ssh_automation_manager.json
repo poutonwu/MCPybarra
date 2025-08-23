@@ -1,0 +1,819 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_ssh_automation_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_ssh_automation_manager/refined/server.py",
+  "timestamp": "2025-07-13T00:54:37.599839",
+  "tools": [
+    {
+      "name": "connect",
+      "description": "\n    建立与远程SSH服务器的安全连接，支持密码或密钥认证。\n\n    Args:（默认为已经配好key_path的免密登录的主机）\n        host: 目标SSH服务器的IP地址或主机名。（默认：10.70.4.146）\n        port: SSH服务端口号，默认22。（默认：26002）\n        username: 登录用户名。（默认：pengbocheng）\n        password: 登录密码（如果使用密钥认证则不需要）。（默认：123456）\n        key_path: 私钥文件路径（如果使用密码认证则不需要）。\n        key_passphrase: 密钥文件的密码短语。\n\n    Returns:\n        包含会话ID的字符串，用于后续操作标识该连接。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        paramiko.SSHException: 如果SSH连接失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "host": {
+            "default": "10.70.4.146",
+            "title": "Host",
+            "type": "string"
+          },
+          "port": {
+            "default": 26002,
+            "title": "Port",
+            "type": "integer"
+          },
+          "username": {
+            "default": "pengbocheng",
+            "title": "Username",
+            "type": "string"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Password"
+          },
+          "key_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Key Path"
+          },
+          "key_passphrase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Key Passphrase"
+          }
+        },
+        "title": "connectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "disconnect",
+      "description": "\n    安全断开指定的SSH连接并释放相关资源。\n\n    Args:\n        session_id: 要断开的会话唯一标识符。\n\n    Returns:\n        包含操作结果状态的字符串（成功/失败）。\n\n    Raises:\n        ValueError: 如果会话ID无效。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "disconnectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_sessions",
+      "description": "\n    列出所有当前活跃的SSH会话信息。\n\n    Args:\n        无\n\n    Returns:\n        JSON格式字符串，包含活跃会话列表及详细信息。\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_sessionsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute",
+      "description": "\n    在指定的SSH会话中执行远程命令，支持标准输入和超时设置。\n\n    Args:\n        session_id: 要执行命令的会话ID。\n        command: 要执行的远程命令。\n        timeout: 命令执行超时时间(秒)，默认60秒。\n        stdin_input: 传递给命令的标准输入内容。\n\n    Returns:\n        JSON格式字符串，包含命令的标准输出、错误输出、退出状态码和执行时间。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "timeout": {
+            "default": 60,
+            "title": "Timeout",
+            "type": "integer"
+          },
+          "stdin_input": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Stdin Input"
+          }
+        },
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "title": "executeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "upload",
+      "description": "\n    将本地文件上传到远程SSH服务器的指定路径。\n\n    Args:\n        session_id: 使用的SSH会话ID。\n        local_path: 本地文件的完整路径。\n        remote_path: 远程服务器上的目标路径。\n\n    Returns:\n        包含传输结果状态的字符串（成功/失败）及传输统计信息。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "local_path",
+          "remote_path"
+        ],
+        "title": "uploadArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download",
+      "description": "\n    从远程SSH服务器下载文件到本地指定路径。\n\n    Args:\n        session_id: 使用的SSH会话ID。\n        remote_path: 远程服务器上的文件路径。\n        local_path: 本地保存文件的完整路径。\n\n    Returns:\n        包含传输结果状态的字符串（成功/失败）及传输统计信息。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "remote_path",
+          "local_path"
+        ],
+        "title": "downloadArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "connect": [
+      {
+        "case_name": "成功建立SSH连接使用默认参数",
+        "purpose": "验证工具能够使用默认参数（host, port, username, password）成功建立SSH连接。",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 21.058971643447876,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用密钥认证成功建立SSH连接",
+        "purpose": "验证工具在提供有效密钥路径和用户名的情况下可以成功建立SSH连接，不使用密码。",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.ssh\\id_rsa"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.ssh\\\\id_rsa'"
+        },
+        "execution_time": 0.0052509307861328125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试连接无效主机地址导致失败",
+        "purpose": "验证工具在提供无效IP地址时能正确抛出错误。",
+        "args": {
+          "host": "invalid_host",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 11001] getaddrinfo failed"
+        },
+        "execution_time": 7.268718004226685,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用空用户名尝试连接失败",
+        "purpose": "验证工具在用户名为空时能否正确进行参数校验并抛出ValueError。",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "",
+          "password": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 'username' 必须是有效的字符串。"
+        },
+        "execution_time": 0.0044193267822265625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符的主机名尝试连接",
+        "purpose": "验证工具是否能处理包含特殊字符的主机名输入，并做出适当响应。",
+        "args": {
+          "host": "special#chars@host",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 11003] getaddrinfo failed"
+        },
+        "execution_time": 0.012114763259887695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试使用错误端口连接导致失败",
+        "purpose": "验证工具在指定一个关闭或不存在的端口时是否能正确处理连接失败的情况。",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 9999,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 22.033602714538574,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用带密码的加密私钥进行连接",
+        "purpose": "验证工具在使用带有密码短语的私钥文件时能否正常建立SSH连接。",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.ssh\\id_rsa_encrypted",
+          "key_passphrase": "securepassphrase"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.ssh\\\\id_rsa_encrypted'"
+        },
+        "execution_time": 1.6347062587738037,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "同时提供密码和密钥路径的连接尝试",
+        "purpose": "验证工具在同时提供密码和密钥路径时是否优先使用密钥认证方式。",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.ssh\\id_rsa"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 21.74712872505188,
+        "is_functional_test": true
+      }
+    ],
+    "list_sessions": [
+      {
+        "case_name": "成功列出当前活跃SSH会话",
+        "purpose": "验证list_sessions工具能够正确返回当前活跃的SSH会话列表。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.023679494857788086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无活跃SSH会话时返回空列表",
+        "purpose": "验证当没有活跃SSH会话时，list_sessions工具能返回一个空列表而不是错误。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.016021728515625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "列出多个活跃SSH会话的信息",
+        "purpose": "验证list_sessions工具在存在多个活跃SSH会话时，能正确返回所有会话的详细信息。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.01351165771484375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "权限不足时无法获取SSH会话信息",
+        "purpose": "验证当执行用户权限不足时，list_sessions工具是否能安全地拒绝操作并返回明确错误。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.013010740280151367,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "系统资源不可用导致无法获取会话列表",
+        "purpose": "验证当底层系统资源（如SSH服务）不可用时，list_sessions能否优雅处理错误。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.013506174087524414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试跨用户访问其他用户的SSH会话",
+        "purpose": "验证list_sessions工具是否限制用户仅能查看自己的SSH会话，防止越权访问。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.009996652603149414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "极端并发下获取SSH会话列表",
+        "purpose": "验证在高并发或大量SSH会话同时存在的情况下，list_sessions工具是否仍能稳定运行并返回完整数据。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.010853290557861328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符或非常长的用户名/主机名出现在会话中",
+        "purpose": "验证list_sessions工具在遇到包含特殊字符或极长字段的会话信息时是否能正确处理并返回有效JSON。",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [], \"total_sessions\": 0}"
+        },
+        "execution_time": 0.0070002079010009766,
+        "is_functional_test": false
+      }
+    ],
+    "execute": [
+      {
+        "case_name": "使用有效会话ID执行简单命令",
+        "purpose": "验证execute工具在提供有效session_id和基本命令时能够成功执行并返回结果。",
+        "args": {
+          "session_id": "valid_session_001",
+          "command": "echo 'Hello World'"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.0049974918365478516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用默认超时时间执行长时间命令",
+        "purpose": "验证execute工具在未指定超时时间时，默认60秒限制是否生效。",
+        "args": {
+          "session_id": "valid_session_001",
+          "command": "sleep 50 && echo 'Done'"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.011005163192749023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "传递标准输入内容执行交互式命令",
+        "purpose": "验证execute工具能正确处理带有标准输入的命令，例如模拟用户输入。",
+        "args": {
+          "session_id": "valid_session_001",
+          "command": "read var && echo $var",
+          "stdin_input": "test_input"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.0060024261474609375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用自定义超时时间执行阻塞命令",
+        "purpose": "验证execute工具在指定较短超时时间时能否正确中断执行并返回错误。",
+        "args": {
+          "session_id": "valid_session_001",
+          "command": "sleep 10",
+          "timeout": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.009295225143432617,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试使用空会话ID执行命令",
+        "purpose": "验证execute工具在session_id为空时能否正确进行参数校验并抛出ValueError。",
+        "args": {
+          "session_id": "",
+          "command": "echo test"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: "
+        },
+        "execution_time": 0.005523681640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试使用非法字符的会话ID执行命令",
+        "purpose": "验证execute工具在session_id包含特殊字符时能否正确拒绝请求并返回错误。",
+        "args": {
+          "session_id": "session#invalid@id",
+          "command": "echo test"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: session#invalid@id"
+        },
+        "execution_time": 0.0060100555419921875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "执行不存在的命令导致错误输出",
+        "purpose": "验证execute工具在执行无效命令时能否返回非零退出码及错误信息。",
+        "args": {
+          "session_id": "valid_session_001",
+          "command": "this_command_does_not_exist"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.008005142211914062,
+        "is_functional_test": true
+      }
+    ],
+    "upload": [
+      {
+        "case_name": "使用有效会话ID上传文件成功",
+        "purpose": "验证在提供有效的SSH会话ID、本地路径和远程路径时，upload工具能够成功将文件上传到远程服务器。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.006000518798828125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传文件时指定的本地路径不存在",
+        "purpose": "验证当提供的本地文件路径不存在时，upload工具是否能正确抛出错误信息。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.008001327514648438,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试上传空文件导致失败",
+        "purpose": "验证upload工具在检测到空文件时是否能正确处理并返回错误提示。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_file.txt",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.008004188537597656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传带有特殊字符的文件名",
+        "purpose": "验证upload工具是否支持上传包含特殊字符（如#,@,!）的文件。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special#chars@copy!.docx",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.00699162483215332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传超大文件测试传输稳定性",
+        "purpose": "验证upload工具在处理极大文件（例如5GB以上）时能否稳定完成传输。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\huge_file.iso",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.003998279571533203,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试使用无效会话ID上传文件",
+        "purpose": "验证upload工具在提供无效或未激活的会话ID时是否能正确拒绝操作并返回错误。",
+        "args": {
+          "session_id": "invalid_session_999",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\app.ico",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: invalid_session_999"
+        },
+        "execution_time": 0.00801706314086914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传文件至无写入权限的目标路径",
+        "purpose": "验证upload工具在目标远程路径没有写入权限时是否能正确处理并返回错误信息。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\rule1.pdf",
+          "remote_path": "/root/restricted_dir/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.003998994827270508,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传过程中网络中断导致失败",
+        "purpose": "模拟上传过程中网络中断的情况，验证upload工具是否能安全中止并清理部分上传内容。",
+        "args": {
+          "session_id": "valid_session_001",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output.pdf",
+          "remote_path": "/home/pengbocheng/uploads/"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: valid_session_001"
+        },
+        "execution_time": 0.005000591278076172,
+        "is_functional_test": false
+      }
+    ],
+    "download": [
+      {
+        "case_name": "使用有效会话ID成功下载远程文件",
+        "purpose": "验证download工具能够通过有效的session_id从远程服务器下载指定文件到本地路径。",
+        "args": {
+          "session_id": "valid_session_12345",
+          "remote_path": "/remote/testFiles/paper1.pdf",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_paper1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.005509614944458008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试使用无效会话ID下载文件失败",
+        "purpose": "验证当提供无效的session_id时，download工具能正确识别并返回错误信息。",
+        "args": {
+          "session_id": "invalid_session",
+          "remote_path": "/remote/testFiles/rule1.pdf",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_rule1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: invalid_session"
+        },
+        "execution_time": 0.00600123405456543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "下载包含特殊字符的远程文件名",
+        "purpose": "验证download工具能否处理远程文件路径中包含特殊字符的情况。",
+        "args": {
+          "session_id": "valid_session_12345",
+          "remote_path": "/remote/testFiles/special#chars@copy!.docx",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_special_chars.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.008000373840332031,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试下载不存在的远程文件",
+        "purpose": "验证当远程文件路径无效或文件不存在时，download工具是否能正确抛出错误。",
+        "args": {
+          "session_id": "valid_session_12345",
+          "remote_path": "/remote/testFiles/nonexistent_file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.004999876022338867,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试将文件下载到无写入权限的目录",
+        "purpose": "验证download工具在目标本地路径不可写时能否正确处理异常情况。",
+        "args": {
+          "session_id": "valid_session_12345",
+          "remote_path": "/remote/testFiles/hit.png",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\hit.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.006989955902099609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "下载非常大的文件测试传输稳定性",
+        "purpose": "验证download工具在处理大文件（如多兆字节）时是否稳定且不丢失数据。",
+        "args": {
+          "session_id": "valid_session_12345",
+          "remote_path": "/remote/testFiles/large_output.zip",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\large_output.zip"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.0039980411529541016,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试覆盖已存在的本地文件",
+        "purpose": "验证download工具在目标路径已有同名文件时是否允许覆盖或抛出错误。",
+        "args": {
+          "session_id": "valid_session_12345",
+          "remote_path": "/remote/testFiles/app.ico",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\app.ico"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.007995367050170898,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "参数为空导致下载失败",
+        "purpose": "验证download工具在任一必要参数为空时是否进行参数校验并抛出ValueError。",
+        "args": {
+          "session_id": "",
+          "remote_path": "/remote/testFiles/xue.jpg",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue_downloaded.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: "
+        },
+        "execution_time": 0.004999399185180664,
+        "is_functional_test": false
+      }
+    ],
+    "disconnect": [
+      {
+        "case_name": "成功断开有效SSH会话",
+        "purpose": "验证disconnect工具能够安全地断开一个已存在的有效SSH会话并释放资源。",
+        "args": {
+          "session_id": "valid_session_12345"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: valid_session_12345"
+        },
+        "execution_time": 0.008999109268188477,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试断开不存在的SSH会话",
+        "purpose": "验证当提供的session_id无效或不存在时，disconnect工具是否能正确抛出ValueError。",
+        "args": {
+          "session_id": "nonexistent_session"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: nonexistent_session"
+        },
+        "execution_time": 0.005508899688720703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用空会话ID尝试断开连接",
+        "purpose": "验证当session_id为空字符串时，工具能否进行参数校验并抛出ValueError。",
+        "args": {
+          "session_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: "
+        },
+        "execution_time": 0.010022640228271484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符的会话ID尝试断开连接",
+        "purpose": "验证disconnect工具在接收到包含特殊字符的session_id时是否能安全处理错误输入。",
+        "args": {
+          "session_id": "!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: !@#$%^&*()"
+        },
+        "execution_time": 0.0070612430572509766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "并发尝试断开多个会话",
+        "purpose": "验证在高并发环境下，disconnect工具是否能稳定处理多个断开请求而不产生资源竞争。",
+        "args": {
+          "session_id": "concurrent_session_789"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: concurrent_session_789"
+        },
+        "execution_time": 0.008005380630493164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "断开长时间未活动的SSH会话",
+        "purpose": "验证disconnect工具能否正确处理因超时而自动关闭的会话，并安全释放相关资源。",
+        "args": {
+          "session_id": "timed_out_session_678"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: timed_out_session_678"
+        },
+        "execution_time": 0.004411458969116211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试断开会话时系统资源不可用",
+        "purpose": "验证当底层资源（如网络、内存）不可用时，disconnect工具是否能优雅失败并返回明确错误。",
+        "args": {
+          "session_id": "session_abc123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: session_abc123"
+        },
+        "execution_time": 0.0049991607666015625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试越权断开其他用户的SSH会话",
+        "purpose": "验证disconnect工具是否限制用户仅能断开自己拥有的会话，防止越权操作。",
+        "args": {
+          "session_id": "other_user_session_xyz"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: other_user_session_xyz"
+        },
+        "execution_time": 0.005689144134521484,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 47
+}

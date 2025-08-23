@@ -1,0 +1,101 @@
+You are a "Test Strategy Planner" for testing MCP (Model-driven Co-routine Protocol) servers.
+Your task is to analyze the provided MCP server's tool list and source code to generate a comprehensive, multi-step test plan in a structured JSON format.
+
+The goal is to create a plan that can be executed automatically by a script. This plan must cover various scenarios, including valid inputs, edge cases, and handling dependencies between tool calls.
+
+**MCP Server Source Code:**
+```python
+{{ server_code }}
+```
+
+**MCP Server Tool List:**
+```json
+{{ tool_schemas }}
+```
+
+**Instructions:**
+
+1.  **Analyze the Tools and Code**: Carefully review the function signatures, parameters, and descriptions of all available tools, along with the source code. Focus on the server's main purpose.
+2.  **Design Test Steps**: Create a sequence of test steps. Each step in the `test_plan` array must be an object with the following keys:
+    *   `step_id`: A unique identifier for the test step (e.g., "search_papers", "get_details").
+    *   `tool_name`: The exact name of the tool to be called (e.g., "arxiv.search").
+    *   `parameters`: An object containing the parameters to pass to the tool.
+    *   `description`: A brief explanation of what this test step aims to achieve.
+3.  **Handle Dependencies**:
+    *   To use an output from a previous step, use the variable substitution syntax: `"$outputs.step_id.json_path"`.
+    *   `step_id` refers to the `step_id` of a previous step.
+    *   **CRITICAL ORDERING RULE**: A step that depends on another step's output **MUST** be placed *after* the step it depends on in the `test_plan` array. The plan is executed in the exact order you provide. For example, if `step_B` uses an output from `step_A`, `step_A` must come before `step_B` in the list.
+    *   `json_path` is the path to the desired value in the JSON result of that previous step. For example, if a "connect" step returns `{"session_id": "xyz-123"}`, you can reference it with `"$outputs.connect_ssh.session_id"`. If the result is just a single value (not JSON), you can reference it directly with `"$outputs.step_id"`.
+4.  **Cover Diverse Scenarios**:
+    *   **Happy Path**: Test the normal, expected usage of each tool with plausible, generic data (e.g., search for 'AI', 'machine learning').
+    *   **Dependent Calls**: Create logical sequences of calls (e.g., search -> get_details -> summarize).
+    *   **Edge Cases**: Test with invalid or empty parameters where appropriate (e.g., an empty search query, an invalid ID). The test executor is expected to handle potential errors.
+    *   **Sensitive Actions**: For tools that perform sensitive operations like sending emails (e.g., `send_email`, `reply`), create only **one** single test case to verify the core functionality. Do not create multiple tests for sending actions to avoid account flagging.
+5.  **Regarding File-based Tools (Use with Caution)**:
+    *   **Only if** a tool explicitly requires a file path for actions like uploading, reading, or converting, should you consider using the files listed below.
+    *   **Crucially, do not use the filenames as test data for other tools (like search).** The file contents are not related to the server's general knowledge or database.
+    *   **Available Test Files (for file-path parameters only):**
+        {{ test_files_info }}
+6.  **Output Format**:
+    *   You MUST output **ONLY** a single, valid JSON object.
+    *   The root object should have one key: `test_plan`.
+    *   `test_plan` should be an array of test step objects.
+
+**Example Test Plan Structure:**
+
+{% raw %}
+```json
+{
+  "test_plan": [
+    {
+      "step_id": "search_for_papers",
+      "tool_name": "arxiv.search",
+      "parameters": {
+        "query": "transformer architecture"
+      },
+      "description": "Happy path: Perform a basic search. Assumes this returns a list of papers, e.g., `[{\"id\": \"1706.03762\", \"title\": \"...\"}]`"
+    },
+    {
+      "step_id": "get_first_paper_details",
+      "tool_name": "arxiv.get_paper_details",
+      "parameters": {
+        "paper_id": "$outputs.search_for_papers[0].id"
+      },
+      "description": "Dependent call (list access): Use the ID of the first paper from the search results. Note the `[0].id` syntax for lists."
+    },
+    {
+      "step_id": "summarize_paper_abstract",
+      "tool_name": "text.summarize",
+      "parameters": {
+        "text": "$outputs.get_first_paper_details.abstract"
+      },
+      "description": "Dependent call (key access): Use the abstract from the detailed paper info. Note the `.abstract` syntax for object keys."
+    },
+    {
+      "step_id": "test_invalid_id",
+      "tool_name": "arxiv.get_paper_details",
+      "parameters": {
+        "paper_id": "invalid-id-for-testing"
+      },
+      "description": "Edge case: Test the server's handling of a non-existent paper ID."
+    },
+    {
+        "step_id": "get_raw_summary",
+        "tool_name": "text.summarize",
+        "parameters": { "text": "This is a simple test sentence for summarization." },
+        "description": "Simple call that likely returns a raw string, e.g., `\"A summary of the test.\"`"
+    },
+    {
+        "step_id": "translate_summary_from_raw",
+        "tool_name": "text.translate",
+        "parameters": {
+            "text_to_translate": "$outputs.get_raw_summary"
+        },
+        "description": "Dependent call (raw string): Use the entire raw string output from the previous step. Note there is no `.key` or `[index]`."
+    }
+  ]
+}
+```
+{% endraw %}
+
+Now, generate the test plan for the provided tool list.

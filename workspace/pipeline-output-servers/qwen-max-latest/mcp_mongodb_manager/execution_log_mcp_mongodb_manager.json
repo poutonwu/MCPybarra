@@ -1,0 +1,393 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_databases",
+      "tool_name": "mcp_list_databases",
+      "parameters": {},
+      "description": "Happy path: List all databases in the MongoDB instance to verify connectivity."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "error",
+      "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"invalid_database\", \"large_db\", \"local\", \"mcp-test\", \"offline_db\", \"restricted_db\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_collections_in_test_db",
+      "tool_name": "mcp_list_collections",
+      "parameters": {
+        "database_name": "test_db"
+      },
+      "description": "Dependent call: List collections in a specific database. Assumes 'test_db' exists or will be handled gracefully if not."
+    },
+    "substituted_params": {
+      "database_name": "test_db"
+    },
+    "result": {
+      "status": "error",
+      "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"empty_docs\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"test_collection'; DROP COLLECTION test_collection;--\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_collection_and_insert_document",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "document": {
+          "name": "Alice",
+          "age": 30,
+          "status": "active"
+        }
+      },
+      "description": "Happy path: Insert a document into a collection. Creates 'users' collection and inserts a test document."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "document": {
+        "name": "Alice",
+        "age": 30,
+        "status": "active"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "\"6874ebc3dd11fdf0f80e6e64\""
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_second_document",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "document": {
+          "name": "Bob",
+          "age": 25,
+          "status": "inactive"
+        }
+      },
+      "description": "Happy path: Insert a second document for query/update/delete testing."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "document": {
+        "name": "Bob",
+        "age": 25,
+        "status": "inactive"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "\"6874ebc3dd11fdf0f80e6e65\""
+    }
+  },
+  {
+    "step": {
+      "step_id": "query_all_users",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users"
+      },
+      "description": "Happy path: Retrieve all documents from the users collection without filters."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users"
+    },
+    "result": {
+      "status": "error",
+      "result": "[{\"_id\": \"6872ad03424cddc98ebe1c08\", \"name\": \"Alice\", \"age\": 25, \"last_modified\": \"2023-10-01\"}, {\"_id\": \"6872ad03424cddc98ebe1c0b\", \"last_modified\": \"2023-10-01\"}, {\"_id\": \"6872bc93b11f255c82054b2a\", \"name\": \"John\", \"age\": 35, \"last_modified\": \"2023-10-01\"}, {\"_id\": \"6872bc93b11f255c82054b2c\", \"user@name\": \"Eve\", \"age#\": 28, \"last_modified\": \"2023-10-01\"}, {\"_id\": \"6872bc93b11f255c82054b2d\", \"a_very_long_key_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\": \"value\", \"last_modified\": \"2023-10-01\"}, {\"_id\": \"6872bc93b11f255c82054b2e\", \"name\": \"Invalid\", \"age\": \"thirty\", \"last_modified\": \"2023-10-01\"}, {\"_id\": \"6874ebc3dd11fdf0f80e6e64\", \"name\": \"Alice\", \"age\": 30, \"status\": \"active\"}, {\"_id\": \"6874ebc3dd11fdf0f80e6e65\", \"name\": \"Bob\", \"age\": 25, \"status\": \"inactive\"}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "query_older_users",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "query": {
+          "age": {
+            "$gt": 28
+          }
+        },
+        "projection": {
+          "_id": 0,
+          "name": 1
+        },
+        "limit": 1
+      },
+      "description": "Happy path: Query with filter, projection, and limit to find one user older than 28."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "query": {
+        "age": {
+          "$gt": 28
+        }
+      },
+      "projection": {
+        "_id": 0,
+        "name": 1
+      },
+      "limit": 1
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"name\": \"John\"}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "update_user_status",
+      "tool_name": "mcp_update_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "filter_query": {
+          "name": "Bob"
+        },
+        "update_data": {
+          "$set": {
+            "status": "active"
+          }
+        },
+        "multi": false
+      },
+      "description": "Happy path: Update Bob's status to active."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "filter_query": {
+        "name": "Bob"
+      },
+      "update_data": {
+        "$set": {
+          "status": "active"
+        }
+      },
+      "multi": false
+    },
+    "result": {
+      "status": "success",
+      "result": "1"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_user_status_update",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "query": {
+          "name": "Bob"
+        }
+      },
+      "description": "Dependent call: Verify that Bob's status was updated to active."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "query": {
+        "name": "Bob"
+      }
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"_id\": \"6874ebc3dd11fdf0f80e6e65\", \"name\": \"Bob\", \"age\": 25, \"status\": \"active\"}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_inactive_users",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "filter_query": {
+          "status": "inactive"
+        },
+        "multi": true
+      },
+      "description": "Happy path: Delete all inactive users (none expected at this point)."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "filter_query": {
+        "status": "inactive"
+      },
+      "multi": true
+    },
+    "result": {
+      "status": "success",
+      "result": "0"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_database_name",
+      "tool_name": "mcp_list_collections",
+      "parameters": {
+        "database_name": ""
+      },
+      "description": "Edge case: Test server behavior when an empty database name is provided."
+    },
+    "substituted_params": {
+      "database_name": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool mcp_list_collections: Invalid database name: ''. Must be a non-empty string."
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_collection_name",
+      "tool_name": "mcp_insert_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "",
+        "document": {
+          "key": "value"
+        }
+      },
+      "description": "Edge case: Attempt to insert a document into an invalid collection name."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "",
+      "document": {
+        "key": "value"
+      }
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool mcp_insert_document: Invalid collection name: ''. Must be a non-empty string."
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_query_structure",
+      "tool_name": "mcp_find_documents",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "query": "not_a_dict"
+      },
+      "description": "Edge case: Provide an invalid query structure (not a dictionary)."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "query": "not_a_dict"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool mcp_find_documents: 1 validation error for mcp_find_documentsArguments\nquery\n  Input should be a valid dictionary [type=dict_type, input_value='not_a_dict', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/dict_type"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_update_data",
+      "tool_name": "mcp_update_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "filter_query": {
+          "name": "Alice"
+        },
+        "update_data": "not_a_dict",
+        "multi": false
+      },
+      "description": "Edge case: Provide invalid update data structure (not a dictionary)."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "filter_query": {
+        "name": "Alice"
+      },
+      "update_data": "not_a_dict",
+      "multi": false
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool mcp_update_document: 1 validation error for mcp_update_documentArguments\nupdate_data\n  Input should be a valid dictionary [type=dict_type, input_value='not_a_dict', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/dict_type"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_multi_flag",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "filter_query": {
+          "name": "Alice"
+        },
+        "multi": "not_boolean"
+      },
+      "description": "Edge case: Pass a non-boolean value for the multi flag."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "filter_query": {
+        "name": "Alice"
+      },
+      "multi": "not_boolean"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool mcp_delete_document: 1 validation error for mcp_delete_documentArguments\nmulti\n  Input should be a valid boolean, unable to interpret input [type=bool_parsing, input_value='not_boolean', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/bool_parsing"
+    }
+  },
+  {
+    "step": {
+      "step_id": "cleanup_delete_all_test_users",
+      "tool_name": "mcp_delete_document",
+      "parameters": {
+        "database_name": "test_db",
+        "collection_name": "users",
+        "filter_query": {
+          "name": {
+            "$in": [
+              "Alice",
+              "Bob"
+            ]
+          }
+        },
+        "multi": true
+      },
+      "description": "Cleanup step: Remove all test users created during the test process."
+    },
+    "substituted_params": {
+      "database_name": "test_db",
+      "collection_name": "users",
+      "filter_query": {
+        "name": {
+          "$in": [
+            "Alice",
+            "Bob"
+          ]
+        }
+      },
+      "multi": true
+    },
+    "result": {
+      "status": "success",
+      "result": "3"
+    }
+  }
+]

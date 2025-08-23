@@ -1,0 +1,966 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_mongodb_manager",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_mongodb_manager/refined/server.py",
+  "timestamp": "2025-07-13T00:40:47.858775",
+  "tools": [
+    {
+      "name": "mcp_list_databases",
+      "description": "\n    Lists all available databases in the MongoDB server.\n\n    Returns:\n        str: A JSON string containing a list of database names.\n\n    Example:\n        >>> mcp_list_databases()\n        '[\"admin\", \"local\", \"my_database\"]'\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "mcp_list_databasesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mcp_list_collections",
+      "description": "\n    Lists all collections within a specified database.\n\n    Args:\n        database_name (str): The name of the database to query.\n\n    Returns:\n        str: A JSON string containing a list of collection names.\n\n    Example:\n        >>> mcp_list_collections(\"my_database\")\n        '[\"users\", \"orders\", \"products\"]'\n    ",
+      "args_schema": {
+        "properties": {
+          "database_name": {
+            "title": "Database Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "database_name"
+        ],
+        "title": "mcp_list_collectionsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mcp_insert_document",
+      "description": "\n    Inserts a new document into a specified MongoDB database and collection.\n\n    Args:\n        database_name (str): The name of the database.\n        collection_name (str): The name of the collection.\n        document (dict): The document to insert.\n\n    Returns:\n        str: A JSON string containing the ID of the inserted document.\n\n    Example:\n        >>> mcp_insert_document(\"my_database\", \"users\", {\"name\": \"John\", \"age\": 30})\n        '{\"_id\": \"63a1b2c3d4e5f67890\"}'\n    ",
+      "args_schema": {
+        "properties": {
+          "database_name": {
+            "title": "Database Name",
+            "type": "string"
+          },
+          "collection_name": {
+            "title": "Collection Name",
+            "type": "string"
+          },
+          "document": {
+            "title": "Document",
+            "type": "object"
+          }
+        },
+        "required": [
+          "database_name",
+          "collection_name",
+          "document"
+        ],
+        "title": "mcp_insert_documentArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mcp_find_documents",
+      "description": "\n    Queries documents in a specified MongoDB database and collection, with support for filtering, projection, and limiting the number of results.\n\n    Args:\n        database_name (str): The name of the database.\n        collection_name (str): The name of the collection.\n        filter (dict, optional): The filter criteria for the query.\n        projection (dict, optional): The fields to include or exclude.\n        limit (int, optional): The maximum number of documents to return.\n\n    Returns:\n        str: A JSON string containing a list of documents matching the query criteria.\n\n    Example:\n        >>> mcp_find_documents(\"my_database\", \"users\", {\"age\": {\"$gte\": 25}}, {\"name\": 1, \"_id\": 0}, 10)\n        '[{\"name\": \"John\"}, {\"name\": \"Jane\"}]'\n    ",
+      "args_schema": {
+        "properties": {
+          "database_name": {
+            "title": "Database Name",
+            "type": "string"
+          },
+          "collection_name": {
+            "title": "Collection Name",
+            "type": "string"
+          },
+          "filter": {
+            "default": null,
+            "title": "Filter",
+            "type": "object"
+          },
+          "projection": {
+            "default": null,
+            "title": "Projection",
+            "type": "object"
+          },
+          "limit": {
+            "default": 0,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "database_name",
+          "collection_name"
+        ],
+        "title": "mcp_find_documentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mcp_update_document",
+      "description": "\n    Updates documents in a specified MongoDB database and collection, with support for single or multiple document updates.\n\n    Args:\n        database_name (str): The name of the database.\n        collection_name (str): The name of the collection.\n        filter (dict): The filter criteria to match documents for updating.\n        update (dict): The update operations to apply.\n        multi (bool, optional): If true, updates all matching documents; otherwise, updates only the first match.\n\n    Returns:\n        str: A JSON string containing the count of documents updated.\n\n    Example:\n        >>> mcp_update_document(\"my_database\", \"users\", {\"name\": \"John\"}, {\"$set\": {\"age\": 35}}, True)\n        '{\"updated_count\": 1}'\n    ",
+      "args_schema": {
+        "properties": {
+          "database_name": {
+            "title": "Database Name",
+            "type": "string"
+          },
+          "collection_name": {
+            "title": "Collection Name",
+            "type": "string"
+          },
+          "filter": {
+            "title": "Filter",
+            "type": "object"
+          },
+          "update": {
+            "title": "Update",
+            "type": "object"
+          },
+          "multi": {
+            "default": false,
+            "title": "Multi",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "database_name",
+          "collection_name",
+          "filter",
+          "update"
+        ],
+        "title": "mcp_update_documentArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "mcp_delete_document",
+      "description": "\n    Deletes documents in a specified MongoDB database and collection, with support for single or multiple document deletions.\n\n    Args:\n        database_name (str): The name of the database.\n        collection_name (str): The name of the collection.\n        filter (dict): The filter criteria to match documents for deletion.\n        multi (bool, optional): If true, deletes all matching documents; otherwise, deletes only the first match.\n\n    Returns:\n        str: A JSON string containing the count of documents deleted.\n\n    Example:\n        >>> mcp_delete_document(\"my_database\", \"users\", {\"age\": {\"$lt\": 20}}, True)\n        '{\"deleted_count\": 2}'\n    ",
+      "args_schema": {
+        "properties": {
+          "database_name": {
+            "title": "Database Name",
+            "type": "string"
+          },
+          "collection_name": {
+            "title": "Collection Name",
+            "type": "string"
+          },
+          "filter": {
+            "title": "Filter",
+            "type": "object"
+          },
+          "multi": {
+            "default": false,
+            "title": "Multi",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "database_name",
+          "collection_name",
+          "filter"
+        ],
+        "title": "mcp_delete_documentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "mcp_list_databases": [
+      {
+        "case_name": "List Databases Successfully",
+        "purpose": "验证工具可以成功列出 MongoDB 中的所有数据库名称",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.007001161575317383,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Databases with No Databases",
+        "purpose": "验证当 MongoDB 中没有数据库时工具的返回是否为空数组",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Databases with Special Characters",
+        "purpose": "验证数据库名称中包含特殊字符时工具是否能正确返回",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.007004261016845703,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Databases with Long Names",
+        "purpose": "验证数据库名称非常长时工具是否能正确处理并返回",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.0060007572174072266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Databases in JSON Format",
+        "purpose": "验证工具返回的数据是否为合法的 JSON 格式字符串",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.005511760711669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Databases without Authentication",
+        "purpose": "验证未认证用户是否无法列出数据库（如果启用了安全认证）",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.0074727535247802734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Databases when MongoDB is Down",
+        "purpose": "验证 MongoDB 服务不可用时工具是否能优雅处理错误",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.004998207092285156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Databases with Invalid Connection String",
+        "purpose": "验证连接字符串无效时工具是否能正确报错",
+        "args": {},
+        "response": {
+          "result": "[\"admin\", \"config\", \"db@#_\\u6d4b\\u8bd5\", \"does_not_exist_db\", \"large_db\", \"local\", \"mcp-test\", \"test_db\", \"users\", \"\\u667a\\u80fd\\u8f6f\\u4ef6\\u5de5\"]"
+        },
+        "execution_time": 0.0070002079010009766,
+        "is_functional_test": false
+      }
+    ],
+    "mcp_list_collections": [
+      {
+        "case_name": "List Collections Successfully",
+        "purpose": "验证工具可以成功列出指定数据库中的所有集合名称",
+        "args": {
+          "database_name": "test_db"
+        },
+        "response": {
+          "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"empty_docs\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"test_collection'; DROP COLLECTION test_collection;--\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Collections from Non-Existent Database",
+        "purpose": "验证当指定的数据库不存在时，工具是否返回空数组",
+        "args": {
+          "database_name": "does_not_exist_db"
+        },
+        "response": {
+          "result": "[\"new_collection\", \"test_collection\"]"
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Collections with Special Characters in DB Name",
+        "purpose": "验证数据库名称包含特殊字符时，工具是否能正确列出集合",
+        "args": {
+          "database_name": "db@#_测试"
+        },
+        "response": {
+          "result": "[\"test_collection\", \"users\"]"
+        },
+        "execution_time": 0.008537530899047852,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Collections with Empty Database Name",
+        "purpose": "验证当数据库名称为空字符串时，工具是否返回错误或空数组",
+        "args": {
+          "database_name": ""
+        },
+        "response": {
+          "result": "{\"error\": \"database name cannot be the empty string\"}"
+        },
+        "execution_time": 0.003998279571533203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Collections without Authentication",
+        "purpose": "验证未认证用户是否无法列出集合（如果启用了安全认证）",
+        "args": {
+          "database_name": "test_db"
+        },
+        "response": {
+          "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"empty_docs\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"test_collection'; DROP COLLECTION test_collection;--\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+        },
+        "execution_time": 0.007002353668212891,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Collections when MongoDB is Down",
+        "purpose": "验证 MongoDB 服务不可用时工具是否能优雅处理错误",
+        "args": {
+          "database_name": "test_db"
+        },
+        "response": {
+          "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"empty_docs\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"test_collection'; DROP COLLECTION test_collection;--\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+        },
+        "execution_time": 0.008005857467651367,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Collections with Invalid Connection String",
+        "purpose": "验证连接字符串无效时工具是否能正确报错",
+        "args": {
+          "database_name": "test_db"
+        },
+        "response": {
+          "result": "[\"a_collection_with_a_very_long_name_that_may_reach_the_limit_of_mongodb_max_key_length_and_test_how_tool_handles_it\", \"new_collection\", \"test_collection\", \"empty_docs\", \"invalid/collection*name\", \"user_profiles\", \"long_key_collection\", \"test_collection'; DROP COLLECTION test_collection;--\", \"large_data\", \"special_chars_collection\", \"binary_data_collection\", \"nonexistent_collection\", \"a_very_long_collection_name_that_exceeds_normal_limits_and_might_cause_issues\", \"users\"]"
+        },
+        "execution_time": 0.006002664566040039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Collections from Database with Unicode Name",
+        "purpose": "验证数据库名称为Unicode字符时，工具是否能正确列出集合",
+        "args": {
+          "database_name": "智能软件工"
+        },
+        "response": {
+          "result": "[\"\\u7528\\u6237\\u4fe1\\u606f\"]"
+        },
+        "execution_time": 0.009508371353149414,
+        "is_functional_test": true
+      }
+    ],
+    "mcp_insert_document": [
+      {
+        "case_name": "Insert Document Successfully",
+        "purpose": "验证工具可以成功将文档插入到指定的数据库和集合中",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "document": {
+            "name": "Alice",
+            "age": 25
+          }
+        },
+        "response": {
+          "result": "{\"_id\": \"68729041dc66f8998dec5874\"}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Document with Special Characters in Database Name",
+        "purpose": "验证数据库名称包含特殊字符时，工具是否能正确插入文档",
+        "args": {
+          "database_name": "db@#_测试",
+          "collection_name": "users",
+          "document": {
+            "username": "special_user"
+          }
+        },
+        "response": {
+          "result": "{\"_id\": \"68729041dc66f8998dec5875\"}"
+        },
+        "execution_time": 0.008001327514648438,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Document into Non-Existent Collection",
+        "purpose": "验证当目标集合不存在时，工具是否能自动创建并插入文档",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "nonexistent_collection",
+          "document": {
+            "key": "value"
+          }
+        },
+        "response": {
+          "result": "{\"_id\": \"68729041dc66f8998dec5876\"}"
+        },
+        "execution_time": 0.009998083114624023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Document with Empty Database Name",
+        "purpose": "验证数据库名称为空字符串时，工具是否返回错误",
+        "args": {
+          "database_name": "",
+          "collection_name": "users",
+          "document": {
+            "name": "Bob"
+          }
+        },
+        "response": {
+          "result": "{\"error\": \"database name cannot be the empty string\"}"
+        },
+        "execution_time": 0.004999399185180664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Document with Empty Collection Name",
+        "purpose": "验证集合名称为空字符串时，工具是否返回错误",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "",
+          "document": {
+            "name": "Charlie"
+          }
+        },
+        "response": {
+          "result": "{\"error\": \"collection names cannot be empty\"}"
+        },
+        "execution_time": 0.010011911392211914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Invalid JSON Format Document",
+        "purpose": "验证非JSON格式文档输入时，工具是否能正确报错",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "document": "invalid_document_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool mcp_insert_document: 1 validation error for mcp_insert_documentArguments\ndocument\n  Input should be a valid dictionary [type=dict_type, input_value='invalid_document_format', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/dict_type"
+        },
+        "execution_time": 0.005001544952392578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Document when MongoDB is Down",
+        "purpose": "验证MongoDB服务不可用时，工具是否能优雅处理错误",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "document": {
+            "name": "DownTestUser"
+          }
+        },
+        "response": {
+          "result": "{\"_id\": \"68729041dc66f8998dec5877\"}"
+        },
+        "execution_time": 0.004998922348022461,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Document with Unicode Database and Collection Names",
+        "purpose": "验证数据库和集合名称为Unicode字符时，工具是否能正确插入文档",
+        "args": {
+          "database_name": "智能软件工",
+          "collection_name": "用户信息",
+          "document": {
+            "用户名": "张三"
+          }
+        },
+        "response": {
+          "result": "{\"_id\": \"68729041dc66f8998dec5878\"}"
+        },
+        "execution_time": 0.009006261825561523,
+        "is_functional_test": true
+      }
+    ],
+    "mcp_find_documents": [
+      {
+        "case_name": "Basic Query Without Filter",
+        "purpose": "验证在指定数据库和集合中不使用过滤器时能否成功查询文档",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users"
+        },
+        "response": {
+          "result": "[{\"_id\": \"687259cf14abe8d498d2f509\", \"name\": \"\", \"age\": null}, {\"_id\": \"68729041dc66f8998dec5874\", \"name\": \"Alice\", \"age\": 25}, {\"_id\": \"68729041dc66f8998dec5877\", \"name\": \"DownTestUser\"}]"
+        },
+        "execution_time": 0.005078315734863281,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Query With Simple Filter",
+        "purpose": "验证使用简单过滤器（如匹配字段值）时能否正确返回符合条件的文档",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "age": {
+              "$gte": 25
+            }
+          }
+        },
+        "response": {
+          "result": "[{\"_id\": \"68729041dc66f8998dec5874\", \"name\": \"Alice\", \"age\": 25}]"
+        },
+        "execution_time": 0.008005857467651367,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Query With Projection",
+        "purpose": "验证使用投影参数时能否正确选择性地返回指定字段",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "age": {
+              "$gte": 25
+            }
+          },
+          "projection": {
+            "name": 1,
+            "_id": 0
+          }
+        },
+        "response": {
+          "result": "[{\"name\": \"Alice\"}]"
+        },
+        "execution_time": 0.007994890213012695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Query With Limit",
+        "purpose": "验证限制返回文档数量是否生效",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "age": {
+              "$gte": 25
+            }
+          },
+          "projection": {
+            "name": 1,
+            "_id": 0
+          },
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"name\": \"Alice\"}]"
+        },
+        "execution_time": 0.006003141403198242,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Collection Name",
+        "purpose": "验证工具是否对集合名称中的特殊字符进行安全处理，防止注入攻击",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users'; DROP COLLECTION users;--"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.007006406784057617,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query Non-Existent Database",
+        "purpose": "验证当指定的数据库不存在时，工具是否能优雅处理错误",
+        "args": {
+          "database_name": "does_not_exist_db",
+          "collection_name": "users"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query Non-Existent Collection",
+        "purpose": "验证当指定的集合不存在时，工具是否能优雅处理空结果或报错",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "nonexistent_collection"
+        },
+        "response": {
+          "result": "[{\"_id\": \"686395fe8bb57d80cdb0c4a3\", \"key\": \"updated_value\"}, {\"_id\": \"68710caed665c89a8d5748ba\", \"name\": \"Alice\", \"email\": \"alice@example.com\"}, {\"_id\": \"68710cc7ea7bb66ae341045d\", \"data\": \"new collection should be created\"}, {\"_id\": \"687258207c1609156ee10ee2\", \"key\": \"value\"}, {\"_id\": \"687259cf14abe8d498d2f50a\", \"key\": \"value\"}, {\"_id\": \"68729041dc66f8998dec5876\", \"key\": \"value\"}]"
+        },
+        "execution_time": 0.010585308074951172,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query with Empty Database Name",
+        "purpose": "验证数据库名称为空字符串时是否返回错误",
+        "args": {
+          "database_name": "",
+          "collection_name": "users"
+        },
+        "response": {
+          "result": "{\"error\": \"database name cannot be the empty string\"}"
+        },
+        "execution_time": 0.005006313323974609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query with Empty Collection Name",
+        "purpose": "验证集合名称为空字符串时是否返回错误",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": ""
+        },
+        "response": {
+          "result": "{\"error\": \"collection names cannot be empty\"}"
+        },
+        "execution_time": 0.006997823715209961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query with Special Characters in Database and Collection Names",
+        "purpose": "验证数据库名和集合名包含特殊字符时能否正常执行查询",
+        "args": {
+          "database_name": "db@#_测试",
+          "collection_name": "special_chars_collection"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0059964656829833984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Query with Large Limit Value",
+        "purpose": "验证设置一个非常大的 limit 值是否会超出系统资源或导致性能问题",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "limit": 1000000
+        },
+        "response": {
+          "result": "[{\"_id\": \"687259cf14abe8d498d2f509\", \"name\": \"\", \"age\": null}, {\"_id\": \"68729041dc66f8998dec5874\", \"name\": \"Alice\", \"age\": 25}, {\"_id\": \"68729041dc66f8998dec5877\", \"name\": \"DownTestUser\"}]"
+        },
+        "execution_time": 0.007004261016845703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query with Unicode Database and Collection Names",
+        "purpose": "验证数据库名和集合名为 Unicode 字符时能否正常执行查询",
+        "args": {
+          "database_name": "智能软件工",
+          "collection_name": "用户信息"
+        },
+        "response": {
+          "result": "[{\"_id\": \"68710caed665c89a8d5748bb\", \"\\u7528\\u6237\\u540d\": \"\\u5f20\\u4e09\", \"\\u5e74\\u9f84\": 28}, {\"_id\": \"68729041dc66f8998dec5878\", \"\\u7528\\u6237\\u540d\": \"\\u5f20\\u4e09\"}]"
+        },
+        "execution_time": 0.007515907287597656,
+        "is_functional_test": true
+      }
+    ],
+    "mcp_update_document": [
+      {
+        "case_name": "Update Single Document Successfully",
+        "purpose": "验证工具可以成功更新匹配条件的第一个文档",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "name": "John"
+          },
+          "update": {
+            "$set": {
+              "age": 35
+            }
+          },
+          "multi": false
+        },
+        "response": {
+          "result": "{\"updated_count\": 0}"
+        },
+        "execution_time": 0.006916999816894531,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Update Multiple Documents Successfully",
+        "purpose": "验证工具可以成功更新所有匹配的文档",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "age": {
+              "$lt": 30
+            }
+          },
+          "update": {
+            "$set": {
+              "status": "young"
+            }
+          },
+          "multi": true
+        },
+        "response": {
+          "result": "{\"updated_count\": 1}"
+        },
+        "execution_time": 0.01300191879272461,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Update Document with Special Characters in DB and Collection",
+        "purpose": "验证数据库和集合名称包含特殊字符时更新是否成功",
+        "args": {
+          "database_name": "db@#_测试",
+          "collection_name": "test_collection",
+          "filter": {
+            "name": "张三"
+          },
+          "update": {
+            "$set": {
+              "city": "北京"
+            }
+          },
+          "multi": false
+        },
+        "response": {
+          "result": "{\"updated_count\": 0}"
+        },
+        "execution_time": 0.011001825332641602,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Update Document with Empty Database Name",
+        "purpose": "验证数据库名称为空时是否返回错误",
+        "args": {
+          "database_name": "",
+          "collection_name": "users",
+          "filter": {
+            "name": "John"
+          },
+          "update": {
+            "$set": {
+              "age": 35
+            }
+          }
+        },
+        "response": {
+          "result": "{\"error\": \"database name cannot be the empty string\"}"
+        },
+        "execution_time": 0.003997087478637695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Update Document with Non-Existent Database",
+        "purpose": "验证当数据库不存在时是否能正确处理错误",
+        "args": {
+          "database_name": "does_not_exist_db",
+          "collection_name": "users",
+          "filter": {
+            "name": "John"
+          },
+          "update": {
+            "$set": {
+              "age": 35
+            }
+          }
+        },
+        "response": {
+          "result": "{\"updated_count\": 0}"
+        },
+        "execution_time": 0.005001068115234375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Update Document with Invalid Filter",
+        "purpose": "验证使用无效filter时是否能正确处理错误",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": "invalid_filter",
+          "update": {
+            "$set": {
+              "age": 35
+            }
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool mcp_update_document: 1 validation error for mcp_update_documentArguments\nfilter\n  Input should be a valid dictionary [type=dict_type, input_value='invalid_filter', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/dict_type"
+        },
+        "execution_time": 0.005003690719604492,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Update Document with Empty Update",
+        "purpose": "验证update参数为空时是否返回错误",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "name": "John"
+          },
+          "update": {}
+        },
+        "response": {
+          "result": "{\"error\": \"update cannot be empty\"}"
+        },
+        "execution_time": 0.004991769790649414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Update Document with Long Field Names",
+        "purpose": "验证字段名非常长时能否正确更新文档",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "name": "John"
+          },
+          "update": {
+            "$set": {
+              "a_very_long_field_name_that_may_exceed_the_normal_limit_of_mongodb_key_length_and_test_how_tool_handles_it": "test_value"
+            }
+          }
+        },
+        "response": {
+          "result": "{\"updated_count\": 0}"
+        },
+        "execution_time": 0.005509376525878906,
+        "is_functional_test": true
+      }
+    ],
+    "mcp_delete_document": [
+      {
+        "case_name": "Delete Single Document Successfully",
+        "purpose": "验证工具可以成功删除单个匹配的文档（multi=False）",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "username": "test_user"
+          },
+          "multi": false
+        },
+        "response": {
+          "result": "{\"deleted_count\": 0}"
+        },
+        "execution_time": 0.006006479263305664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Multiple Documents Successfully",
+        "purpose": "验证工具可以成功删除多个匹配的文档（multi=True）",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "age": {
+              "$lt": 30
+            }
+          },
+          "multi": true
+        },
+        "response": {
+          "result": "{\"deleted_count\": 1}"
+        },
+        "execution_time": 0.010007381439208984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete with Non-Existent Database",
+        "purpose": "验证当指定的数据库不存在时，工具是否返回错误或0删除计数",
+        "args": {
+          "database_name": "does_not_exist_db",
+          "collection_name": "users",
+          "filter": {
+            "username": "test_user"
+          }
+        },
+        "response": {
+          "result": "{\"deleted_count\": 0}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete with Non-Existent Collection",
+        "purpose": "验证当集合不存在时，工具是否返回0删除计数",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "nonexistent_collection",
+          "filter": {
+            "username": "test_user"
+          }
+        },
+        "response": {
+          "result": "{\"deleted_count\": 0}"
+        },
+        "execution_time": 0.006514072418212891,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete with Empty Filter",
+        "purpose": "验证使用空过滤器是否会导致删除所有文档（multi=True）并返回正确计数",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {},
+          "multi": true
+        },
+        "response": {
+          "result": "{\"deleted_count\": 2}"
+        },
+        "execution_time": 0.007999420166015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete with Special Characters in Filter",
+        "purpose": "验证包含特殊字符的查询条件是否能被正确处理",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "username": "user@#_测试"
+          },
+          "multi": false
+        },
+        "response": {
+          "result": "{\"deleted_count\": 0}"
+        },
+        "execution_time": 0.006127834320068359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete without Authentication",
+        "purpose": "验证未认证用户是否无法执行删除操作（如果启用了安全认证）",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "username": "test_user"
+          }
+        },
+        "response": {
+          "result": "{\"deleted_count\": 0}"
+        },
+        "execution_time": 0.008521795272827148,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete when MongoDB is Down",
+        "purpose": "验证 MongoDB 服务不可用时工具是否能优雅处理错误",
+        "args": {
+          "database_name": "test_db",
+          "collection_name": "users",
+          "filter": {
+            "username": "test_user"
+          }
+        },
+        "response": {
+          "result": "{\"deleted_count\": 0}"
+        },
+        "execution_time": 0.007001638412475586,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 52
+}

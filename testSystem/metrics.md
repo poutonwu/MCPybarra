@@ -1,0 +1,27 @@
+# MCP Server Automated Testing Evaluation System
+
+This document defines the evaluation criteria used for automated testing of MCP servers. The system aims to comprehensively and objectively measure the overall quality of servers. The total evaluation score is 100 points, divided into five core dimensions, each weighted differently according to its importance.
+
+---
+
+## Evaluation Dimensions and Weights
+
+| Dimension         | Weight (Max Points) | Definition                                                                        | Evaluation Points and Explicit Scoring Criteria                                                                                                                                                                                                                                                                                                                 |
+| :---------------- | :------------------ | :-------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Functionality** | **30 points**       | Whether the server's core functions work as expected.                             | **Scoring basis**: LLM judges the "semantic success rate" of test cases (i.e., whether the returned results fully meet expectations in terms of logic and content).<br>- `>95%` semantic success: **30 points**<br>- `>85%` semantic success: **25-29 points**<br>- `>70%` semantic success: **20-24 points**<br>- `<70%` semantic success: **Below 20 points** |
+| **Robustness**    | **20 points**       | The ability to handle boundary conditions, abnormal inputs, and error situations. | **Scoring basis**: LLM judges the success rate of boundary and error handling test cases.<br>- `>95%` of exception cases properly handled: **20 points**<br>- `>75%` of exception cases properly handled: **15-19 points**<br>- `<75%` of exception cases properly handled: **Below 15 points**                                                                 |
+| **Security**      | **20 points**       | The ability to resist unsafe inputs and implement access control.                 | **Scoring basis**: LLM judges the success rate of security test cases.<br>- `100%` of security threats successfully blocked: **20 points**<br>- Potential vulnerabilities exist (non-critical): **12-19 points**<br>- Serious security vulnerabilities exist: **Below 12 points**                                                                               |
+| **Performance**   | **20 points**       | The response speed of the server.                                                 | **Scoring basis**: LLM evaluates based on the `execution_time` of all test cases, considering the tool type and latency to determine the score.                                                                                                                                                                                                                 |
+| **Transparency**  | **10 points**       | The clarity and effectiveness of error messages and logs.                         | **Scoring basis**: LLM analyzes the `error` information returned by failed test cases and scores based on how helpful it is for developers to troubleshoot issues.                                                                                                                                                                                              |
+| **Total**         | **100 points**      | -                                                                                 | -                                                                                                                                                                                                                                                                                                                                                               |
+
+---
+
+## Evaluation Process
+
+1. **Automated Test Execution**: The `intelligent_benchmark.py` script dynamically generates and executes test cases for all server tools, covering basic functionality, boundary conditions, error handling, and security scenarios. All original results are recorded in the `test_report_{server_name}.json` file.
+2. **LLM-Driven Qualitative Analysis**: The `Reporter` class in `reporting.py` submits the complete test results (JSON file) to a large language model (LLM).
+3. **Generate Evaluation Report**: The LLM conducts a comprehensive analysis of the server based on the five weighted dimensions above and generates a detailed evaluation report in Markdown format (`detailed_report_{server_name}.md`), including specific scores and analysis rationale for each dimension.
+4. **Result Extraction and Visualization**: The system automatically extracts scores for each dimension from the report for generating visualization charts (such as radar charts) and summarizes the final results.
+
+This evaluation system aims to combine the breadth of automated testing with the analytical depth of LLMs to provide a more comprehensive and intelligent server quality assessment solution than traditional methods.
