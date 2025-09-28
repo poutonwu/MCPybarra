@@ -81,7 +81,7 @@ def parse_args():
     
     parser.add_argument(
         "--output-dir",
-        default="reports",
+        default="data/raw_run_data",
         help="Report output directory"
     )
     

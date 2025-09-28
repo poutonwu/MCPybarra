@@ -74,12 +74,18 @@ project_root/
 │   │   ├── state.py         # Workflow state definition
 │   │   └── graph.py         # Workflow graph definition
 │   ├── tool/                # Tool collection
-│   └── run_langgraph_workflow.py  # LangGraph workflow entry
-├── testSystem/              # Testing system
-│   ├── prompts/             # Testing system prompts
-│   ├── testFiles/           # Test files
-│   ├── utils/               # Testing system tools
-│   └── main.py              # Testing system entry
+│   └── batch_run_workflow.py # Script for batch generation
+├── testSystem/              # Automated evaluation system
+│   ├── prompts/             # Prompts for the evaluation system
+│   ├── testFiles/           # Test files used during evaluation
+│   ├── utils/               # Utility scripts for the evaluation system
+│   ├── intelligent_benchmark.py # Script to test a single server
+│   └── main.py              # Main entry point for the evaluation pipeline
+├── data/                    # Raw and summarized experiment data
+│   ├── raw_run_data/        # Raw output from evaluation runs
+│   └── summary_data/        # Aggregated data tables
+├── results/                 # Final analysis results (figures and reports)
+├── scripts/                 # Scripts for data analysis and visualization
 ├── resources/               # Resource files
 │   ├── mcp-server-doc.md    # MCP protocol documentation
 │   ├── metrics.md           # Evaluation metrics documentation
@@ -88,28 +94,41 @@ project_root/
     ├── public-mcp-servers/  # Public MCP server examples
     ├── pipeline-output-servers/ # Pipeline output servers
     ├── metaGPT-servers/     # MetaGPT generated servers
-    └── refinement/          # Optimized code
 ```
 
-## Environment Requirements
+## Getting Started
+This guide provides step-by-step instructions to set up the environment and start using the framework.
 
-- **Python Version**: Python 3.12.9
-- **Dependencies**: Comprehensive library support for framework and generated MCP servers
-
-## Installation
+### Step 1: Environment Setup
+First, clone the repository and install the required Python packages. We strongly recommend using a virtual environment.
 
 ```bash
 # Clone the repository
 git clone https://github.com/poutonwu/MCPybarra
 cd MCPybarra
 
+# (Recommended) Create and activate a virtual environment
+# On Windows
+py -3.12 -m venv venv 
+venv\Scripts\activate
+# On Linux/macOS
+# python -m venv venv
+# source venv/bin/activate
+
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-## Quick Start Configuration
+### Step 2: API Configuration
+The framework requires API keys to interact with LLMs. Create a `.env` file in the project root by copying the template, then fill in your API keys.
 
-Create a `.env` file in the project root with the following variables:
+```bash
+# In the project root, copy the example file
+cp .env.example .env
+# Now, edit the .env file with your preferred text editor to add the API keys.
+```
+
+The `.env` file contains settings for different LLM providers and assigns specific models to each agent in the workflow.
 
 ```env
 # Default model settings
@@ -119,15 +138,10 @@ LLM_MAX_TOKENS=64000
 LLM_TEMPERATURE=0.6
 LLM_ENABLE_THINKING=false
 
-# Provider-specific settings
+# Provider-specific settings (e.g., Qwen, GPT, Gemini)
 QWEN_BASE_URL=your_qwen_base_url
 QWEN_API_KEY=your_qwen_api_key
-
-GPTSAPI_BASE_URL=your_gptsapi_base_url
-GPTSAPI_API_KEY=your_gptsapi_api_key
-
-GEMINI_BASE_URL=your_gemini_base_url
-GEMINI_API_KEY=your_gemini_api_key
+# ... other providers
 
 # Agent model assignments
 SWE_AGENT_MODEL=gpt-4o
@@ -138,19 +152,59 @@ DEFAULT_AGENT_MODEL=qwen-plus
 
 ## Usage
 
-### Generate and Test MCP Servers
+### Generating a Single MCP Server
+The core of our framework is the generation workflow, which can be run in two modes.
+
+**1. Interactive Mode (Default)**
+Many generated servers may require manual intervention, such as adding API keys or installing specific dependencies. The interactive mode pauses the workflow after code generation, allowing you to make necessary configurations before the automated testing begins.
 
 ```bash
-# Generate MCP server without interaction
-python framwork/run_langgraph_workflow.py \
+# Example: Generate an Unsplash server that requires an API key.
+# The workflow will pause for confirmation before proceeding to the QA stage.
+python run_langgraph_workflow.py \
+    --swe-model "deepseek-v3" \
+    --user-input "Develop an automated image retrieval processing MCP server capable of implementing automatic searching of images on the Unsplash platform based on keywords, pagination, sorting, color, and image orientation through the search_photos method, returning result lists containing detailed information such as image ID, description, multi-size image URLs, width, and height."
+```
+
+**2. Non-Interactive Mode**
+For servers that require no special configuration (like a Git tool server) or for fully automated runs, use the `--non-interactive` flag to skip the human confirmation step.
+
+```bash
+# Example: Generate a Git server, which has no external dependencies or API keys.
+python run_langgraph_workflow.py \
     --swe-model "gemini-2.5-pro" \
     --non-interactive \
     --user-input "Develop an automated Git repository management MCP server that can implement the following functions: use git_init to initialize repositories, use git_status to view status, use git_add to add files to the staging area, use git_diff_unstaged and git_diff_staged to view unstaged and staged differences respectively, use git_diff to compare branches or commits, use git_commit to commit changes, use git_reset to unstage changes, use git_log to view commit history, use git_create_branch to create branches, use git_checkout to switch branches, and use git_show to display detailed commit content."
+```
+### Testing a Single Server
+For quick verification of a single generated server, or to inspect the behavior of a specific baseline server, you can run the `intelligent_benchmark.py` script directly on a single file. This is highly recommended for the AEC to quickly validate the evaluation process on a small scale.
 
-# Generate MCP server with human confirmation
-python framwork/run_langgraph_workflow.py \
-    --swe-model "deepseek-v3" \
-    --user-input "Develop an automated image retrieval processing MCP server capable of implementing automatic searching of images on the Unsplash platform based on keywords, pagination, sorting, color, and image orientation through the search_photos method, returning result lists containing detailed information such as image ID, description, multi-size image URLs, width, and height."
+```bash
+# Example: Evaluate a single generated server
+$ python testSystem/intelligent_benchmark.py path/to/server.py
+
+# Example: Evaluate a human-written baseline server
+$ python testSystem/intelligent_benchmark.py workspace/public-mcp-servers/arxiv-mcp-server-main/src/server.py
+```
+
+### Reproducing the Full Benchmark
+To reproduce the complete benchmark results from our paper, follow these two stages.
+
+**1. Batch Generation**
+You can automatically generate all 25 servers using the `batch_run_workflow.py` script. It reads prompts from a specified file (e.g., `framwork/batch_complete.txt`) and runs the generation workflow for each.
+
+```bash
+# Note: This script typically runs in non-interactive mode.
+# For servers requiring API keys, we recommend the single-run interactive approach first.
+python framwork/batch_run_workflow.py
+```
+
+**2. Full Pipeline Evaluation**
+After generating the servers, run the main evaluation pipeline. This script will automatically discover, test, and evaluate all generated servers, saving the comprehensive results into a new timestamped directory.
+
+```bash
+# This command stores all evaluation results in a new subfolder inside data/raw_run_data
+python testSystem/main.py --mode pipeline --output-dir data/raw_run_data
 ```
 
 ## Acknowledgments
