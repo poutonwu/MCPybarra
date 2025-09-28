@@ -1,0 +1,168 @@
+[
+  {
+    "step": {
+      "step_id": "list_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all available tables in the database to verify connectivity."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "addresses, companies, order_items, orders, products, reviews, test_table, users"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_users_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_tables[0]"
+      },
+      "description": "Dependent call: Read the first 100 rows from the first table (likely 'users')."
+    },
+    "substituted_params": {
+      "table_name": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.list_tables[0]'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `$outputs.read_users_table[0].id` LIMIT 50"
+      },
+      "description": "Dependent call: Execute a SELECT query on the same table using dynamic table name from previous read."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `$outputs.read_users_table[0].id` LIMIT 50"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: 1146 (42S02): Table 'user-db.$outputs.read_users_table[0].id' doesn't exist\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM invalid_table_for_testing"
+      },
+      "description": "Edge case: Test execution of SQL query on a non-existent table."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM invalid_table_for_testing"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: 1146 (42S02): Table 'user-db.invalid_table_for_testing' doesn't exist\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "CREATE TABLE IF NOT EXISTS test_table (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))"
+      },
+      "description": "Sensitive action: Create a test table for subsequent operations."
+    },
+    "substituted_params": {
+      "query": "CREATE TABLE IF NOT EXISTS test_table (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "INSERT INTO test_table (name) VALUES ('Alice'), ('Bob')"
+      },
+      "description": "Dependent sensitive action: Insert sample data into the test table."
+    },
+    "substituted_params": {
+      "query": "INSERT INTO test_table (name) VALUES ('Alice'), ('Bob')"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: 1364 (HY000): Field 'id' doesn't have a default value\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "select_from_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM test_table"
+      },
+      "description": "Dependent validation: Verify that inserted data exists in the test table."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "No output returned."
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DROP TABLE IF EXISTS test_table"
+      },
+      "description": "Sensitive cleanup: Remove the test table after testing."
+    },
+    "substituted_params": {
+      "query": "DROP TABLE IF EXISTS test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_with_empty_table_name",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": ""
+      },
+      "description": "Edge case: Attempt to read with an empty table name."
+    },
+    "substituted_params": {
+      "table_name": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_resource: Invalid table_name. It must be a non-empty string."
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_with_empty_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Attempt to execute an empty SQL query."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: Invalid query. It must be a non-empty string."
+    }
+  }
+]

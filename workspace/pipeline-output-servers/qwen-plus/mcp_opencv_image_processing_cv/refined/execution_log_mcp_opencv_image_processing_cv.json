@@ -1,0 +1,292 @@
+[
+  {
+    "step": {
+      "step_id": "get_image_stats",
+      "tool_name": "get_image_stats_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg"
+      },
+      "description": "Happy path: Get basic statistics of an image to verify correct reading and analysis."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"stats\": {\"dimensions\": {\"width\": 1080, \"height\": 715, \"channels\": 3}, \"color_space\": \"BGR (Dominant: Orange)\", \"pixel_value_ranges\": [{\"channel\": 0, \"min\": 0, \"max\": 255, \"range\": 255}, {\"channel\": 1, \"min\": 0, \"max\": 255, \"range\": 255}, {\"channel\": 2, \"min\": 21, \"max\": 255, \"range\": 234}], \"total_pixels\": 2316600, \"memory_usage_kb\": 2262.3}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "resize_image",
+      "tool_name": "resize_image_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "width": "$outputs.get_image_stats.stats.dimensions.width + 100",
+        "height": "$outputs.get_image_stats.stats.dimensions.height + 100"
+      },
+      "description": "Dependent call: Resize the same image using dimensions derived from previous stats. Verifies resizing functionality."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "width": null,
+      "height": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.get_image_stats.stats.dimensions.width + 100'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "save_resized_image",
+      "tool_name": "save_image_tool",
+      "parameters": {
+        "image_path": "$outputs.resize_image.message.split('to ')[1].strip('.')",
+        "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\resized_output.jpg"
+      },
+      "description": "Dependent call: Save the resized image to a new location. Tests saving functionality with file paths."
+    },
+    "substituted_params": {
+      "image_path": null,
+      "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\resized_output.jpg"
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.resize_image.message.split('to ')[1].strip('.')'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "crop_image",
+      "tool_name": "crop_image_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "x": 50,
+        "y": 50,
+        "width": 300,
+        "height": 200
+      },
+      "description": "Happy path: Crop a defined region from the original image. Validates cropping logic."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "x": 50,
+      "y": 50,
+      "width": 300,
+      "height": 200
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"message\": \"Image cropped to 300x200 at position (50, 50) and saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\\\u81ea\\u7136\\u98ce\\u5149_cropped.jpg\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "apply_gaussian_filter",
+      "tool_name": "apply_filter_tool",
+      "parameters": {
+        "image_path": "$outputs.crop_image.message.split('to ')[1].strip('.')",
+        "filter_type": "gaussian",
+        "kernel_size": 5
+      },
+      "description": "Dependent call: Apply Gaussian blur on cropped image. Ensures filter application works correctly."
+    },
+    "substituted_params": {
+      "image_path": null,
+      "filter_type": "gaussian",
+      "kernel_size": 5
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.crop_image.message.split('to ')[1].strip('.')'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "detect_edges_canny",
+      "tool_name": "detect_edges_tool",
+      "parameters": {
+        "image_path": "$outputs.apply_gaussian_filter.message.split('to ')[1].strip('.')",
+        "method": "canny",
+        "threshold1": 100,
+        "threshold2": 200
+      },
+      "description": "Dependent call: Detect edges after filtering. Tests edge detection workflow."
+    },
+    "substituted_params": {
+      "image_path": null,
+      "method": "canny",
+      "threshold1": 100,
+      "threshold2": 200
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.apply_gaussian_filter.message.split('to ')[1].strip('.')'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "apply_threshold",
+      "tool_name": "apply_threshold_tool",
+      "parameters": {
+        "image_path": "$outputs.detect_edges_canny.message.split('to ')[1].strip('.')",
+        "threshold_value": 127,
+        "max_value": 255
+      },
+      "description": "Dependent call: Apply thresholding to edge-detected image. Validates segmentation logic."
+    },
+    "substituted_params": {
+      "image_path": null,
+      "threshold_value": 127,
+      "max_value": 255
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.detect_edges_canny.message.split('to ')[1].strip('.')'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "detect_contours",
+      "tool_name": "detect_contours_tool",
+      "parameters": {
+        "image_path": "$outputs.apply_threshold.message.split('to ')[1].strip('.')",
+        "mode": "external",
+        "method": "simple"
+      },
+      "description": "Dependent call: Detect contours after thresholding. Tests contour detection functionality."
+    },
+    "substituted_params": {
+      "image_path": null,
+      "mode": "external",
+      "method": "simple"
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.apply_threshold.message.split('to ')[1].strip('.')'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "find_shapes_circle",
+      "tool_name": "find_shapes_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "shape_type": "circle"
+      },
+      "description": "Happy path: Detect circles in the original image. Validates shape detection capabilities."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "shape_type": "circle"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"message\": \"Found 1086 circle shapes\", \"shapes\": [{\"type\": \"circle\", \"position\": {\"x\": 512, \"y\": 80}, \"radius\": 632}, {\"type\": \"circle\", \"position\": {\"x\": 526, \"y\": 94}, \"radius\": 612}, {\"type\": \"circle\", \"position\": {\"x\": 476, \"y\": 92}, \"radius\": 610}], \"__truncation_alert__\": \"This JSON object has been intelligently truncated to save space. Lists may be shortened.\", \"__adapter_truncation_note__\": \"NOTE: This truncation is due to the MCP adapter's output length limit, NOT an issue with the tool itself.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "find_shapes_rectangle",
+      "tool_name": "find_shapes_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "shape_type": "rectangle"
+      },
+      "description": "Happy path: Detect rectangles in the original image. Further validates shape detection."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "shape_type": "rectangle"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"message\": \"Found 1 rectangle shapes\", \"shapes\": [{\"type\": \"rectangle\", \"position\": {\"x\": 0, \"y\": 0}, \"dimensions\": {\"width\": 1080, \"height\": 715}}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_file_path",
+      "tool_name": "get_image_stats_tool",
+      "parameters": {
+        "image_path": "nonexistent_image.jpg"
+      },
+      "description": "Edge case: Test handling of non-existent file paths. Verifies error propagation."
+    },
+    "substituted_params": {
+      "image_path": "nonexistent_image.jpg"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"File not found: nonexistent_image.jpg\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_resize_dimensions",
+      "tool_name": "resize_image_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "width": -100,
+        "height": -50
+      },
+      "description": "Edge case: Test invalid resize dimensions. Checks validation of numeric inputs."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "width": -100,
+      "height": -50
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"Width must be a positive integer, got -100\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_crop_coordinates",
+      "tool_name": "crop_image_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "x": -10,
+        "y": -10,
+        "width": 100,
+        "height": 100
+      },
+      "description": "Edge case: Test invalid crop coordinates. Validates boundary checks."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "x": -10,
+      "y": -10,
+      "width": 100,
+      "height": 100
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"X coordinate must be non-negative integer, got -10\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_kernel_size",
+      "tool_name": "apply_filter_tool",
+      "parameters": {
+        "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+        "filter_type": "gaussian",
+        "kernel_size": 4
+      },
+      "description": "Edge case: Test even kernel size for filters that require odd sizes. Validates parameter constraints."
+    },
+    "substituted_params": {
+      "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg",
+      "filter_type": "gaussian",
+      "kernel_size": 4
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"Kernel size must be a positive odd integer, got 4\"}"
+    }
+  }
+]

@@ -1,0 +1,338 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_advanced_file_search",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_advanced_file_search/refined/server.py",
+  "timestamp": "2025-07-13T02:40:31.171517",
+  "tools": [
+    {
+      "name": "search_files",
+      "description": "\n    Searches for files and folders on the Windows system using the everything.dll library.\n\n    Args:\n        query (str): The search query string.\n        case_sensitive (bool, optional): Whether the search should be case-sensitive. Defaults to False.\n        whole_word_match (bool, optional): Whether to match whole words only. Defaults to False.\n        regex (bool, optional): Whether to enable regular expression matching. Defaults to False.\n        sort_by (str, optional): The sorting criterion for the results. Options include 'name', 'size',\n                                 'date_created', 'date_modified'. Defaults to 'name'.\n        limit (int, optional): The maximum number of results to return. Defaults to 100.\n\n    Returns:\n        str: A JSON string containing a list of dictionaries, where each dictionary represents a file or folder.\n\n    Example:\n        search_files(query=\"*.txt\", case_sensitive=False, whole_word_match=False, regex=False, sort_by=\"name\", limit=10)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "case_sensitive": {
+            "default": false,
+            "title": "Case Sensitive",
+            "type": "boolean"
+          },
+          "whole_word_match": {
+            "default": false,
+            "title": "Whole Word Match",
+            "type": "boolean"
+          },
+          "regex": {
+            "default": false,
+            "title": "Regex",
+            "type": "boolean"
+          },
+          "sort_by": {
+            "default": "name",
+            "title": "Sort By",
+            "type": "string"
+          },
+          "limit": {
+            "default": 100,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_filesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_file_details",
+      "description": "\n    Retrieves detailed information about a specific file or folder.\n\n    Args:\n        file_path (str): The full path of the file or folder for which details are to be retrieved.\n\n    Returns:\n        str: A JSON string containing details of the file or folder.\n\n    Example:\n        get_file_details(file_path=\"C:\\Path\\To\\example.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "get_file_detailsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_files": [
+      {
+        "case_name": "Basic File Search by Extension",
+        "purpose": "验证工具能否通过默认参数搜索特定扩展名的文件，例如PDF文件。",
+        "args": {
+          "query": ".pdf"
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.0045032501220703125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Case Sensitive Search",
+        "purpose": "验证工具是否能正确执行区分大小写的搜索。",
+        "args": {
+          "query": "rule1.pdf",
+          "case_sensitive": true
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.0040051937103271484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Whole Word Match Search",
+        "purpose": "验证工具是否能正确匹配完整单词的查询。",
+        "args": {
+          "query": "pdf",
+          "whole_word_match": true
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.002997159957885742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Regex Based Search",
+        "purpose": "验证工具是否能使用正则表达式进行搜索。",
+        "args": {
+          "query": ".*\\.doc",
+          "regex": true
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.00601649284362793,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Sort Results by Date Modified",
+        "purpose": "验证工具是否能按修改日期对搜索结果排序。",
+        "args": {
+          "query": ".html",
+          "sort_by": "date_modified"
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.004510164260864258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limit Number of Results",
+        "purpose": "验证工具是否能限制返回的搜索结果数量。",
+        "args": {
+          "query": ".jpg",
+          "limit": 1
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Non-Existent File",
+        "purpose": "验证工具在没有找到匹配项时是否返回空结果。",
+        "args": {
+          "query": "nonexistentfile.xyz"
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.006508350372314453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Search with Multiple Options",
+        "purpose": "验证工具是否能同时处理多个选项（如正则、大小写敏感和排序）。",
+        "args": {
+          "query": "^.*\\.xml$",
+          "regex": true,
+          "case_sensitive": true,
+          "sort_by": "size",
+          "limit": 50
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Restricted Path Access",
+        "purpose": "验证工具不会访问受限或系统级路径（模拟攻击者尝试）。",
+        "args": {
+          "query": "..\\..\\windows\\system32"
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.004513263702392578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Regex Pattern",
+        "purpose": "验证工具在提供无效正则表达式时是否能够优雅地处理错误。",
+        "args": {
+          "query": "*invalid_regex",
+          "regex": true
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.006999015808105469,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Empty Query",
+        "purpose": "验证工具是否能处理空查询输入的情况。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.0042877197265625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Maximum Limit",
+        "purpose": "验证工具是否能处理最大限制值的边界情况。",
+        "args": {
+          "query": ".",
+          "limit": 10000
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能正确处理包含特殊字符的搜索查询。",
+        "args": {
+          "query": "test@#$.file"
+        },
+        "response": {
+          "result": "[{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}]"
+        },
+        "execution_time": 0.0065152645111083984,
+        "is_functional_test": false
+      }
+    ],
+    "get_file_details": [
+      {
+        "case_name": "Basic File Details Retrieval",
+        "purpose": "验证工具能否获取指定文件的基本详细信息。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.005513668060302734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Details for Non-Existent File",
+        "purpose": "验证工具在请求不存在的文件时是否返回空结果或适当错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.txt"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.003000497817993164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "File Details for Folder",
+        "purpose": "验证工具是否能正确检索文件夹的信息（如大小、修改时间等）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.004523515701293945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Restricted Path Access Attempt",
+        "purpose": "验证工具是否会阻止对受限路径（如系统目录）的访问尝试。",
+        "args": {
+          "file_path": "..\\..\\windows\\system32"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.005991935729980469,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Empty File Path",
+        "purpose": "验证工具在提供空文件路径时是否能优雅处理错误。",
+        "args": {
+          "file_path": ""
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.0030050277709960938,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Long File Path",
+        "purpose": "验证工具是否能处理包含长路径名的文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_filename_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz_abcdefghijklmnopqrstuvwxyz.txt"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.007512807846069336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in File Path",
+        "purpose": "验证工具是否能正确处理包含特殊字符的文件路径。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@#$.file"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Hidden or System File Details",
+        "purpose": "验证工具是否能正确获取隐藏或系统属性文件的详细信息。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png"
+        },
+        "response": {
+          "result": "{\"name\": \"example.txt\", \"path\": \"C:\\\\Path\\\\To\\\\example.txt\", \"size\": 1024, \"date_created\": \"2023-01-01\", \"date_modified\": \"2023-01-02\", \"attributes\": [\"readonly\"]}"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 21
+}

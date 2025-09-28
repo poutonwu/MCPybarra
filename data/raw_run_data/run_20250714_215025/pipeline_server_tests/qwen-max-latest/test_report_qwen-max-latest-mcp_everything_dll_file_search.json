@@ -1,0 +1,261 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_everything_dll_file_search",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_everything_dll_file_search/refined/server.py",
+  "timestamp": "2025-07-14T21:50:28.608320",
+  "tools": [
+    {
+      "name": "perform_everything_search",
+      "description": "\n    Perform an advanced file search on Windows using the Everything API via ctypes.\n\n    Args:\n        query (str): The search query including keywords, wildcards, or regex patterns.\n        path (str, optional): The root directory path to start the search from. Defaults to the entire system.\n        size_min (int, optional): Minimum file size in bytes.\n        size_max (int, optional): Maximum file size in bytes.\n        date_modified_start (str, optional): Start date for filtering by modification time (YYYY-MM-DD).\n        date_modified_end (str, optional): End date for filtering by modification time (YYYY-MM-DD).\n        attributes (list of str, optional): List of file attributes to filter by (e.g., 'readonly', 'hidden').\n        sort_by (str, optional): Sorting criteria ('name', 'size', 'date').\n        case_sensitive (bool, optional): If True, the search is case-sensitive.\n        whole_word (bool, optional): If True, only whole word matches are returned.\n        regex (bool, optional): If True, the query is treated as a regular expression.\n\n    Returns:\n        A JSON string containing a list of dictionaries, where each dictionary contains detailed information about a found file or folder.\n\n    Example:\n        To search for all .txt files in C:\\Users\\Public that are larger than 1MB and modified after 2023-01-01:\n        perform_everything_search(\n            query=\"*.txt\",\n            path=\"C:\\Users\\Public\",\n            size_min=1048576,\n            date_modified_start=\"2023-01-01\"\n        )\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "path": {
+            "default": null,
+            "title": "Path",
+            "type": "string"
+          },
+          "size_min": {
+            "default": null,
+            "title": "Size Min",
+            "type": "integer"
+          },
+          "size_max": {
+            "default": null,
+            "title": "Size Max",
+            "type": "integer"
+          },
+          "date_modified_start": {
+            "default": null,
+            "title": "Date Modified Start",
+            "type": "string"
+          },
+          "date_modified_end": {
+            "default": null,
+            "title": "Date Modified End",
+            "type": "string"
+          },
+          "attributes": {
+            "default": null,
+            "items": {},
+            "title": "Attributes",
+            "type": "array"
+          },
+          "sort_by": {
+            "default": null,
+            "title": "Sort By",
+            "type": "string"
+          },
+          "case_sensitive": {
+            "default": false,
+            "title": "Case Sensitive",
+            "type": "boolean"
+          },
+          "whole_word": {
+            "default": false,
+            "title": "Whole Word",
+            "type": "boolean"
+          },
+          "regex": {
+            "default": false,
+            "title": "Regex",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "perform_everything_searchArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "perform_everything_search": [
+      {
+        "case_name": "Basic File Search by Extension",
+        "purpose": "验证使用默认参数时能否正确搜索指定路径中的特定扩展名文件",
+        "args": {
+          "query": "*.csv",
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[{\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\68078d40e08a19b806665fee_1745325376_auto_driving_system.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\cs.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\includeempty.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\spreadsheet.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\tmp.csv\"}]"
+        },
+        "execution_time": 0.16516709327697754,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Size Filter",
+        "purpose": "验证工具能根据最小文件大小过滤CSV文件",
+        "args": {
+          "query": "*.csv",
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "size_min": 1000
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_everything_search: Error during search: The DLL does not support size filtering (Everything_SetSizeMin)"
+        },
+        "execution_time": 0.00400233268737793,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Regex Search for PDF Files",
+        "purpose": "验证正则表达式模式是否能正确识别PDF文件",
+        "args": {
+          "query": ".*\\.pdf",
+          "regex": true,
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.4674398899078369,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Case Sensitive Search",
+        "purpose": "验证区分大小写的查询是否有效",
+        "args": {
+          "query": "Sample1.pdf",
+          "case_sensitive": true,
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.15384149551391602,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Whole Word Match",
+        "purpose": "验证仅返回与整个单词匹配的文件名",
+        "args": {
+          "query": "docx",
+          "whole_word": true,
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.3892042636871338,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attribute Filter - Hidden Files",
+        "purpose": "验证能否通过属性过滤隐藏文件（如以~$开头的临时文件）",
+        "args": {
+          "attributes": [
+            "hidden"
+          ],
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_everything_search: 1 validation error for perform_everything_searchArguments\nquery\n  Field required [type=missing, input_value={'attributes': ['hidden']...\\testSystem\\\\testFiles'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004004478454589844,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Sort by Modification Date",
+        "purpose": "验证按修改日期排序功能是否正常",
+        "args": {
+          "query": "*",
+          "sort_by": "date",
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[{\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\68078d40e08a19b806665fee_1745325376_auto_driving_system.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\app.ico\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\converted_image.gif\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\converted_image.png\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\cs.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\includeempty.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\inspector.zip\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_document_copy.docx\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonname.html\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\paper1.pdf\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\present.html\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\re2.doc\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2444字符，剩余1044字符"
+        },
+        "execution_time": 0.06643414497375488,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Date Range Filter",
+        "purpose": "验证按修改日期范围筛选文件的功能",
+        "args": {
+          "query": "*",
+          "date_modified_start": "2023-01-01",
+          "date_modified_end": "2025-12-31",
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_everything_search: Error during search: The DLL does not support date filtering (Everything_SetDateModifiedStart)"
+        },
+        "execution_time": 0.005961418151855469,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Invalid Path Access",
+        "purpose": "验证工具是否安全地处理无效或受限路径的访问尝试",
+        "args": {
+          "query": "*",
+          "path": "C:\\Windows\\System32\\config"
+        },
+        "response": {
+          "result": "[{\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\settings\\\\.Dbfs.dbfs_bootstrap\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\Windows\\\\0\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\ApplicationInsights\\\\0ccf0a812d4cf9c114c6fe293ffb302a59721be2a7fef0dcce946bc2ea7dda4d\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\Crypto\\\\PCPKSP\\\\14024f6214e862a44ed1dc75f1f08be95690f10c\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\Office\\\\16.0\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\Windows\\\\2052\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\ApplicationInsights\\\\217b0e90ff46186da7ab495f2c7d007abed0ad0072cbf06cadd6941ce31c61fb\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\ApplicationInsights\\\\3044bf171883f86ec8f21cc31ba7f3b1719b9877d5a6b2ddce179049cb0a829d\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\ApplicationInsights\\\\4b3ea8c40e516e8517f1dde1ece8d9897630de67eb129bc49514bc61a96675d2\"}, {\"file_path\": \"C:\\\\Windows\\\\System32\\\\config\\\\systemprofile\\\\AppData\\\\Local\\\\Microsoft\\\\Vault\\\\4BF4C...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计474540字符，剩余473140字符"
+        },
+        "execution_time": 0.09403538703918457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Regex Pattern",
+        "purpose": "验证当提供非法正则表达式时工具是否优雅处理错误",
+        "args": {
+          "query": "*invalid*pattern?",
+          "regex": true
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.031035900115966797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Nonexistent Root Path",
+        "purpose": "验证当搜索路径不存在时是否返回空结果而非异常",
+        "args": {
+          "query": "*",
+          "path": "Z:\\NonExistent\\Path"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.015224933624267578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Empty Query",
+        "purpose": "验证空查询字符串是否被安全处理并返回所有文件",
+        "args": {
+          "query": "",
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[{\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\68078d40e08a19b806665fee_1745325376_auto_driving_system.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\app.ico\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\converted_image.gif\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\converted_image.png\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\\\\converted_image.png\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\cs.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\includeempty.csv\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\inspector.zip\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\\\\locked_file.docx\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_document_copy.docx\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonname.html\"}, {\"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\paper1.pdf...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2444字符，剩余1044字符"
+        },
+        "execution_time": 0.05658221244812012,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证包含特殊字符的查询是否被正确解析",
+        "args": {
+          "query": "re[2].doc",
+          "regex": true,
+          "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.42308712005615234,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 13
+}

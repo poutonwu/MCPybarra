@@ -1,0 +1,183 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_duckduckgo_search_and_fetc",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_duckduckgo_search_and_fetc/refined/server.py",
+  "timestamp": "2025-07-16T10:10:41.432495",
+  "tools": [
+    {
+      "name": "duckduckgo_search",
+      "description": "\n    Perform a search on DuckDuckGo and return structured results.\n\n    Args:\n        query: The search term or phrase to query on DuckDuckGo (required).\n        max_results: Maximum number of search results to return (default: 5).\n\n    Returns:\n        A dictionary containing search results with 'title', 'url', and 'snippet' under 'results' key.\n\n    Raises:\n        ValueError: If the query is empty or max_results is invalid.\n        httpx.HTTPStatusError: If the API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "duckduckgo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetch and parse the main text content of a webpage.\n\n    Args:\n        url: The URL of the webpage to scrape (required).\n\n    Returns:\n        A string containing the cleaned, main text content of the webpage.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.HTTPStatusError: If the request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "duckduckgo_search": [
+      {
+        "case_name": "Basic Search Query",
+        "purpose": "验证 duckduckgo_search 能够执行基本搜索并返回结果。",
+        "args": {
+          "query": "artificial intelligence",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Artificial intelligence Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence\\\">Artificial intelligence</a> Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\"\n    },\n    {\n      \"title\": \"A.I. Artificial Intelligence A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\",\n      \"url\": \"https://duckduckgo.com/A.I._Artificial_Intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/A.I._Artificial_Intelligence\\\">A.I. Artificial Intelligence</a> A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\"\n    },\n    {\n      \"title\": \"Artificial intelligence in video games In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence_in_video_games\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence_in_video_games\\\">Artificial intelligence in video games</a>In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\"\n    }\n  ]\n}"
+        },
+        "execution_time": 1.827563762664795,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Custom Max Results",
+        "purpose": "测试当提供自定义 max_results 参数时，工具是否能正确返回指定数量的结果。",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 3
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Quantum computing Category\",\n      \"url\": \"https://duckduckgo.com/c/Quantum_computing\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Quantum_computing\\\">Quantum computing Category</a>\"\n    },\n    {\n      \"title\": \"Open problems\",\n      \"url\": \"https://duckduckgo.com/c/Open_problems\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Open_problems\\\">Open problems</a>\"\n    },\n    {\n      \"title\": \"Quantum cryptography\",\n      \"url\": \"https://duckduckgo.com/c/Quantum_cryptography\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Quantum_cryptography\\\">Quantum cryptography</a>\"\n    }\n  ]\n}"
+        },
+        "execution_time": 6.582027196884155,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Validation",
+        "purpose": "验证当查询为空时是否会抛出 ValueError。",
+        "args": {
+          "query": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Query cannot be empty."
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Validation",
+        "purpose": "测试当 max_results 为负数或非整数时是否会抛出 ValueError。",
+        "args": {
+          "query": "machine learning",
+          "max_results": -2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.004552125930786133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "验证搜索能否处理包含特殊字符的查询字符串。",
+        "args": {
+          "query": "!@#$%^&*()_+{}|:\"<>?",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Redirect response '301 Moved Permanently' for url 'https://api.duckduckgo.com/?q=!@#$%^&*()_+{}|:%22%3C%3E?&format=json&no_html=1&no_redirect=1'\nRedirect location: 'https://duckduckgo.com'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301"
+        },
+        "execution_time": 1.298421859741211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Max Results Zero",
+        "purpose": "测试 max_results 设置为 0 时的行为（边界条件）。",
+        "args": {
+          "query": "deep learning",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.00334930419921875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Large Max Results Boundary",
+        "purpose": "测试最大允许值附近的 max_results 行为（假设 DuckDuckGo API 支持最多100条）。",
+        "args": {
+          "query": "neural networks",
+          "max_results": 100
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.004013776779174805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test For Sensitive Input",
+        "purpose": "检查是否可以利用搜索参数注入敏感内容（如系统命令、SQL 片段等）。",
+        "args": {
+          "query": "'; DROP TABLE users; --",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Grammatical number - In linguistics, grammatical number is a feature of nouns, pronouns, adjectives and verb agreement that expresses count distinctions. English and many other languages present number categories of singular or plural. Some languages also have a dual, trial and paucal number or other arrangements.\",\n      \"url\": \"https://duckduckgo.com/Grammatical_number\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Grammatical_number\\\">Grammatical number</a> - In linguistics, grammatical number is a feature of nouns, pronouns, adjectives and verb agreement that expresses count distinctions. English and many other languages present number categories of singular or plural. Some languages also have a dual, trial and paucal number or other arrangements.\"\n    },\n    {\n      \"title\": \"Mathematical constant - A mathematical constant is a number whose value is fixed by an unambiguous definition, often referred to by a special symbol, or by mathematicians' names to facilitate using it across multiple mathematical problems.\",\n      \"url\": \"https://duckduckgo.com/Mathematical_constant\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Mathematical_constant\\\">Mathematical constant</a> - A mathematical constant is a number whose value is fixed by an unambiguous definition, often referred to by a special symbol, or by mathematicians' names to ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2997字符，剩余1597字符"
+        },
+        "execution_time": 1.688777208328247,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Empty URL Validation",
+        "purpose": "测试当提供空 URL 时是否会抛出 ValueError。",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: URL cannot be empty."
+        },
+        "execution_time": 0.005036115646362305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "验证无效格式的 URL 是否能被正确识别并抛出错误。",
+        "args": {
+          "url": "htp:/invalid-url-format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 0.45860958099365234,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 10
+}

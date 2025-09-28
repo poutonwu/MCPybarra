@@ -1,0 +1,370 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_automated_data_analysis",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_automated_data_analysis/refined/server.py",
+  "timestamp": "2025-07-13T03:49:02.581123",
+  "tools": [
+    {
+      "name": "load_csv",
+      "description": "\n    Load a CSV file into memory and store it with a user-defined dataset name.\n\n    Args:\n        file_path (str): The path to the CSV file to be loaded.\n        dataset_name (str): A unique name to associate with the dataset.\n\n    Returns:\n        str: JSON-formatted string indicating success or error.\n\n    Example:\n        load_csv(\"data/sales.csv\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "dataset_name"
+        ],
+        "title": "load_csvArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "run_script",
+      "description": "\n    Execute a Python script dynamically using a dataset loaded in memory.\n\n    Args:\n        script_code (str): The Python code to execute as a string.\n        dataset_name (str): The name of the dataset to pass to the script.\n\n    Returns:\n        str: JSON-formatted string indicating success or error with execution output.\n\n    Example:\n        run_script(\"print(dataset.head())\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "script_code": {
+            "title": "Script Code",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "script_code",
+          "dataset_name"
+        ],
+        "title": "run_scriptArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "explore_data",
+      "description": "\n    Generate an automated profile report for a dataset in memory.\n\n    Args:\n        dataset_name (str): The name of the dataset to explore.\n\n    Returns:\n        str: JSON-formatted string with summary insights and the path to the generated report.\n\n    Example:\n        explore_data(\"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "explore_dataArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_csv": [
+      {
+        "case_name": "Load Valid CSV File",
+        "purpose": "验证工具可以成功加载一个有效的CSV文件并以指定的名称存储在内存中。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'perf_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"perf_data\"}}"
+        },
+        "execution_time": 0.00999903678894043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load Non-CSV File",
+        "purpose": "验证工具是否能正确处理非CSV文件输入，返回错误信息。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.png",
+          "dataset_name": "image_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Only .csv or .zip files are supported.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.005646228790283203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Dataset Name",
+        "purpose": "测试当提供空字符串作为数据集名称时，工具是否能正确报错。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset '' loaded successfully.\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 0.011995315551757812,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Duplicate Dataset Name",
+        "purpose": "验证使用已存在的数据集名称是否会引发冲突或覆盖行为（根据预期设计）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'perf_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"perf_data\"}}"
+        },
+        "execution_time": 0.005001068115234375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Dataset Name",
+        "purpose": "验证工具是否支持在数据集名称中使用特殊字符。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "data@#%&_test"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'data@#%&_test' loaded successfully.\", \"outputs\": {\"dataset_name\": \"data@#%&_test\"}}"
+        },
+        "execution_time": 0.007998943328857422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid File Path",
+        "purpose": "验证工具能否优雅地处理无效或不存在的文件路径。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv",
+          "dataset_name": "invalid_file_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv\", \"outputs\": {}}"
+        },
+        "execution_time": 0.006996870040893555,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Dataset Name",
+        "purpose": "测试工具对长字符串作为数据集名称的处理能力。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries' loaded successfully.\", \"outputs\": {\"dataset_name\": \"a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries\"}}"
+        },
+        "execution_time": 0.010000228881835938,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "测试是否存在路径穿越漏洞风险，例如尝试访问上级目录中的文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\..\\etc\\passwd",
+          "dataset_name": "security_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\..\\\\etc\\\\passwd\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      }
+    ],
+    "explore_data": [
+      {
+        "case_name": "Explore Valid Dataset",
+        "purpose": "验证工具可以成功生成已加载数据集的概要分析报告。",
+        "args": {
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at perf_data_profile_report.html\", \"report_path\": \"perf_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"perf_data\"}}"
+        },
+        "execution_time": 2.9239985942840576,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore Nonexistent Dataset",
+        "purpose": "验证当尝试探索一个未加载的数据集时，工具是否能正确返回错误信息。",
+        "args": {
+          "dataset_name": "nonexistent_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_data' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004001140594482422,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Dataset Name",
+        "purpose": "测试使用空字符串作为数据集名称时的行为，确保工具能正确处理或报错。",
+        "args": {
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at _profile_report.html\", \"report_path\": \"_profile_report.html\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 2.3672640323638916,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Dataset Name",
+        "purpose": "验证工具是否支持在数据集名称中使用特殊字符并正确生成报告。",
+        "args": {
+          "dataset_name": "data@#%&_test"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at data@#%&_test_profile_report.html\", \"report_path\": \"data@#%&_test_profile_report.html\", \"outputs\": {\"dataset_name\": \"data@#%&_test\"}}"
+        },
+        "execution_time": 2.2322325706481934,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Dataset Name",
+        "purpose": "测试工具对极长数据集名称的处理能力。",
+        "args": {
+          "dataset_name": "a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries_profile_report.html\", \"report_path\": \"a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries_profile_report.html\", \"outputs\": {\"dataset_name\": \"a_very_long_dataset_name_that_exceeds_normal_length_requirements_and_tests_boundaries\"}}"
+        },
+        "execution_time": 2.427142381668091,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Dataset Name",
+        "purpose": "测试是否存在路径穿越漏洞风险，例如在数据集名称中嵌入路径信息。",
+        "args": {
+          "dataset_name": "..\\etc\\passwd"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset '..\\\\etc\\\\passwd' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.003992319107055664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore Dataset After Reload",
+        "purpose": "验证重复加载同一数据集后，能否正常进行探索分析。",
+        "args": {
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at perf_data_profile_report.html\", \"report_path\": \"perf_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"perf_data\"}}"
+        },
+        "execution_time": 2.102872610092163,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore Dataset with Special Encoding",
+        "purpose": "测试工具对包含特殊编码字符（如中文）的数据集名称的支持情况。",
+        "args": {
+          "dataset_name": "中文数据集名称"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset '\\u4e2d\\u6587\\u6570\\u636e\\u96c6\\u540d\\u79f0' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004509925842285156,
+        "is_functional_test": true
+      }
+    ],
+    "run_script": [
+      {
+        "case_name": "Execute Valid Script on Loaded Dataset",
+        "purpose": "验证工具可以成功执行一个简单的Python脚本，作用于已加载的合法数据集。",
+        "args": {
+          "script_code": "print(dataset.shape)",
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"perf_data\"}}"
+        },
+        "execution_time": 0.004999876022338867,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Script with Syntax Error",
+        "purpose": "验证工具在执行包含语法错误的脚本时能正确返回错误信息。",
+        "args": {
+          "script_code": "prnt(dataset.head())",
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"name 'prnt' is not defined\", \"outputs\": {}}"
+        },
+        "execution_time": 0.0030012130737304688,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute Script on Nonexistent Dataset",
+        "purpose": "验证当尝试对未加载的数据集执行脚本时，工具能正确报错。",
+        "args": {
+          "script_code": "print(dataset.describe())",
+          "dataset_name": "nonexistent_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_data' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.006298542022705078,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Dataset Name in Script Execution",
+        "purpose": "测试使用空字符串作为数据集名称时，工具是否能正确处理或报错。",
+        "args": {
+          "script_code": "print(dataset.columns)",
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 0.002998828887939453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Execute Script with Malicious Code",
+        "purpose": "验证工具是否能阻止执行潜在危险的系统命令或敏感操作。",
+        "args": {
+          "script_code": "import os; os.system('dir')",
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.04082655906677246,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Script Code",
+        "purpose": "验证工具是否能正确处理包含特殊字符的脚本代码。",
+        "args": {
+          "script_code": "print(dataset['@#%&_column'].unique())",
+          "dataset_name": "data@#%&_test"
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.0019922256469726562,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Script with Invalid Dataset Access",
+        "purpose": "验证脚本中尝试访问不存在的列或数据结构时，工具是否能正确报错。",
+        "args": {
+          "script_code": "print(dataset['nonexistent_column'].mean())",
+          "dataset_name": "perf_data"
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.0019998550415039062,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 23
+}

@@ -1,0 +1,202 @@
+[
+  {
+    "step": {
+      "step_id": "list_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all available tables in the database to verify basic functionality."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_tables.tables[0]"
+      },
+      "description": "Dependent call: Read data from the first table returned by list_tables to test table content retrieval."
+    },
+    "substituted_params": {
+      "table_name": "addresses"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"columns\": [\"id\", \"user_id\", \"street\", \"city\", \"state\", \"zip_code\", \"country\", \"is_primary\"], \"rows\": [{\"id\": 1, \"user_id\": 1, \"street\": \"\\u79d1\\u6280\\u5927\\u9053100\\u53f7\", \"city\": \"\\u5317\\u4eac\", \"state\": \"\\u5317\\u4eac\", \"zip_code\": \"100000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 2, \"user_id\": 1, \"street\": \"\\u79d1\\u6280\\u56ed20\\u53f7\", \"city\": \"\\u5317\\u4eac\", \"state\": \"\\u5317\\u4eac\", \"zip_code\": \"100001\", \"country\": \"China\", \"is_primary\": 0}, {\"id\": 3, \"user_id\": 2, \"street\": \"\\u5546\\u4e1a\\u885750\\u53f7\", \"city\": \"\\u4e0a\\u6d77\", \"state\": \"\\u4e0a\\u6d77\", \"zip_code\": \"200000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 4, \"user_id\": 3, \"street\": \"\\u6c7d\\u8f66\\u57ce15\\u53f7\", \"city\": \"\\u5e7f\\u5dde\", \"state\": \"\\u5e7f\\u4e1c\", \"zip_code\": \"510000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 5, \"user_id\": 4, \"street\": \"\\u8f6f\\u4ef6\\u56ed35\\u53f7\", \"city\": \"\\u6df1\\u5733\", \"state\": \"\\u5e7f\\u4e1c\", \"zip_code\": \"518000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 6, \"user_id\": 5, \"street\": \"\\u8d2d\\u7269\\u4e2d\\u5fc388\\u53f7\", \"city\": \"\\u676d\\u5dde\", \"state\": \"\\u6d59\\u6c5f\", \"zip_code\": \"310000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 7, \"user_id\": 6, \"street\": \"\\u521b\\u4e1a\\u8def77\\u53f7\", \"city\": \"\\u6210\\u90fd\", \"state\": \"\\u56db\\u5ddd\", \"zip_code\": \"610000\", \"country\": \"China\", \"is_primary\": 1}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "SELECT * FROM `$outputs.list_tables.tables[0]` LIMIT 1"
+      },
+      "description": "Happy path: Execute a SELECT query on the first table to validate SQL execution capability."
+    },
+    "substituted_params": {
+      "sql_query": "SELECT * FROM `$outputs.list_tables.tables[0]` LIMIT 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: SQL execution failed: 1146 (42S02): Table 'user-db.$outputs.list_tables.tables[0]' doesn't exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_sql",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "INVALID SQL QUERY"
+      },
+      "description": "Edge case: Test server's handling of invalid SQL syntax."
+    },
+    "substituted_params": {
+      "sql_query": "INVALID SQL QUERY"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: SQL execution failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INVALID SQL QUERY' at line 1"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_update_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "UPDATE `users` SET email = 'updated@example.com' WHERE id = 1"
+      },
+      "description": "Happy path: Execute an UPDATE query to test write operations. Assumes a 'users' table with id=1 exists."
+    },
+    "substituted_params": {
+      "sql_query": "UPDATE `users` SET email = 'updated@example.com' WHERE id = 1"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 1}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_update",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "users"
+      },
+      "description": "Dependent call: Verify the update was successfully applied by reading the users table again."
+    },
+    "substituted_params": {
+      "table_name": "users"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"columns\": [\"id\", \"username\", \"email\", \"age\", \"company_id\", \"created_at\"], \"rows\": [{\"id\": 1, \"username\": \"user1\", \"email\": \"updated@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null, \"created_at\": \"2025-06-30 22:13:23\"}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_nonexistent_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "nonexistent_table_for_testing"
+      },
+      "description": "Edge case: Test server's handling of nonexistent tables."
+    },
+    "substituted_params": {
+      "table_name": "nonexistent_table_for_testing"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_resource: Failed to read table nonexistent_table_for_testing: 1146 (42S02): Table 'user-db.nonexistent_table_for_testing' doesn't exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_sql_with_empty_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": ""
+      },
+      "description": "Edge case: Test server's validation for empty SQL queries."
+    },
+    "substituted_params": {
+      "sql_query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: SQL query must be a non-empty string"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+      },
+      "description": "Happy path: Create a test table to be used for subsequent tests."
+    },
+    "substituted_params": {
+      "sql_query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 0}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "INSERT INTO test_table (id, name) VALUES (1, 'Test Name')"
+      },
+      "description": "Happy path: Insert data into the newly created test table."
+    },
+    "substituted_params": {
+      "sql_query": "INSERT INTO test_table (id, name) VALUES (1, 'Test Name')"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 1}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_test_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "test_table"
+      },
+      "description": "Dependent call: Read back the inserted data to confirm successful insertion."
+    },
+    "substituted_params": {
+      "table_name": "test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"columns\": [\"id\", \"name\"], \"rows\": [{\"id\": 1, \"name\": \"Test Name\"}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "drop_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "DROP TABLE IF EXISTS test_table"
+      },
+      "description": "Cleanup: Remove the test table after testing is complete."
+    },
+    "substituted_params": {
+      "sql_query": "DROP TABLE IF EXISTS test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 0}"
+    }
+  }
+]

@@ -1,0 +1,898 @@
+{
+  "server_name": "server",
+  "parent_dir": "outlook_mcp_server_refined",
+  "report_name": "outlook_mcp_server_refined-server",
+  "server_path": "workspace\\refinement\\outlook_mcp_server_refined\\server.py",
+  "timestamp": "2025-06-30T22:12:42.641376",
+  "tools": [
+    {
+      "name": "list_folders",
+      "description": "列出所有可用的Outlook邮件文件夹。\n    \n    Args:\n        None\n\n    Returns:\n        str: 包含所有文件夹名称的JSON字符串。\n\n    Raises:\n        RuntimeError: 如果无法访问Outlook或获取文件夹列表失败。\n\n    示例:\n        >>> list_folders()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_foldersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_recent_emails",
+      "description": "获取指定天数内（支持指定文件夹）的邮件标题列表，并缓存邮件信息。\n    \n    Args:\n        days (int): 要检索的最近天数，默认为7天。必须是大于等于1的整数。\n        folder_name (str): 要搜索的文件夹名称，默认为'收件箱'。\n\n    Returns:\n        str: 包含邮件标题和ID的JSON字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        RuntimeError: 如果无法访问Outlook或获取邮件列表失败。\n\n    示例:\n        >>> list_recent_emails(days=3, folder_name=\"工作邮件\")\n    ",
+      "args_schema": {
+        "properties": {
+          "days": {
+            "default": 7,
+            "title": "Days",
+            "type": "integer"
+          },
+          "folder_name": {
+            "default": "收件箱",
+            "title": "Folder Name",
+            "type": "string"
+          }
+        },
+        "title": "list_recent_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_emails",
+      "description": "按联系人或关键词在指定时间段和文件夹内搜索邮件，并返回匹配邮件标题列表。\n    \n    Args:\n        query (str): 要搜索的关键词或联系人，不能为空且必须是字符串。\n        start_date (str): 开始日期，格式为YYYY-MM-DD。如果未提供，则不限制开始日期。\n        end_date (str): 结束日期，格式为YYYY-MM-DD。如果未提供，则默认为今天。\n        folder_name (str): 要搜索的文件夹名称，默认为'收件箱'。\n\n    Returns:\n        str: 包含匹配邮件标题和ID的JSON字符串。\n\n    Raises:\n        ValueError: 如果日期格式无效或查询参数无效。\n        RuntimeError: 如果搜索过程中发生错误。\n\n    示例:\n        >>> search_emails(query=\"项目报告\", start_date=\"2023-09-01\", end_date=\"2023-09-15\", folder_name=\"工作邮件\")\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "start_date": {
+            "default": null,
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "default": null,
+            "title": "End Date",
+            "type": "string"
+          },
+          "folder_name": {
+            "default": "收件箱",
+            "title": "Folder Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_email_by_number",
+      "description": "获取上次列出的邮件的详细内容，包括正文和附件信息。\n    \n    Args:\n        email_id (int): 邮件编号，来自之前调用list_recent_emails或search_emails的结果。\n\n    Returns:\n        str: 包含邮件详细信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果邮件ID无效或不存在。\n        RuntimeError: 如果获取邮件信息失败。\n\n    示例:\n        >>> get_email_by_number(email_id=42)\n    ",
+      "args_schema": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email_id"
+        ],
+        "title": "get_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "reply_to_email_by_number",
+      "description": "对指定编号的邮件进行回复，并发送回复内容。\n    \n    Args:\n        email_id (int): 邮件编号，来自之前调用list_recent_emails或search_emails的结果。\n        reply_text (str): 要发送的回复文本，不能为空且必须是字符串。\n\n    Returns:\n        str: 表示回复状态的JSON字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        RuntimeError: 如果回复邮件失败。\n\n    示例:\n        >>> reply_to_email_by_number(email_id=42, reply_text=\"感谢您的邮件，我会尽快回复。\")\n    ",
+      "args_schema": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "integer"
+          },
+          "reply_text": {
+            "title": "Reply Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email_id",
+          "reply_text"
+        ],
+        "title": "reply_to_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "compose_email",
+      "description": "新建并发送邮件，支持主题、正文、收件人和抄送。\n    \n    Args:\n        subject (str): 邮件主题，不能为空且必须是字符串。\n        body (str): 邮件正文，不能为空且必须是字符串。\n        to_recipients (list): 收件人电子邮件地址列表。\n        cc_recipients (list): 抄送收件人电子邮件地址列表，默认为空。\n\n    Returns:\n        str: 表示发送状态的JSON字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        RuntimeError: 如果发送邮件失败。\n\n    示例:\n        >>> compose_email(subject=\"会议通知\", body=\"明天下午3点开会，请准时参加。\", to_recipients=[\"john@example.com\", \"jane@example.com\"], cc_recipients=[\"manager@example.com\"])\n    ",
+      "args_schema": {
+        "properties": {
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "to_recipients": {
+            "items": {},
+            "title": "To Recipients",
+            "type": "array"
+          },
+          "cc_recipients": {
+            "default": [],
+            "items": {},
+            "title": "Cc Recipients",
+            "type": "array"
+          }
+        },
+        "required": [
+          "subject",
+          "body",
+          "to_recipients"
+        ],
+        "title": "compose_emailArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_folders": [
+      {
+        "case_name": "基本功能测试 - 列出所有Outlook文件夹",
+        "purpose": "验证list_folders工具能够正确列出Outlook中所有可用的邮件文件夹。",
+        "args": {},
+        "response": {
+          "result": "{\"folders\": [\"1291980381@qq.com\", \"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"大计基\", \"npx @modelcontextprotocol/inspector\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Feeds\", \"Outbound\", \"Inbound\", \"Contacts\", \"Organizational Contacts\", \"Recipient Cache\", \"Companies\", \"GAL Contacts\", \"{06967759-274D-40B2-A3EB-D7F9E73727D7}\", \"{A9E2BC46-B3A0-4243-B315-60D991004455}\", \"PeopleCentricConversation Buddies\", \"Conversation History\", \"Team Chat\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"同步问题\", \"冲突\", \"本地故障\", \"服务器故障\", \"RSS 源\", \"对话操作设置\", \"快速步骤设置\"]}"
+        },
+        "execution_time": 0.7505648136138916,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - Outlook中无可用文件夹",
+        "purpose": "验证当Outlook中没有任何可用文件夹时，工具是否能正确返回空列表或处理该情况。",
+        "args": {},
+        "response": {
+          "result": "{\"folders\": [\"1291980381@qq.com\", \"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"大计基\", \"npx @modelcontextprotocol/inspector\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Feeds\", \"Outbound\", \"Inbound\", \"Contacts\", \"Organizational Contacts\", \"Recipient Cache\", \"Companies\", \"GAL Contacts\", \"{06967759-274D-40B2-A3EB-D7F9E73727D7}\", \"{A9E2BC46-B3A0-4243-B315-60D991004455}\", \"PeopleCentricConversation Buddies\", \"Conversation History\", \"Team Chat\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"同步问题\", \"冲突\", \"本地故障\", \"服务器故障\", \"RSS 源\", \"对话操作设置\", \"快速步骤设置\"]}"
+        },
+        "execution_time": 0.7468388080596924,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - Outlook未运行或无法访问",
+        "purpose": "模拟Outlook未启动或权限不足导致无法访问的情况，验证工具是否抛出RuntimeError。",
+        "args": {},
+        "response": {
+          "result": "{\"folders\": [\"1291980381@qq.com\", \"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"大计基\", \"npx @modelcontextprotocol/inspector\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Feeds\", \"Outbound\", \"Inbound\", \"Contacts\", \"Organizational Contacts\", \"Recipient Cache\", \"Companies\", \"GAL Contacts\", \"{06967759-274D-40B2-A3EB-D7F9E73727D7}\", \"{A9E2BC46-B3A0-4243-B315-60D991004455}\", \"PeopleCentricConversation Buddies\", \"Conversation History\", \"Team Chat\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"同步问题\", \"冲突\", \"本地故障\", \"服务器故障\", \"RSS 源\", \"对话操作设置\", \"快速步骤设置\"]}"
+        },
+        "execution_time": 0.7512552738189697,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户调用工具",
+        "purpose": "验证非授权用户尝试调用list_folders工具时是否被正确阻止或抛出安全异常。",
+        "args": {},
+        "response": {
+          "result": "{\"folders\": [\"1291980381@qq.com\", \"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"大计基\", \"npx @modelcontextprotocol/inspector\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Feeds\", \"Outbound\", \"Inbound\", \"Contacts\", \"Organizational Contacts\", \"Recipient Cache\", \"Companies\", \"GAL Contacts\", \"{06967759-274D-40B2-A3EB-D7F9E73727D7}\", \"{A9E2BC46-B3A0-4243-B315-60D991004455}\", \"PeopleCentricConversation Buddies\", \"Conversation History\", \"Team Chat\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"同步问题\", \"冲突\", \"本地故障\", \"服务器故障\", \"RSS 源\", \"对话操作设置\", \"快速步骤设置\"]}"
+        },
+        "execution_time": 0.7713925838470459,
+        "is_security_test": true
+      }
+    ],
+    "list_recent_emails": [
+      {
+        "case_name": "基本功能测试 - 获取默认时间范围内的邮件列表",
+        "purpose": "验证工具在默认参数下（7天，收件箱）能正确获取最近邮件标题和ID。",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.8660576343536377,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 指定天数和文件夹获取邮件列表",
+        "purpose": "验证工具能根据指定的天数和文件夹名称获取对应邮件列表。",
+        "args": {
+          "days": 3,
+          "folder_name": "Sent Items"
+        },
+        "response": {
+          "result": "{\"emails\": [{\"id\": 19, \"subject\": \"测试邮件\"}, {\"id\": 20, \"subject\": \"测试抄送功能\"}, {\"id\": 21, \"subject\": \"测试空抄送字段\"}, {\"id\": 22, \"subject\": \"A\"}, {\"id\": 23, \"subject\": \"测试权限不足\"}, {\"id\": 24, \"subject\": \"测试邮件主题\"}, {\"id\": 25, \"subject\": \"带抄送的测试邮件\"}, {\"id\": 26, \"subject\": \"空CC字段测试邮件\"}, {\"id\": 27, \"subject\": \"边界测试邮件\"}, {\"id\": 28, \"subject\": \"这是一个非常长的邮件主题示例，用于测试compose_email工具对超长主题行的处理能力，确保不会因为主题过长而导致发送失败或系统异常。\"}, {\"id\": 29, \"subject\": \"空正文测试邮件\"}, {\"id\": 30, \"subject\": \"'; DROP TABLE emails;--\"}, {\"id\": 31, \"subject\": \"XSS攻击测试邮件\"}, {\"id\": 32, \"subject\": \"项目进度汇报\"}, {\"id\": 33, \"subject\": \"中文主题测试\"}, {\"id\": 34, \"subject\": \"系统更新通知\"}, {\"id\": 35, \"subject\": \"恶意脚本测试\"}, {\"id\": 36, \"subject\": \"你好，这是一个包含日文字符の测试邮件。テストメールです。\"}, {\"id\": 37, \"subject\": \"<script>alert('XSS')</script>\"}, {\"id\": 38, \"subject\": \"附带PDF报告的邮件...[截断]，共计3358字符，剩余2558字符"
+        },
+        "execution_time": 9.664637327194214,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 使用中文文件夹名获取邮件列表",
+        "purpose": "验证工具支持使用中文命名的Outlook文件夹进行邮件检索。",
+        "args": {
+          "days": 5,
+          "folder_name": "工作邮件"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: 找不到名为'工作邮件'的文件夹"
+        },
+        "execution_time": 0.805377721786499,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 最小有效天数",
+        "purpose": "验证工具在最小有效天数（1天）时是否能正常返回邮件列表。",
+        "args": {
+          "days": 1,
+          "folder_name": "Inbox"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: <unknown>.ReceivedTime"
+        },
+        "execution_time": 0.04720425605773926,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 非法天数输入（0天）",
+        "purpose": "验证工具在输入非法天数（0）时是否抛出ValueError。",
+        "args": {
+          "days": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: days参数必须是大于等于1的整数"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 输入非整型天数",
+        "purpose": "验证工具在days参数传入非整数时是否抛出ValueError。",
+        "args": {
+          "days": "seven"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 1 validation error for list_recent_emailsArguments\ndays\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='seven', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.008000850677490234,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - Outlook无法访问",
+        "purpose": "模拟Outlook未运行或连接失败的情况下，验证工具是否抛出RuntimeError。",
+        "args": {
+          "days": 2,
+          "folder_name": "Drafts"
+        },
+        "response": {
+          "result": "{\"emails\": []}"
+        },
+        "execution_time": 0.1280364990234375,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户尝试获取邮件列表",
+        "purpose": "验证非授权用户调用list_recent_emails工具时是否被拒绝或抛出安全异常。",
+        "args": {
+          "days": 3,
+          "folder_name": "Junk Email"
+        },
+        "response": {
+          "result": "{\"emails\": []}"
+        },
+        "execution_time": 0.11964058876037598,
+        "is_security_test": true
+      }
+    ],
+    "search_emails": [
+      {
+        "case_name": "基本功能测试 - 按关键词搜索指定时间段内的邮件",
+        "purpose": "验证工具能根据关键词在指定时间段和默认文件夹中正确搜索匹配的邮件标题列表。",
+        "args": {
+          "query": "项目报告",
+          "start_date": "2023-09-01",
+          "end_date": "2023-09-15"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.9362037181854248,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 按联系人搜索特定文件夹中的邮件",
+        "purpose": "验证工具能根据联系人名称在指定文件夹中搜索相关邮件，并返回正确的邮件标题和ID。",
+        "args": {
+          "query": "张三",
+          "folder_name": "Sent Items"
+        },
+        "response": {
+          "result": "{\"emails\": []}"
+        },
+        "execution_time": 0.7343428134918213,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 搜索所有时间范围内的邮件",
+        "purpose": "验证工具在未提供开始日期的情况下，能搜索从最早到当前的所有匹配邮件。",
+        "args": {
+          "query": "会议纪要",
+          "end_date": "2023-10-01"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.8263037204742432,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 搜索当天的邮件",
+        "purpose": "验证工具在开始日期与结束日期为同一天时能否正确返回当日匹配邮件。",
+        "args": {
+          "query": "今日任务",
+          "start_date": "2023-10-05",
+          "end_date": "2023-10-05"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.8208324909210205,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 搜索最大时间跨度的邮件",
+        "purpose": "验证工具是否支持搜索跨越多年的大时间范围邮件，如从1970年至今。",
+        "args": {
+          "query": "历史记录",
+          "start_date": "1970-01-01",
+          "end_date": "2023-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.8109714984893799,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 输入非法日期格式",
+        "purpose": "验证工具在输入不符合YYYY-MM-DD格式的日期时是否抛出ValueError。",
+        "args": {
+          "query": "错误测试",
+          "start_date": "2023/09/01",
+          "end_date": "2023-09-30"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 日期格式无效: time data '2023/09/01' does not match format '%Y-%m-%d'. 正确格式为YYYY-MM-DD"
+        },
+        "execution_time": 0.03012251853942871,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 查询参数为空",
+        "purpose": "验证工具在查询参数为空或缺失时是否抛出ValueError。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: query参数不能为空且必须是字符串"
+        },
+        "execution_time": 0.01599907875061035,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户调用搜索功能",
+        "purpose": "验证非授权用户尝试调用search_emails工具时是否被拒绝或抛出安全异常。",
+        "args": {
+          "query": "机密信息"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.8098444938659668,
+        "is_security_test": true
+      },
+      {
+        "case_name": "安全性测试 - 使用SQL注入字符串作为查询内容",
+        "purpose": "验证工具是否对查询参数进行安全过滤，防止SQL注入攻击。",
+        "args": {
+          "query": "' OR '1'='1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.7947118282318115,
+        "is_security_test": true
+      },
+      {
+        "case_name": "安全性测试 - 使用XSS脚本作为查询内容",
+        "purpose": "验证工具是否对查询参数进行转义处理，防止XSS攻击。",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'收件箱'的文件夹"
+        },
+        "execution_time": 0.803725004196167,
+        "is_security_test": false
+      },
+      {
+        "case_name": "性能测试 - 大范围搜索高匹配度关键词",
+        "purpose": "验证工具在搜索大量匹配邮件时的响应时间和稳定性。",
+        "args": {
+          "query": "test",
+          "start_date": "2020-01-01",
+          "end_date": "2023-12-31",
+          "folder_name": "Inbox"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: <unknown>.ReceivedTime"
+        },
+        "execution_time": 0.030994176864624023,
+        "is_security_test": false
+      },
+      {
+        "case_name": "兼容性测试 - 搜索包含中文字符的关键词",
+        "purpose": "验证工具是否支持使用中文关键词进行邮件搜索。",
+        "args": {
+          "query": "工作总结",
+          "folder_name": "工作邮件"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 找不到名为'工作邮件'的文件夹"
+        },
+        "execution_time": 0.7567453384399414,
+        "is_security_test": false
+      }
+    ],
+    "get_email_by_number": [
+      {
+        "case_name": "基本功能测试 - 获取已存在的邮件详细信息",
+        "purpose": "验证工具能够正确获取指定邮件ID的详细内容，包括正文和附件。",
+        "args": {
+          "email_id": 19
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为19的邮件"
+        },
+        "execution_time": 0.025002241134643555,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 获取包含附件的邮件详情",
+        "purpose": "验证工具能够正确返回包含附件的邮件详细信息，确保附件字段存在并正确解析。",
+        "args": {
+          "email_id": 25
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为25的邮件"
+        },
+        "execution_time": 0.05127406120300293,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 获取不同主题特征的邮件详情",
+        "purpose": "验证工具能够处理各种主题特征的邮件（如长主题、特殊字符等），并正确返回详细信息。",
+        "args": {
+          "email_id": 28
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为28的邮件"
+        },
+        "execution_time": 0.01800394058227539,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 使用最小有效邮件ID获取详情",
+        "purpose": "验证当邮件ID为最小有效值（如1）时，工具是否能正确返回该邮件的详细信息。",
+        "args": {
+          "email_id": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为1的邮件"
+        },
+        "execution_time": 0.0240023136138916,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 使用最大邮件ID获取详情",
+        "purpose": "验证当邮件ID为最大值（如38）时，工具是否能正确返回该邮件的详细信息。",
+        "args": {
+          "email_id": 38
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为38的邮件"
+        },
+        "execution_time": 0.017998218536376953,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 提供无效的邮件ID（负数）",
+        "purpose": "验证当用户提供负数作为邮件ID时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为-1的邮件"
+        },
+        "execution_time": 0.022001981735229492,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 提供不存在的邮件ID",
+        "purpose": "验证当提供的邮件ID在系统中不存在时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": 9999
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为9999的邮件"
+        },
+        "execution_time": 0.016997098922729492,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 输入非整型邮件ID",
+        "purpose": "验证当邮件ID参数传入非整数类型时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": "forty-two"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 1 validation error for get_email_by_numberArguments\nemail_id\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='forty-two', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.025004148483276367,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - SQL注入攻击尝试",
+        "purpose": "验证工具是否对邮件ID参数进行安全过滤，防止SQL注入攻击。",
+        "args": {
+          "email_id": "42 OR 1=1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 1 validation error for get_email_by_numberArguments\nemail_id\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='42 OR 1=1', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.037064313888549805,
+        "is_security_test": true
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户调用获取邮件详情",
+        "purpose": "验证非授权用户尝试调用get_email_by_number工具时是否被拒绝或抛出安全异常。",
+        "args": {
+          "email_id": 20
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为20的邮件"
+        },
+        "execution_time": 0.027001142501831055,
+        "is_security_test": true
+      }
+    ],
+    "reply_to_email_by_number": [
+      {
+        "case_name": "基本功能测试 - 使用有效邮件ID和回复内容进行回复",
+        "purpose": "验证工具能够使用有效的邮件ID和非空字符串回复内容正确发送回复。",
+        "args": {
+          "email_id": 25,
+          "reply_text": "感谢您的邮件，我会尽快处理。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为25的邮件"
+        },
+        "execution_time": 0.012000560760498047,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 回复包含特殊字符的邮件",
+        "purpose": "验证工具能够正确处理包含特殊字符的回复文本并成功发送。",
+        "args": {
+          "email_id": 19,
+          "reply_text": "这是一个包含特殊字符的回复：!@#$%^&*()_+=-{}[]|:;\"'<>,.?/`~"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为19的邮件"
+        },
+        "execution_time": 0.015004873275756836,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 回复长文本邮件",
+        "purpose": "验证工具能够处理较长的回复文本，并确保不会因内容过长而导致异常或失败。",
+        "args": {
+          "email_id": 38,
+          "reply_text": "这是一个非常长的回复内容示例，用于测试reply_to_email_by_number工具对超长文本的处理能力，确保不会因为内容过长而导致发送失败或系统异常。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为38的邮件"
+        },
+        "execution_time": 0.006997823715209961,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 使用最小有效邮件ID进行回复",
+        "purpose": "验证当提供最小有效邮件ID（如1）时，工具是否能正常处理并发送回复。",
+        "args": {
+          "email_id": 1,
+          "reply_text": "这是对最小邮件ID的回复测试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为1的邮件"
+        },
+        "execution_time": 0.022516489028930664,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 使用最大邮件ID进行回复",
+        "purpose": "验证当提供最大邮件ID（例如38）时，工具是否能正常处理并发送回复。",
+        "args": {
+          "email_id": 38,
+          "reply_text": "这是对最大邮件ID的回复测试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为38的邮件"
+        },
+        "execution_time": 0.021007537841796875,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 提供无效邮件ID（负数）",
+        "purpose": "验证当用户提供负数作为邮件ID时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": -1,
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为-1的邮件"
+        },
+        "execution_time": 0.016048908233642578,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 提供不存在的邮件ID",
+        "purpose": "验证当提供的邮件ID在系统中不存在时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": 9999,
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为9999的邮件"
+        },
+        "execution_time": 0.025777101516723633,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 输入非整型邮件ID",
+        "purpose": "验证当邮件ID参数传入非整数类型时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": "forty-two",
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 1 validation error for reply_to_email_by_numberArguments\nemail_id\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='forty-two', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.016009092330932617,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 提供空回复内容",
+        "purpose": "验证当回复内容为空字符串时，工具是否抛出ValueError。",
+        "args": {
+          "email_id": 20,
+          "reply_text": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: reply_text不能为空且必须是字符串"
+        },
+        "execution_time": 0.03705763816833496,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - SQL注入攻击尝试",
+        "purpose": "验证工具是否对邮件ID参数进行安全过滤，防止SQL注入攻击。",
+        "args": {
+          "email_id": "42 OR 1=1",
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 1 validation error for reply_to_email_by_numberArguments\nemail_id\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='42 OR 1=1', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.026998043060302734,
+        "is_security_test": true
+      },
+      {
+        "case_name": "安全性测试 - XSS脚本注入测试",
+        "purpose": "验证工具是否对回复文本参数进行转义处理，防止XSS攻击。",
+        "args": {
+          "email_id": 22,
+          "reply_text": "<script>alert('XSS')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为22的邮件"
+        },
+        "execution_time": 0.022011518478393555,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户调用回复功能",
+        "purpose": "验证非授权用户尝试调用reply_to_email_by_number工具时是否被拒绝或抛出安全异常。",
+        "args": {
+          "email_id": 20,
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为20的邮件"
+        },
+        "execution_time": 0.029999494552612305,
+        "is_security_test": true
+      }
+    ],
+    "compose_email": [
+      {
+        "case_name": "基本功能测试 - 发送包含主题、正文、收件人和抄送的邮件",
+        "purpose": "验证compose_email工具能够正确发送一封包含有效主题、正文、收件人列表和抄送列表的邮件。",
+        "args": {
+          "subject": "项目进度汇报",
+          "body": "各位同事，这是本周的项目进展报告，请查收。",
+          "to_recipients": [
+            "john@example.com",
+            "jane@example.com"
+          ],
+          "cc_recipients": [
+            "manager@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '项目进度汇报'\"}"
+        },
+        "execution_time": 6.038804292678833,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 发送不带抄送的邮件",
+        "purpose": "验证当cc_recipients为空时，compose_email工具仍能成功发送邮件。",
+        "args": {
+          "subject": "无抄送邮件测试",
+          "body": "这是一封没有抄送的测试邮件。",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '无抄送邮件测试'\"}"
+        },
+        "execution_time": 10.390512228012085,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 主题为最大长度字符串",
+        "purpose": "验证工具是否能处理超长主题字段并正常发送邮件。",
+        "args": {
+          "subject": "这是一个非常长的邮件主题示例，用于测试compose_email工具对超长主题行的处理能力，确保不会因为主题过长而导致发送失败或系统异常。",
+          "body": "这是一封主题超长但内容正常的测试邮件。",
+          "to_recipients": [
+            "user@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '这是一个非常长的邮件主题示例，用于测试compose_email工具对超长主题行的处理能力，确保不会因为主题过长而导致发送失败或系统异常。'\"}"
+        },
+        "execution_time": 7.014677286148071,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 正文为空格字符",
+        "purpose": "验证当邮件正文仅由空格组成时，工具是否将其视为非空并成功发送。",
+        "args": {
+          "subject": "空白正文测试",
+          "body": "   ",
+          "to_recipients": [
+            "empty_body@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '空白正文测试'\"}"
+        },
+        "execution_time": 7.728817462921143,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 空主题",
+        "purpose": "验证当subject参数为空字符串时，工具是否抛出ValueError。",
+        "args": {
+          "subject": "",
+          "body": "这是一封测试邮件。",
+          "to_recipients": [
+            "error_test@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 无法发送邮件: subject不能为空且必须是字符串"
+        },
+        "execution_time": 0.03126215934753418,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 邮件正文为None",
+        "purpose": "验证当body参数为None时，工具是否抛出ValueError。",
+        "args": {
+          "subject": "无效正文测试",
+          "body": null,
+          "to_recipients": [
+            "invalid@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 1 validation error for compose_emailArguments\nbody\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0356748104095459,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 收件人地址格式错误",
+        "purpose": "验证当to_recipients中包含非法电子邮件格式时，工具是否抛出ValueError。",
+        "args": {
+          "subject": "错误邮箱测试",
+          "body": "这是一封测试邮件，发往格式错误的邮箱。",
+          "to_recipients": [
+            "invalid-email@domain"
+          ],
+          "cc_recipients": [
+            "manager@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 无法发送邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', 'Outlook 无法识别一个或多个名称。 ', None, 0, -2147467259), None)"
+        },
+        "execution_time": 6.689786911010742,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - SQL注入尝试",
+        "purpose": "验证工具是否对邮件主题进行安全过滤，防止SQL注入攻击。",
+        "args": {
+          "subject": "DROP TABLE users;",
+          "body": "这是一封包含SQL注入尝试的测试邮件。",
+          "to_recipients": [
+            "sql_injection@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 'DROP TABLE users;'\"}"
+        },
+        "execution_time": 6.375457048416138,
+        "is_security_test": true
+      },
+      {
+        "case_name": "安全性测试 - XSS脚本注入测试",
+        "purpose": "验证工具是否对邮件正文进行转义处理，防止XSS攻击。",
+        "args": {
+          "subject": "XSS攻击测试",
+          "body": "<script>alert('xss')</script>",
+          "to_recipients": [
+            "xss_attack@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 'XSS攻击测试'\"}"
+        },
+        "execution_time": 6.15505051612854,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 使用恶意文件作为附件（模拟）",
+        "purpose": "验证工具在集成附件发送时能否检测并阻止潜在恶意文件发送。",
+        "args": {
+          "subject": "恶意脚本附件测试",
+          "body": "这是一封包含潜在恶意脚本附件的测试邮件。",
+          "to_recipients": [
+            "malicious@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '恶意脚本附件测试'\"}"
+        },
+        "execution_time": 6.917191743850708,
+        "is_security_test": false
+      }
+    ]
+  },
+  "total_cases": 56
+}

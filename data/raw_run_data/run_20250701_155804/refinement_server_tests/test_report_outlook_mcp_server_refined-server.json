@@ -1,0 +1,1050 @@
+{
+  "server_name": "server",
+  "parent_dir": "outlook_mcp_server_refined",
+  "report_name": "outlook_mcp_server_refined-server",
+  "server_path": "workspace\\refinement\\outlook_mcp_server_refined\\server.py",
+  "timestamp": "2025-07-01T17:07:21.696209",
+  "tools": [
+    {
+      "name": "list_folders",
+      "description": "列出所有可用的Outlook邮件文件夹。\n    \n    Args:\n        None\n\n    Returns:\n        str: 包含所有文件夹名称的JSON字符串。\n\n    Raises:\n        RuntimeError: 如果无法访问Outlook或获取文件夹列表失败。\n\n    示例:\n        >>> list_folders()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_foldersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_recent_emails",
+      "description": "获取指定天数内（支持指定文件夹）的邮件标题列表，并缓存邮件信息。\n    \n    Args:\n        days (int): 要检索的最近天数，默认为7天。必须是大于等于1的整数。\n        folder_name (str): 要搜索的文件夹名称，默认为'收件箱'。\n\n    Returns:\n        str: 包含邮件标题和ID的JSON字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        RuntimeError: 如果无法访问Outlook或获取邮件列表失败。\n\n    示例:\n        >>> list_recent_emails(days=3, folder_name=\"工作邮件\")\n    ",
+      "args_schema": {
+        "properties": {
+          "days": {
+            "default": 7,
+            "title": "Days",
+            "type": "integer"
+          },
+          "folder_name": {
+            "default": "收件箱",
+            "title": "Folder Name",
+            "type": "string"
+          }
+        },
+        "title": "list_recent_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_emails",
+      "description": "按联系人或关键词在指定时间段和文件夹内搜索邮件，并返回匹配邮件标题列表。\n    \n    Args:\n        query (str): 要搜索的关键词或联系人，不能为空且必须是字符串。\n        start_date (str): 开始日期，格式为YYYY-MM-DD。如果未提供，则不限制开始日期。\n        end_date (str): 结束日期，格式为YYYY-MM-DD。如果未提供，则默认为今天。\n        folder_name (str): 要搜索的文件夹名称，默认为'收件箱'。\n\n    Returns:\n        str: 包含匹配邮件标题和ID的JSON字符串。\n\n    Raises:\n        ValueError: 如果日期格式无效或查询参数无效。\n        RuntimeError: 如果搜索过程中发生错误。\n\n    示例:\n        >>> search_emails(query=\"项目报告\", start_date=\"2023-09-01\", end_date=\"2023-09-15\", folder_name=\"工作邮件\")\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "start_date": {
+            "default": null,
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "default": null,
+            "title": "End Date",
+            "type": "string"
+          },
+          "folder_name": {
+            "default": "收件箱",
+            "title": "Folder Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_email_by_number",
+      "description": "获取上次列出的邮件的详细内容，包括正文和附件信息。\n    \n    Args:\n        email_id (int): 邮件编号，来自之前调用list_recent_emails或search_emails的结果。\n\n    Returns:\n        str: 包含邮件详细信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果邮件ID无效或不存在。\n        RuntimeError: 如果获取邮件信息失败。\n\n    示例:\n        >>> get_email_by_number(email_id=42)\n    ",
+      "args_schema": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email_id"
+        ],
+        "title": "get_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "reply_to_email_by_number",
+      "description": "对指定编号的邮件进行回复，并发送回复内容。\n    \n    Args:\n        email_id (int): 邮件编号，来自之前调用list_recent_emails或search_emails的结果。\n        reply_text (str): 要发送的回复文本，不能为空且必须是字符串。\n\n    Returns:\n        str: 表示回复状态的JSON字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        RuntimeError: 如果回复邮件失败。\n\n    示例:\n        >>> reply_to_email_by_number(email_id=42, reply_text=\"感谢您的邮件，我会尽快回复。\")\n    ",
+      "args_schema": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "integer"
+          },
+          "reply_text": {
+            "title": "Reply Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email_id",
+          "reply_text"
+        ],
+        "title": "reply_to_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "compose_email",
+      "description": "新建并发送邮件，支持主题、正文、收件人和抄送。\n    \n    Args:\n        subject (str): 邮件主题，不能为空且必须是字符串。\n        body (str): 邮件正文，不能为空且必须是字符串。\n        to_recipients (list): 收件人电子邮件地址列表。\n        cc_recipients (list): 抄送收件人电子邮件地址列表，默认为空。\n\n    Returns:\n        str: 表示发送状态的JSON字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        RuntimeError: 如果发送邮件失败。\n\n    示例:\n        >>> compose_email(subject=\"会议通知\", body=\"明天下午3点开会，请准时参加。\", to_recipients=[\"john@example.com\", \"jane@example.com\"], cc_recipients=[\"manager@example.com\"])\n    ",
+      "args_schema": {
+        "properties": {
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "to_recipients": {
+            "items": {},
+            "title": "To Recipients",
+            "type": "array"
+          },
+          "cc_recipients": {
+            "default": [],
+            "items": {},
+            "title": "Cc Recipients",
+            "type": "array"
+          }
+        },
+        "required": [
+          "subject",
+          "body",
+          "to_recipients"
+        ],
+        "title": "compose_emailArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_folders": [
+      {
+        "case_name": "Basic Folder Listing Success",
+        "purpose": "验证 list_folders 能够成功列出Outlook邮件文件夹（模拟正常工作情况）",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.17000031471252441,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Folder List Handling",
+        "purpose": "测试当Outlook中没有可用邮件文件夹时工具的响应行为",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.3085496425628662,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Folder Name Encoding Test",
+        "purpose": "验证是否能正确处理包含非ASCII字符（如中文、日文等）的文件夹名称",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.21729207038879395,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Large Folder List Performance",
+        "purpose": "测试大量邮件文件夹情况下 list_folders 的性能与稳定性",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.2186441421508789,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "No Outlook Access Security Check",
+        "purpose": "验证在无Outlook访问权限的情况下是否拒绝执行并抛出异常",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.21299219131469727,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Malformed Folder Data Handling",
+        "purpose": "测试工具在接收到格式错误或损坏的文件夹数据时的容错能力",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.22664737701416016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Outlook Connection Failure Error Handling",
+        "purpose": "验证当Outlook服务不可用时能否正确抛出 RuntimeError",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.19376540184020996,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Folder Name with Special Characters",
+        "purpose": "测试包含特殊字符（如空格、括号、符号）的文件夹名称是否被正确返回",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.21405720710754395,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Folder Name Length Boundary Test",
+        "purpose": "测试超长文件夹名称（超过255字符）是否能被正确处理",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.22219276428222656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Nested Folder Structure Handling",
+        "purpose": "验证多层嵌套文件夹结构是否能被正确识别并列出",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.18267560005187988,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Duplicate Folder Names Handling",
+        "purpose": "测试存在多个同名文件夹时，工具是否能够区分并完整列出",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.24666714668273926,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "System Resource Exhaustion Test",
+        "purpose": "验证在系统资源不足（如内存、CPU）情况下工具是否能优雅失败",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_folders: 无法列出文件夹: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.1810135841369629,
+        "is_functional_test": false
+      }
+    ],
+    "list_recent_emails": [
+      {
+        "case_name": "Basic Email Listing Success",
+        "purpose": "验证 list_recent_emails 能够成功列出默认7天内收件箱中的邮件标题和ID（模拟正常工作情况）",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.23781251907348633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Days Email Listing",
+        "purpose": "测试指定非默认天数（如3天）是否能正确列出邮件标题和ID",
+        "args": {
+          "days": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.17498040199279785,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Folder Email Listing",
+        "purpose": "测试指定非默认文件夹（如'工作邮件'）是否能正确列出邮件标题和ID",
+        "args": {
+          "folder_name": "工作邮件"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.1513669490814209,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Custom Days and Folder",
+        "purpose": "验证同时指定自定义天数和文件夹时能否正确返回邮件列表",
+        "args": {
+          "days": 5,
+          "folder_name": "重要邮件"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.17626500129699707,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Minimum Days Boundary Test",
+        "purpose": "测试最小合法天数（days=1）是否能正确执行",
+        "args": {
+          "days": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.2324540615081787,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Days Type Handling",
+        "purpose": "测试传递字符串类型的 days 参数是否会抛出 ValueError",
+        "args": {
+          "days": "seven"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 1 validation error for list_recent_emailsArguments\ndays\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='seven', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.029518604278564453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Days Error Handling",
+        "purpose": "验证负值作为 days 参数时是否抛出 ValueError",
+        "args": {
+          "days": -3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: days参数必须是大于等于1的整数"
+        },
+        "execution_time": 0.04559922218322754,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Outlook Connection Failure Handling",
+        "purpose": "验证当Outlook服务不可用时能否正确抛出 RuntimeError",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.18723607063293457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Folder Handling",
+        "purpose": "测试不存在的文件夹名称是否引发异常或返回空结果",
+        "args": {
+          "folder_name": "不存在的文件夹"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.21274280548095703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Folder Name",
+        "purpose": "验证包含特殊字符（如空格、括号、符号）的文件夹名称是否被正确处理",
+        "args": {
+          "folder_name": "项目 (2024)"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.2312934398651123,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Folder Name Handling",
+        "purpose": "验证是否能正确处理包含非ASCII字符（如中文、日文等）的文件夹名称",
+        "args": {
+          "folder_name": "客户邮件-日本語"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.17032504081726074,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Days Boundary Test",
+        "purpose": "测试极端大值作为 days 参数时的行为（如365天）",
+        "args": {
+          "days": 365
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: 无法列出最近邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.16308236122131348,
+        "is_functional_test": true
+      }
+    ],
+    "search_emails": [
+      {
+        "case_name": "Basic Email Search Success",
+        "purpose": "验证在默认参数下（收件箱、无时间限制）能否成功搜索到包含关键词的邮件标题列表",
+        "args": {
+          "query": "项目报告"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.1809983253479004,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Search with Date Range and Folder",
+        "purpose": "测试指定时间段和文件夹时能否正确返回匹配邮件标题列表",
+        "args": {
+          "query": "会议纪要",
+          "start_date": "2023-09-01",
+          "end_date": "2023-09-15",
+          "folder_name": "工作邮件"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.13904762268066406,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Only Start Date",
+        "purpose": "验证仅提供开始日期时是否能正确执行搜索",
+        "args": {
+          "query": "合同",
+          "start_date": "2023-08-01"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.13466191291809082,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Only End Date",
+        "purpose": "验证仅提供结束日期时是否能正确执行搜索",
+        "args": {
+          "query": "发票",
+          "end_date": "2023-09-10"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.1369953155517578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Handling",
+        "purpose": "测试空查询字符串是否引发 ValueError",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: query参数不能为空且必须是字符串"
+        },
+        "execution_time": 0.007997989654541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Date Format Handling",
+        "purpose": "验证非法日期格式是否抛出 ValueError",
+        "args": {
+          "query": "报告",
+          "start_date": "2023/09/01"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: 日期格式无效: time data '2023/09/01' does not match format '%Y-%m-%d'. 正确格式为YYYY-MM-DD"
+        },
+        "execution_time": 0.014010906219482422,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Future End Date Handling",
+        "purpose": "测试使用未来日期作为 end_date 是否能正常处理",
+        "args": {
+          "query": "客户",
+          "end_date": "2099-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.12551307678222656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Nonexistent Folder Handling",
+        "purpose": "测试不存在的文件夹名称是否返回空结果或引发异常",
+        "args": {
+          "query": "测试",
+          "folder_name": "不存在的文件夹"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.1307375431060791,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证查询关键词中包含特殊字符是否被正确处理",
+        "args": {
+          "query": "test@company.com"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.14562129974365234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Query Handling",
+        "purpose": "测试包含非ASCII字符（如中文、日文）的查询是否被正确处理",
+        "args": {
+          "query": "プロジェクト"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.13399815559387207,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Outlook Connection Failure Handling",
+        "purpose": "验证当Outlook服务不可用时能否正确抛出 RuntimeError",
+        "args": {
+          "query": "错误处理测试"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: 无法搜索邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '网络问题阻止到 Microsoft Exchange 的连接。', None, 0, -2147221227), None)"
+        },
+        "execution_time": 0.13362717628479004,
+        "is_functional_test": false
+      }
+    ],
+    "get_email_by_number": [
+      {
+        "case_name": "Basic Email Detail Retrieval Success",
+        "purpose": "验证 get_email_by_number 能够成功获取邮件详细信息（正文和附件）的正常工作情况",
+        "args": {
+          "email_id": 42
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为42的邮件"
+        },
+        "execution_time": 0.014509201049804688,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Email ID Handling",
+        "purpose": "测试传递非法邮件ID（如负数）时是否抛出 ValueError",
+        "args": {
+          "email_id": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为-1的邮件"
+        },
+        "execution_time": 0.013997077941894531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Email ID Handling",
+        "purpose": "验证不存在的邮件ID是否引发 ValueError",
+        "args": {
+          "email_id": 999999
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为999999的邮件"
+        },
+        "execution_time": 0.006997108459472656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Outlook Connection Failure Handling",
+        "purpose": "验证当Outlook服务不可用时能否正确抛出 RuntimeError",
+        "args": {
+          "email_id": 100
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为100的邮件"
+        },
+        "execution_time": 0.009999275207519531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Minimum Valid Email ID Boundary Test",
+        "purpose": "测试最小合法邮件ID（如0）是否能正确执行",
+        "args": {
+          "email_id": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为0的邮件"
+        },
+        "execution_time": 0.007454395294189453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Email ID Boundary Test",
+        "purpose": "测试极大邮件ID值是否能被系统正确处理",
+        "args": {
+          "email_id": 2147483647
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为2147483647的邮件"
+        },
+        "execution_time": 0.019525527954101562,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email with Attachments Retrieval",
+        "purpose": "验证带有多个附件的邮件能否被完整获取，包括附件信息",
+        "args": {
+          "email_id": 55
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为55的邮件"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Email Body Handling",
+        "purpose": "测试空邮件正文是否能被正确返回而不会导致错误",
+        "args": {
+          "email_id": 60
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为60的邮件"
+        },
+        "execution_time": 0.019010066986083984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Email Content",
+        "purpose": "验证邮件内容包含特殊字符（如HTML标签、表情符号）是否被正确返回",
+        "args": {
+          "email_id": 73
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为73的邮件"
+        },
+        "execution_time": 0.006998777389526367,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Email Content Handling",
+        "purpose": "测试包含非ASCII字符（如中文、日文）的邮件正文是否被正确处理",
+        "args": {
+          "email_id": 88
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为88的邮件"
+        },
+        "execution_time": 0.007999420166015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Large Email Size Performance Test",
+        "purpose": "测试超大邮件（如含高清图片或大型PDF附件）获取时的性能与稳定性",
+        "args": {
+          "email_id": 101
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为101的邮件"
+        },
+        "execution_time": 0.0060045719146728516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "No Access to Email Security Check",
+        "purpose": "验证在无权限访问指定邮件时是否拒绝执行并抛出异常",
+        "args": {
+          "email_id": 200
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 无法获取邮件详情: 找不到ID为200的邮件"
+        },
+        "execution_time": 0.01799750328063965,
+        "is_functional_test": false
+      }
+    ],
+    "reply_to_email_by_number": [
+      {
+        "case_name": "Basic Email Reply Success",
+        "purpose": "验证使用有效邮件ID和回复文本能够成功发送回复（模拟正常工作情况）",
+        "args": {
+          "email_id": 42,
+          "reply_text": "感谢您的邮件，我会尽快回复。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为42的邮件"
+        },
+        "execution_time": 0.04399991035461426,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Reply Text Handling",
+        "purpose": "测试空字符串作为 reply_text 参数时是否抛出 ValueError",
+        "args": {
+          "email_id": 100,
+          "reply_text": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: reply_text不能为空且必须是字符串"
+        },
+        "execution_time": 0.015000343322753906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Email ID Handling",
+        "purpose": "验证对不存在的邮件ID进行回复是否会抛出 RuntimeError",
+        "args": {
+          "email_id": 999999,
+          "reply_text": "这是对不存在邮件的回复尝试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为999999的邮件"
+        },
+        "execution_time": 0.03200101852416992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Email ID Type Handling",
+        "purpose": "测试传递字符串类型的 email_id 是否会抛出 ValueError",
+        "args": {
+          "email_id": "fortytwo",
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 1 validation error for reply_to_email_by_numberArguments\nemail_id\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='fortytwo', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.03699326515197754,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Email ID Handling",
+        "purpose": "验证负值作为 email_id 是否会抛出 ValueError",
+        "args": {
+          "email_id": -5,
+          "reply_text": "这是一条测试回复内容。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为-5的邮件"
+        },
+        "execution_time": 0.020352602005004883,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Outlook Connection Failure Handling",
+        "purpose": "验证当Outlook服务不可用时能否正确抛出 RuntimeError",
+        "args": {
+          "email_id": 101,
+          "reply_text": "Outlook连接失败时的回复测试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为101的邮件"
+        },
+        "execution_time": 0.0239870548248291,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Reply Text Handling",
+        "purpose": "测试包含非ASCII字符（如中文、日文）的回复文本是否被正确处理",
+        "args": {
+          "email_id": 73,
+          "reply_text": "これは日本語の返信テストです。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为73的邮件"
+        },
+        "execution_time": 0.01899409294128418,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Reply Text",
+        "purpose": "验证回复文本中包含特殊字符（如HTML标签、表情符号）是否被正确发送",
+        "args": {
+          "email_id": 88,
+          "reply_text": "这是一个包含<b>HTML标签</b>和😊表情的回复测试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为88的邮件"
+        },
+        "execution_time": 0.020733356475830078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Minimum Valid Email ID Boundary Test",
+        "purpose": "测试最小合法邮件ID（如0）是否能正确执行回复",
+        "args": {
+          "email_id": 0,
+          "reply_text": "这是对最小合法邮件ID的回复测试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为0的邮件"
+        },
+        "execution_time": 0.023999929428100586,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Email ID Boundary Test",
+        "purpose": "测试极大邮件ID值是否能被系统正确处理",
+        "args": {
+          "email_id": 2147483647,
+          "reply_text": "这是对最大合法邮件ID的回复测试。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为2147483647的邮件"
+        },
+        "execution_time": 0.01599907875061035,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "No Access to Email Security Check",
+        "purpose": "验证在无权限访问指定邮件时是否拒绝执行并抛出异常",
+        "args": {
+          "email_id": 200,
+          "reply_text": "尝试回复无访问权限的邮件。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: 无法回复邮件: 找不到ID为200的邮件"
+        },
+        "execution_time": 0.028162002563476562,
+        "is_functional_test": false
+      }
+    ],
+    "compose_email": [
+      {
+        "case_name": "Basic Email Composition Success",
+        "purpose": "验证使用有效参数（主题、正文、收件人）能否成功发送邮件",
+        "args": {
+          "subject": "测试邮件",
+          "body": "这是一封测试邮件，请忽略。",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '测试邮件'\"}"
+        },
+        "execution_time": 47.93867826461792,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email with CC Recipients",
+        "purpose": "验证包含抄送收件人的邮件是否能被正确发送",
+        "args": {
+          "subject": "带抄送的测试邮件",
+          "body": "这是一封包含抄送的测试邮件。",
+          "to_recipients": [
+            "john@example.com"
+          ],
+          "cc_recipients": [
+            "jane@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '带抄送的测试邮件'\"}"
+        },
+        "execution_time": 7.75486946105957,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Subject Handling",
+        "purpose": "测试空字符串作为 subject 参数时是否抛出 ValueError",
+        "args": {
+          "subject": "",
+          "body": "这是一封测试邮件。",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 无法发送邮件: subject不能为空且必须是字符串"
+        },
+        "execution_time": 0.02499866485595703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Body Handling",
+        "purpose": "测试空字符串作为 body 参数时是否抛出 ValueError",
+        "args": {
+          "subject": "空正文测试",
+          "body": "",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 无法发送邮件: body不能为空且必须是字符串"
+        },
+        "execution_time": 0.03300070762634277,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid To Recipient Format",
+        "purpose": "测试非法格式的收件人邮箱地址是否引发错误",
+        "args": {
+          "subject": "无效收件人测试",
+          "body": "这是一封测试邮件，用于测试无效收件人。",
+          "to_recipients": [
+            "invalid-email"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 无法发送邮件: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', 'Outlook 无法识别一个或多个名称。 ', None, 0, -2147467259), None)"
+        },
+        "execution_time": 29.94005537033081,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multiple Recipients and CCs",
+        "purpose": "验证多个收件人和抄送收件人是否能被正确处理",
+        "args": {
+          "subject": "多收件人测试",
+          "body": "这是一封发送给多个收件人和抄送的测试邮件。",
+          "to_recipients": [
+            "user1@example.com",
+            "user2@example.com"
+          ],
+          "cc_recipients": [
+            "cc1@example.com",
+            "cc2@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '多收件人测试'\"}"
+        },
+        "execution_time": 10.158296585083008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Subject",
+        "purpose": "验证邮件主题中包含特殊字符是否被正确处理",
+        "args": {
+          "subject": "测试邮件!@#$%^&*()",
+          "body": "这是一封包含特殊字符的主题测试邮件。",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '测试邮件!@#$%^&*()'\"}"
+        },
+        "execution_time": 50.32238268852234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Content Handling",
+        "purpose": "测试包含非ASCII字符（如中文、日文）的邮件内容是否被正确处理",
+        "args": {
+          "subject": "これは日本語のテストメールです",
+          "body": "このメールはUnicode文字列を含むテストメールです。",
+          "to_recipients": [
+            "recipient@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 'これは日本語のテストメールです'\"}"
+        },
+        "execution_time": 8.064474105834961,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Outlook Connection Failure Handling",
+        "purpose": "验证当Outlook服务不可用时能否正确抛出 RuntimeError",
+        "args": {
+          "subject": "Outlook连接失败测试",
+          "body": "Outlook服务不可用时的邮件发送测试。",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 'Outlook连接失败测试'\"}"
+        },
+        "execution_time": 10.18315076828003,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Minimum Recipient List Boundary",
+        "purpose": "测试最小合法收件人列表（仅一个收件人）是否能正确执行",
+        "args": {
+          "subject": "最小收件人测试",
+          "body": "只包含一个收件人的测试邮件。",
+          "to_recipients": [
+            "single@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '最小收件人测试'\"}"
+        },
+        "execution_time": 15.088496446609497,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Recipient List Boundary",
+        "purpose": "测试极大收件人列表是否能被系统正确处理",
+        "args": {
+          "subject": "最大收件人测试",
+          "body": "包含大量收件人的测试邮件。",
+          "to_recipients": [
+            "user1@example.com",
+            "user2@example.com",
+            "user3@example.com",
+            "user4@example.com",
+            "user5@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '最大收件人测试'\"}"
+        },
+        "execution_time": 13.269189596176147,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "No CC Recipients Default Handling",
+        "purpose": "验证未提供 cc_recipients 时是否使用默认值空列表",
+        "args": {
+          "subject": "无抄送测试",
+          "body": "这是一封没有抄送收件人的测试邮件。",
+          "to_recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"已成功发送邮件 '无抄送测试'\"}"
+        },
+        "execution_time": 10.539841651916504,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 70
+}

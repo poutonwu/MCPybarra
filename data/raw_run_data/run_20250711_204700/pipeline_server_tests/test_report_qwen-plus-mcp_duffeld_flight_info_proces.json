@@ -1,0 +1,841 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_duffeld_flight_info_proces",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_duffeld_flight_info_proces/refined/server.py",
+  "timestamp": "2025-07-11T20:48:54.735439",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    Search for flights based on origin, destination, dates, cabin class, and passengers.\n\n    Args:\n        origin: Departure airport IATA code (3 letters).\n        destination: Arrival airport IATA code (3 letters).\n        departure_date: Departure date in YYYY-MM-DD format.\n        return_date: Return date in YYYY-MM-DD format (optional).\n        cabin_class: Cabin class preference (optional).\n        passengers: List of passengers with type and age.\n\n    Returns:\n        JSON string containing flight details.\n\n    Raises:\n        ValueError: If inputs are invalid.\n        httpx.HTTPStatusError: If API call fails.\n\n    Example:\n        search_flights(origin=\"LAX\", destination=\"JFK\", departure_date=\"2023-12-25\", passengers=[Passenger(type='adult')])\n    ",
+      "args_schema": {
+        "$defs": {
+          "Passenger": {
+            "properties": {
+              "type": {
+                "description": "Passenger type ('adult', 'child', 'infant')",
+                "title": "Type",
+                "type": "string"
+              },
+              "age": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Passenger age",
+                "title": "Age"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "title": "Passenger",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "departure_date": {
+            "title": "Departure Date",
+            "type": "string"
+          },
+          "return_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Return Date"
+          },
+          "cabin_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cabin Class"
+          },
+          "passengers": {
+            "default": [
+              {
+                "type": "adult",
+                "age": null
+              }
+            ],
+            "items": {
+              "$ref": "#/$defs/Passenger"
+            },
+            "title": "Passengers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure_date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    Retrieve detailed information about a specific flight offer.\n\n    Args:\n        offer_id: Unique ID for the flight offer.\n\n    Returns:\n        Full details including price breakdown, baggage allowance, and cancellation policy.\n\n    Raises:\n        ValueError: If input is invalid.\n        httpx.HTTPStatusError: If API call fails.\n\n    Example:\n        get_offer_details(offer_id=\"off_1234567890\")\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    Search for multi-city flights with custom cabin class and passenger list.\n\n    Args:\n        segments: List of flight segments with origin, destination, and departure date.\n        cabin_class: Preferred cabin class (optional).\n        passengers: List of passengers with type and age.\n\n    Returns:\n        JSON string with multi-city flight combinations and pricing.\n\n    Raises:\n        ValueError: If input is invalid.\n        httpx.HTTPStatusError: If API call fails.\n\n    Example:\n        search_multi_city(segments=[{\"origin\": \"LAX\", \"destination\": \"CHI\", \"departure_date\": \"2023-12-25\"}], passengers=[Passenger(type='adult')])\n    ",
+      "args_schema": {
+        "$defs": {
+          "Passenger": {
+            "properties": {
+              "type": {
+                "description": "Passenger type ('adult', 'child', 'infant')",
+                "title": "Type",
+                "type": "string"
+              },
+              "age": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Passenger age",
+                "title": "Age"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "title": "Passenger",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "segments": {
+            "items": {
+              "type": "object"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "cabin_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cabin Class"
+          },
+          "passengers": {
+            "default": [
+              {
+                "type": "adult",
+                "age": null
+              }
+            ],
+            "items": {
+              "$ref": "#/$defs/Passenger"
+            },
+            "title": "Passengers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "segments"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic Flight Search with Default Parameters",
+        "purpose": "验证使用默认参数的基本航班搜索功能是否正常工作。",
+        "args": {
+          "origin": "LAX",
+          "destination": "JFK",
+          "departure_date": "2023-12-25",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.005940914154052734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Return Date",
+        "purpose": "验证包含返回日期的航班搜索是否能正确执行。",
+        "args": {
+          "origin": "SFO",
+          "destination": "ORD",
+          "departure_date": "2023-11-15",
+          "return_date": "2023-11-20",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.004004955291748047,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Cabin Class Preference",
+        "purpose": "验证带有舱位等级偏好的航班搜索是否能正确执行。",
+        "args": {
+          "origin": "ATL",
+          "destination": "MIA",
+          "departure_date": "2023-10-10",
+          "cabin_class": "business",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.004509925842285156,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Multiple Passengers",
+        "purpose": "验证包含多个乘客（成人、儿童）的航班搜索是否能正确执行。",
+        "args": {
+          "origin": "SEA",
+          "destination": "DEN",
+          "departure_date": "2024-01-05",
+          "passengers": [
+            {
+              "type": "adult"
+            },
+            {
+              "type": "child",
+              "age": 8
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Infant Passenger",
+        "purpose": "验证包含婴儿乘客的航班搜索是否能正确执行。",
+        "args": {
+          "origin": "BOS",
+          "destination": "PHX",
+          "departure_date": "2023-09-20",
+          "passengers": [
+            {
+              "type": "adult"
+            },
+            {
+              "type": "infant",
+              "age": 1
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.00808095932006836,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Origin Airport Code",
+        "purpose": "验证当输入无效出发机场代码时工具是否抛出 ValueError。",
+        "args": {
+          "origin": "XYZ",
+          "destination": "JFK",
+          "departure_date": "2023-12-25",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.010519027709960938,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Departure Date",
+        "purpose": "验证缺少必填出发日期时是否抛出 ValueError。",
+        "args": {
+          "origin": "LAX",
+          "destination": "JFK",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\ndeparture_date\n  Field required [type=missing, input_value={'origin': 'LAX', 'destin...s': [{'type': 'adult'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.008329153060913086,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Date Format",
+        "purpose": "验证使用错误日期格式时是否抛出 ValueError。",
+        "args": {
+          "origin": "LAX",
+          "destination": "JFK",
+          "departure_date": "2023/12/25",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Parameter validation failed: 1 validation error for SearchFlightsParams\ndeparture_date\n  String should match pattern '\\d{4}-\\d{2}-\\d{2}' [type=string_pattern_mismatch, input_value='2023/12/25', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_pattern_mismatch"
+        },
+        "execution_time": 0.013057470321655273,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Passenger Age",
+        "purpose": "验证输入负数年龄时是否抛出 ValueError。",
+        "args": {
+          "origin": "MCO",
+          "destination": "EWR",
+          "departure_date": "2023-08-15",
+          "passengers": [
+            {
+              "type": "child",
+              "age": -5
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.011905431747436523,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Cabin Class Input",
+        "purpose": "验证输入无效舱位等级时是否抛出 ValueError。",
+        "args": {
+          "origin": "DFW",
+          "destination": "CLT",
+          "departure_date": "2023-07-10",
+          "cabin_class": "luxury",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.010929584503173828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Flight Search with Special Characters in IATA Codes",
+        "purpose": "验证输入特殊字符作为IATA代码时是否抛出 ValueError。",
+        "args": {
+          "origin": "L@X",
+          "destination": "J#K",
+          "departure_date": "2023-12-25",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Duffel API request failed: OfferRequestClient.create() got an unexpected keyword argument 'slices'"
+        },
+        "execution_time": 0.011539697647094727,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Retrieval",
+        "purpose": "验证使用有效 offer_id 是否能成功获取航班报价详细信息。",
+        "args": {
+          "offer_id": "off_1234567890"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.006009101867675781,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Offer ID Input",
+        "purpose": "验证输入空 offer_id 时是否抛出 ValueError。",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.002997159957885742,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only Offer ID",
+        "purpose": "验证输入仅包含空白字符的 offer_id 时是否抛出 ValueError。",
+        "args": {
+          "offer_id": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.0052585601806640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Offer ID",
+        "purpose": "验证输入包含特殊字符的 offer_id 是否被正确处理或抛出错误。",
+        "args": {
+          "offer_id": "off_!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.005538463592529297,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-String Offer ID Input",
+        "purpose": "验证输入非字符串类型的 offer_id 是否抛出参数验证错误。",
+        "args": {
+          "offer_id": 1234567890
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\noffer_id\n  Input should be a valid string [type=string_type, input_value=1234567890, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.005986452102661133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer Details API Failure Simulation",
+        "purpose": "模拟 API 调用失败情况，验证工具是否抛出 httpx.HTTPStatusError。",
+        "args": {
+          "offer_id": "off_invalid_api_call"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.003512859344482422,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt in Offer ID",
+        "purpose": "测试 offer_id 中包含 SQL 注入尝试时是否被安全拦截。",
+        "args": {
+          "offer_id": "off_1234567890'; DROP TABLE offers;--"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.004002809524536133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt in Offer ID",
+        "purpose": "测试 offer_id 中包含 XSS 尝试时是否被安全拦截。",
+        "args": {
+          "offer_id": "off_1234567890<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.0045146942138671875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer ID with Unicode Characters",
+        "purpose": "验证包含 Unicode 字符的 offer_id 是否被正确处理。",
+        "args": {
+          "offer_id": "off_你好世界_123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Duffel API request failed: HTTPAdapter.send() got an unexpected keyword argument 'client'"
+        },
+        "execution_time": 0.007997751235961914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Offer ID Parameter",
+        "purpose": "验证未提供 offer_id 参数时是否抛出参数缺失错误。",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\noffer_id\n  Field required [type=missing, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.00400853157043457,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi-City Search with Default Parameters",
+        "purpose": "验证使用默认参数的基本多城市航班搜索功能是否正常工作。",
+        "args": {
+          "segments": [
+            {
+              "origin": "LAX",
+              "destination": "CHI",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments\n  List should have at least 2 items after validation, not 1 [type=too_short, input_value=[{'origin': 'LAX', 'desti...re_date': '2023-12-25'}], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short"
+        },
+        "execution_time": 0.004833698272705078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Business Class Preference",
+        "purpose": "验证带有商务舱位偏好的多城市航班搜索是否能正确执行。",
+        "args": {
+          "segments": [
+            {
+              "origin": "JFK",
+              "destination": "MIA",
+              "departure_date": "2024-01-10"
+            },
+            {
+              "origin": "MIA",
+              "destination": "ORD",
+              "departure_date": "2024-01-15"
+            }
+          ],
+          "cabin_class": "business",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0050013065338134766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Multiple Passengers",
+        "purpose": "验证包含多个乘客（成人、儿童）的多城市航班搜索是否能正确执行。",
+        "args": {
+          "segments": [
+            {
+              "origin": "SFO",
+              "destination": "SEA",
+              "departure_date": "2023-11-20"
+            },
+            {
+              "origin": "SEA",
+              "destination": "DEN",
+              "departure_date": "2023-11-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            },
+            {
+              "type": "child",
+              "age": 6
+            }
+          ]
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.007509469985961914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Infant Passenger",
+        "purpose": "验证包含婴儿乘客的多城市航班搜索是否能正确执行。",
+        "args": {
+          "segments": [
+            {
+              "origin": "BOS",
+              "destination": "PHX",
+              "departure_date": "2023-09-20"
+            },
+            {
+              "origin": "PHX",
+              "destination": "ATL",
+              "departure_date": "2023-09-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            },
+            {
+              "type": "infant",
+              "age": 1
+            }
+          ]
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.00529170036315918,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Invalid Origin Airport Code",
+        "purpose": "验证当输入无效出发机场代码时工具是否抛出 ValueError。",
+        "args": {
+          "segments": [
+            {
+              "origin": "XYZ",
+              "destination": "JFK",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments\n  List should have at least 2 items after validation, not 1 [type=too_short, input_value=[{'origin': 'XYZ', 'desti...re_date': '2023-12-25'}], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Missing Departure Date",
+        "purpose": "验证缺少必填出发日期时是否抛出 ValueError。",
+        "args": {
+          "segments": [
+            {
+              "origin": "LAX",
+              "destination": "JFK"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments.0.departure_date\n  Field required [type=missing, input_value={'origin': 'LAX', 'destination': 'JFK'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.00450897216796875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Invalid Date Format",
+        "purpose": "验证使用错误日期格式时是否抛出 ValueError。",
+        "args": {
+          "segments": [
+            {
+              "origin": "LAX",
+              "destination": "JFK",
+              "departure_date": "2023/12/25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments.0.departure_date\n  String should match pattern '\\d{4}-\\d{2}-\\d{2}' [type=string_pattern_mismatch, input_value='2023/12/25', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_pattern_mismatch"
+        },
+        "execution_time": 0.007509469985961914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Negative Passenger Age",
+        "purpose": "验证输入负数年龄时是否抛出 ValueError。",
+        "args": {
+          "segments": [
+            {
+              "origin": "MCO",
+              "destination": "EWR",
+              "departure_date": "2023-08-15"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "child",
+              "age": -5
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments\n  List should have at least 2 items after validation, not 1 [type=too_short, input_value=[{'origin': 'MCO', 'desti...re_date': '2023-08-15'}], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short"
+        },
+        "execution_time": 0.003620624542236328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Invalid Cabin Class Input",
+        "purpose": "验证输入无效舱位等级时是否抛出 ValueError。",
+        "args": {
+          "segments": [
+            {
+              "origin": "DFW",
+              "destination": "CLT",
+              "departure_date": "2023-07-10"
+            }
+          ],
+          "cabin_class": "luxury",
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments\n  List should have at least 2 items after validation, not 1 [type=too_short, input_value=[{'origin': 'DFW', 'desti...re_date': '2023-07-10'}], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short"
+        },
+        "execution_time": 0.0055806636810302734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Special Characters in IATA Codes",
+        "purpose": "验证输入特殊字符作为IATA代码时是否抛出 ValueError。",
+        "args": {
+          "segments": [
+            {
+              "origin": "L@X",
+              "destination": "J#K",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Parameter validation failed: 1 validation error for SearchMultiCityParams\nsegments\n  List should have at least 2 items after validation, not 1 [type=too_short, input_value=[{'origin': 'L@X', 'desti...re_date': '2023-12-25'}], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.10/v/too_short"
+        },
+        "execution_time": 0.010321617126464844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt in Passenger Type",
+        "purpose": "测试乘客类型中包含 SQL 注入尝试时是否被安全拦截。",
+        "args": {
+          "segments": [
+            {
+              "origin": "LAX",
+              "destination": "CHI",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult'; DROP TABLE passengers;--"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\npassengers.0.type\n  Value error, Invalid passenger type. Must be one of ['adult', 'child', 'infant']. [type=value_error, input_value=\"adult'; DROP TABLE passengers;--\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+        },
+        "execution_time": 0.005171537399291992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt in Passenger Type",
+        "purpose": "测试乘客类型中包含 XSS 尝试时是否被安全拦截。",
+        "args": {
+          "segments": [
+            {
+              "origin": "LAX",
+              "destination": "CHI",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "passengers": [
+            {
+              "type": "adult<script>alert('xss')</script>"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\npassengers.0.type\n  Value error, Invalid passenger type. Must be one of ['adult', 'child', 'infant']. [type=value_error, input_value=\"adult<script>alert('xss')</script>\", input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+        },
+        "execution_time": 0.0061457157135009766,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 33
+}

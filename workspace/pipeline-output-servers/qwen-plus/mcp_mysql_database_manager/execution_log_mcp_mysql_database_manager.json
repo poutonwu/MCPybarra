@@ -1,0 +1,185 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all available tables in the database to verify basic functionality."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "{\"tables\": [\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table_data",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_all_tables.tables[0]"
+      },
+      "description": "Dependent call: Read data from the first table returned by list_all_tables to test table content retrieval."
+    },
+    "substituted_params": {
+      "table_name": "addresses"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"columns\": [\"id\", \"user_id\", \"street\", \"city\", \"state\", \"zip_code\", \"country\", \"is_primary\"], \"rows\": [{\"id\": 1, \"user_id\": 1, \"street\": \"\\u79d1\\u6280\\u5927\\u9053100\\u53f7\", \"city\": \"\\u5317\\u4eac\", \"state\": \"\\u5317\\u4eac\", \"zip_code\": \"100000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 2, \"user_id\": 1, \"street\": \"\\u79d1\\u6280\\u56ed20\\u53f7\", \"city\": \"\\u5317\\u4eac\", \"state\": \"\\u5317\\u4eac\", \"zip_code\": \"100001\", \"country\": \"China\", \"is_primary\": 0}, {\"id\": 3, \"user_id\": 2, \"street\": \"\\u5546\\u4e1a\\u885750\\u53f7\", \"city\": \"\\u4e0a\\u6d77\", \"state\": \"\\u4e0a\\u6d77\", \"zip_code\": \"200000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 4, \"user_id\": 3, \"street\": \"\\u6c7d\\u8f66\\u57ce15\\u53f7\", \"city\": \"\\u5e7f\\u5dde\", \"state\": \"\\u5e7f\\u4e1c\", \"zip_code\": \"510000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 5, \"user_id\": 4, \"street\": \"\\u8f6f\\u4ef6\\u56ed35\\u53f7\", \"city\": \"\\u6df1\\u5733\", \"state\": \"\\u5e7f\\u4e1c\", \"zip_code\": \"518000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 6, \"user_id\": 5, \"street\": \"\\u8d2d\\u7269\\u4e2d\\u5fc388\\u53f7\", \"city\": \"\\u676d\\u5dde\", \"state\": \"\\u6d59\\u6c5f\", \"zip_code\": \"310000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 7, \"user_id\": 6, \"street\": \"\\u521b\\u4e1a\\u8def77\\u53f7\", \"city\": \"\\u6210\\u90fd\", \"state\": \"\\u56db\\u5ddd\", \"zip_code\": \"610000\", \"country\": \"China\", \"is_primary\": 1}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "SELECT * FROM `$outputs.list_all_tables.tables[0]` LIMIT 1"
+      },
+      "description": "Happy path: Execute a SELECT query on the first table to verify SQL execution and result formatting."
+    },
+    "substituted_params": {
+      "sql_query": "SELECT * FROM `$outputs.list_all_tables.tables[0]` LIMIT 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: SQL execution failed: 1146 (42S02): Table 'user-db.$outputs.list_all_tables.tables[0]' doesn't exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_update_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "UPDATE `$outputs.list_all_tables.tables[0]` SET name = 'TestUser' WHERE id = 1"
+      },
+      "description": "Edge case: Attempt an UPDATE operation to validate write operations and affected row count reporting."
+    },
+    "substituted_params": {
+      "sql_query": "UPDATE `$outputs.list_all_tables.tables[0]` SET name = 'TestUser' WHERE id = 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: SQL execution failed: 1146 (42S02): Table 'user-db.$outputs.list_all_tables.tables[0]' doesn't exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_sql",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "INVALID SQL QUERY"
+      },
+      "description": "Edge case: Test error handling for malformed SQL queries."
+    },
+    "substituted_params": {
+      "sql_query": "INVALID SQL QUERY"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: SQL execution failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INVALID SQL QUERY' at line 1"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_nonexistent_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "nonexistent_table_for_testing"
+      },
+      "description": "Edge case: Attempt to read from a non-existent table to test error handling."
+    },
+    "substituted_params": {
+      "table_name": "nonexistent_table_for_testing"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_resource: Failed to read table nonexistent_table_for_testing: 1146 (42S02): Table 'user-db.nonexistent_table_for_testing' doesn't exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_show_tables_sql",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "SHOW TABLES"
+      },
+      "description": "Happy path: Use execute_sql to fetch list of tables, cross-checking with list_resources output."
+    },
+    "substituted_params": {
+      "sql_query": "SHOW TABLES"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"columns\": [\"Tables_in_user-db\"], \"rows\": [{\"Tables_in_user-db\": \"addresses\"}, {\"Tables_in_user-db\": \"companies\"}, {\"Tables_in_user-db\": \"order_items\"}, {\"Tables_in_user-db\": \"orders\"}, {\"Tables_in_user-db\": \"products\"}, {\"Tables_in_user-db\": \"reviews\"}, {\"Tables_in_user-db\": \"users\"}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_create_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+      },
+      "description": "Happy path: Create a new table using raw SQL to test DDL execution."
+    },
+    "substituted_params": {
+      "sql_query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 0}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "INSERT INTO test_table (id, name) VALUES (1, 'TestName')"
+      },
+      "description": "Happy path: Insert data into newly created table to verify write operations."
+    },
+    "substituted_params": {
+      "sql_query": "INSERT INTO test_table (id, name) VALUES (1, 'TestName')"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 1}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_from_test_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "test_table"
+      },
+      "description": "Dependent call: Read data from test_table to confirm successful insert operation."
+    },
+    "substituted_params": {
+      "table_name": "test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"columns\": [\"id\", \"name\"], \"rows\": [{\"id\": 1, \"name\": \"TestName\"}]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "drop_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "sql_query": "DROP TABLE test_table"
+      },
+      "description": "Cleanup: Remove test_table after testing completes."
+    },
+    "substituted_params": {
+      "sql_query": "DROP TABLE test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 0}"
+    }
+  }
+]

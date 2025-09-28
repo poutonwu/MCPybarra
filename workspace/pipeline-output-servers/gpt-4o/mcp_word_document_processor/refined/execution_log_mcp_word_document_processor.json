@@ -1,0 +1,223 @@
+[
+  {
+    "step": {
+      "step_id": "create_new_document",
+      "tool_name": "create_document",
+      "parameters": {
+        "title": "Test Document",
+        "author": "Jane Smith",
+        "subject": "Testing Word Processing"
+      },
+      "description": "Happy path: Create a new document with valid metadata."
+    },
+    "substituted_params": {
+      "title": "Test Document",
+      "author": "Jane Smith",
+      "subject": "Testing Word Processing"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Document created successfully\", \"file_path\": \"Test_Document.docx\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_document_creation",
+      "tool_name": "get_document_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path"
+      },
+      "description": "Dependent call: Confirm the document was created by retrieving its (initially empty) text content."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "add_first_paragraph",
+      "tool_name": "add_paragraph",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "text": "This is the first paragraph of the test document."
+      },
+      "description": "Dependent call: Add a paragraph to the newly created document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "text": "This is the first paragraph of the test document."
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Paragraph added successfully\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "add_heading_1",
+      "tool_name": "add_heading",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "text": "Introduction",
+        "level": 1
+      },
+      "description": "Dependent call: Add a level-1 heading to the document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "text": "Introduction",
+      "level": 1
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Heading added successfully\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "add_custom_style",
+      "tool_name": "create_custom_style",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "style_name": "CustomHeadingStyle",
+        "font_name": "Calibri",
+        "font_size": 14,
+        "bold": true,
+        "italic": false
+      },
+      "description": "Dependent call: Define a custom style for headings."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "style_name": "CustomHeadingStyle",
+      "font_name": "Calibri",
+      "font_size": 14,
+      "bold": true,
+      "italic": false
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"<WD_PARAGRAPH_ALIGNMENT.LEFT: 0> is not a valid WD_STYLE_TYPE\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "format_heading_with_style",
+      "tool_name": "format_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "start": 0,
+        "end": 1,
+        "style_name": "CustomHeadingStyle"
+      },
+      "description": "Dependent call: Apply the custom style to the previously added heading."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "start": 0,
+      "end": 1,
+      "style_name": "CustomHeadingStyle"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"\\\"no style with name 'CustomHeadingStyle'\\\"\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "retrieve_second_paragraph",
+      "tool_name": "get_paragraph_text_from_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "paragraph_index": 1
+      },
+      "description": "Dependent call: Retrieve the second paragraph (the heading) by index."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "paragraph_index": 1
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"Introduction\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_for_paragraph_text",
+      "tool_name": "find_text_in_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "search_text": "first paragraph"
+      },
+      "description": "Dependent call: Search for the presence of the first paragraph's content."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "search_text": "first paragraph"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"occurrences\": [0]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "attempt_password_protection",
+      "tool_name": "protect_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "password": "test_password_123"
+      },
+      "description": "Edge case: Attempt to add password protection, expecting an implementation error."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "password": "test_password_123"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Password protection not implemented\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "attempt_footnote_addition",
+      "tool_name": "add_footnote_to_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "text": "This is a test footnote."
+      },
+      "description": "Edge case: Attempt to add a footnote, expecting an implementation error."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "text": "This is a test footnote."
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Footnote addition not implemented\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_final_document_content",
+      "tool_name": "get_document_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path"
+      },
+      "description": "Dependent call: Retrieve all text to confirm final document structure and content."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"This is the first paragraph of the test document.\\nIntroduction\"}"
+    }
+  }
+]

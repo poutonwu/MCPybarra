@@ -1,0 +1,1012 @@
+{
+  "server_name": "server",
+  "parent_dir": "ssh_mcp_server_automation_refined",
+  "report_name": "ssh_mcp_server_automation_refined-server",
+  "server_path": "workspace\\refinement\\ssh_mcp_server_automation_refined\\server.py",
+  "timestamp": "2025-06-30T22:13:01.080626",
+  "tools": [
+    {
+      "name": "connect",
+      "description": "\n    建立SSH连接。\n\n    Args:\n        hostname: 远程服务器主机名或IP地址 (必填)。（默认的服务器是10.70.0.133，已经配置了免密登录，特别说明）\n        username: 登录用户名 (必填)。\n        password: 登录密码 (可选，如果使用密钥认证则不需要)。（10.70.0.133使用了密钥无需密码）\n        private_key_path: 私钥文件路径 (可选，如果使用密码认证则不需要)。\n        port: SSH端口号，默认为22 (可选)。\n\n    Returns:\n        一个JSON格式的字符串，包含会话ID和连接状态。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        ConnectionError: 如果连接失败。\n        RuntimeError: 如果发生其他错误。\n\n    示例:\n        connect(hostname=\"example.com\", username=\"user1\", password=\"pass123\", port=22)\n        connect(hostname=\"192.168.1.100\", username=\"admin\", private_key_path=\"/path/to/private_key.pem\")\n    ",
+      "args_schema": {
+        "properties": {
+          "hostname": {
+            "default": "10.70.0.133",
+            "title": "Hostname",
+            "type": "string"
+          },
+          "username": {
+            "default": "pengbocheng",
+            "title": "Username",
+            "type": "string"
+          },
+          "password": {
+            "default": null,
+            "title": "Password",
+            "type": "string"
+          },
+          "private_key_path": {
+            "default": null,
+            "title": "Private Key Path",
+            "type": "string"
+          },
+          "port": {
+            "default": 26002,
+            "title": "Port",
+            "type": "integer"
+          }
+        },
+        "title": "connectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "disconnect",
+      "description": "\n    断开指定的SSH会话。\n\n    Args:\n        session_id: 要断开的会话ID (必填)。\n\n    Returns:\n        一个JSON格式的字符串，包含操作结果。\n\n    Raises:\n        ValueError: 如果会话ID无效。\n        RuntimeError: 如果发生其他错误。\n\n    示例:\n        disconnect(session_id=\"session_1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "disconnectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_sessions",
+      "description": "\n    列出所有活跃的SSH会话。\n\n    Returns:\n        一个JSON格式的字符串，包含所有活跃会话的信息。\n\n    示例:\n        list_sessions()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_sessionsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute",
+      "description": "\n    在远程服务器上执行命令。\n\n    Args:\n        session_id: 要使用的会话ID (必填)。\n        command: 要执行的命令 (必填)。\n        timeout: 命令执行超时时间（秒），默认10秒 (可选)。\n        stdin_data: 要发送到标准输入的数据 (可选)。\n\n    Returns:\n        一个JSON格式的字符串，包含标准输出、标准错误和退出状态。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        RuntimeError: 如果执行命令时发生错误。\n\n    示例:\n        execute(session_id=\"session_1\", command=\"ls -l\", timeout=5)\n        execute(session_id=\"session_2\", command=\"echo \"Hello World\"\", stdin_data=\"input data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "timeout": {
+            "default": 10,
+            "title": "Timeout",
+            "type": "integer"
+          },
+          "stdin_data": {
+            "default": null,
+            "title": "Stdin Data",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "title": "executeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "upload",
+      "description": "\n    上传文件到远程服务器。\n\n    Args:\n        session_id: 要使用的会话ID (必填)。\n        local_path: 本地文件路径 (必填)。\n        remote_path: 远程目标路径 (必填)。\n\n    Returns:\n        一个JSON格式的字符串，包含上传结果。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        FileNotFoundError: 如果本地文件不存在。\n        RuntimeError: 如果上传过程中发生错误。\n\n    示例:\n        upload(session_id=\"session_1\", local_path=\"/local/path/file.txt\", remote_path=\"/remote/path/file.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "local_path",
+          "remote_path"
+        ],
+        "title": "uploadArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download",
+      "description": "\n    从远程服务器下载文件。\n\n    Args:\n        session_id: 要使用的会话ID (必填)。\n        remote_path: 远程文件路径 (必填)。\n        local_path: 本地目标路径 (必填)。\n\n    Returns:\n        一个JSON格式的字符串，包含下载结果。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        RuntimeError: 如果下载过程中发生错误。\n\n    示例:\n        download(session_id=\"session_1\", remote_path=\"/remote/path/file.txt\", local_path=\"/local/path/file.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "remote_path",
+          "local_path"
+        ],
+        "title": "downloadArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "connect": [
+      {
+        "case_name": "BasicConnectWithDefaultParams",
+        "purpose": "验证使用默认参数是否能成功建立SSH连接（10.70.0.133，端口26002，用户名pengbocheng，密钥登录）",
+        "args": {
+          "hostname": "10.70.0.133",
+          "username": "pengbocheng",
+          "private_key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\mas.png",
+          "port": 26002
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: 'gbk' codec can't decode byte 0xa2 in position 23: illegal multibyte sequence\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.025058746337890625,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithPasswordAuthentication",
+        "purpose": "验证使用密码认证方式是否可以成功建立SSH连接（假设目标服务器支持密码登录）",
+        "args": {
+          "hostname": "example.com",
+          "username": "user1",
+          "password": "pass123",
+          "port": 22
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: [WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 21.13808536529541,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithCustomPrivateKeyPath",
+        "purpose": "验证使用自定义私钥路径是否可以成功建立SSH连接",
+        "args": {
+          "hostname": "192.168.1.100",
+          "username": "admin",
+          "private_key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\mas.png"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: 'gbk' codec can't decode byte 0xa2 in position 23: illegal multibyte sequence\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.020416259765625,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithInvalidHostname",
+        "purpose": "验证传入无效主机名时是否抛出ConnectionError",
+        "args": {
+          "hostname": "invalid.hostname.example",
+          "username": "user",
+          "password": "pass"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: [Errno 11001] getaddrinfo failed\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.09051108360290527,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithInvalidPort",
+        "purpose": "验证传入无效端口号时是否抛出ConnectionError",
+        "args": {
+          "hostname": "example.com",
+          "username": "user",
+          "password": "pass",
+          "port": 99999
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u7aef\\u53e3\\u5fc5\\u987b\\u57281-65535\\u4e4b\\u95f4\\uff0c\\u5f53\\u524d\\u503c: 99999\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.01500248908996582,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithoutRequiredParameters",
+        "purpose": "验证未提供必填参数时是否抛出ValueError",
+        "args": {
+          "hostname": "",
+          "username": ""
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: hostname\\u548cusername\\u662f\\u5fc5\\u586b\\u53c2\\u6570\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.029000043869018555,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithBothAuthMethods",
+        "purpose": "验证同时提供密码和私钥路径是否会正确处理（优先使用密钥）",
+        "args": {
+          "hostname": "example.com",
+          "username": "user",
+          "password": "pass",
+          "private_key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\mas.png"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: 'gbk' codec can't decode byte 0xa2 in position 23: illegal multibyte sequence\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.015492916107177734,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithEmptyPrivateKeyPath",
+        "purpose": "验证私钥路径为空但使用密钥认证时是否抛出ValueError",
+        "args": {
+          "hostname": "example.com",
+          "username": "user",
+          "private_key_path": ""
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u5fc5\\u987b\\u63d0\\u4f9b\\u5bc6\\u7801\\u6216\\u79c1\\u94a5\\u6587\\u4ef6\\u8def\\u5f84\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.019000768661499023,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithNonExistentPrivateKey",
+        "purpose": "验证提供的私钥文件不存在时是否抛出RuntimeError",
+        "args": {
+          "hostname": "example.com",
+          "username": "user",
+          "private_key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_key.pem"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u79c1\\u94a5\\u6587\\u4ef6\\u4e0d\\u5b58\\u5728: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_key.pem\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.01400303840637207,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithSpecialCharactersInPassword",
+        "purpose": "验证密码中包含特殊字符时是否仍能成功建立连接",
+        "args": {
+          "hostname": "example.com",
+          "username": "user",
+          "password": "p@ssw!rd#123"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: [WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 21.08990454673767,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithIPv4Address",
+        "purpose": "验证使用IPv4地址是否可以正常建立SSH连接",
+        "args": {
+          "hostname": "192.168.1.1",
+          "username": "admin",
+          "password": "securePass123"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: [WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 21.07535481452942,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConnectWithIPv6Address",
+        "purpose": "验证使用IPv6地址是否可以正常建立SSH连接",
+        "args": {
+          "hostname": "2001:db8::1",
+          "username": "admin",
+          "password": "securePass123"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u5efa\\u7acb\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: [WinError 10060] \\u7531\\u4e8e\\u8fde\\u63a5\\u65b9\\u5728\\u4e00\\u6bb5\\u65f6\\u95f4\\u540e\\u6ca1\\u6709\\u6b63\\u786e\\u7b54\\u590d\\u6216\\u8fde\\u63a5\\u7684\\u4e3b\\u673a\\u6ca1\\u6709\\u53cd\\u5e94\\uff0c\\u8fde\\u63a5\\u5c1d\\u8bd5\\u5931\\u8d25\\u3002\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 21.069472074508667,
+        "is_security_test": false
+      }
+    ],
+    "list_sessions": [
+      {
+        "case_name": "ListSessionsSuccessfully",
+        "purpose": "验证在存在活跃SSH会话时，list_sessions 能正确返回会话列表",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.010061025619506836,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListSessionsWithNoActiveSessions",
+        "purpose": "验证在没有活跃SSH会话时，list_sessions 返回空数组",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.021066904067993164,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListSessionsAfterSessionTimeout",
+        "purpose": "验证经过一段时间无操作后，超时的SSH会话是否会被自动清除并从列表中移除",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.014998912811279297,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListSessionsOnEmptySessionTable",
+        "purpose": "验证系统初始化时，会话表为空的情况下 list_sessions 的行为",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.02500128746032715,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListSessionsWhenMaxConnectionsReached",
+        "purpose": "验证当达到最大连接数限制时，list_sessions 是否能正确列出所有连接",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.030017614364624023,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListSessionsWithInvalidPermissions",
+        "purpose": "验证非管理员用户调用 list_sessions 时是否抛出权限错误",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.023006439208984375,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListSessionsDuringConcurrentAccess",
+        "purpose": "验证多个用户同时调用 list_sessions 时是否能安全访问并返回一致结果",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions_count\": 0, \"sessions\": {}}"
+        },
+        "execution_time": 0.0445096492767334,
+        "is_security_test": true
+      }
+    ],
+    "execute": [
+      {
+        "case_name": "ExecuteCommandSuccessfully",
+        "purpose": "验证在有效会话中执行简单命令是否能成功返回结果（如 'ls -l'）",
+        "args": {
+          "session_id": "session_1",
+          "command": "ls -l"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_1\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.029402971267700195,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithStdinData",
+        "purpose": "验证在有效会话中执行需要标准输入的命令是否能正确接收 stdin 数据并返回结果",
+        "args": {
+          "session_id": "session_2",
+          "command": "cat",
+          "stdin_data": "This is input data for testing."
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_2\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.02821826934814453,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithCustomTimeout",
+        "purpose": "验证设置自定义超时时间后，长时间运行的命令是否会在超时后被中断",
+        "args": {
+          "session_id": "session_3",
+          "command": "sleep 15 && echo 'Done'",
+          "timeout": 5
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_3\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.029983997344970703,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithEmptySessionId",
+        "purpose": "验证未提供 session_id 是否抛出 ValueError",
+        "args": {
+          "session_id": "",
+          "command": "echo 'test'"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: \", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.03880620002746582,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithInvalidSessionId",
+        "purpose": "验证使用无效的 session_id 是否导致命令执行失败并抛出 RuntimeError",
+        "args": {
+          "session_id": "invalid_session",
+          "command": "whoami"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: invalid_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.035718679428100586,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteLongCommandOutput",
+        "purpose": "验证执行输出大量数据的命令是否能完整返回所有输出内容",
+        "args": {
+          "session_id": "session_4",
+          "command": "seq 1 10000 | paste -sd ','"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_4\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.04588818550109863,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteMalformedCommand",
+        "purpose": "验证执行包含非法字符或格式错误的命令是否会正确处理并返回错误信息",
+        "args": {
+          "session_id": "session_5",
+          "command": "echo `rm -rf /`"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_5\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.026517391204833984,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithSpecialCharactersInArgs",
+        "purpose": "验证命令参数中包含特殊字符（如空格、引号、符号）时是否仍能正确执行",
+        "args": {
+          "session_id": "session_6",
+          "command": "echo \"Hello, World! @#$%^&*()\""
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_6\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.02492237091064453,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteUnauthorizedCommand",
+        "purpose": "验证执行需要管理员权限的命令是否会因权限不足而返回非零退出码",
+        "args": {
+          "session_id": "session_7",
+          "command": "sudo systemctl restart apache2"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_7\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.07218408584594727,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteNonExistentCommand",
+        "purpose": "验证执行不存在的命令是否会抛出错误并返回非零退出码",
+        "args": {
+          "session_id": "session_8",
+          "command": "nonexistent_command"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_8\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.02200031280517578,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithUnicodeOutput",
+        "purpose": "验证执行返回 Unicode 字符的命令是否能正确解码输出",
+        "args": {
+          "session_id": "session_9",
+          "command": "echo '中文测试 日本語 テスト 한국어 테스트'"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_9\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.03207731246948242,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ExecuteCommandWithShellInjectionAttempt",
+        "purpose": "验证尝试进行 shell 注入攻击的命令是否会安全拒绝执行",
+        "args": {
+          "session_id": "session_10",
+          "command": "echo test; rm -rf /tmp/test"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u6267\\u884c\\u547d\\u4ee4\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_10\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.03169727325439453,
+        "is_security_test": true
+      }
+    ],
+    "upload": [
+      {
+        "case_name": "BasicUploadSuccess",
+        "purpose": "验证使用有效会话ID、本地路径和远程路径是否能成功上传文件",
+        "args": {
+          "session_id": "valid_session_123",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature_image.jpg",
+          "remote_path": "/remote/path/nature_image.jpg"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_123\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0040090084075927734,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithNonExistentLocalFile",
+        "purpose": "验证当本地文件不存在时是否抛出 FileNotFoundError",
+        "args": {
+          "session_id": "valid_session_456",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "remote_path": "/remote/path/nonexistent_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_456\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.006002664566040039,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithEmptySessionId",
+        "purpose": "验证当 session_id 为空字符串时是否抛出 ValueError",
+        "args": {
+          "session_id": "",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\app.ico",
+          "remote_path": "/remote/path/app.ico"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: \", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0039937496185302734,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithEmptyLocalPath",
+        "purpose": "验证当 local_path 为空字符串时是否抛出 ValueError",
+        "args": {
+          "session_id": "valid_session_789",
+          "local_path": "",
+          "remote_path": "/remote/path/empty_local.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_789\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0045168399810791016,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithEmptyRemotePath",
+        "purpose": "验证当 remote_path 为空字符串时是否抛出 ValueError",
+        "args": {
+          "session_id": "valid_session_101",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\code (1).html",
+          "remote_path": ""
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_101\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.007994413375854492,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithSpecialCharactersInPaths",
+        "purpose": "验证包含特殊字符的本地和远程路径是否能被正确处理",
+        "args": {
+          "session_id": "specialchars_session",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\file@with#special!.txt",
+          "remote_path": "/remote/path/file with spaces & symbols.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: specialchars_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.005002260208129883,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadToRestrictedDirectory",
+        "purpose": "验证尝试上传到受限制目录（如系统目录）是否会因权限不足而失败",
+        "args": {
+          "session_id": "restricted_session",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\ResultReport.xml",
+          "remote_path": "/system/restricted_dir/report.xml"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: restricted_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.006997108459472656,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadLargeFileSize",
+        "purpose": "验证上传大文件（例如超过1GB）时工具的行为，确保无内存溢出或超时",
+        "args": {
+          "session_id": "largefile_session",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\工业问答.mp4",
+          "remote_path": "/remote/path/largefile.mp4"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: largefile_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadSameFileMultipleTimes",
+        "purpose": "验证多次上传相同文件时是否会覆盖或正确处理重复文件",
+        "args": {
+          "session_id": "duplicate_session",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_document.docx",
+          "remote_path": "/remote/path/existing_document.docx"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: duplicate_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.004001140594482422,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithoutEstablishedSession",
+        "purpose": "验证在未建立有效SSH连接的情况下上传是否失败并抛出 RuntimeError",
+        "args": {
+          "session_id": "invalid_session_abc",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\智能软件工.pptx",
+          "remote_path": "/remote/path/presentation.pptx"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: invalid_session_abc\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_security_test": false
+      },
+      {
+        "case_name": "UploadWithUnicodeFilenames",
+        "purpose": "验证上传带有 Unicode 字符的文件名是否能正确处理",
+        "args": {
+          "session_id": "unicode_session",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\专利1_副本.docx",
+          "remote_path": "/remote/path/中文文件名_副本.docx"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0a\\u4f20\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: unicode_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0066738128662109375,
+        "is_security_test": false
+      }
+    ],
+    "download": [
+      {
+        "case_name": "BasicDownloadSuccess",
+        "purpose": "验证使用有效会话ID、远程路径和本地路径是否能成功下载文件",
+        "args": {
+          "session_id": "valid_session_123",
+          "remote_path": "/remote/path/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_123\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithNonExistentRemoteFile",
+        "purpose": "验证当远程文件不存在时是否抛出 FileNotFoundError",
+        "args": {
+          "session_id": "valid_session_456",
+          "remote_path": "/remote/path/nonexistent_file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_nonexistent.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_456\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.005660295486450195,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithEmptySessionId",
+        "purpose": "验证当 session_id 为空字符串时是否抛出 ValueError",
+        "args": {
+          "session_id": "",
+          "remote_path": "/remote/path/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_empty_session.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: \", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.00750422477722168,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithEmptyRemotePath",
+        "purpose": "验证当 remote_path 为空字符串时是否抛出 ValueError",
+        "args": {
+          "session_id": "valid_session_789",
+          "remote_path": "",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_empty_remote.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_789\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithEmptyLocalPath",
+        "purpose": "验证当 local_path 为空字符串时是否抛出 ValueError",
+        "args": {
+          "session_id": "valid_session_101",
+          "remote_path": "/remote/path/file.txt",
+          "local_path": ""
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_101\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.005041837692260742,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithSpecialCharactersInPaths",
+        "purpose": "验证包含特殊字符的远程和本地路径是否能被正确处理",
+        "args": {
+          "session_id": "specialchars_session",
+          "remote_path": "/remote/path/file with spaces & symbols.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\file@with#special!.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: specialchars_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.003961324691772461,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithoutEstablishedSession",
+        "purpose": "验证在未建立有效SSH连接的情况下下载是否失败并抛出 RuntimeError",
+        "args": {
+          "session_id": "invalid_session_abc",
+          "remote_path": "/remote/path/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_invalid_session.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: invalid_session_abc\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.006034135818481445,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadLargeFileSize",
+        "purpose": "验证下载大文件（例如超过1GB）时工具的行为，确保无内存溢出或超时",
+        "args": {
+          "session_id": "largefile_session",
+          "remote_path": "/remote/path/largefile.mp4",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_largefile.mp4"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: largefile_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.00395965576171875,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadSameFileMultipleTimes",
+        "purpose": "验证多次下载相同文件时是否会覆盖或正确处理重复文件",
+        "args": {
+          "session_id": "duplicate_session",
+          "remote_path": "/remote/path/existing_document.docx",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_document.docx"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: duplicate_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0039975643157958984,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithUnicodeFilenames",
+        "purpose": "验证下载带有 Unicode 字符的文件名是否能正确处理",
+        "args": {
+          "session_id": "unicode_session",
+          "remote_path": "/remote/path/中文文件名_副本.docx",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\专利1_副本.docx"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: unicode_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.005998373031616211,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadFromRestrictedDirectory",
+        "purpose": "验证尝试从受限制目录（如系统目录）下载文件是否会因权限不足而失败",
+        "args": {
+          "session_id": "restricted_session",
+          "remote_path": "/system/restricted_dir/report.xml",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\ResultReport.xml"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: restricted_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.004003047943115234,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadWithInvalidSessionId",
+        "purpose": "验证使用无效的 session_id 是否导致命令执行失败并抛出 RuntimeError",
+        "args": {
+          "session_id": "invalid_session_xyz",
+          "remote_path": "/remote/path/file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_invalid_session_xyz.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u4e0b\\u8f7d\\u6587\\u4ef6\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: invalid_session_xyz\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_security_test": false
+      }
+    ],
+    "disconnect": [
+      {
+        "case_name": "BasicDisconnectSuccess",
+        "purpose": "验证使用有效的会话ID能否成功断开SSH连接",
+        "args": {
+          "session_id": "valid_session_123"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: valid_session_123\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.012024879455566406,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectWithInvalidSessionId",
+        "purpose": "验证传入无效的会话ID时是否抛出 ValueError 异常",
+        "args": {
+          "session_id": "invalid_session"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: invalid_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.010422706604003906,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectWithoutSessionId",
+        "purpose": "验证未提供 session_id 参数时是否抛出 ValueError 异常",
+        "args": {
+          "session_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: \", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0030045509338378906,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectMultipleSessionsOneByOne",
+        "purpose": "验证可以依次断开多个活跃会话",
+        "args": {
+          "session_id": "session_abc"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session_abc\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectNonExistentSession",
+        "purpose": "验证尝试断开不存在的会话ID是否会抛出 RuntimeError",
+        "args": {
+          "session_id": "nonexistent_session"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: nonexistent_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.005008697509765625,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectAfterSessionTimeout",
+        "purpose": "验证超时后的会话是否仍可被 disconnect 工具安全处理（应抛出异常）",
+        "args": {
+          "session_id": "timedout_session"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: timedout_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.004998683929443359,
+        "is_security_test": true
+      },
+      {
+        "case_name": "ConcurrentDisconnectOnSameSession",
+        "purpose": "验证多个线程/用户同时调用 disconnect 同一会话ID时的行为，确保无竞争条件或重复释放",
+        "args": {
+          "session_id": "concurrent_session"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: concurrent_session\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectWithSpecialCharactersInSessionId",
+        "purpose": "验证包含特殊字符的 session_id 是否能被正确拒绝并抛出 ValueError",
+        "args": {
+          "session_id": "session@with#special!chars"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: session@with#special!chars\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.004002094268798828,
+        "is_security_test": false
+      },
+      {
+        "case_name": "SecurityTest_DisconnectUnauthorizedSession",
+        "purpose": "验证非授权用户尝试断开其他用户的会话时是否抛出权限错误",
+        "args": {
+          "session_id": "protected_session_987"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: protected_session_987\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.006997346878051758,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DisconnectWithVeryLongSessionId",
+        "purpose": "验证传入非常长的 session_id 字符串时是否能正确处理（如截断或拒绝）",
+        "args": {
+          "session_id": "a_very_long_session_id_that_exceeds_reasonable_length_by_far_and_causes_boundary_condition_testing"
+        },
+        "response": {
+          "result": "{\"error\": \"\\u65ad\\u5f00\\u8fde\\u63a5\\u65f6\\u53d1\\u751f\\u9519\\u8bef: \\u65e0\\u6548\\u7684\\u4f1a\\u8bddID: a_very_long_session_id_that_exceeds_reasonable_length_by_far_and_causes_boundary_condition_testing\", \"exception_type\": \"RuntimeError\"}"
+        },
+        "execution_time": 0.004001140594482422,
+        "is_security_test": false
+      }
+    ]
+  },
+  "total_cases": 64
+}

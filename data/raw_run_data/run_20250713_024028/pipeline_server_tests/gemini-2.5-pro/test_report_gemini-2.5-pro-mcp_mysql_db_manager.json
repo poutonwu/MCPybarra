@@ -1,0 +1,333 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_mysql_db_manager",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_mysql_db_manager/refined/server.py",
+  "timestamp": "2025-07-13T02:55:20.822120",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "\n    Lists all available tables in the current database.\n\n    This tool takes no parameters and returns a list of all table names.\n\n    Returns:\n        Dict[str, List[str]]: A dictionary with a 'tables' key,\n        the value of which is a list of strings, where each string\n        is a table name.\n        Example: `{\"tables\": [\"users\", \"products\", \"orders\"]}`\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "\n    Reads the full content of a specified table, returning up to 100 records\n    in a structured row-column format.\n\n    Args:\n        table_name (str): The name of the target table to read data from (required).\n\n    Returns:\n        Dict[str, Union[List[str], List[List[Any]]]]: A dictionary containing\n        'columns' and 'rows' keys. 'columns' is a list of column names, and\n        'rows' is a list of lists, where each inner list represents a data row.\n        Example:\n        ```json\n        {\n          \"columns\": [\"id\", \"name\", \"email\"],\n          \"rows\": [\n            [1, \"Alice\", \"alice@example.com\"],\n            [2, \"Bob\", \"bob@example.com\"]\n          ]\n        }\n        ```\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "\n    Executes a custom SQL query on the MySQL database.\n    Supports data query (e.g., `SELECT`, `SHOW`) and data manipulation\n    (e.g., `INSERT`, `UPDATE`, `DELETE`).\n\n    Args:\n        query (str): The SQL query string to be executed (required).\n\n    Returns:\n        Dict[str, Any]: For queries that return data like `SELECT` or `SHOW`,\n        returns a dictionary with 'columns' and 'rows'. For data manipulation\n        queries like `INSERT`, `UPDATE`, `DELETE`, returns a dictionary with\n        an 'affected_rows' key.\n        Example (SELECT): `{\"columns\": [\"id\", \"name\"], \"rows\": [[1, \"Alice\"]]}`\n        Example (UPDATE): `{\"affected_rows\": 1}`\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "List All Tables Successfully",
+        "purpose": "验证 list_resources 工具能够正确返回当前数据库中所有表的列表。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.00970768928527832,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Database Response",
+        "purpose": "测试当数据库中没有任何表时，工具是否能优雅地返回空数组。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.007000446319580078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Verify Table Names Match Expected Structure",
+        "purpose": "确保返回的数据结构为包含 'tables' 键的字典，且值为字符串列表。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.00899958610534668,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Check for SQL Injection Vulnerability in Input",
+        "purpose": "测试工具是否接受参数输入（即使文档说明无参数），防止潜在注入攻击。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Database Connection Failure Handling",
+        "purpose": "模拟数据库连接失败情况，验证工具是否能返回合理的错误信息而非崩溃。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.007999658584594727,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Handle Unexpected Return Format",
+        "purpose": "测试工具在接收到非预期格式的返回数据时能否处理异常。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.006387472152709961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Test With Maximum Number of Tables",
+        "purpose": "验证工具在数据库中存在大量表时仍能正常返回结果。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.007999897003173828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Table Names with Special Characters",
+        "purpose": "测试工具是否能正确处理包含特殊字符的表名。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.004999399185180664,
+        "is_functional_test": true
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "Read Users Table Successfully",
+        "purpose": "验证 read_resource 工具能够正确读取 'users' 表的全部内容，返回最多100条记录。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"user1\",\n      \"new_email@example.com\",\n      28,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null,\n      \"2025-06-30T22:13:23\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.007860183715820312,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Nonexistent Table Gracefully",
+        "purpose": "测试当指定的表名不存在时，工具是否能返回合理的错误信息而非崩溃。",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Table 'nonexistent_table' not found in the database."
+        },
+        "execution_time": 0.006505489349365234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Verify Returned Data Structure for Companies Table",
+        "purpose": "确保从 'companies' 表中读取的数据结构包含 'columns' 和 'rows' 键，并且值类型正确。",
+        "args": {
+          "table_name": "companies"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"name\",\n    \"industry\",\n    \"founded_year\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"科技巨头A\",\n      \"科技\",\n      2005\n    ],\n    [\n      2,\n      \"零售王者B\",\n      \"零售\",\n      1990\n    ],\n    [\n      3,\n      \"汽车先锋C\",\n      \"汽车\",\n      1931\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.015003681182861328,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Table Name",
+        "purpose": "测试工具是否对表名参数进行安全校验，防止 SQL 注入攻击。",
+        "args": {
+          "table_name": "users; DROP TABLE users;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Table 'users; DROP TABLE users;' not found in the database."
+        },
+        "execution_time": 0.00899958610534668,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Handle Empty Table Response",
+        "purpose": "验证当目标表存在但没有数据时，工具是否能返回空的 'rows' 列表而不是报错。",
+        "args": {
+          "table_name": "empty_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Table 'empty_table' not found in the database."
+        },
+        "execution_time": 0.0045011043548583984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Table with Special Characters in Name",
+        "purpose": "测试工具是否能正确处理包含特殊字符（如下划线、连字符）的表名。",
+        "args": {
+          "table_name": "order_items"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"order_id\",\n    \"product_id\",\n    \"quantity\",\n    \"unit_price\"\n  ],\n  \"rows\": [\n    [\n      1,\n      1,\n      1,\n      1,\n      \"899.99\"\n    ],\n    [\n      2,\n      2,\n      4,\n      1,\n      \"179.99\"\n    ],\n    [\n      3,\n      3,\n      5,\n      1,\n      \"79.99\"\n    ],\n    [\n      4,\n      4,\n      7,\n      1,\n      \"45000.00\"\n    ],\n    [\n      5,\n      5,\n      3,\n      1,\n      \"1299.99\"\n    ],\n    [\n      6,\n      6,\n      6,\n      1,\n      \"49.99\"\n    ],\n    [\n      7,\n      7,\n      2,\n      1,\n      \"249.99\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.008000850677490234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Table with Maximum Allowed Records (100)",
+        "purpose": "验证工具在读取最大允许记录数（100）时的行为是否符合预期。",
+        "args": {
+          "table_name": "large_table_with_100_rows"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Table 'large_table_with_100_rows' not found in the database."
+        },
+        "execution_time": 0.007998943328857422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Database Connection Failure Handling in Read Operation",
+        "purpose": "模拟数据库连接失败情况，验证工具是否能返回合理的错误信息而非崩溃。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"user1\",\n      \"new_email@example.com\",\n      28,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null,\n      \"2025-06-30T22:13:23\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.008001565933227539,
+        "is_functional_test": false
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "Execute SELECT Query Successfully",
+        "purpose": "验证 execute_sql 工具能够正确执行 SELECT 查询并返回包含 'columns' 和 'rows' 的结果。",
+        "args": {
+          "query": "SELECT id, name FROM users LIMIT 1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: An error occurred while executing the SQL query: (1054, \"Unknown column 'name' in 'field list'\")"
+        },
+        "execution_time": 0.0095062255859375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute INSERT Query Successfully",
+        "purpose": "验证 execute_sql 工具能够正确执行 INSERT 查询并返回 'affected_rows' 字段。",
+        "args": {
+          "query": "INSERT INTO users (username, email) VALUES ('test_user', 'test@example.com')"
+        },
+        "response": {
+          "result": "{\n  \"affected_rows\": 1\n}"
+        },
+        "execution_time": 0.01151895523071289,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute UPDATE Query Successfully",
+        "purpose": "验证 execute_sql 工具能够正确执行 UPDATE 查询并返回受影响的行数。",
+        "args": {
+          "query": "UPDATE users SET email = 'updated_email@example.com' WHERE username = 'test_user'"
+        },
+        "response": {
+          "result": "{\n  \"affected_rows\": 1\n}"
+        },
+        "execution_time": 0.014012336730957031,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute DELETE Query Successfully",
+        "purpose": "验证 execute_sql 工具能够正确执行 DELETE 查询并返回受影响的行数。",
+        "args": {
+          "query": "DELETE FROM users WHERE username = 'test_user'"
+        },
+        "response": {
+          "result": "{\n  \"affected_rows\": 1\n}"
+        },
+        "execution_time": 0.012664079666137695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Query Parameter",
+        "purpose": "测试 execute_sql 是否对 SQL 注入尝试进行安全处理，防止恶意语句执行。",
+        "args": {
+          "query": "SELECT * FROM users; DROP TABLE users;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: An error occurred while executing the SQL query: (3730, \"Cannot drop table 'users' referenced by a foreign key constraint 'orders_ibfk_1' on table 'orders'.\")"
+        },
+        "execution_time": 0.005841732025146484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid SQL Syntax Handling",
+        "purpose": "验证 execute_sql 在接收到语法错误的 SQL 查询时是否能返回合理的错误信息而非崩溃。",
+        "args": {
+          "query": "SELCT id, name FROM users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: An error occurred while executing the SQL query: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELCT id, name FROM users' at line 1\")"
+        },
+        "execution_time": 0.006997585296630859,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input Handling",
+        "purpose": "测试 execute_sql 在查询参数为空时是否能返回适当的错误信息。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Parameter 'query' must be a non-empty SQL string."
+        },
+        "execution_time": 0.004004240036010742,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query with Special Characters",
+        "purpose": "验证 execute_sql 能否正确处理包含特殊字符（如单引号、分号）的 SQL 查询。",
+        "args": {
+          "query": "SELECT * FROM users WHERE username = 'user'; -- comment"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"rows\": []\n}"
+        },
+        "execution_time": 0.0060002803802490234,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

@@ -1,0 +1,502 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_web_search_processor",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_web_search_processor/refined/server.py",
+  "timestamp": "2025-07-13T03:05:43.989383",
+  "tools": [
+    {
+      "name": "tavily_web_search",
+      "description": "\n    执行全面的网络搜索，支持基础或高级搜索深度，可通过包含或排除特定域名精确控制搜索范围。\n\n    Args:\n        query: 搜索查询字符串 (必填)。\n        search_depth: 搜索深度，可选 \"basic\" 或 \"advanced\", 默认 \"basic\"。\n        include_domains: 包含在结果中的域名列表 (可选)。\n        exclude_domains: 排除的域名列表 (可选)。\n        max_results: 返回的最大结果数 (1-5), 默认 5。\n\n    Returns:\n        List[Dict[str, str]]: 包含标题、URL 和内容摘要的搜索结果列表。\n\n    示例:\n        >>> tavily_web_search(query=\"Python 3.10 features\", search_depth=\"advanced\", \n                             include_domains=[\"python.org\"], max_results=3)\n        [\n            {\n                \"title\": \"Python 3.10 新特性详解\",\n                \"url\": \"https://docs.python.org/3.10/whatsnew/3.10.html\",\n                \"content\": \"Python 3.10 的新特性包括模式匹配、更好的类型提示等...\"\n            },\n            {\n                \"title\": \"Python 3.10 发布说明\",\n                \"url\": \"https://www.python.org/downloads/release/python-3100/\",\n                \"content\": \"Python 3.10 正式版发布，包含多项性能改进和错误修复...\"\n            },\n            {\n                \"title\": \"Python 3.10：面向未来的编程语言\",\n                \"url\": \"https://realpython.com/python310-new-features/\",\n                \"content\": \"探索 Python 3.10 中最令人期待的新特性和改进...\"\n            }\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "basic",
+            "title": "Search Depth",
+            "type": "string"
+          },
+          "include_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Domains"
+          },
+          "exclude_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Exclude Domains"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_web_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_answer_search",
+      "description": "\n    根据查询内容直接生成回答并附带支持证据，适用于需要具体答案的问题。\n\n    Args:\n        query: 要回答的问题 (必填)。\n        search_depth: 搜索深度，可选 \"basic\" 或 \"advanced\", 默认 \"advanced\".\n\n    Returns:\n        Dict[str, Union[str, List[Dict[str, str]]]]: 包含答案和证据的字典.\n\n    示例:\n        >>> tavily_answer_search(query=\"地球的卫星是什么？\")\n        {\n            \"answer\": \"地球的卫星是月球。\",\n            \"evidence\": [\n                {\n                    \"title\": \"月球 - 维基百科\",\n                    \"url\": \"https://zh.wikipedia.org/wiki/%E6%9C%88%E7%90%83\",\n                    \"content\": \"月球是地球唯一的天然卫星，也是太阳系中第五大的卫星...\"\n                }\n            ]\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "advanced",
+            "title": "Search Depth",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_answer_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_news_search",
+      "description": "\n    专门搜索近期新闻文章，支持限定查询时效性（最多可追溯365天），并可指定包含或排除的新闻源。\n\n    Args:\n        query: 新闻搜索查询 (必填)。\n        days: 查询回溯的天数 (1-365), 默认 7。\n        include_domains: 包含的新闻源域名列表 (可选)。\n        exclude_domains: 排除的新闻源域名列表 (可选)。\n        max_results: 返回的最大结果数 (1-5), 默认 5。\n\n    Returns:\n        List[Dict[str, str]]: 包含标题、URL 和内容摘要的新闻结果列表.\n\n    示例:\n        >>> tavily_news_search(query=\"人工智能最新进展\", days=3, \n                              include_domains=[\"techcrunch.com\"], max_results=2)\n        [\n            {\n                \"title\": \"AI 领域的三大突破：2024 年第一季度\",\n                \"url\": \"https://techcrunch.com/2024/03/15/ai-breakthroughs-q1-2024/\",\n                \"content\": \"本文总结了 2024 年第一季度人工智能领域的三项重大突破...\"\n            },\n            {\n                \"title\": \"大模型训练成本降低 80%，新技术革新 AI 行业\",\n                \"url\": \"https://techcrunch.com/2024/03/14/ai-training-cost-reduction/\",\n                \"content\": \"一项新技术使大模型训练成本大幅降低，为人工智能发展带来新的可能...\"\n            }\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "days": {
+            "default": 7,
+            "title": "Days",
+            "type": "integer"
+          },
+          "include_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Domains"
+          },
+          "exclude_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Exclude Domains"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_news_searchArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "tavily_web_search": [
+      {
+        "case_name": "Basic Web Search",
+        "purpose": "验证基础搜索功能是否正常工作，使用默认参数进行简单查询。",
+        "args": {
+          "query": "Python programming"
+        },
+        "response": [
+          "{\n  \"title\": \"Python (programming language) - Wikipedia\",\n  \"url\": \"https://en.wikipedia.org/wiki/Python_(programming_language)\",\n  \"content\": \"Python (programming language) - Wikipedia # Python (programming language) - Cebuano \\\"Python (programming language) – Cebuano\\\") - မြန်မာဘာသာ \\\"Python (programming language) – Burmese\\\") - Simple English \\\"Python (programming language) – Simple English\\\") - တႆး \\\"Python (programming language) – Shan\\\") - Winaray \\\"Python (programming language) – Waray\\\") | Python | | | - Python Programming at Wikibooks | | **Python** is a high-level, general-purpose programming language. Python consistently ranks as one of the most popular programming languages, and it has gained widespread use in the machine learning community. - Media \\\"c:Category:Python (programming language)\\\") from Commons - Python (programming language) \\\"Category:Python (programming language)\\\") - Articles with example Python (programming language) code_code \\\"Category:Articles with example Python (programming language) code\\\") Python (programming language)\"\n}",
+          "{\n  \"title\": \"Python Full Course for Beginners [2025] - YouTube\",\n  \"url\": \"https://www.youtube.com/watch?v=K5KVEU3aaeQ\",\n  \"content\": \"Python Full Course for Beginners [2025]\\nProgramming with Mosh\\n4610000 subscribers\\n44255 likes\\n1641438 views\\n12 Feb 2025\\nMaster Python from scratch 🚀 No fluff—just clear, practical coding skills to kickstart your journey! \\n\\n❤️ Join this channel to get access to perks:\\nhttps://www.youtube.com/channel/UCWv7vMbMWH4-V0ZXdmDpPBA/join\\n\\n🚀 Want to dive deeper?\\n- Check out my Python mastery course: https://mosh.link/python-course\\n- Subscribe for more awesome Python content: https://goo.gl/6PYaGF\\n\\n🔗 Related videos \\nhttps://youtu.be/yVl_G-F7m8c?si=aoIiT6CyaRRfBsRM\\n\\n✋ Stay connected:\\n- Full Courses: https://codewithmosh.com\\n- Twitter: https://twitter.com/moshhamedani\\n- Facebook: https://www.facebook.com/programmingwithmosh/\\n- Instagram: https://www.instagram.com/codewithmosh.official/\\n- LinkedIn: https://www.linkedin.com/school/codewithmosh/\\n\\n📖 Table of Content\\n0:00:00 Introduction\\n0:00:56 What is Python?\\n0:04:11 Installing Python\\n0:05:36 Python Interpreter\\n0:07:30 Code Editors\\n0:08:49 Your First Python Program\\n0:12:25 Python Extension\\n0:14:26 Linting Python Code\\n0:18:40 Formatting Python Code\\n0:22:51 Running Python Code\\n0:24:30 Python Implementations\\n0:26:59 How Python Code is Executed\\n0:29:45 Quiz\\n0:31:17 Python Mastery Course\\n0:31:44 Variables\\n0:34:48 Variable Names\\n0:37:51 Strings\\n0:43:20 Escape Sequences\\n0:46:01 Formatted Strings\\n0:48:09 String Methods\\n0:54:03 Numbers\\n0:56:50 Working With Numbers\\n0:58:59 Type Conversion\\n1:04:03 Quiz\\n1:06:43 Comparison Operators\\n1:08:46 Conditional Statements\\n1:12:56 Ternary Operator\\n1:15:04 Logical Operators\\n1:19:07 Short-circuit Evaluations\\n1:21:13 Chaining Comparison Operators\\n1:22:35 Quiz\\n1:24:18 For Loops\\n1:27:56 For..Else\\n1:30:42 Nested Loops\\n1:33:26 Iterables\\n1:36:34 While Loops\\n1:41:33 Infinite Loops\\n1:43:10 Exercise\\n1:45:13 Defining Functions\\n1:47:37 Arguments\\n1:49:57 Types of Functions\\n1:53:59 Keyword Arguments\\n1:55:59 Default Arguments\\n1:57:34 xargs\\n\\n#Python #AI #MachineLearning #WebDevelopment\\n1100 comments\\n\"\n}",
+          "{\n  \"title\": \"Introduction to Python - W3Schools\",\n  \"url\": \"https://www.w3schools.com/python/python_intro.asp\",\n  \"content\": \"Introduction to Python Tutorials \\\"Tutorials and References\\\")Exercises \\\"Exercises and Quizzes\\\")Certificates \\\"Certificates\\\")Services \\\"Our Services\\\")Menu \\\"Menu\\\") Certificates Learn ChatGPT-3.5Tutorial Learn ChatGPT-4Tutorial Learn C#Tutorial Learn ChatGPT-3.5Tutorial Learn ChatGPT-4Tutorial Certificates What is a Certificate? #### Log in / Sign Up Create a free W3Schools Account to Improve Your Learning Experience Python Tutorial Python Tuples Python Sets Python Dictionaries Python Modules Python Matplotlib Python DSA Python MySQL Python MongoDB Python Reference Python How To Python Examples Python Introduction What is Python? Python is a popular programming language. ### What can Python do? Python can be used on a server to create web applications. Why Python? In this tutorial Python will be written in a text editor. Python Tutorial Python Reference Python Examples Python Certificate\"\n}",
+          "{\n  \"title\": \"Welcome to Python.org\",\n  \"url\": \"https://www.python.org/\",\n  \"content\": \"*   Python *   Python Brochure Learn more about Python. *   ### Python Source Python 3.13.5 Python 3.13.5 Python 3.13.5 #### Download Python for Any OS *   Python Books *   Python Essays Python Docs *   Python Logo *   Python Wiki *   #### The Python Community *   Python News *   Python Events *   Python Events Archive *   Find events from the Python Community around the world! More about defining functions in Python 3  # Python 3: List comprehensions More about lists in Python 3  Python Hi, Python. Latest: Python 3.13.5 *   2025-06-17Python 3.14.0 beta 3 is here! *   Python Brochure *   Python Books *   Python Essays *   Python Wiki *   Python News *   Python Events *   Python Events Archive *   python-dev list\"\n}"
+        ],
+        "execution_time": 3.1109423637390137,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Advanced Search with Domain Inclusion",
+        "purpose": "测试高级搜索深度并限制结果仅来自指定域名列表的功能。",
+        "args": {
+          "query": "machine learning applications",
+          "search_depth": "advanced",
+          "include_domains": [
+            "example.com",
+            "ai.org"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"Reducing Infant Mortality in Indiana\",\n  \"url\": \"http://ai.org/isdh/files/Infant_Mortality_Report.pdf\",\n  \"content\": \"The machine learning algorithm both determines the significance of user-specified inputs, and calculates the risk of low birth weight. KSMC then integrated the\"\n}",
+          "{\n  \"title\": \"MATERIALS\",\n  \"url\": \"https://ai.org/che/files/Agenda_-_February_13_2014.pdf\",\n  \"content\": \"Dr. Ng is also a professor of computer science at Stanford University, and has done significant work on machine learning. CHE Agenda 2. Page\"\n}",
+          "{\n  \"title\": \"Full Program Proposal AS in Computer Science\",\n  \"url\": \"http://ai.org/che/files/Full_Program_Proposal.pdf\",\n  \"content\": \"understanding of virtual machines, interpreters, and compilers in their use with programming languages.  Discuss machine level representation of data including numeric representation and number bases and representation of character data.  Understand and employ various search and sort algorithms.  Demonstrate an understanding of database systems and database query languages, entity relationship modeling, and normalization  Employ functions, relations, sets, digital logic, propositional [...] the new program is 11.0701 , defined as follows: A general program that focuses on computers, computing problems and solutions, and the design of computer systems and user interfaces from a scientific perspective. The program includes instruction in the principles of computational science, and computing theory; computer hardware design; computer development and programming; and applications to a variety of end-use situations (NCES, Classification of Instructional Programs. 2000 edition). 2. [...] Objectives  Demonstrate problem-solving strategies including the role, implementation strategies, and properties of algorithms.  Manipulate and configure fundamental programming constructs: syntax and semantics, data types, numeric operations, control structures, functions, methods and parameter passing.  Demonstrate understanding of object-oriented concepts of computer programming: classes, objects, inheritance, exception handling, GUI, and event-driven programming.  Demonstrate an\"\n}",
+          "{\n  \"title\": \"Libraries - SBOA\",\n  \"url\": \"http://ai.org/sboa/4450.htm\",\n  \"content\": \"See IC 36-1-11-1(b) for additional exceptions. [...] must be accompanied by a certified check or other evidence of financial responsibility, and a statement concerning whether discussions may be conducted with the offerors for the purpose of clarification to assure full understanding of and responsiveness to the solicitation requirements - IC 5-23-5-2. Notice of the request for proposals shall be given by publication in accordance with IC 5-3-1 - IC 5-23-5-3. [...] #### Other Miscellaneous\"\n}",
+          "{\n  \"title\": \"Hospitals - SBOA\",\n  \"url\": \"http://ai.org/sboa/4451.htm\",\n  \"content\": \"Types of activities excluded from IC 5-22, see IC 5-22-1-3\\n\\n#### Special Purchasing Methods\\n\\nNo solicitation of bids or proposals, IC 5-22-10:\\n\\n1. Competition required, IC 5-22-10-2.\\n\\n2. Unique opportunity for substantial savings, IC 5-22-10-5.\\n\\n3. Auctions, IC 5-22-10-6.\\n\\n4. Data processing contracts or license agreements, IC 5-22-10-7.\\n\\n5. Compatibility, IC 5-22-10-8.\\n\\n6. Failure to receive responsive offer, IC 5-22-10-10.\\n\\n7. Discount, IC 5-22-10-12.\\n\\n8. Single source, IC 5-22-10-13. [...] 8. Adjustments in price, IC 5-22-20-2.\\n\\n9. Electronic transmission of material, IC 5-22-3-4, IC 5-22-7-5, IC 5-22-7.3-5, IC 5-22-7.3-9, IC 5-22-9-3\\n\\n#### Purchase of Land or Structures\\n\\n#### Definitions\\n\\nPurchasing Agent - IC 36-1-10.5-3\\n\\nStructure - IC 36-1-10.5-4 [...] #### Manuals\\n\\n#### Guidelines for Audits of Hospitals and State and Local Governments by Independent Public Accounting Firms\\n\\nGuidelines for the Audits of Hospitals and State and Local Governments by Authorized Independent Public Accountants\\n\\n#### Internal Control Manual\\n\\nUniform Internal Control Standards for Indiana Political Subdivisions\\n\\n#### Information Technology Manual\\n\\nAccounting and Uniform Compliance Guidelines Manual for Indiana Political Subdivisions - Information Technology\"\n}"
+        ],
+        "execution_time": 5.516542911529541,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Domain Exclusion",
+        "purpose": "验证搜索可以正确排除特定域名的结果。",
+        "args": {
+          "query": "climate change news",
+          "exclude_domains": [
+            "fake-news-site.com",
+            "irrelevant-blog.net"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"Climate change\",\n  \"url\": \"https://www.cnn.com/climate\",\n  \"content\": \"*   CNN10 *   About CNN (Photo by Eric Vryn/Getty Images) Eric Vryn/Getty ImagesBeleaguered Weather Service defends its forecasts as Texas officials point fingers over flood warnings Image 6: last.png • Video 1:35 CNNHow climate change made Texas flooding more violent 1:35 (Photo by Moisés ÁVILA / AFP) (Photo by MOISES AVILA/AFP via Getty Images) Moises Avila/AFP via Getty ImagesCamp Mystic’s ‘littlest souls’ were nurtured in Bubble Inn. All the cabin’s girls and 2 counselors were lost in the Texas flood Jul 11, 2025 Image 33: 202506-BBB-Top-Illustration.jpg Photo Illustration by Alberto Mier/CNN/Getty ImagesGOP senators’ top concerns with Trump’s big agenda bill, in their own words Jun 7, 2025 *   CNN10 *   About CNN\"\n}",
+          "{\n  \"title\": \"Climate Home News\",\n  \"url\": \"https://www.climatechangenews.com/\",\n  \"content\": \"*   Image 15Sponsored special reports are produced by Climate Home News journalists with the support of partners on topics of mutual interest. *   Image 16Sponsored special reports are produced by Climate Home News journalists with the support of partners on topics of mutual interest. *   Image 51: The UN carbon market needs rules that count - we've just set them  Jun 6, 2025 Comment   Two of Kenya’s biggest carbon credit projects are mired in controversy, clouding the country’s hopes of raising climate finance from the offset market Read more   Social movements want justice placed at the heart of national climate planning, and a new global mechanism to support worker and community-led transitions Read more   *   Image 66: Advancing women's rights and empowerment in climate adaptation  Mar 7, 2025 Sponsored  \"\n}",
+          "{\n  \"title\": \"Climate crisis\",\n  \"url\": \"https://www.theguardian.com/environment/climate-crisis\",\n  \"content\": \"*   The Guardian view *   Image 2: a man in a suit speaks   ### The 89% project Democrats and climate groups ‘too polite’ in fight against ‘malevolent’ fossil fuel giants, says key senator Sheldon Whitehouse of Rhode Island gives 300th climate speech on the US Senate floor          *   Image 3: Texas grapples with devastation following Hill Country floods<br>KERRVILLE, TEXAS - JULY 7: U.S. Senator Ted Cruz (Texas) speaks at a news briefing in Texas' Hill Country near the Guadalupe River in Kerrville, Texas on July 7, 2025. (Photo by Jorge Salgado/Anadolu via Getty Images)   ### Texas floods 2025 Ted Cruz ensured Trump spending bill slashed weather forecasting funding         *   Image 8: Luiz Inácio Lula da Silva  ### With the world in crisis, many say end globalisation. *   Most viewed Across the guardian ### Most viewed Across the guardian\"\n}",
+          "{\n  \"title\": \"No, David Suzuki hasn't given up on the climate fight\",\n  \"url\": \"https://www.cbc.ca/news/science/david-suzuki-climate-change-1.7582418\",\n  \"content\": \"No, David Suzuki hasn't given up on the climate fight — but his battle plan is changing | CBC News No, David Suzuki hasn't given up on the climate fight — but his battle plan is changing | CBC News Loaded \\\"I look at what the straight science says and that is that we've passed too many boundaries,\\\" said Suzuki in an interview with CBC News on Monday. In an interview on CBC's The Early Edition, environmental activist David Suzuki explained comments he made during an iPolitics interview, where he declared \\\"humanity has lost the fight against climate change.\\\" Suzuki said elevating economics and politics over science for decades has brought the world to a critical point.\"\n}",
+          "{\n  \"title\": \"Climate - BBC News\",\n  \"url\": \"https://www.bbc.com/news/topics/cmj34zmwm1zt\",\n  \"content\": \"Climate - BBC News 1 day ago Climate 2 days ago Image 7: Sunlight coming through a crane. 2 days ago Image 8: Close up of a thermometer showing 30 degrees C Moving into the third heatwave of the summer… --------------------------------------------- This looks set to be the most widespread and persistent spell of hot weather so far this year with all four nations set to meet their heatwave criteria. 2 days ago 3 days ago Image 9: Six lanes of traffic on motorway have all been stopped with a police car parked in the centre. 3 days ago Cambridgeshire *   About the BBC \"\n}"
+        ],
+        "execution_time": 2.714085578918457,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limited Results Search",
+        "purpose": "测试返回最大结果数的限制是否生效。",
+        "args": {
+          "query": "latest smartphones",
+          "max_results": 2
+        },
+        "response": [
+          "{\n  \"title\": \"Explore the Latest Galaxy Smartphones | Samsung US\",\n  \"url\": \"https://www.samsung.com/us/smartphones/\",\n  \"content\": \"Discover our newest Galaxy smartphones and explore Samsung's full lineup—including the Galaxy S25 Series, Flip and Fold phones, Fan Edition, A Series 5G,\"\n}",
+          "{\n  \"title\": \"Cell Phones: Shop the Best Smartphones Online - Verizon\",\n  \"url\": \"https://www.verizon.com/smartphones/\",\n  \"content\": \"With so many different options to choose from, including the latest Apple iPhone, new Samsung Galaxy phones, and Google smartphones, it's important to pick a\"\n}"
+        ],
+        "execution_time": 2.827439546585083,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Special Characters in Query",
+        "purpose": "验证工具是否能处理包含特殊字符的搜索查询。",
+        "args": {
+          "query": "C++ vs C# performance comparison"
+        },
+        "response": [
+          "{\n  \"title\": \"C# vs C++: Head to Head Comparison [2025] - Hackr.io\",\n  \"url\": \"https://hackr.io/blog/c-sharp-vs-cpp\",\n  \"content\": \"ComparisonC++C#Supports Object-Oriented ProgrammingSupports OOPS concepts, but is not fully OOPSupports OOP and component-based architecture (multi-paradigm language); fully OOPType of LanguageA low-level programming language with some high-level language features thus called an intermediate-level languageA high-level programming language with no complex features, thus easy to understand.AbstractionLow level of abstractionHigh level of abstractionMemory ManagementMemory management is manually done like in CMemory management is automatic like in JavaPerformancePerformance is exceptionally highGood performance, but less than C++ due to having to compile firstPlatform SupportPlatform independent and can write programs for any OS (platform)Mainly targeted for Windows and .NET framework; rarely used outside WindowsError WarningsFlexible, you can code anything, the compiler doesn’t generate warnings unless syntax is incorrectMore control, the compiler generates warnings and errors beforehand so that application runtime errors are reducedBinaries and Compilation Compiled using the light-weight compilerInterpreted using CLR into bytecodes thus includes all the libraries prior to compilationBest Use CasesGood for high-performance applications like gaming, device drivers and server-side applicationsGreat for web and desktop applications for computers, mobiles, and tabletsData TypesData types in C++ are similar to that of C.Built-in – int, char, float, double, etc…Derived – array, function, pointerUser-defined – enum, struct, unionApart from the primitive data types like int, char, float, double, etc.., C# supports reference data types like String, arrays, classes, and interfaces, and pointer data type.\"\n}",
+          "{\n  \"title\": \"How much faster is C++ than C#? - Stack Overflow\",\n  \"url\": \"https://stackoverflow.com/questions/138361/how-much-faster-is-c-than-c\",\n  \"content\": \"I compared C++ (Thin layer over ODBC) vs C# (ADO.NET SqlClient) and found that C++ was about 50% faster than the C# code. ADO.NET is supposed to\"\n}",
+          "{\n  \"title\": \"How fast is C# these days compared to C++? : r/csharp - Reddit\",\n  \"url\": \"https://www.reddit.com/r/csharp/comments/qq16wy/how_fast_is_c_these_days_compared_to_c/\",\n  \"content\": \"Generally C# has good performance, but if you really need to micro optimize then C++ is usually a better performance choice.\"\n}",
+          "{\n  \"title\": \"C++ vs. C# vs. Python - Plugin Speed Comparison - Rhino Developer\",\n  \"url\": \"https://discourse.mcneel.com/t/c-vs-c-vs-python-plugin-speed-comparison/140854\",\n  \"content\": \"I have found the best approach is to develop everthing in Python first using Rhinocommon calls, and then push the performance critical parts into C++ code. C# is like a cross of Python and C++; it provides more complex, object oriented structures and libraries like Python but it also allows fairly high performance for speed-critical portions of your code. Of course, C and C++ are better performing in average, but this is pointless if the code you wrote has no performance issue, but instead the library code of Rhino. If you really want to improve performance, learn more about algorithms, algorithmic complexity and performance profiling and don’t expect to write fast code, just because it is in C++.\"\n}",
+          "{\n  \"title\": \"C++ vs CSharp Speed Comparison Test - YouTube\",\n  \"url\": \"https://www.youtube.com/watch?v=rlGiZU5v2_U\",\n  \"content\": \"Comments ; C++ vs C# - What Programmers Need to Know About Their Similarities and Differences. Coding With Chuck · 173K views ; Programming\"\n}"
+        ],
+        "execution_time": 2.5404560565948486,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "检查搜索是否对潜在的跨站脚本攻击输入进行安全过滤。",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": [
+          "{\n  \"title\": \"XSS Filter Evasion - OWASP Cheat Sheet Series\",\n  \"url\": \"https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html\",\n  \"content\": \"*   STYLE Tags that Breaks Up JavaScript for XSS *   STYLE Tags that Breaks Up JavaScript for XSS This test delivers a 'polyglot test XSS payload' that executes in multiple contexts, including HTML, script strings, JavaScript, and URLs: <IMG \\\"\\\"\\\"><SCRIPT>alert(\\\"XSS\\\")</SCRIPT>\\\"\\\\> This attack allows you to rename your JavaScript file to an image as an XSS vector: <META HTTP-EQUIV=\\\"Set-Cookie\\\" Content=\\\"USERID=<SCRIPT>alert('XSS')</SCRIPT>\\\"> <A HREF=\\\"javascript:document.location='http://www.google.com/'\\\">XSS</A> Developers HTML encoded the `title` parameter in the `Content` page to prevent against XSS but for some reasons they didn't URL encoded this parameter to prevent from HTTP Parameter Pollution. *   `<Img src = x onerror = \\\"javascript: window.onerror = alert; throw XSS\\\">` *   `\\\"><img src=\\\"x:x\\\" onerror=\\\"alert(XSS)\\\">` *   `\\\"><iframe src=\\\"javascript:alert(XSS)\\\">` *   `<object data=\\\"javascript:alert(XSS)\\\">` *   `<isindex type=image src=1 onerror=alert(XSS)>`\"\n}",
+          "{\n  \"title\": \"The Ultimate Beginners Guide to XSS Vulnerability - Bright Security\",\n  \"url\": \"https://www.brightsec.com/blog/cross-site-scripting-xss/\",\n  \"content\": \"1. Basic injection works <script>alert(1)</script> in the URL parameter id (broken_site/xss/1?id=<script>alert(1)</script>) 2. Basic injection doesn’t work but we get some reflection (http://100.26.239.14:3000/vuln/xss/2?id=<script>alert(1)</script>) Next payload is broken/site/xss/2?id=<sCriPt>alert(1)</ScRipt>. 3. Let’s try on another page, again we start with basic injection to scout it out broken_site/xss/3?id=<script>alert(1)</script> Again as in the previous example, let’s mix the case and see how that reacts broken/site/xss/3?id=<sCriPt>alert(1)</ScRipt> 4. Page 4, again basic injection to see what’s going on broken_site/xss/4?id=<script>alert(1)</script> Let’s try wrapping it up to see what’s happening with the payload broken_site/xss/4?id=<sc<script>ript>alert(1)</sc</script>ript> 5. Another page, again we try the basic injection to see what’s going on with the site broken_site/xss/5?id=<script>alert(1)</script> If we try to input this in the search box XSS like <img src=\\\"http://juice-shop.herokuapp.com/rest/user/change-password?new=aaaaa&repeat=aaaaa\\\"> it won’t work because it doesn’t actually send a request.\"\n}",
+          "{\n  \"title\": \"Cross-Site Scripting (XSS) Vulnerability Guide - Invicti\",\n  \"url\": \"https://www.invicti.com/learn/cross-site-scripting-xss/\",\n  \"content\": \"Cross-site scripting (XSS) is a web vulnerability that lets a malicious hacker introduce (inject) undesired commands into legitimate client-side code (usually JavaScript) executed by a browser on behalf of the web application. While most other web attacks target the server side, cross-site scripting is different in that XSS attacks use your website or web application as a tool to directly attack the users – either your business users or complete strangers. Cross-site scripting (XSS) is a web vulnerability that lets a malicious hacker introduce (inject) undesired commands into legitimate client-side code (usually JavaScript) executed by a browser on behalf of the web application. A cross-site scripting attack is a type of attack executed through a security vulnerability typically found in web applications.\"\n}",
+          "{\n  \"title\": \"Cross-site scripting (XSS) - Security - MDN Web Docs\",\n  \"url\": \"https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS\",\n  \"content\": \"That's what we see in the first example: the malicious code is injected in the browser, by a script running in the page assigning the URL parameter value to the `Element.innerHTML` property, which interprets its value as HTML code. If you're rendering content in the browser, you can use the Trusted Types API to ensure that input is being passed through a sanitization function before being included in the page. So you need to protect against the case where `my_input` is HTML that defines executable code, such as `<img src=x onerror=\\\"alert('XSS')\\\">`. * When interpolating input into a page, either in the browser or in the server, use a templating engine that performs output encoding.\"\n}",
+          "{\n  \"title\": \"Cross-site scripting contexts | Web Security Academy - PortSwigger\",\n  \"url\": \"https://portswigger.net/web-security/cross-site-scripting/contexts\",\n  \"content\": \"When the XSS context is text between HTML tags, you need to introduce some new HTML tags designed to trigger execution of JavaScript. For example, if the XSS context is into the `href` attribute of an anchor tag, you can use the `javascript` pseudo-protocol to execute script. In cases where the XSS context is inside a quoted string literal, it is often possible to break out of the string and execute JavaScript directly. When the XSS context is some existing JavaScript within a quoted tag attribute, such as an event handler, it is possible to make use of HTML-encoding to work around some input filters. and the application blocks or escapes single quote characters, you can use the following payload to break out of the JavaScript string and execute your own script:\"\n}"
+        ],
+        "execution_time": 3.1365621089935303,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "测试当 max_results 超出允许范围时是否正确报错或自动修正。",
+        "args": {
+          "query": "error testing",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: tavily_web_search 发生错误: max_results 必须是 1 到 5 之间的整数"
+        },
+        "execution_time": 0.006011962890625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "验证工具是否能优雅处理空查询输入。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: tavily_web_search 发生错误: 搜索查询不能为空"
+        },
+        "execution_time": 0.008997917175292969,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_answer_search": [
+      {
+        "case_name": "Basic Answer Search",
+        "purpose": "验证工具在默认参数下能否正确回答简单问题并提供证据。",
+        "args": {
+          "query": "地球的卫星是什么？"
+        },
+        "response": {
+          "result": "Earth's natural satellite is the Moon. There are also human-made satellites orbiting Earth. Earth has no other natural satellites."
+        },
+        "execution_time": 4.407912969589233,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Advanced Search Depth Test",
+        "purpose": "验证使用 advanced 搜索深度时是否能返回更详细和结构化的答案。",
+        "args": {
+          "query": "量子计算的基本原理是什么？",
+          "search_depth": "advanced"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.440507173538208,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "测试工具是否能够处理包含特殊字符的问题，确保搜索不会因格式问题失败。",
+        "args": {
+          "query": "C++ 和 C# 的区别是什么？"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.476651668548584,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attack Simulation",
+        "purpose": "验证工具是否对潜在的跨站脚本攻击输入进行安全过滤或转义处理。",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4844329357147217,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "验证工具是否能优雅处理空查询输入，并返回明确错误信息。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: 查询内容不能为空"
+        },
+        "execution_time": 0.0041124820709228516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Query Type",
+        "purpose": "测试工具是否能处理非字符串类型的查询输入并报错。",
+        "args": {
+          "query": 12345
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: 1 validation error for tavily_answer_searchArguments\nquery\n  Input should be a valid string [type=string_type, input_value=12345, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.005001544952392578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Domain Restriction",
+        "purpose": "验证工具是否支持指定域名范围内的搜索功能，并仅从这些来源提取证据。",
+        "args": {
+          "query": "机器学习的应用领域",
+          "include_domains": [
+            "wikipedia.org",
+            "example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4882781505584717,
+        "is_functional_test": true
+      }
+    ],
+    "tavily_news_search": [
+      {
+        "case_name": "Basic News Search",
+        "purpose": "验证基础新闻搜索功能是否正常工作，使用默认参数进行简单查询。",
+        "args": {
+          "query": "人工智能最新进展"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4773237705230713,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "News Search with Time Range",
+        "purpose": "测试工具是否支持限定新闻时效性（如最近3天）并返回正确结果。",
+        "args": {
+          "query": "科技行业动态",
+          "days": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: Invalid time range. Must be 'day', 'week', 'month', 'year' (or 'd', 'w', 'm', 'y')."
+        },
+        "execution_time": 1.4334545135498047,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "News Search with Domain Inclusion",
+        "purpose": "验证工具是否能限制搜索结果仅来自指定域名列表。",
+        "args": {
+          "query": "机器学习应用",
+          "include_domains": [
+            "techcrunch.com",
+            "wired.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4622769355773926,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "News Search with Domain Exclusion",
+        "purpose": "测试工具是否能排除特定域名的新闻来源。",
+        "args": {
+          "query": "气候变化报道",
+          "exclude_domains": [
+            "fake-news-site.com",
+            "irrelevant-blog.net"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.464930772781372,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limited Results News Search",
+        "purpose": "验证工具是否能正确限制返回的最大新闻条目数。",
+        "args": {
+          "query": "国际要闻",
+          "max_results": 2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4789257049560547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in News Query",
+        "purpose": "检查工具是否对潜在的跨站脚本攻击输入进行安全过滤或转义处理。",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4881060123443604,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty News Query Input",
+        "purpose": "验证工具是否能优雅处理空查询输入，并返回明确错误信息。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: 新闻查询不能为空"
+        },
+        "execution_time": 0.004006862640380859,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "测试当 max_results 超出允许范围时是否正确报错或自动修正。",
+        "args": {
+          "query": "error testing",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: max_results 必须是 1 到 5 之间的整数"
+        },
+        "execution_time": 0.0049974918365478516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Days Value Test",
+        "purpose": "测试最大和最小天数边界值是否被正确处理。",
+        "args": {
+          "query": "历史新闻回顾",
+          "days": 365
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4424161911010742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in News Query",
+        "purpose": "测试工具是否能够处理包含特殊字符的新闻查询，确保搜索不会因格式问题失败。",
+        "args": {
+          "query": "C++ vs C# 性能对比"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: This request exceeds your plan's set usage limit. Please upgrade your plan or contact support@tavily.com"
+        },
+        "execution_time": 1.4351179599761963,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 25
+}

@@ -1,0 +1,230 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_duckduckgo_search_fetcher",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_duckduckgo_search_fetcher/refined/server.py",
+  "timestamp": "2025-07-13T02:47:52.665824",
+  "tools": [
+    {
+      "name": "DuckDuckGo_search",
+      "description": "\n    Performs a search on DuckDuckGo using the provided query and returns the results in a structured format.\n    This tool is designed to give users quick access to search results without needing to manually open a browser.\n\n    Args:\n        query (str): The search term or phrase that the user wants to look up. This parameter is mandatory.\n                     Example: \"Python programming language\"\n\n    Returns:\n        str: A JSON formatted string representing a list of search results. Each item in the list\n             is an object containing 'title', 'link', and 'snippet'.\n             Example:\n             \"[{\"title\": \"Official Python Website\", \"link\": \"https://www.python.org\", \"snippet\": \"The official home of the Python Programming Language...\"}]\"\n\n    Raises:\n        ValueError: If the query parameter is empty or contains only whitespace.\n        httpx.HTTPStatusError: If the request to the DuckDuckGo API fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "DuckDuckGo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetches the content from a given URL, parses the HTML, and extracts the primary text content.\n    It aims to remove boilerplate elements like navigation, ads, and footers.\n\n    Args:\n        url (str): The full URL of the webpage from which to extract content. This parameter is mandatory.\n                   Example: \"https://www.python.org/doc/\"\n\n    Returns:\n        str: A single string containing the cleaned, primary text content of the webpage.\n             Paragraphs are separated by newlines.\n             Example:\n             \"The Python programming language is a versatile and powerful tool...\\n\\nThis article will explore...\"\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.RequestError: If there is a problem with the network request.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "DuckDuckGo_search": [
+      {
+        "case_name": "Basic Search Query",
+        "purpose": "验证 DuckDuckGo_search 工具在输入有效查询时是否能返回结构化的搜索结果。",
+        "args": {
+          "query": "Python programming language"
+        },
+        "response": {
+          "result": "[{\"title\": \"Python (programming language) Category\", \"link\": \"https://duckduckgo.com/c/Python_(programming_language)\", \"snippet\": \"\"}, {\"title\": \"Python syntax and semantics\", \"link\": \"https://duckduckgo.com/Python_syntax_and_semantics\", \"snippet\": \"The syntax of the Python programming language is the set of rules that defines how a Python program will be written and interpreted. The Python language has many similarities to Perl, C, and Java. However, there are some definite differences between the languages.\"}, {\"title\": \"History of programming languages\", \"link\": \"https://duckduckgo.com/History_of_programming_languages\", \"snippet\": \"The history of programming languages spans from documentation of early mechanical computers to modern tools for software development. Early programming languages were highly specialized, relying on mathematical notation and similarly obscure syntax.\"}, {\"title\": \"Pattern matching programming languages\", \"link\": \"https://duckduckgo.com/c/Pattern_matching_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Class-based programming languages\", \"link\": \"https://duckduckgo.com/c/Class-based_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Multi-paradigm programming languages\", \"link\": \"https://duckduckgo.com/c/Multi-paradigm_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Text-oriented programming languages\", \"link\": \"https://duckduckgo.com/c/Text-oriented_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Concurrent programming languages\", \"link\"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2677字符，剩余1177字符"
+        },
+        "execution_time": 1.1454570293426514,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "测试当 query 参数为空字符串时，工具是否抛出 ValueError 异常。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool DuckDuckGo_search: The 'query' parameter cannot be empty."
+        },
+        "execution_time": 0.00506281852722168,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only Query",
+        "purpose": "测试当 query 参数仅包含空白字符时，工具是否正确处理并抛出 ValueError。",
+        "args": {
+          "query": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool DuckDuckGo_search: The 'query' parameter cannot be empty."
+        },
+        "execution_time": 0.0070340633392333984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能正确处理包含特殊字符的搜索查询。",
+        "args": {
+          "query": "!@#$%^&*()_+{}[]|:\"<>?`~"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.37375473976135254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Query Handling",
+        "purpose": "测试工具是否支持 Unicode 字符集作为搜索内容。",
+        "args": {
+          "query": "你好世界 Hello World"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.33875060081481934,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security - Command Injection Attempt",
+        "purpose": "测试是否对潜在命令注入攻击进行安全过滤或拒绝执行。",
+        "args": {
+          "query": "; rm -rf / ;"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.3451817035675049,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Network Failure Simulation",
+        "purpose": "模拟网络故障，验证工具是否能优雅地捕获 HTTP 错误并抛出 httpx.HTTPStatusError。",
+        "args": {
+          "query": "test network failure"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.34021759033203125,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Basic URL Content Fetch",
+        "purpose": "验证 fetch_content 工具在输入有效 URL 时是否能正确提取网页主要内容。",
+        "args": {
+          "url": "https://www.python.org/doc/"
+        },
+        "response": {
+          "result": "Notice:While JavaScript is not essential for this website, your interaction with the content will be limited. Please turn JavaScript on for the full experience.\n\nPython's documentation, tutorials, and guides are constantly evolving.\n\nGet started here, or scroll down for documentation broken out by type and subject.\n\nPython Docs\n\nSee alsoDocumentation Releases by Version\n\nCan’t find what you’re looking for?Try our comprehensive Help section\n\nOpen source software is made better when users can easily contribute code and documentation to fix bugs and add features. Python strongly encourages community involvement in improving the software.Learn moreabout how to make Python better for everyone.\n\nContribute to PythonIssue Tracker\n\nCopyright ©2001-2025.Python Software FoundationLegal StatementsPrivacy Notice"
+        },
+        "execution_time": 0.7394781112670898,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty URL Input",
+        "purpose": "测试当 url 参数为空字符串时，工具是否抛出 ValueError 异常。",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A valid URL starting with 'http://' or 'https://' is required."
+        },
+        "execution_time": 0.0030982494354248047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only URL",
+        "purpose": "测试当 url 参数仅包含空白字符时，工具是否正确处理并抛出 ValueError。",
+        "args": {
+          "url": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A valid URL starting with 'http://' or 'https://' is required."
+        },
+        "execution_time": 0.003003358840942383,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "验证工具是否对格式错误的 URL 抛出 ValueError。",
+        "args": {
+          "url": "htp:/invalid.url"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A valid URL starting with 'http://' or 'https://' is required."
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in URL",
+        "purpose": "验证工具是否能正确处理包含特殊字符的 URL。",
+        "args": {
+          "url": "https://example.com/page?query=!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Failed to fetch content due to HTTP status 404 for URL: https://example.com/page?query=!@#$%^&*()"
+        },
+        "execution_time": 1.4075045585632324,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode URL Handling",
+        "purpose": "测试工具是否支持 Unicode 字符集作为 URL 的一部分。",
+        "args": {
+          "url": "https://例子.测试/页面"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A network error occurred while trying to fetch the URL: https://例子.测试/页面. Details: "
+        },
+        "execution_time": 1.6052467823028564,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security - Command Injection Attempt in URL",
+        "purpose": "测试是否对潜在命令注入攻击进行安全过滤或拒绝执行。",
+        "args": {
+          "url": "http://example.com/; rm -rf / ;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Failed to fetch content due to HTTP status 404 for URL: http://example.com/; rm -rf / ;"
+        },
+        "execution_time": 1.0444512367248535,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-existent Domain Request",
+        "purpose": "模拟请求一个不存在的域名，验证工具是否捕获网络错误并抛出 httpx.RequestError。",
+        "args": {
+          "url": "https://nonexistentdomain.example"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A network error occurred while trying to fetch the URL: https://nonexistentdomain.example. Details: "
+        },
+        "execution_time": 1.6197576522827148,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 15
+}

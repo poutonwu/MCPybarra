@@ -1,0 +1,556 @@
+{
+  "server_name": "server",
+  "parent_dir": "arxiv_paper_manager_refined",
+  "report_name": "arxiv_paper_manager_refined-server",
+  "server_path": "workspace\\refinement\\arxiv_paper_manager_refined\\server.py",
+  "timestamp": "2025-06-30T22:05:25.227385",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Searches arXiv for academic papers based on a query.\n\n    Args:\n        query: The search query (e.g., 'machine learning').\n        max_results: Maximum number of results to return (default is 10).\n\n    Returns:\n        A JSON string containing the list of matching papers.\n\n    Example:\n        search_papers(query=\"quantum computing\", max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    Downloads the PDF of a specified arXiv paper and saves it locally.\n\n    Args:\n        paper_id: The unique identifier of the paper (e.g., '1605.08386v1').\n\n    Returns:\n        A JSON string indicating the success or failure of the download.\n\n    Example:\n        download_paper(paper_id=\"1605.08386v1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    Lists all locally stored papers.\n\n    Returns:\n        A JSON string containing the list of locally stored papers.\n\n    Example:\n        list_papers()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    Reads the content of a specified paper file.\n\n    Args:\n        filename: The name of the file to read (e.g., '1605.08386v1.pdf').\n\n    Returns:\n        A JSON string containing the content of the paper or an error message.\n\n    Example:\n        read_paper(filename=\"1605.08386v1.pdf\")\n    ",
+      "args_schema": {
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "BasicSearchTest",
+        "purpose": "验证工具能否根据查询词返回默认数量的论文结果。",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"Lecture Notes: Optimization for Machine Learning\", \"authors\": [\"Elad Hazan\"], \"summary\": \"Lecture notes on optimization for machine learning, derived from a course at\\nPrinceton University and tutorials given in MLSS, Buenos Aires, as well as\\nSimons Foundation, Berkeley.\", \"pdf_url\": \"http://arxiv.org/pdf/1909.03550v1\", \"entry_id\": \"http://arxiv.org/abs/1909.03550v1\"}, {\"title\": \"An Optimal Control View of Adversarial Machine Learning\", \"authors\": [\"Xiaojin Zhu\"], \"summary\": \"I describe an optimal control view of adversarial machine learning, where the\\ndynamical system is the machine learner, the input are adversarial actions, and\\nthe control costs are defined by the adversary's goals to do harm and be hard\\nto detect. This view encompasses many types of adversarial machine ...[截断]，共计8781字符，剩余7981字符"
+        },
+        "execution_time": 0.9175856113433838,
+        "is_security_test": false
+      },
+      {
+        "case_name": "CustomMaxResultsTest",
+        "purpose": "验证工具在指定max_results参数时是否能正确返回相应数量的结果。",
+        "args": {
+          "query": "deep learning",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Opening the black box of deep learning\", \"authors\": [\"Dian Lei\", \"Xiaoxiao Chen\", \"Jianfei Zhao\"], \"summary\": \"The great success of deep learning shows that its technology contains\\nprofound truth, and understanding its internal mechanism not only has important\\nimplications for the development of its technology and effective application in\\nvarious fields, but also provides meaningful insights into the understanding of\\nhuman brain mechanism. At present, most of the theoretical research on deep\\nlearning is based on mathematics. This dissertation proposes that the neural\\nnetwork of deep learning is a physical system, examines deep learning from\\nthree different perspectives: microscopic, macroscopic, and physical world\\nviews, answers multiple theoretical puzzles in deep lear...[截断]，共计5205字符，剩余4405字符"
+        },
+        "execution_time": 1.5754029750823975,
+        "is_security_test": false
+      },
+      {
+        "case_name": "EmptyQueryTest",
+        "purpose": "验证空查询字符串是否能触发默认或合理的行为（如返回空或默认结果）。",
+        "args": {
+          "query": "",
+          "max_results": 10
+        },
+        "response": {
+          "result": "{\"error\": \"'query' must be a non-empty string.\"}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_security_test": false
+      },
+      {
+        "case_name": "MaxResultsZeroTest",
+        "purpose": "测试当max_results设为0时是否返回空结果。",
+        "args": {
+          "query": "reinforcement learning",
+          "max_results": 0
+        },
+        "response": {
+          "result": "{\"error\": \"'max_results' must be a positive integer.\"}"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_security_test": false
+      },
+      {
+        "case_name": "MaxResultsNegativeTest",
+        "purpose": "测试负数作为max_results参数时是否能正确处理或抛出错误。",
+        "args": {
+          "query": "computer vision",
+          "max_results": -5
+        },
+        "response": {
+          "result": "{\"error\": \"'max_results' must be a positive integer.\"}"
+        },
+        "execution_time": 0.0048182010650634766,
+        "is_security_test": false
+      },
+      {
+        "case_name": "LargeMaxResultsTest",
+        "purpose": "测试非常大的max_results值是否会超出限制或影响性能。",
+        "args": {
+          "query": "natural language processing",
+          "max_results": 1000
+        },
+        "response": {
+          "result": "{\"error\": \"Page of results was unexpectedly empty (https://export.arxiv.org/api/query?search_query=natural+language+processing&id_list=&sortBy=relevance&sortOrder=descending&start=300&max_results=100)\"}"
+        },
+        "execution_time": 22.884373664855957,
+        "is_security_test": false
+      },
+      {
+        "case_name": "InvalidQueryCharactersTest",
+        "purpose": "测试包含特殊字符的查询是否被正确处理或安全过滤。",
+        "args": {
+          "query": "<script>alert('xss')</script>",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Structural Learning of Attack Vectors for Generating Mutated XSS Attacks\", \"authors\": [\"Yi-Hsun Wang\", \"Ching-Hao Mao\", \"Hahn-Ming Lee\"], \"summary\": \"Web applications suffer from cross-site scripting (XSS) attacks that\\nresulting from incomplete or incorrect input sanitization. Learning the\\nstructure of attack vectors could enrich the variety of manifestations in\\ngenerated XSS attacks. In this study, we focus on generating more threatening\\nXSS attacks for the state-of-the-art detection approaches that can find\\npotential XSS vulnerabilities in Web applications, and propose a mechanism for\\nstructural learning of attack vectors with the aim of generating mutated XSS\\nattacks in a fully automatic way. Mutated XSS attack generation depends on the\\nanalysis of attack vectors and...[截断]，共计16529字符，剩余15729字符"
+        },
+        "execution_time": 1.5158884525299072,
+        "is_security_test": true
+      },
+      {
+        "case_name": "SQLInjectionAttemptTest",
+        "purpose": "测试是否存在基本的安全防护以防止SQL注入攻击尝试。",
+        "args": {
+          "query": "'; DROP TABLE papers;--",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Why Don't Developers Detect Improper Input Validation?'; DROP TABLE Papers; --\", \"authors\": [\"Larissa Braz\", \"Enrico Fregnan\", \"G\\u00fcl \\u00c7alikli\", \"Alberto Bacchelli\"], \"summary\": \"Improper Input Validation (IIV) is a software vulnerability that occurs when\\na system does not safely handle input data. Even though IIV is easy to detect\\nand fix, it still commonly happens in practice. In this paper, we study to what\\nextent developers can detect IIV and investigate underlying reasons. This\\nknowledge is essential to better understand how to support developers in\\ncreating secure software systems. We conduct an online experiment with 146\\nparticipants, of which 105 report at least three years of professional software\\ndevelopment experience. Our results show that the existenc...[截断]，共计11494字符，剩余10694字符"
+        },
+        "execution_time": 1.6449458599090576,
+        "is_security_test": true
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "BasicDownloadTest",
+        "purpose": "验证工具能否正确下载一个有效且存在的arXiv论文PDF文件。",
+        "args": {
+          "paper_id": "1605.08386v1"
+        },
+        "response": {
+          "result": "{\"message\": \"Paper downloaded successfully.\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}"
+        },
+        "execution_time": 2.20927095413208,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadNonExistentPaperTest",
+        "purpose": "测试当提供一个不存在的paper_id时，工具是否能正确返回失败信息。",
+        "args": {
+          "paper_id": "9999.99999v1"
+        },
+        "response": {
+          "result": "{\"error\": \"object has no attribute 'updated_parsed'\"}"
+        },
+        "execution_time": 0.5197038650512695,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadInvalidFormatPaperIdTest",
+        "purpose": "测试当paper_id格式不合法时（如包含特殊字符），工具是否能正确处理错误。",
+        "args": {
+          "paper_id": "invalid_id_123!@#"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=invalid_id_123%21%40%23&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.432139158248901,
+        "is_security_test": false
+      },
+      {
+        "case_name": "EmptyPaperIdTest",
+        "purpose": "测试当paper_id为空字符串时，工具是否能正确抛出错误。",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"'paper_id' must be a non-empty string.\"}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_security_test": false
+      },
+      {
+        "case_name": "PaperIdWithSpecialCharactersTest",
+        "purpose": "测试包含特殊字符的paper_id是否被安全地处理或拒绝，防止潜在注入攻击。",
+        "args": {
+          "paper_id": "1605.08386v1<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=1605.08386v1%3Cscript%3Ealert%28%27xss%27%29%3C%2Fscript%3E&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.966337203979492,
+        "is_security_test": true
+      },
+      {
+        "case_name": "DownloadLargePaperTest",
+        "purpose": "验证工具能否成功下载一个大尺寸的论文PDF文件，测试性能与稳定性。",
+        "args": {
+          "paper_id": "2001.00001v1"
+        },
+        "response": {
+          "result": "{\"message\": \"Paper downloaded successfully.\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}"
+        },
+        "execution_time": 5.057169437408447,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ConcurrentDownloadTest",
+        "purpose": "验证工具在并发请求多个不同paper_id时是否能够稳定运行并正确响应。",
+        "args": {
+          "paper_id": "1909.03550v1"
+        },
+        "response": {
+          "result": "{\"message\": \"Paper downloaded successfully.\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}"
+        },
+        "execution_time": 4.199142932891846,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadAlreadyExistingFileTest",
+        "purpose": "验证当目标PDF文件已存在本地时，工具是否会覆盖、重命名或报错，确保文件操作逻辑正确。",
+        "args": {
+          "paper_id": "1605.08386v1"
+        },
+        "response": {
+          "result": "{\"message\": \"Paper downloaded successfully.\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}"
+        },
+        "execution_time": 2.335381507873535,
+        "is_security_test": false
+      },
+      {
+        "case_name": "DownloadToFilesystemRestrictedPathTest",
+        "purpose": "测试工具在尝试将PDF写入受限制路径时是否能正确处理权限错误。",
+        "args": {
+          "paper_id": "1605.08386v1"
+        },
+        "response": {
+          "result": "{\"message\": \"Paper downloaded successfully.\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}"
+        },
+        "execution_time": 1.730452537536621,
+        "is_security_test": false
+      },
+      {
+        "case_name": "SQLInjectionInPaperIdTest",
+        "purpose": "测试是否存在基本的安全防护以防止SQL注入攻击尝试通过paper_id参数。",
+        "args": {
+          "paper_id": "1605.08386v1'; DROP TABLE papers;--"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=1605.08386v1%27%3B+DROP+TABLE+papers%3B--&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.405965805053711,
+        "is_security_test": true
+      },
+      {
+        "case_name": "XSSAttemptInPaperIdTest",
+        "purpose": "测试工具是否对paper_id参数进行安全过滤，防止XSS攻击尝试。",
+        "args": {
+          "paper_id": "<img src=x onerror=alert(1)>"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=%3Cimg+src%3Dx+onerror%3Dalert%281%29%3E&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.420044660568237,
+        "is_security_test": true
+      },
+      {
+        "case_name": "NullByteInjectionInPaperIdTest",
+        "purpose": "测试paper_id参数中包含空字节是否会被正确拒绝，防止路径穿越等漏洞利用。",
+        "args": {
+          "paper_id": "1605.08386v1%00.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=1605.08386v1%2500.pdf&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.396914005279541,
+        "is_security_test": false
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "BasicListPapersTest",
+        "purpose": "验证工具能够正确列出本地存储的所有论文信息。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.005138874053955078,
+        "is_security_test": false
+      },
+      {
+        "case_name": "EmptyStorageListTest",
+        "purpose": "验证当本地没有存储任何论文时，工具是否返回空列表或合理响应。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.005000591278076172,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListPapersWithSpecialCharactersInStorage",
+        "purpose": "验证工具在本地存储包含特殊字符的论文元数据时能否正常处理并输出完整JSON。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.007999181747436523,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListPapersBoundaryZeroTest",
+        "purpose": "测试当本地存储论文数量为零时，工具是否能正确处理边界情况。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.00400090217590332,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListPapersLargeDataSetTest",
+        "purpose": "验证工具在本地存储大量论文时能否稳定运行并完整返回所有条目。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.005690336227416992,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListPapersInvalidMetadataFormatTest",
+        "purpose": "测试工具在遇到格式错误或损坏的论文元数据文件时是否能正确处理并避免崩溃。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.0049991607666015625,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ListPapersSecurityXSSAttemptTest",
+        "purpose": "测试工具在本地存储包含潜在XSS攻击内容的论文标题或摘要时是否进行安全过滤。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.003001689910888672,
+        "is_security_test": true
+      },
+      {
+        "case_name": "ListPapersSQLInjectionInMetadataTest",
+        "purpose": "验证工具在读取包含潜在SQL注入内容的论文元数据时是否具备基本防护机制。",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"1605.08386.pdf\", \"filepath\": \"workspace/papers/1605.08386.pdf\"}, {\"filename\": \"1605.08386v1.pdf\", \"filepath\": \"workspace/papers/1605.08386v1.pdf\"}, {\"filename\": \"1907.13114v1.pdf\", \"filepath\": \"workspace/papers/1907.13114v1.pdf\"}, {\"filename\": \"1909.03550v1.pdf\", \"filepath\": \"workspace/papers/1909.03550v1.pdf\"}, {\"filename\": \"2001.00001v1.pdf\", \"filepath\": \"workspace/papers/2001.00001v1.pdf\"}, {\"filename\": \"2208.00733v1.pdf\", \"filepath\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.005002498626708984,
+        "is_security_test": false
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "BasicReadPaperTest",
+        "purpose": "验证工具能否正确读取一个有效且存在的论文文件内容。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "response": {
+          "result": "{\"content\": \"%PDF-1.5\\n%\\n142 0 obj\\n<<\\n/Length 349       \\n/Filter /FlateDecode\\n>>\\nstream\\nx\\u0685Rn0\\u0010\\u0015>\\u0014\\u001f\\u01e6iVQ*H=4=Pb\\bj\\u00145,!Q.\\u0005;;f\\u001f3b\\u0019;G&\\bd\\u0014(\\\"0D,\\n\\u0004G\\u0011\\u000bSE\\u001b\\u03e7\\u001c:\\u061e\\u0014\\u0000xl\\u001e!y$uueN\\u0006&\\rMvG|\\u0003NK<\\u077c?vPcP\\u0db5\\u0000u7K9dF9\\u07acwv\\u0007b,IJWbi0AAj\\u0014K\\t=P\\u001aQ\\\"jS!\\u0002,#\\u0013\\u001cH.lRU~Qf4\\u001d7\\\\;ctZ$m\\u001buYwp3Yd-\\n\\u0016\\u0017p0OC\\u0010\\u000b0\\\"\\u0001&\\f@i8$\\u0015\\u02f1n$eVy\\u007fqj1L\\u0006/_J\\u001b,Io086q{.\\u0004e-\\u0007\\nendstream\\nendobj\\n45 0 obj\\n<<\\n/Type /XObject\\n/Subtype /Form\\n/FormType 1\\n/PTEX.FileName (./examples/W7-NLP-OSS/nlposs-2023/papers/33.pdf)\\n/PTEX.PageNumber 1\\n/PTEX.InfoDict 150 0 R\\n/BBox [0 0 595.276 841.89]\\n/Resources <<\\n/Font << /F105 153 0 R...[截断]，共计248285字符，剩余247485字符"
+        },
+        "execution_time": 0.027526378631591797,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadNonExistentPaperTest",
+        "purpose": "测试当提供一个不存在的文件路径时，工具是否能返回明确的错误信息。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_paper.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_paper.pdf' does not exist.\"}"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadEmptyFilenameTest",
+        "purpose": "测试当提供空文件名参数时，工具是否能正确抛出错误。",
+        "args": {
+          "filename": ""
+        },
+        "response": {
+          "result": "{\"error\": \"'filename' must be a non-empty string.\"}"
+        },
+        "execution_time": 0.003000020980834961,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadLargePaperFileTest",
+        "purpose": "验证工具能否成功处理并读取大尺寸PDF论文文件的内容。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\multi_merged_output.zip"
+        },
+        "response": {
+          "result": "{\"content\": \"\"}"
+        },
+        "execution_time": 0.008001089096069336,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadInvalidFileTypeTest",
+        "purpose": "测试工具在尝试读取非PDF文件（如图片、文本等）时是否能正确拒绝或报错。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature_image.jpg"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u0000\\u0010JFIF\\u0000\\u0001\\u0001\\u0001\\u0000H\\u0000H\\u0000\\u0000\\u0002\\u001cICC_PROFILE\\u0000\\u0001\\u0001\\u0000\\u0000\\u0002\\flcms\\u0002\\u0010\\u0000\\u0000mntrRGB XYZ \\u0007\\u0000\\u0001\\u0000\\u0019\\u0000\\u0003\\u0000)\\u00009acspAPPL\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0001\\u0000\\u0000\\u0000\\u0000-lcms\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000\\ndesc\\u0000\\u0000\\u0000\\u0000\\u0000\\u0000^cprt\\u0000\\u0000\\u0001\\\\\\u0000\\u00...[截断]，共计152964字符，剩余152164字符"
+        },
+        "execution_time": 0.017998695373535156,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadFileWithSpecialCharactersInPathTest",
+        "purpose": "验证包含特殊字符的文件路径是否被安全处理，防止潜在注入攻击。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\<script>alert('xss')</script>.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\<script>alert('xss')</script>.pdf' does not exist.\"}"
+        },
+        "execution_time": 0.004000663757324219,
+        "is_security_test": true
+      },
+      {
+        "case_name": "SQLInjectionInFilenameTest",
+        "purpose": "测试是否存在基本的安全防护以防止通过文件名参数进行SQL注入攻击。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\'; DROP TABLE papers;--.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\'; DROP TABLE papers;--.pdf' does not exist.\"}"
+        },
+        "execution_time": 0.006008148193359375,
+        "is_security_test": true
+      },
+      {
+        "case_name": "XSSAttemptInFilenameTest",
+        "purpose": "测试工具是否对文件名参数进行安全过滤，防止XSS攻击尝试。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\<img src=x onerror=alert(1)>.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\<img src=x onerror=alert(1)>.pdf' does not exist.\"}"
+        },
+        "execution_time": 0.006026268005371094,
+        "is_security_test": true
+      },
+      {
+        "case_name": "NullByteInjectionInFilenameTest",
+        "purpose": "测试文件名参数中包含空字节是否会被正确拒绝，防止路径穿越等漏洞利用。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper%00.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\paper%00.pdf' does not exist.\"}"
+        },
+        "execution_time": 0.004004240036010742,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadFileWithHiddenExtensionTest",
+        "purpose": "测试工具在读取具有隐藏扩展名的文件时是否能正确识别和处理。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config"
+        },
+        "response": {
+          "result": "{\"content\": \"[core]\\n\\trepositoryformatversion = 0\\n\\tfilemode = false\\n\\tbare = false\\n\\tlogallrefupdates = true\\n\\tignorecase = true\\n\"}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadDirectoryInsteadOfFileTest",
+        "purpose": "测试工具在尝试读取目录而非具体文件时是否能正确处理错误。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\"
+        },
+        "response": {
+          "result": "{\"error\": \"[Errno 2] No such file or directory: 'D:\\\\\\\\devWorkspace\\\\\\\\MCPServer-Generator\\\\\\\\testSystem\\\\\\\\testFiles\\\\\\\\'\"}"
+        },
+        "execution_time": 0.006523609161376953,
+        "is_security_test": false
+      },
+      {
+        "case_name": "ReadLockedOrProtectedFileTest",
+        "purpose": "验证工具在尝试读取受保护或锁定的文件时是否能正确处理权限错误。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\app.ico"
+        },
+        "response": {
+          "result": "{\"content\": \"PK\\u0003\\u0004\\u0014\\u0000\\u0000\\u0000\\b\\u0000DZR\\u0001\\u0000\\u0000\\u0006\\u0000\\u0000\\u0013\\u0000\\u0000\\u0000[Content_Types].xmlMO@\\u0010\\u0015/> {C\\u000f\\u0015p(p,\\u001aD8Y/L\\u0002:UP\\u0006.}\\u001e\\u06f2=|&[CD]]W\\\"\\u0003|\\u0762.f7E!IH\\u001d\\u0006|\\u00196\\u00010:_\\u0012BZX\\u0000'V\\u0012\\u001f\\u0185\\bR=\\u00057#pTR'+hPv\\u007fw\\\"CE.&Vk\\n8`UF`sv+rgUq\\u000ex\\u000bo\\u0010m.wW3\\u0006SZ\\u0012jok&\\u0003Wn;V+hZYT}iH\\u001azC\\u000e)'!]\\u00062|)$>\\u0608^MmU\\u000f5U?RA397qC\\\"}[9DN}D_=(@{\\u000ea\\u0005\\u0018\\fHu\\u06c2cL,)[\\u001d\\u0011a{\\u000b\\u0019D>\\u05e7?\\\"\\u0014M^\\u0000PK\\u0003\\u0004\\u0014\\u0000\\u0000\\u0000\\b\\u0000DZy&K@\\u0000\\u0000\\u0000\\u0002\\u0000\\u0000\\u000b\\u0000\\u0000\\u0000_rels/.relsJ\\u00031\\u0010>E%nUD^DM>n~H\\u06beQD]X\\u0016\\u001ecf\\u059b\\u001b+lWbY\\u0542X)_\\b\\t!xTYl#\\u000e@e&6fV >...[截断]，共计53275字符，剩余52475字符"
+        },
+        "execution_time": 0.010544776916503906,
+        "is_security_test": false
+      }
+    ]
+  },
+  "total_cases": 40
+}

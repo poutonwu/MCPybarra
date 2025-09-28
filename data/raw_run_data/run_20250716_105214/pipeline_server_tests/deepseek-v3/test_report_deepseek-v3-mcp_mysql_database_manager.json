@@ -1,0 +1,381 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_mysql_database_manager",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_mysql_database_manager/refined/server.py",
+  "timestamp": "2025-07-16T11:00:49.439290",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "\n    Lists all available MySQL database tables as accessible resources.\n\n    Args:\n        database_name (str, optional): Name of the MySQL database. If omitted, lists tables from the default connected database.\n\n    Returns:\n        A list of dictionaries, where each dictionary represents a table with keys:\n            - `table_name` (str): Name of the table.\n            - `schema` (str, optional): Schema name if applicable.\n\n    Raises:\n        mysql.connector.Error: If there is an error connecting to the database or executing the query.\n    ",
+      "args_schema": {
+        "properties": {
+          "database_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Database Name"
+          }
+        },
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "\n    Reads the full data content of a specified MySQL table (limited to 100 rows).\n\n    Args:\n        table_name (str, required): Name of the table to read.\n        limit (int, optional): Maximum number of rows to return (default: 100).\n\n    Returns:\n        A dictionary with:\n            - `columns` (list of str): Column names.\n            - `rows` (list of lists): Row data, where each inner list represents a row.\n\n    Raises:\n        mysql.connector.Error: If there is an error connecting to the database or executing the query.\n        ValueError: If table_name is empty or limit is negative.\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          },
+          "limit": {
+            "default": 100,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "\n    Executes a custom SQL query (SELECT, SHOW, INSERT, UPDATE, etc.) and returns structured results.\n\n    Args:\n        query (str, required): The SQL query to execute.\n\n    Returns:\n        For SELECT/SHOW: A dictionary with `columns` (list of str) and `rows` (list of lists).\n        For INSERT/UPDATE/DELETE: A dictionary with `affected_rows` (int) indicating the number of rows modified.\n\n    Raises:\n        mysql.connector.Error: If there is an error connecting to the database or executing the query.\n        ValueError: If query is empty.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "List tables from default database",
+        "purpose": "验证工具在未指定数据库名称时能正确列出默认连接数据库中的所有表",
+        "args": {},
+        "response": [
+          "{\n  \"table_name\": \"addresses\"\n}",
+          "{\n  \"table_name\": \"companies\"\n}",
+          "{\n  \"table_name\": \"order_items\"\n}",
+          "{\n  \"table_name\": \"orders\"\n}",
+          "{\n  \"table_name\": \"products\"\n}",
+          "{\n  \"table_name\": \"reviews\"\n}",
+          "{\n  \"table_name\": \"users\"\n}"
+        ],
+        "execution_time": 0.16982316970825195,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List tables from specified database",
+        "purpose": "验证工具可以正确列出指定数据库中的所有表",
+        "args": {
+          "database_name": "test_db"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_resources: Database error: 1049 (42000): Unknown database 'test_db'"
+        },
+        "execution_time": 0.13883304595947266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty database name parameter",
+        "purpose": "验证当提供空字符串作为数据库名时工具的行为",
+        "args": {
+          "database_name": ""
+        },
+        "response": [
+          "{\n  \"table_name\": \"addresses\"\n}",
+          "{\n  \"table_name\": \"companies\"\n}",
+          "{\n  \"table_name\": \"order_items\"\n}",
+          "{\n  \"table_name\": \"orders\"\n}",
+          "{\n  \"table_name\": \"products\"\n}",
+          "{\n  \"table_name\": \"reviews\"\n}",
+          "{\n  \"table_name\": \"users\"\n}"
+        ],
+        "execution_time": 0.13705992698669434,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Database does not exist",
+        "purpose": "验证当指定的数据库不存在时，工具是否能正确抛出错误",
+        "args": {
+          "database_name": "nonexistent_db"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_resources: Database error: 1049 (42000): Unknown database 'nonexistent_db'"
+        },
+        "execution_time": 0.12883424758911133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special characters in database name",
+        "purpose": "测试数据库名中包含特殊字符时工具的处理能力",
+        "args": {
+          "database_name": "db_with_!@#$%^&*"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_resources: Database error: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '!@#$%^&*' at line 1"
+        },
+        "execution_time": 0.12889909744262695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long database name input",
+        "purpose": "验证工具对超长数据库名称参数的处理能力",
+        "args": {
+          "database_name": "a_very_long_database_name_that_exceeds_standard_length_limits_and_may_cause_issues"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_resources: Database error: 1059 (42000): Identifier name 'a_very_long_database_name_that_exceeds_standard_length_limits_and_may_cause_issues' is too long"
+        },
+        "execution_time": 0.12930893898010254,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL injection attempt in database name",
+        "purpose": "验证工具是否安全地处理潜在的SQL注入攻击",
+        "args": {
+          "database_name": "test_db; DROP TABLE users;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_resources: Database error: 1049 (42000): Unknown database 'test_db'"
+        },
+        "execution_time": 0.13032317161560059,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Schema-aware table listing",
+        "purpose": "验证工具是否能够正确返回带有 schema 名称的表信息",
+        "args": {
+          "database_name": "schema_test_db"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_resources: Database error: 1049 (42000): Unknown database 'schema_test_db'"
+        },
+        "execution_time": 0.13379120826721191,
+        "is_functional_test": true
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "Read data from a valid table with default limit",
+        "purpose": "验证工具能正确读取一个有效表的前100条数据（使用默认limit参数）",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"updated_user\",\n      \"new_email@example.com\",\n      30,\n      1\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null\n    ],\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13485479354858398,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read data from a valid table with custom limit",
+        "purpose": "验证工具能正确读取一个有效表并限制返回指定数量的行",
+        "args": {
+          "table_name": "orders",
+          "limit": 50
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"user_id\",\n    \"total_amount\",\n    \"status\"\n  ],\n  \"rows\": [\n    [\n      1,\n      1,\n      \"899.99\",\n      \"completed\"\n    ],\n    [\n      2,\n      1,\n      \"179.99\",\n      \"completed\"\n    ],\n    [\n      3,\n      2,\n      \"79.99\",\n      \"completed\"\n    ],\n    [\n      4,\n      3,\n      \"45000.00\",\n      \"completed\"\n    ],\n    [\n      5,\n      4,\n      \"1299.99\",\n      \"shipped\"\n    ],\n    [\n      6,\n      5,\n      \"49.99\",\n      \"paid\"\n    ],\n    [\n      7,\n      1,\n      \"249.99\",\n      \"pending\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13623309135437012,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to read from a non-existent table",
+        "purpose": "验证当指定的表不存在时，工具是否能正确抛出错误",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Database error: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist"
+        },
+        "execution_time": 0.13000106811523438,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL injection attempt in table name",
+        "purpose": "验证工具是否安全地处理潜在的SQL注入攻击",
+        "args": {
+          "table_name": "users; DROP TABLE orders;"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"updated_user\",\n      \"new_email@example.com\",\n      30,\n      1\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null\n    ],\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13193416595458984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read data from table with special characters in name",
+        "purpose": "测试表名中包含特殊字符时工具的处理能力",
+        "args": {
+          "table_name": "order_items!@#"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Database error: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '!@# LIMIT 100' at line 1"
+        },
+        "execution_time": 0.1344461441040039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read data with negative limit value",
+        "purpose": "验证当limit参数为负数时工具能否正确抛出错误",
+        "args": {
+          "table_name": "products",
+          "limit": -10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: limit must be non-negative"
+        },
+        "execution_time": 0.0034384727478027344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read data with zero limit value",
+        "purpose": "验证当limit参数为0时工具的行为",
+        "args": {
+          "table_name": "companies",
+          "limit": 0
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"name\",\n    \"industry\",\n    \"founded_year\"\n  ],\n  \"rows\": []\n}"
+        },
+        "execution_time": 0.13450098037719727,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read data from table with maximum allowed rows",
+        "purpose": "验证工具在达到默认最大行数限制（100）时的行为",
+        "args": {
+          "table_name": "reviews",
+          "limit": 100
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"user_id\",\n    \"product_id\",\n    \"rating\",\n    \"comment\"\n  ],\n  \"rows\": [\n    [\n      1,\n      1,\n      1,\n      5,\n      \"这款手机性能太棒了，电池续航也很好！\"\n    ],\n    [\n      2,\n      1,\n      4,\n      4,\n      \"音质不错，但续航一般。\"\n    ],\n    [\n      3,\n      2,\n      5,\n      5,\n      \"穿着很舒服，质量也很好。\"\n    ],\n    [\n      4,\n      3,\n      7,\n      5,\n      \"驾驶体验超棒，科技感十足！\"\n    ],\n    [\n      5,\n      4,\n      3,\n      4,\n      \"性能强劲，但有点重。\"\n    ],\n    [\n      6,\n      5,\n      6,\n      4,\n      \"容量很大，设计也很时尚。\"\n    ],\n    [\n      7,\n      1,\n      2,\n      5,\n      \"功能齐全，佩戴舒适。\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13376832008361816,
+        "is_functional_test": true
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "Execute valid SELECT query",
+        "purpose": "验证工具能正确执行基本的SELECT查询并返回结构化结果",
+        "args": {
+          "query": "SELECT * FROM users LIMIT 5"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"updated_user\",\n      \"new_email@example.com\",\n      30,\n      1\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13851237297058105,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute INSERT query",
+        "purpose": "验证工具能正确执行INSERT语句并返回受影响行数",
+        "args": {
+          "query": "INSERT INTO users (username, email) VALUES ('test_user', 'test@example.com')"
+        },
+        "response": {
+          "result": "{\n  \"affected_rows\": 1\n}"
+        },
+        "execution_time": 0.14286470413208008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute UPDATE query",
+        "purpose": "验证工具能正确执行UPDATE语句并返回受影响行数",
+        "args": {
+          "query": "UPDATE users SET age = 35 WHERE username = 'test_user'"
+        },
+        "response": {
+          "result": "{\n  \"affected_rows\": 1\n}"
+        },
+        "execution_time": 0.1451718807220459,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute DELETE query",
+        "purpose": "验证工具能正确执行DELETE语句并返回受影响行数",
+        "args": {
+          "query": "DELETE FROM users WHERE username = 'test_user'"
+        },
+        "response": {
+          "result": "{\n  \"affected_rows\": 1\n}"
+        },
+        "execution_time": 0.13956546783447266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL injection attempt in query parameter",
+        "purpose": "验证工具是否安全地处理潜在的SQL注入攻击",
+        "args": {
+          "query": "SELECT * FROM users; DROP TABLE users;"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"updated_user\",\n      \"new_email@example.com\",\n      30,\n      1\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null\n    ],\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13140630722045898,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty query input",
+        "purpose": "验证当提供空字符串作为查询时工具能否正确抛出错误",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: query cannot be empty"
+        },
+        "execution_time": 0.004011869430541992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Malformed SQL query",
+        "purpose": "验证当提供语法错误的SQL语句时工具能否正确抛出错误",
+        "args": {
+          "query": "SELEC * FORM users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Database error: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FORM users' at line 1"
+        },
+        "execution_time": 0.13408207893371582,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query with special characters",
+        "purpose": "测试特殊字符在SQL查询中的处理能力",
+        "args": {
+          "query": "SELECT * FROM users WHERE username = 'O''Reilly'"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\"\n  ],\n  \"rows\": [\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.13294649124145508,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

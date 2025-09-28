@@ -1,0 +1,150 @@
+{
+  "server_name": "server",
+  "parent_dir": "mysql_mcp_server-main",
+  "report_name": "mysql_mcp_server-main-server",
+  "server_path": "workspace\\public-mcp-servers\\mysql_mcp_server-main\\server.py",
+  "timestamp": "2025-06-30T21:51:54.614979",
+  "tools": [
+    {
+      "name": "execute_sql",
+      "description": "Execute an SQL query on the MySQL server",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The SQL query to execute"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    }
+  ],
+  "test_results": {
+    "execute_sql": [
+      {
+        "case_name": "Basic SELECT Query Execution",
+        "purpose": "验证工具能够执行基本的SELECT查询并返回结果",
+        "args": {
+          "query": "SELECT 1 AS test_value;"
+        },
+        "response": {
+          "result": "test_value\n1"
+        },
+        "execution_time": 0.24677014350891113,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Query with Table Creation and Insertion",
+        "purpose": "验证工具可以执行DDL和DML语句，创建表并插入数据",
+        "args": {
+          "query": "CREATE TEMPORARY TABLE test_table (id INT PRIMARY KEY, name VARCHAR(50)); INSERT INTO test_table VALUES (1, 'TestName');"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.18496370315551758,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Query to Fetch Data from Existing Table",
+        "purpose": "验证工具能从现有表中检索数据",
+        "args": {
+          "query": "SELECT * FROM users LIMIT 10;"
+        },
+        "response": {
+          "result": "id,username,email,age,company_id,created_at\n1,user1,user1@example.com,28,1,2025-06-30 10:43:59\n2,user2,user2@example.com,35,2,2025-06-30 10:43:59\n3,user3,user3@example.com,42,3,2025-06-30 10:43:59\n4,user4,user4@example.com,25,1,2025-06-30 10:43:59\n5,user5,user5@example.com,31,2,2025-06-30 10:43:59\n6,user6,user6@example.com,29,None,2025-06-30 10:43:59"
+        },
+        "execution_time": 0.15859746932983398,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Empty SQL Query",
+        "purpose": "验证工具对空SQL语句的处理能力",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Query is required"
+        },
+        "execution_time": 0.009535551071166992,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Malformed SQL Query",
+        "purpose": "验证工具是否能正确处理错误格式的SQL语句",
+        "args": {
+          "query": "SELEC * FORM invalid_table;"
+        },
+        "response": {
+          "result": "Error executing query: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FORM invalid_table' at line 1"
+        },
+        "execution_time": 0.15380406379699707,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Long SQL Query Execution",
+        "purpose": "测试边界条件：执行一个长字符串的合法SQL语句",
+        "args": {
+          "query": "SELECT * FROM very_long_table_name_with_a_lot_of_columns_and_data LIMIT 1;"
+        },
+        "response": {
+          "result": "Error executing query: 1146 (42S02): Table 'user-db.very_long_table_name_with_a_lot_of_columns_and_data' doesn't exist"
+        },
+        "execution_time": 0.15603232383728027,
+        "is_security_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt Detection",
+        "purpose": "安全性测试：检测是否允许危险的SQL注入式语句执行",
+        "args": {
+          "query": "DROP DATABASE IF EXISTS test; -- Simulated injection attempt"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.15662479400634766,
+        "is_security_test": true
+      },
+      {
+        "case_name": "Execute SQL with Special Characters in Query",
+        "purpose": "验证工具能否处理包含特殊字符的SQL语句",
+        "args": {
+          "query": "INSERT INTO test_table (name) VALUES ('O''Reilly'), ('Smith & Jones');"
+        },
+        "response": {
+          "result": "Error executing query: 1146 (42S02): Table 'user-db.test_table' doesn't exist"
+        },
+        "execution_time": 0.15812253952026367,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Query That Causes Server Timeout",
+        "purpose": "测试长时间运行的查询是否被正确处理",
+        "args": {
+          "query": "SELECT SLEEP(10);"
+        },
+        "response": {
+          "result": "SLEEP(10)\n0"
+        },
+        "execution_time": 10.183118104934692,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Multiple Statement Execution",
+        "purpose": "验证是否支持多语句执行（根据MySQL配置决定是否允许）",
+        "args": {
+          "query": "SELECT 1; SELECT 2; SELECT 3;"
+        },
+        "response": {
+          "result": "1\n1"
+        },
+        "execution_time": 0.15274429321289062,
+        "is_security_test": false
+      }
+    ]
+  },
+  "total_cases": 10
+}

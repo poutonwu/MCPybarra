@@ -1,0 +1,174 @@
+{
+  "server_name": "server",
+  "parent_dir": "mysql_mcp_server-main",
+  "report_name": "mysql_mcp_server-main-server",
+  "server_path": "workspace\\public-mcp-servers\\mysql_mcp_server-main\\server.py",
+  "timestamp": "2025-07-01T18:24:05.495961",
+  "tools": [
+    {
+      "name": "execute_sql",
+      "description": "Execute an SQL query on the MySQL server",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The SQL query to execute"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    }
+  ],
+  "test_results": {
+    "execute_sql": [
+      {
+        "case_name": "Execute Valid SELECT Query",
+        "purpose": "验证工具可以成功执行一个有效的SELECT查询并返回结果",
+        "args": {
+          "query": "SELECT 1;"
+        },
+        "response": {
+          "result": "1\n1"
+        },
+        "execution_time": 0.3649146556854248,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Valid INSERT Query",
+        "purpose": "验证工具可以成功执行INSERT语句并插入数据到表中",
+        "args": {
+          "query": "CREATE TEMPORARY TABLE test_table (id INT PRIMARY KEY, name VARCHAR(255)); INSERT INTO test_table VALUES (1, 'Test Name');"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.31867456436157227,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Valid UPDATE Query",
+        "purpose": "验证工具可以成功执行UPDATE语句更新表中的数据",
+        "args": {
+          "query": "CREATE TEMPORARY TABLE test_update (id INT PRIMARY KEY, value VARCHAR(255)); INSERT INTO test_update VALUES (1, 'Old Value'); UPDATE test_update SET value = 'New Value' WHERE id = 1;"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.31802964210510254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Valid DELETE Query",
+        "purpose": "验证工具可以成功执行DELETE语句删除表中的数据",
+        "args": {
+          "query": "CREATE TEMPORARY TABLE test_delete (id INT PRIMARY KEY, name VARCHAR(255)); INSERT INTO test_delete VALUES (1, 'To Delete'); DELETE FROM test_delete WHERE id = 1;"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.272097110748291,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Multiple Queries in One Request",
+        "purpose": "验证工具支持一次执行多个SQL语句",
+        "args": {
+          "query": "CREATE TEMPORARY TABLE multi_query (id INT PRIMARY KEY, data VARCHAR(255)); INSERT INTO multi_query VALUES (1, 'Data1'), (2, 'Data2'); SELECT * FROM multi_query;"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.2553846836090088,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Query with Special Characters",
+        "purpose": "验证工具能正确处理包含特殊字符的SQL语句",
+        "args": {
+          "query": "SELECT '特殊字符测试', '测试_含特殊字符.pdf';"
+        },
+        "response": {
+          "result": "特殊字符测试,测试_含特殊字符.pdf\n特殊字符测试,测试_含特殊字符.pdf"
+        },
+        "execution_time": 0.4007997512817383,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt Detection",
+        "purpose": "测试系统是否能够检测或阻止基本的SQL注入攻击尝试",
+        "args": {
+          "query": "DROP DATABASE IF EXISTS test; --"
+        },
+        "response": {
+          "error": "ToolException: Commands out of sync; you can't run this command now"
+        },
+        "execution_time": 0.20729374885559082,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute Empty SQL Query",
+        "purpose": "验证工具在空查询时能否正确返回错误信息",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Query is required"
+        },
+        "execution_time": 0.183366060256958,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute Invalid SQL Syntax",
+        "purpose": "验证工具是否能正确处理语法错误的SQL语句",
+        "args": {
+          "query": "SELEC * FORM invalid_table;"
+        },
+        "response": {
+          "result": "Error executing query: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FORM invalid_table' at line 1"
+        },
+        "execution_time": 0.31761741638183594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute Query on Non-Existent Table",
+        "purpose": "验证工具在操作不存在的表时能否优雅处理错误",
+        "args": {
+          "query": "SELECT * FROM non_existent_table;"
+        },
+        "response": {
+          "result": "Error executing query: 1146 (42S02): Table 'user-db.non_existent_table' doesn't exist"
+        },
+        "execution_time": 0.2595820426940918,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute Very Long SQL Query",
+        "purpose": "验证工具是否能处理非常长的SQL语句",
+        "args": {
+          "query": "SELECT REPEAT('a', 100000);"
+        },
+        "response": {
+          "result": "REPEAT('a', 100000)\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...[截断]，共计100020字符，剩余99220字符"
+        },
+        "execution_time": 0.4469304084777832,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Query with Unicode Characters",
+        "purpose": "验证工具是否能正确处理包含Unicode字符的SQL语句",
+        "args": {
+          "query": "SELECT '你好世界', 'ハローワールド', 'Hello World';"
+        },
+        "response": {
+          "result": "你好世界,ハローワールド,Hello World\n你好世界,ハローワールド,Hello World"
+        },
+        "execution_time": 0.3059988021850586,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 12
+}

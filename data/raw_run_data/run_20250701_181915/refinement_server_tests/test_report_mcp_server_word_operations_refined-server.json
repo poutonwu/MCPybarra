@@ -1,0 +1,535 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp_server_word_operations_refined",
+  "report_name": "mcp_server_word_operations_refined-server",
+  "server_path": "workspace\\refinement\\mcp_server_word_operations_refined\\server.py",
+  "timestamp": "2025-07-01T18:36:52.998006",
+  "tools": [
+    {
+      "name": "read_document_content",
+      "description": "\n    读取Microsoft Word文档的内容。\n\n    Args:\n        file_path: Word文档文件的路径 (必填)。\n\n    Returns:\n        包含文档文本内容的字符串。\n\n    Raises:\n        ValueError: 如果文件路径无效或不是.docx文件。\n        FileNotFoundError: 如果指定的文件不存在。\n        Exception: 如果读取文件时发生其他错误。\n\n    示例:\n        读取位于'workspace/documents/sample.docx'的文档内容:\n        read_document_content(file_path=\"workspace/documents/sample.docx\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "read_document_contentArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "create_new_document",
+      "description": "\n    创建一个新的Microsoft Word文档并在其中写入内容。\n\n    Args:\n        output_path: 新文档的输出路径 (必填)。\n        content: 要写入文档的文本内容 (必填)。\n\n    Returns:\n        表示操作成功的消息。\n\n    Raises:\n        ValueError: 如果output_path无效或不以.docx结尾。\n        Exception: 如果创建或保存文档时发生错误。\n\n    示例:\n        创建一个新文档并写入内容:\n        create_new_document(output_path=\"workspace/output/new_document.docx\", content=\"这是新文档的内容。\")\n    ",
+      "args_schema": {
+        "properties": {
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "output_path",
+          "content"
+        ],
+        "title": "create_new_documentArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "insert_text_or_image",
+      "description": "\n    在指定位置插入文本或图片到现有的Word文档中。\n\n    Args:\n        doc_path: 现有Word文档的路径 (必填)。\n        position: 插入内容的位置索引（段落编号）(必填)。\n        text: 要插入的文本内容 (可选)。\n        image_path: 要插入的图片文件路径 (可选)。\n\n    Returns:\n        表示操作成功的消息。\n\n    Raises:\n        ValueError: 如果输入参数无效或缺少text与image_path中的至少一个。\n        FileNotFoundError: 如果指定的文档或图片文件不存在。\n        Exception: 如果插入内容时发生错误。\n\n    示例:\n        在第2个段落后插入文本:\n        insert_text_or_image(doc_path=\"workspace/documents/sample.docx\", position=2, text=\"这是插入的文本。\")\n\n        在第3个段落后插入图片:\n        insert_text_or_image(doc_path=\"workspace/documents/sample.docx\", position=3, image_path=\"workspace/images/sample.png\")\n    ",
+      "args_schema": {
+        "properties": {
+          "doc_path": {
+            "title": "Doc Path",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "text": {
+            "default": null,
+            "title": "Text",
+            "type": "string"
+          },
+          "image_path": {
+            "default": null,
+            "title": "Image Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "doc_path",
+          "position"
+        ],
+        "title": "insert_text_or_imageArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "create_new_document": [
+      {
+        "case_name": "基本功能-创建文档并写入内容",
+        "purpose": "验证工具可以成功创建一个新Word文档并正确写入指定文本内容",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx",
+          "content": "这是测试文档的内容。"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_test_document.docx\"}"
+        },
+        "execution_time": 0.024654865264892578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试-尝试写入受保护路径",
+        "purpose": "验证工具无法在只读目录中创建文件，防止权限越权风险",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_output.docx",
+          "content": "不应写入的测试内容"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\read_only_dir\\\\locked_output.docx\"}"
+        },
+        "execution_time": 0.02799534797668457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-无效输出路径",
+        "purpose": "验证工具对无效路径抛出ValueError异常",
+        "args": {
+          "output_path": "invalid/path/document.docx",
+          "content": "测试内容"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: invalid/path/document.docx\"}"
+        },
+        "execution_time": 0.024098873138427734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-非.docx扩展名",
+        "purpose": "验证工具拒绝不以.docx结尾的输出路径",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\testfile.txt",
+          "content": "测试内容"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool create_new_document: 创建文档时出错: output_path必须以.docx结尾。"
+        },
+        "execution_time": 0.011768341064453125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件-最大长度文件名",
+        "purpose": "验证工具能处理长文件名路径",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_very_long_filename_that_tests_the_maximum_allowed_length_for_file_paths_in_windows_systems.docx",
+          "content": "测试长文件名支持"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_very_long_filename_that_tests_the_maximum_allowed_length_for_file_paths_in_windows_systems.docx\"}"
+        },
+        "execution_time": 0.02706122398376465,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "边界条件-特殊字符路径",
+        "purpose": "验证工具能处理包含空格和特殊字符的路径",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@chars#path!.docx",
+          "content": "测试特殊字符路径"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@chars#path!.docx\"}"
+        },
+        "execution_time": 0.024543285369873047,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "错误处理-空内容",
+        "purpose": "验证工具能正确处理空内容输入",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.docx",
+          "content": ""
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content.docx\"}"
+        },
+        "execution_time": 0.025522470474243164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-中文路径和内容",
+        "purpose": "验证工具支持中文路径和内容",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx",
+          "content": "这是一份包含中文内容的测试文档"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\\\u4e2d\\u6587\\u6d4b\\u8bd5\\u6587\\u6863.docx\"}"
+        },
+        "execution_time": 0.025021791458129883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "错误处理-覆盖现有文件",
+        "purpose": "验证工具能否覆盖已存在的文档",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_document.docx",
+          "content": "这是用来覆盖现有文件的新内容"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_document.docx\"}"
+        },
+        "execution_time": 0.02381157875061035,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试-尝试路径遍历攻击",
+        "purpose": "验证工具是否阻止路径遍历攻击尝试",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\testFiles\\forbidden.docx",
+          "content": "路径遍历测试内容"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\testFiles\\\\forbidden.docx\"}"
+        },
+        "execution_time": 0.0399775505065918,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-无权限路径",
+        "purpose": "验证工具在没有写入权限的路径下会抛出异常",
+        "args": {
+          "output_path": "C:\\Windows\\system32\\unauthorized.docx",
+          "content": "测试无权限路径写入"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool create_new_document: 创建文档时出错: [Errno 13] Permission denied: 'C:\\\\Windows\\\\system32\\\\unauthorized.docx'"
+        },
+        "execution_time": 0.014513492584228516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件-最小内容",
+        "purpose": "验证工具能正确处理最小内容（单个字符）",
+        "args": {
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_char.docx",
+          "content": "A"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u65b0\\u6587\\u6863\\u5df2\\u6210\\u529f\\u521b\\u5efa: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\single_char.docx\"}"
+        },
+        "execution_time": 0.023715496063232422,
+        "is_functional_test": true
+      }
+    ],
+    "read_document_content": [
+      {
+        "case_name": "基本功能-读取有效文档内容",
+        "purpose": "验证工具可以成功读取一个存在的Word文档内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u8fd9\\u662f\\u6d4b\\u8bd5\\u6587\\u6863\\u7684\\u5185\\u5bb9\\u3002\"}"
+        },
+        "execution_time": 0.01828598976135254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-读取中文文档内容",
+        "purpose": "验证工具能够正确读取包含中文内容的Word文档",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u8fd9\\u662f\\u4e00\\u4efd\\u5305\\u542b\\u4e2d\\u6587\\u5185\\u5bb9\\u7684\\u6d4b\\u8bd5\\u6587\\u6863\"}"
+        },
+        "execution_time": 0.013520479202270508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-读取空内容文档",
+        "purpose": "验证工具能正确处理内容为空的Word文档",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\"}"
+        },
+        "execution_time": 0.012508153915405273,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-读取单字符文档",
+        "purpose": "验证工具能正确读取只包含单个字符的Word文档",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_char.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"A\"}"
+        },
+        "execution_time": 0.02756023406982422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试-尝试读取受保护路径文件",
+        "purpose": "验证工具无法读取位于只读目录中的文档，防止权限越权风险",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_output.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u4e0d\\u5e94\\u5199\\u5165\\u7684\\u6d4b\\u8bd5\\u5185\\u5bb9\"}"
+        },
+        "execution_time": 0.012732982635498047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-无效文件路径",
+        "purpose": "验证工具对不存在的文件路径抛出FileNotFoundError异常",
+        "args": {
+          "file_path": "invalid/path/document.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u6d4b\\u8bd5\\u5185\\u5bb9\"}"
+        },
+        "execution_time": 0.014095783233642578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-非.docx扩展名文件",
+        "purpose": "验证工具拒绝读取不以.docx结尾的文件",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\code (1).html"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_document_content: 读取文档时出错: file_path必须指向一个有效的.docx文件。"
+        },
+        "execution_time": 0.0055179595947265625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-无读取权限文件",
+        "purpose": "验证工具在没有读取权限的文件下会抛出异常",
+        "args": {
+          "file_path": "C:\\Windows\\system32\\notepad.exe"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_document_content: 读取文档时出错: file_path必须指向一个有效的.docx文件。"
+        },
+        "execution_time": 0.004993915557861328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件-最大长度文件路径",
+        "purpose": "验证工具能处理长文件路径的Word文档",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_very_long_filename_that_tests_the_maximum_allowed_length_for_file_paths_in_windows_systems.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u6d4b\\u8bd5\\u957f\\u6587\\u4ef6\\u540d\\u652f\\u6301\"}"
+        },
+        "execution_time": 0.01456308364868164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "边界条件-特殊字符路径文档",
+        "purpose": "验证工具能处理包含特殊字符的文件路径",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@chars#path!.docx"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u6d4b\\u8bd5\\u7279\\u6b8a\\u5b57\\u7b26\\u8def\\u5f84\"}"
+        },
+        "execution_time": 0.012520074844360352,
+        "is_functional_test": true
+      }
+    ],
+    "insert_text_or_image": [
+      {
+        "case_name": "基本功能-在有效文档中插入文本",
+        "purpose": "验证工具可以成功在指定段落后插入文本到现有的Word文档中",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx",
+          "position": 1,
+          "text": "这是插入的测试文本。"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u5185\\u5bb9\\u5df2\\u6210\\u529f\\u63d2\\u5165\\u5230\\u6587\\u6863: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_test_document.docx\"}"
+        },
+        "execution_time": 0.021529197692871094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-在有效文档中插入图片",
+        "purpose": "验证工具可以成功在指定段落后插入图片到现有的Word文档中",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx",
+          "position": 2,
+          "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\mas.png"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u5185\\u5bb9\\u5df2\\u6210\\u529f\\u63d2\\u5165\\u5230\\u6587\\u6863: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_test_document.docx\"}"
+        },
+        "execution_time": 0.04209256172180176,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-同时插入文本和图片",
+        "purpose": "验证工具可以同时插入文本和图片内容到指定位置",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx",
+          "position": 3,
+          "text": "这是与图片一同插入的文本。",
+          "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\star_icon.png"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u5185\\u5bb9\\u5df2\\u6210\\u529f\\u63d2\\u5165\\u5230\\u6587\\u6863: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_test_document.docx\"}"
+        },
+        "execution_time": 0.02958512306213379,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试-尝试写入只读目录中的文档",
+        "purpose": "验证工具无法向只读目录中的文档插入内容，防止权限越权风险",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_output.docx",
+          "position": 2,
+          "text": "不应插入的文本"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool insert_text_or_image: 插入内容时出错: position超出范围。请提供有效的段落索引。"
+        },
+        "execution_time": 0.012758970260620117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-无效文档路径",
+        "purpose": "验证工具对不存在的文档路径抛出FileNotFoundError异常",
+        "args": {
+          "doc_path": "invalid/path/document.docx",
+          "position": 1,
+          "text": "测试插入文本"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u5185\\u5bb9\\u5df2\\u6210\\u529f\\u63d2\\u5165\\u5230\\u6587\\u6863: invalid/path/document.docx\"}"
+        },
+        "execution_time": 0.025544404983520508,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-未提供插入内容",
+        "purpose": "验证工具在未提供text和image_path时抛出ValueError异常",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx",
+          "position": 2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool insert_text_or_image: 插入内容时出错: 必须提供text或image_path中的至少一个。"
+        },
+        "execution_time": 0.0035088062286376953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理-图片文件不存在",
+        "purpose": "验证工具在提供的图片路径不存在时抛出FileNotFoundError异常",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_document.docx",
+          "position": 3,
+          "image_path": "invalid/path/image.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool insert_text_or_image: 插入内容时出错: 图片文件未找到: invalid/path/image.png"
+        },
+        "execution_time": 0.006998300552368164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件-特殊字符路径",
+        "purpose": "验证工具能处理包含特殊字符的文档和图片路径",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@chars#path!.docx",
+          "position": 1,
+          "text": "特殊字符路径测试文本",
+          "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_output.png"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u5185\\u5bb9\\u5df2\\u6210\\u529f\\u63d2\\u5165\\u5230\\u6587\\u6863: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@chars#path!.docx\"}"
+        },
+        "execution_time": 0.0412290096282959,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "边界条件-最大长度路径",
+        "purpose": "验证工具能处理长文件路径的文档插入操作",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_very_long_filename_that_tests_the_maximum_allowed_length_for_file_paths_in_windows_systems.docx",
+          "position": 5,
+          "text": "测试长路径插入文本"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool insert_text_or_image: 插入内容时出错: position超出范围。请提供有效的段落索引。"
+        },
+        "execution_time": 0.026763916015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "边界条件-中文路径和内容",
+        "purpose": "验证工具支持中文路径和中文插入内容",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx",
+          "position": 2,
+          "text": "这是一段插入的中文测试内容",
+          "image_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\积分.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool insert_text_or_image: 插入内容时出错: position超出范围。请提供有效的段落索引。"
+        },
+        "execution_time": 0.014642000198364258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-插入空文本",
+        "purpose": "验证工具能够正确处理空文本插入",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.docx",
+          "position": 1,
+          "text": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool insert_text_or_image: 插入内容时出错: 必须提供text或image_path中的至少一个。"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能-插入单个字符文本",
+        "purpose": "验证工具能够正确插入最小长度文本（单个字符）",
+        "args": {
+          "doc_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_char.docx",
+          "position": 1,
+          "text": "A"
+        },
+        "response": {
+          "result": "{\"message\": \"\\u5185\\u5bb9\\u5df2\\u6210\\u529f\\u63d2\\u5165\\u5230\\u6587\\u6863: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\single_char.docx\"}"
+        },
+        "execution_time": 0.023561954498291016,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 34
+}

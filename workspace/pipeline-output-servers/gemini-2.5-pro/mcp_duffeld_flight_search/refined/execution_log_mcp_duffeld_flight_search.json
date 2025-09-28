@@ -1,0 +1,255 @@
+[
+  {
+    "step": {
+      "step_id": "search_one_way_flight",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR",
+        "destination": "JFK",
+        "departure_date": "2025-04-01"
+      },
+      "description": "Happy path: Search for a one-way flight from London (LHR) to New York (JFK)."
+    },
+    "substituted_params": {
+      "origin": "LHR",
+      "destination": "JFK",
+      "departure_date": "2025-04-01"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_round_trip_flight",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LAX",
+        "destination": "SFO",
+        "departure_date": "2025-04-05",
+        "return_date": "2025-04-12"
+      },
+      "description": "Happy path: Search for a round-trip flight from Los Angeles (LAX) to San Francisco (SFO)."
+    },
+    "substituted_params": {
+      "origin": "LAX",
+      "destination": "SFO",
+      "departure_date": "2025-04-05",
+      "return_date": "2025-04-12"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_first_offer_details",
+      "tool_name": "get_offer_details",
+      "parameters": {
+        "offer_id": "$outputs.search_one_way_flight[0].id"
+      },
+      "description": "Dependent call: Retrieve detailed information about the first flight offer returned."
+    },
+    "substituted_params": {
+      "offer_id": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_one_way_flight[0].id'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_multi_city_flight",
+      "tool_name": "search_multi_city",
+      "parameters": {
+        "slices": [
+          {
+            "origin": "AMS",
+            "destination": "FRA",
+            "departure_date": "2025-05-10"
+          },
+          {
+            "origin": "FRA",
+            "destination": "MUC",
+            "departure_date": "2025-05-12"
+          },
+          {
+            "origin": "MUC",
+            "destination": "AMS",
+            "departure_date": "2025-05-15"
+          }
+        ]
+      },
+      "description": "Happy path: Search for a multi-city itinerary with three flight segments."
+    },
+    "substituted_params": {
+      "slices": [
+        {
+          "origin": "AMS",
+          "destination": "FRA",
+          "departure_date": "2025-05-10"
+        },
+        {
+          "origin": "FRA",
+          "destination": "MUC",
+          "departure_date": "2025-05-12"
+        },
+        {
+          "origin": "MUC",
+          "destination": "AMS",
+          "departure_date": "2025-05-15"
+        }
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_invalid_origin_iata",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "invalid",
+        "destination": "JFK",
+        "departure_date": "2025-04-01"
+      },
+      "description": "Edge case: Test invalid origin IATA code (not 3 uppercase letters)."
+    },
+    "substituted_params": {
+      "origin": "invalid",
+      "destination": "JFK",
+      "departure_date": "2025-04-01"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: Invalid origin IATA code: 'invalid'. Must be 3 uppercase letters (e.g., LHR).\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_invalid_destination_iata",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR",
+        "destination": "jfk",
+        "departure_date": "2025-04-01"
+      },
+      "description": "Edge case: Test invalid destination IATA code (lowercase letters)."
+    },
+    "substituted_params": {
+      "origin": "LHR",
+      "destination": "jfk",
+      "departure_date": "2025-04-01"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: Invalid destination IATA code: 'jfk'. Must be 3 uppercase letters (e.g., JFK).\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_missing_required_parameters",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR"
+      },
+      "description": "Edge case: Test missing required parameters (destination and departure date)."
+    },
+    "substituted_params": {
+      "origin": "LHR"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_flights: 2 validation errors for search_flightsArguments\ndestination\n  Field required [type=missing, input_value={'origin': 'LHR'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ndeparture_date\n  Field required [type=missing, input_value={'origin': 'LHR'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_invalid_return_date",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR",
+        "destination": "JFK",
+        "departure_date": "2025-04-05",
+        "return_date": "2025-04-01"
+      },
+      "description": "Edge case: Return date is earlier than departure date."
+    },
+    "substituted_params": {
+      "origin": "LHR",
+      "destination": "JFK",
+      "departure_date": "2025-04-05",
+      "return_date": "2025-04-01"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: Return date cannot be earlier than departure date.\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_invalid_slices_format",
+      "tool_name": "search_multi_city",
+      "parameters": {
+        "slices": "not_a_list"
+      },
+      "description": "Edge case: Invalid slices format - not a list."
+    },
+    "substituted_params": {
+      "slices": "not_a_list"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nslices\n  Input should be a valid list [type=list_type, input_value='not_a_list', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/list_type"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_incomplete_slice_data",
+      "tool_name": "search_multi_city",
+      "parameters": {
+        "slices": [
+          {
+            "origin": "AMS",
+            "destination": "FRA"
+          }
+        ]
+      },
+      "description": "Edge case: Incomplete slice data - missing departure_date."
+    },
+    "substituted_params": {
+      "slices": [
+        {
+          "origin": "AMS",
+          "destination": "FRA"
+        }
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_multi_city: Each slice must contain 'origin', 'destination', and 'departure_date'. Problem at slice 0.\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_invalid_offer_id",
+      "tool_name": "get_offer_details",
+      "parameters": {
+        "offer_id": "nonexistent-offer-id"
+      },
+      "description": "Edge case: Get details for an invalid or expired offer ID."
+    },
+    "substituted_params": {
+      "offer_id": "nonexistent-offer-id"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Failed to get details for offer 'nonexistent-offer-id'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+    }
+  }
+]

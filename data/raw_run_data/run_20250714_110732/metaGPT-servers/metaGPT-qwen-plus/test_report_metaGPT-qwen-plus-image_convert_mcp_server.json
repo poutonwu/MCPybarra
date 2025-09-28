@@ -1,0 +1,160 @@
+{
+  "server_name": "image_convert_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-image_convert_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\image_convert_mcp_server.py",
+  "timestamp": "2025-07-14T11:07:35.373939",
+  "tools": [
+    {
+      "name": "convert_image",
+      "description": "\n    将各种图像文件格式（如PNG、JPEG、BMP、GIF等）相互转换，支持处理包含透明度的RGBA图像，\n    自动执行适当的颜色空间转换，并将转换后的图像保存至指定目录。\n    \n    Args:\n        input_path: 输入图像文件的完整路径 (必填)。\n        output_dir: 转换后图像文件的输出目录 (必填)。\n        format: 目标格式名称 (可选，默认从输出文件扩展名推断)。\n                支持的格式: png, jpg, jpeg, bmp, gif\n    \n    Returns:\n        一个包含转换结果信息的字典，结构如下：\n        {\n            \"status\": \"success\" or \"error\",\n            \"output_path\": \"转换后的文件路径 (成功时存在)\",\n            \"message\": \"详细的操作信息或错误描述\"\n        }\n    \n    Raises:\n        FileNotFoundError: 如果输入图像文件不存在。\n        PermissionError: 如果输入文件不可读或输出目录不可写。\n        ValueError: 如果输入参数无效或目标格式不受支持。\n        RuntimeError: 如果图像转换过程中发生严重错误。\n    ",
+      "args_schema": {
+        "properties": {
+          "input_path": {
+            "title": "Input Path",
+            "type": "string"
+          },
+          "output_dir": {
+            "title": "Output Dir",
+            "type": "string"
+          },
+          "format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Format"
+          }
+        },
+        "required": [
+          "input_path",
+          "output_dir"
+        ],
+        "title": "convert_imageArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_image": [
+      {
+        "case_name": "Basic Image Conversion from JPEG to PNG",
+        "purpose": "验证工具能正确将JPEG图像转换为PNG格式，并使用默认输出格式（从文件扩展名推断）。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "format": null
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature_converted.jpeg\",\n  \"message\": \"成功将 D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.jpeg 转换为 JPEG 格式 (nature_converted.jpeg)\"\n}"
+        },
+        "execution_time": 0.4501361846923828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Conversion with Explicit Format Specification",
+        "purpose": "验证工具在显式指定目标格式时，能够正确将JPG图像转换为BMP格式。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "format": "bmp"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\xue_converted.bmp\",\n  \"message\": \"成功将 D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\xue.jpg 转换为 BMP 格式 (xue_converted.bmp)\"\n}"
+        },
+        "execution_time": 0.18172717094421387,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Input File Not Found Error",
+        "purpose": "验证当输入文件不存在时，工具抛出FileNotFoundError并返回错误状态。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "format": "jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_image: 输入图像文件不存在: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.png"
+        },
+        "execution_time": 0.010517358779907227,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Output Directory Permissions",
+        "purpose": "验证当输出目录不可写时，工具抛出PermissionError并返回错误状态。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg",
+          "output_dir": "C:\\Windows\\System32\\",
+          "format": "gif"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_image: [Errno 13] Permission denied: 'C:\\\\Windows\\\\System32\\\\nature_converted.gif'"
+        },
+        "execution_time": 2.007382869720459,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unsupported Output Format Handling",
+        "purpose": "验证当尝试转换为不支持的格式时，工具抛出ValueError并返回错误信息。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "format": "tiff"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_image: 不支持的目标格式: tiff。支持的格式有: png, jpg, jpeg, bmp, gif"
+        },
+        "execution_time": 0.010505914688110352,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Convert Image Using Default Format from Input Extension",
+        "purpose": "验证工具能根据输出文件路径自动推断目标格式。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "format": null
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature_converted.jpeg\",\n  \"message\": \"成功将 D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.jpeg 转换为 JPEG 格式 (nature_converted.jpeg)\"\n}"
+        },
+        "execution_time": 0.2914612293243408,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long File Path and Special Characters in Output Dir",
+        "purpose": "验证工具处理长路径和特殊字符的能力。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\测试_!@#$%^&*()_目录\\",
+          "format": "png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_image: 无法创建输出目录: [WinError 123] 文件名、目录名或卷标语法不正确。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\测试_!@#$%^&*()_目录\\\\'"
+        },
+        "execution_time": 0.004506587982177734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Attempt Conversion of Non-Image File",
+        "purpose": "验证工具对非图像文件进行转换时是否能正确报错。",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "format": "png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_image: PIL无法识别图像文件: cannot identify image file 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\cs.csv'"
+        },
+        "execution_time": 0.032883405685424805,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 8
+}

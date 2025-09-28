@@ -1,0 +1,280 @@
+[
+  {
+    "step": {
+      "step_id": "search_one_way_flights",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR",
+        "destination": "JFK",
+        "departure_date": "2025-04-10"
+      },
+      "description": "Happy path: Search for one-way flights from London Heathrow (LHR) to New York JFK on a specific date."
+    },
+    "substituted_params": {
+      "origin": "LHR",
+      "destination": "JFK",
+      "departure_date": "2025-04-10"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_round_trip_flights",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "JFK",
+        "destination": "LAX",
+        "departure_date": "2025-04-15",
+        "return_date": "2025-04-22"
+      },
+      "description": "Happy path: Search for round-trip flights between JFK and LAX with return date specified."
+    },
+    "substituted_params": {
+      "origin": "JFK",
+      "destination": "LAX",
+      "departure_date": "2025-04-15",
+      "return_date": "2025-04-22"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_offer_details_from_search",
+      "tool_name": "get_offer_details",
+      "parameters": {
+        "offer_id": "$outputs.search_one_way_flights[0].id"
+      },
+      "description": "Dependent call: Retrieve full details of the first flight offer returned by one-way search."
+    },
+    "substituted_params": {
+      "offer_id": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_one_way_flights[0].id'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_multi_city_itinerary",
+      "tool_name": "search_multi_city",
+      "parameters": {
+        "slices": [
+          {
+            "origin": "LHR",
+            "destination": "AMS",
+            "departure_date": "2025-05-01"
+          },
+          {
+            "origin": "AMS",
+            "destination": "ORD",
+            "departure_date": "2025-05-03"
+          },
+          {
+            "origin": "ORD",
+            "destination": "LHR",
+            "departure_date": "2025-05-06"
+          }
+        ],
+        "cabin_class": "business"
+      },
+      "description": "Happy path: Search for a multi-city trip with three legs in business class."
+    },
+    "substituted_params": {
+      "slices": [
+        {
+          "origin": "LHR",
+          "destination": "AMS",
+          "departure_date": "2025-05-01"
+        },
+        {
+          "origin": "AMS",
+          "destination": "ORD",
+          "departure_date": "2025-05-03"
+        },
+        {
+          "origin": "ORD",
+          "destination": "LHR",
+          "departure_date": "2025-05-06"
+        }
+      ],
+      "cabin_class": "business"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_multi_city_offer_details",
+      "tool_name": "get_offer_details",
+      "parameters": {
+        "offer_id": "$outputs.search_multi_city_itinerary[0].id"
+      },
+      "description": "Dependent call: Get detailed info for the first multi-city flight offer."
+    },
+    "substituted_params": {
+      "offer_id": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_multi_city_itinerary[0].id'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_invalid_return_date",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR",
+        "destination": "JFK",
+        "departure_date": "2025-04-10",
+        "return_date": "2025-04-09"
+      },
+      "description": "Edge case: Test search where return date is before departure date, expecting API to handle or fail gracefully."
+    },
+    "substituted_params": {
+      "origin": "LHR",
+      "destination": "JFK",
+      "departure_date": "2025-04-10",
+      "return_date": "2025-04-09"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_missing_required_params",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "",
+        "destination": "",
+        "departure_date": ""
+      },
+      "description": "Edge case: Call search with missing required parameters to test input validation."
+    },
+    "substituted_params": {
+      "origin": "",
+      "destination": "",
+      "departure_date": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: Missing required parameters: origin, destination, and departure_date must be provided.\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_invalid_iata_codes",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "XYZ",
+        "destination": "ABC",
+        "departure_date": "2025-04-10"
+      },
+      "description": "Edge case: Use invalid IATA codes to test error handling."
+    },
+    "substituted_params": {
+      "origin": "XYZ",
+      "destination": "ABC",
+      "departure_date": "2025-04-10"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_invalid_cabin_class",
+      "tool_name": "search_flights",
+      "parameters": {
+        "origin": "LHR",
+        "destination": "JFK",
+        "departure_date": "2025-04-10",
+        "cabin_class": "invalid_class"
+      },
+      "description": "Edge case: Test with an unsupported cabin class value."
+    },
+    "substituted_params": {
+      "origin": "LHR",
+      "destination": "JFK",
+      "departure_date": "2025-04-10",
+      "cabin_class": "invalid_class"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_details_with_invalid_offer_id",
+      "tool_name": "get_offer_details",
+      "parameters": {
+        "offer_id": "nonexistent-offer-id-123"
+      },
+      "description": "Edge case: Attempt to get details for an invalid or expired offer ID."
+    },
+    "substituted_params": {
+      "offer_id": "nonexistent-offer-id-123"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Failed to get details for offer 'nonexistent-offer-id-123'. It might be invalid or expired. Error: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_multi_city_with_empty_slices",
+      "tool_name": "search_multi_city",
+      "parameters": {
+        "slices": []
+      },
+      "description": "Edge case: Test multi-city search with empty slices list to trigger input validation error."
+    },
+    "substituted_params": {
+      "slices": []
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_multi_city: 'slices' must be a non-empty list of flight segments.\", \"status\": \"failed\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_multi_city_with_missing_keys",
+      "tool_name": "search_multi_city",
+      "parameters": {
+        "slices": [
+          {
+            "origin": "LHR",
+            "departure_date": "2025-05-01"
+          }
+        ]
+      },
+      "description": "Edge case: Provide incomplete slice data (missing destination) to test validation logic."
+    },
+    "substituted_params": {
+      "slices": [
+        {
+          "origin": "LHR",
+          "departure_date": "2025-05-01"
+        }
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"An unexpected error occurred in search_multi_city: Each slice must contain 'origin', 'destination', and 'departure_date'.\", \"status\": \"failed\"}"
+    }
+  }
+]

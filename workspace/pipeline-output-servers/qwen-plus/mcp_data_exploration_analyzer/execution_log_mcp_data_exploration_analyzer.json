@@ -1,0 +1,197 @@
+[
+  {
+    "step": {
+      "step_id": "load_valid_csv",
+      "tool_name": "load_csv",
+      "parameters": {
+        "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv"
+      },
+      "description": "Happy path: Load a valid CSV file with default dataset name."
+    },
+    "substituted_params": {
+      "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"message\": \"成功加载 1524 行数据到数据集 '机械设备精简'\", \"dataset_name\": \"机械设备精简\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_exploration_plan_valid",
+      "tool_name": "generate_exploration_plan",
+      "parameters": {
+        "dataset_name": "$outputs.load_valid_csv.dataset_name"
+      },
+      "description": "Dependent call: Generate an exploration plan for the loaded dataset."
+    },
+    "substituted_params": {
+      "dataset_name": "机械设备精简"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"生成探索计划时发生错误: Object of type int64 is not JSON serializable\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 324, in generate_exploration_plan\\n    return json.dumps(result, ensure_ascii=False)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\json\\\\__init__.py\\\", line 238, in dumps\\n    **kw).encode(obj)\\n          ^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\json\\\\encoder.py\\\", line 200, in encode\\n    chunks = self.iterencode(o, _one_shot=True)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\json\\\\encoder.py\\\", line 258, in iterencode\\n    return _iterencode(o, 0)\\n           ^^^^^^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\json\\\\encoder.py\\\", line 180, in default\\n    raise TypeError(f'Object of type {o.__class__.__name__} '\\nTypeError: Object of type int64 is not JSON serializable\\n\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_visualization_valid",
+      "tool_name": "execute_visualization",
+      "parameters": {
+        "plan_id": "$outputs.generate_exploration_plan_valid.exploration_plan.plan_id"
+      },
+      "description": "Dependent call: Execute visualization based on the generated exploration plan."
+    },
+    "substituted_params": {
+      "plan_id": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.generate_exploration_plan_valid.exploration_plan.plan_id'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "run_script_with_description",
+      "tool_name": "run_script",
+      "parameters": {
+        "script_code": "result_df = df.describe()",
+        "dataset_name": "$outputs.load_valid_csv.dataset_name"
+      },
+      "description": "Dependent call: Run a simple script to generate descriptive statistics of the dataset."
+    },
+    "substituted_params": {
+      "script_code": "result_df = df.describe()",
+      "dataset_name": "机械设备精简"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"output\": \"\", \"result_dataset_name\": \"机械设备精简_processed_20250708232113\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "run_script_with_normalization",
+      "tool_name": "run_script",
+      "parameters": {
+        "script_code": "scaler = StandardScaler()\nresult_df = pd.DataFrame(scaler.fit_transform(df.select_dtypes(include=[np.number])), columns=df.select_dtypes(include=[np.number]).columns)",
+        "dataset_name": "$outputs.load_valid_csv.dataset_name"
+      },
+      "description": "Dependent call: Run a script to normalize numerical features in the dataset."
+    },
+    "substituted_params": {
+      "script_code": "scaler = StandardScaler()\nresult_df = pd.DataFrame(scaler.fit_transform(df.select_dtypes(include=[np.number])), columns=df.select_dtypes(include=[np.number]).columns)",
+      "dataset_name": "机械设备精简"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"success\", \"output\": \"\", \"result_dataset_name\": \"机械设备精简_processed_20250708232113\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "run_script_with_pca",
+      "tool_name": "run_script",
+      "parameters": {
+        "script_code": "pca = PCA(n_components=2)\nresult_df = pd.DataFrame(pca.fit_transform(df.select_dtypes(include=[np.number])))",
+        "dataset_name": "$outputs.run_script_with_normalization.result_dataset_name"
+      },
+      "description": "Dependent call: Apply PCA on normalized data to reduce dimensionality."
+    },
+    "substituted_params": {
+      "script_code": "pca = PCA(n_components=2)\nresult_df = pd.DataFrame(pca.fit_transform(df.select_dtypes(include=[np.number])))",
+      "dataset_name": "机械设备精简_processed_20250708232113"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"执行脚本时发生错误: n_components=2 must be between 0 and min(n_samples, n_features)=1 with svd_solver='covariance_eigh'\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 150, in run_script\\n    exec(compiled_code, namespace)\\n  File \\\"<string>\\\", line 2, in <module>\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\site-packages\\\\sklearn\\\\utils\\\\_set_output.py\\\", line 316, in wrapped\\n    data_to_wrap = f(self, X, *args, **kwargs)\\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\site-packages\\\\sklearn\\\\base.py\\\", line 1473, in wrapper\\n    return fit_method(estimator, *args, **kwargs)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\site-packages\\\\sklearn\\\\decomposition\\\\_pca.py\\\", line 474, in fit_transform\\n    U, S, _, X, x_is_centered, xp = self._fit(X)\\n                                    ^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\site-packages\\\\sklearn\\\\decomposition\\\\_pca.py\\\", line 547, in _fit\\n    return self._fit_full(X, n_components, xp, is_array_api_compliant)\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"C:\\\\Users\\\\PS\\\\.conda\\\\envs\\\\agent_lab\\\\Lib\\\\site-packages\\\\sklearn\\\\decomposition\\\\_pca.py\\\", line 561, in _fit_full\\n    raise ValueError(\\nValueError: n_components=2 must be between 0 and min(n_samples, n_features)=1 with svd_solver='covariance_eigh'\\n\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "load_invalid_file_type",
+      "tool_name": "load_csv",
+      "parameters": {
+        "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg"
+      },
+      "description": "Edge case: Attempt to load a non-CSV file (e.g., image) and expect error."
+    },
+    "substituted_params": {
+      "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\自然风光.jpg"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"加载 CSV 时发生错误: 仅支持 CSV 文件格式。\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 55, in load_csv\\n    raise ValueError(\\\"仅支持 CSV 文件格式。\\\")\\nValueError: 仅支持 CSV 文件格式。\\n\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "load_nonexistent_file",
+      "tool_name": "load_csv",
+      "parameters": {
+        "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv"
+      },
+      "description": "Edge case: Attempt to load a file that does not exist."
+    },
+    "substituted_params": {
+      "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"加载 CSV 时发生错误: 文件 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv' 不存在。\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 52, in load_csv\\n    raise FileNotFoundError(f\\\"文件 '{file_path}' 不存在。\\\")\\nFileNotFoundError: 文件 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv' 不存在。\\n\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "run_script_with_invalid_dataset",
+      "tool_name": "run_script",
+      "parameters": {
+        "script_code": "df.head()",
+        "dataset_name": "invalid_dataset"
+      },
+      "description": "Edge case: Run script on a dataset that doesn't exist."
+    },
+    "substituted_params": {
+      "script_code": "df.head()",
+      "dataset_name": "invalid_dataset"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"执行脚本时发生错误: 数据集 'invalid_dataset' 不存在，请先使用 load_csv 加载数据。\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 124, in run_script\\n    raise ValueError(f\\\"数据集 '{dataset_name}' 不存在，请先使用 load_csv 加载数据。\\\")\\nValueError: 数据集 'invalid_dataset' 不存在，请先使用 load_csv 加载数据。\\n\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "generate_exploration_plan_invalid_dataset",
+      "tool_name": "generate_exploration_plan",
+      "parameters": {
+        "dataset_name": "invalid_dataset"
+      },
+      "description": "Edge case: Generate exploration plan for a dataset that doesn't exist."
+    },
+    "substituted_params": {
+      "dataset_name": "invalid_dataset"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"生成探索计划时发生错误: 数据集 'invalid_dataset' 不存在，请先使用 load_csv 加载数据。\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 216, in generate_exploration_plan\\n    raise ValueError(f\\\"数据集 '{dataset_name}' 不存在，请先使用 load_csv 加载数据。\\\")\\nValueError: 数据集 'invalid_dataset' 不存在，请先使用 load_csv 加载数据。\\n\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_visualization_invalid_plan",
+      "tool_name": "execute_visualization",
+      "parameters": {
+        "plan_id": "invalid_plan_id"
+      },
+      "description": "Edge case: Execute visualization with an invalid plan ID."
+    },
+    "substituted_params": {
+      "plan_id": "invalid_plan_id"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"status\": \"error\", \"message\": \"执行可视化时发生错误: 找不到 ID 为 'invalid_plan_id' 的探索计划。\", \"traceback\": \"Traceback (most recent call last):\\n  File \\\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\qwen-plus\\\\mcp_data_exploration_analyzer\\\\mcp_data_exploration_analyzer.py\\\", line 361, in execute_visualization\\n    raise ValueError(f\\\"找不到 ID 为 '{plan_id}' 的探索计划。\\\")\\nValueError: 找不到 ID 为 'invalid_plan_id' 的探索计划。\\n\"}"
+    }
+  }
+]

@@ -1,0 +1,923 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_text_file_processor",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_text_file_processor/refined/server.py",
+  "timestamp": "2025-07-16T11:19:29.871376",
+  "tools": [
+    {
+      "name": "get_text_file_contents",
+      "description": "\n    Reads the contents of multiple text files, optionally by line range, and returns the file contents along with a hash value for concurrency control.\n\n    Args:\n        file_paths: Paths to the text files to read.\n        line_range: The start and end line numbers to read (inclusive). If not provided, reads the entire file.\n\n    Returns:\n        A dictionary where keys are file paths and values are dictionaries containing:\n            content: The content of the file or the specified line range.\n            hash: A hash value of the file content for concurrency control.\n\n    Raises:\n        ValueError: If any file path is invalid or the line range is incorrect.\n        FileNotFoundError: If any file does not exist.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_paths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "File Paths",
+            "type": "array"
+          },
+          "line_range": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "minItems": 2,
+                "prefixItems": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Line Range"
+          }
+        },
+        "required": [
+          "file_paths"
+        ],
+        "title": "get_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "create_text_file",
+      "description": "\n    Creates a new text file with the specified content.\n\n    Args:\n        file_path: The path where the new text file will be created.\n        content: The content to write to the new file.\n\n    Returns:\n        A dictionary with:\n            success: Indicates whether the file was created successfully.\n            message: A status message (e.g., \"File created successfully\" or an error message).\n\n    Raises:\n        ValueError: If the file path is invalid or content is empty.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "content"
+        ],
+        "title": "create_text_fileArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "append_text_file_contents",
+      "description": "\n    Appends content to an existing text file.\n\n    Args:\n        file_path: The path to the text file.\n        content: The content to append to the file.\n\n    Returns:\n        A dictionary with:\n            success: Indicates whether the content was appended successfully.\n            message: A status message.\n\n    Raises:\n        ValueError: If the file does not exist or content is empty.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "content"
+        ],
+        "title": "append_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "delete_text_file_contents",
+      "description": "\n    Deletes a specific range of lines from a text file.\n\n    Args:\n        file_path: The path to the text file.\n        line_range: The start and end line numbers to delete (inclusive).\n\n    Returns:\n        A dictionary with:\n            success: Indicates whether the lines were deleted successfully.\n            message: A status message.\n\n    Raises:\n        ValueError: If the file does not exist or the line range is invalid.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "line_range": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Line Range",
+            "type": "array"
+          }
+        },
+        "required": [
+          "file_path",
+          "line_range"
+        ],
+        "title": "delete_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "insert_text_file_contents",
+      "description": "\n    Inserts content into a text file at a specified line position.\n\n    Args:\n        file_path: The path to the text file.\n        line_number: The line number where the content will be inserted.\n        content: The content to insert.\n\n    Returns:\n        A dictionary with:\n            success: Indicates whether the content was inserted successfully.\n            message: A status message.\n\n    Raises:\n        ValueError: If the file does not exist or the line number is invalid.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "line_number": {
+            "title": "Line Number",
+            "type": "integer"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "line_number",
+          "content"
+        ],
+        "title": "insert_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "patch_text_file_contents",
+      "description": "\n    Applies precise modifications to a text file, with hash validation to avoid conflicts.\n\n    Args:\n        file_path: The path to the text file.\n        modifications: A list of modifications, where each modification is a dictionary with:\n            action: The action to perform (e.g., \"insert\", \"delete\", \"replace\").\n            line_number: The line number to modify.\n            content: The content to insert or replace (if applicable).\n        expected_hash: The expected hash value of the file content before modifications.\n\n    Returns:\n        A dictionary with:\n            success: Indicates whether the modifications were applied successfully.\n            message: A status message.\n            new_hash: The new hash value of the file content after modifications.\n\n    Raises:\n        ValueError: If the file does not exist, the hash does not match, or modifications are invalid.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "modifications": {
+            "items": {
+              "type": "object"
+            },
+            "title": "Modifications",
+            "type": "array"
+          },
+          "expected_hash": {
+            "title": "Expected Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "modifications",
+          "expected_hash"
+        ],
+        "title": "patch_text_file_contentsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "create_text_file": [
+      {
+        "case_name": "Create Text File with Default Content",
+        "purpose": "验证create_text_file工具能使用默认参数创建一个文本文件并写入内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "content": "This is a test file content."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"File created successfully\"\n}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Create Text File in Special Directory",
+        "purpose": "验证create_text_file工具能否在包含特殊字符的目录中创建文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\@special#dir\\special_test.txt",
+          "content": "Content for special directory test."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"File created successfully\"\n}"
+        },
+        "execution_time": 0.005513191223144531,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Content Validation",
+        "purpose": "测试当content参数为空时，是否抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_test.txt",
+          "content": ""
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error creating file: Content cannot be empty\"\n}"
+        },
+        "execution_time": 0.008057117462158203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid File Path Handling",
+        "purpose": "测试无效文件路径是否触发ValueError异常。",
+        "args": {
+          "file_path": "<invalid>:\\path\\to\\file.txt",
+          "content": "Some content"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error creating file: [WinError 123] 文件名、目录名或卷标语法不正确。: '<invalid>:'\"\n}"
+        },
+        "execution_time": 0.0039980411529541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Overwrite Existing File",
+        "purpose": "验证工具是否可以覆盖已存在的文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "content": "New content to overwrite the existing file."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"File created successfully\"\n}"
+        },
+        "execution_time": 0.007584333419799805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long File Path Boundary Test",
+        "purpose": "测试超长文件路径是否支持创建。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_very_long_directory_name_very_long_directory_name\\long_filename_test.txt",
+          "content": "Testing long path support."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"File created successfully\"\n}"
+        },
+        "execution_time": 0.004511356353759766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in File Name",
+        "purpose": "验证文件名中包含特殊字符时能否正常处理。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\!@#$%^&*()_+-=test.txt",
+          "content": "Testing special characters in file name."
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error creating file: [Errno 22] Invalid argument: 'D:\\\\\\\\devWorkspace\\\\\\\\MCPServer-Generator\\\\\\\\testSystem\\\\\\\\testFiles\\\\\\\\!@#$%^&*()_+-=test.txt'\"\n}"
+        },
+        "execution_time": 0.006000518798828125,
+        "is_functional_test": true
+      }
+    ],
+    "get_text_file_contents": [
+      {
+        "case_name": "Read Single Text File Entire Content",
+        "purpose": "验证get_text_file_contents工具能正确读取单个文本文件的全部内容并生成哈希值。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt"
+          ]
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\test_output.txt\": {\n    \"content\": \"This is a test file content.\",\n    \"hash\": \"dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a\"\n  }\n}"
+        },
+        "execution_time": 0.004167079925537109,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Multiple Text Files Entire Content",
+        "purpose": "验证get_text_file_contents工具可以同时读取多个文本文件的完整内容。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt"
+          ]
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\test_output.txt\": {\n    \"content\": \"This is a test file content.\",\n    \"hash\": \"dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a\"\n  },\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\existing_file.txt\": {\n    \"content\": \"New content to overwrite the existing file.\",\n    \"hash\": \"1b3da9b9d667950d92e748e681b9c5e8d131a9b835cc41e5b8f25ffacd3b3903\"\n  }\n}"
+        },
+        "execution_time": 0.0075151920318603516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Specific Line Range from Text File",
+        "purpose": "验证get_text_file_contents工具能够按指定行号范围读取文本内容。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt"
+          ],
+          "line_range": [
+            1,
+            3
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_text_file_contents: Error processing file D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt: Invalid line range: (1, 3)"
+        },
+        "execution_time": 0.008090972900390625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File in Special Directory",
+        "purpose": "验证工具能否从包含特殊字符的目录中读取文本文件内容。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\@special#dir\\special_test.txt"
+          ]
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\@special#dir\\\\special_test.txt\": {\n    \"content\": \"Content for special directory test.\",\n    \"hash\": \"d3004dfea63cf7242a835470d4082cb08ca63de3870e13914f8ef8fdcc59fdb9\"\n  }\n}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid File Path Handling",
+        "purpose": "测试无效文件路径是否触发FileNotFoundError异常。",
+        "args": {
+          "file_paths": [
+            "D:\\invalid\\path\\to\\nonexistent_file.txt"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_text_file_contents: Error processing file D:\\invalid\\path\\to\\nonexistent_file.txt: File not found: D:\\invalid\\path\\to\\nonexistent_file.txt"
+        },
+        "execution_time": 0.003378152847290039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Line Range Handling",
+        "purpose": "测试不合法的行号范围（如负数或超出实际行数）是否抛出ValueError。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt"
+          ],
+          "line_range": [
+            -5,
+            -1
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_text_file_contents: Error processing file D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt: Invalid line range: (-5, -1)"
+        },
+        "execution_time": 0.006999492645263672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Non-Text File",
+        "purpose": "测试尝试读取非文本文件时的行为，预期应返回错误信息。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_text_file_contents: Error processing file D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png: 'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte"
+        },
+        "execution_time": 0.003509998321533203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Empty Text File",
+        "purpose": "验证工具能否处理空文本文件的情况，应返回空字符串内容。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_test.txt"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_text_file_contents: Error processing file D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_test.txt: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_test.txt"
+        },
+        "execution_time": 0.0050432682037353516,
+        "is_functional_test": true
+      }
+    ],
+    "append_text_file_contents": [
+      {
+        "case_name": "Append Text to Existing File",
+        "purpose": "验证append_text_file_contents工具能正确向已存在的文本文件追加内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "content": "This is appended content."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content appended successfully\"\n}"
+        },
+        "execution_time": 0.005509138107299805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to File in Special Directory",
+        "purpose": "验证append_text_file_contents工具能否在包含特殊字符的目录中追加文件内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\@special#dir\\special_test.txt",
+          "content": "Appended content to special directory file."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content appended successfully\"\n}"
+        },
+        "execution_time": 0.00800013542175293,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Content Validation",
+        "purpose": "测试当content参数为空时，是否抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "content": ""
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error appending content: Content cannot be empty\"\n}"
+        },
+        "execution_time": 0.004058122634887695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid File Path Handling",
+        "purpose": "测试无效文件路径是否触发ValueError异常。",
+        "args": {
+          "file_path": "<invalid>:\\path\\to\\file.txt",
+          "content": "Some content"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error appending content: File not found: <invalid>:\\\\path\\\\to\\\\file.txt\"\n}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Append to Non-Text File",
+        "purpose": "测试尝试向非文本文件追加内容时的行为，预期应返回错误信息。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png",
+          "content": "This is a text content to append."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content appended successfully\"\n}"
+        },
+        "execution_time": 0.008524179458618164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Append with Special Characters in Content",
+        "purpose": "验证工具能否正确处理包含特殊字符的内容追加。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "content": "!@#$%^&*()_+-=[]{};':\",./<>?|\\`~"
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content appended successfully\"\n}"
+        },
+        "execution_time": 0.004509687423706055,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to Long Path File",
+        "purpose": "测试超长文件路径是否支持内容追加。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_very_long_directory_name_very_long_directory_name\\long_filename_test.txt",
+          "content": "Appending to long path file."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content appended successfully\"\n}"
+        },
+        "execution_time": 0.006002187728881836,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to Non-Existent File",
+        "purpose": "测试向不存在的文件追加内容是否会抛出异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "content": "Content to append to non-existent file."
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error appending content: File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\"\n}"
+        },
+        "execution_time": 0.0072100162506103516,
+        "is_functional_test": false
+      }
+    ],
+    "insert_text_file_contents": [
+      {
+        "case_name": "Insert Content at Valid Line in Existing File",
+        "purpose": "验证在现有文件的有效行号位置插入内容是否成功。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_number": 2,
+          "content": "This is the inserted content."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content inserted successfully\"\n}"
+        },
+        "execution_time": 0.004498720169067383,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Content at Beginning of File",
+        "purpose": "验证在文件的第一行前插入内容是否成功。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_number": 1,
+          "content": "Inserted at the beginning."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content inserted successfully\"\n}"
+        },
+        "execution_time": 0.00701141357421875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Content at End of File",
+        "purpose": "验证在文件末尾插入内容是否成功（行号超出当前行数）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_number": 100,
+          "content": "Appended at the end."
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error inserting content: Line number 100 is out of range\"\n}"
+        },
+        "execution_time": 0.007538557052612305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert into Non-Existent File",
+        "purpose": "测试尝试向不存在的文件中插入内容是否会抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "line_number": 1,
+          "content": "Content to insert into non-existent file."
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error inserting content: File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\"\n}"
+        },
+        "execution_time": 0.003504037857055664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert with Invalid Line Number (Zero)",
+        "purpose": "测试使用无效的行号（零）是否会抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_number": 0,
+          "content": "Invalid line number test."
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error inserting content: Line number must be at least 1\"\n}"
+        },
+        "execution_time": 0.006008148193359375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert with Negative Line Number",
+        "purpose": "测试使用负数行号是否会抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_number": -1,
+          "content": "Negative line number test."
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error inserting content: Line number must be at least 1\"\n}"
+        },
+        "execution_time": 0.006480693817138672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Empty Content into File",
+        "purpose": "验证插入空内容是否被允许（根据工具描述，应允许插入空字符串）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_number": 2,
+          "content": ""
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error inserting content: Content cannot be empty\"\n}"
+        },
+        "execution_time": 0.004001140594482422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert into File with Special Characters in Path",
+        "purpose": "验证在包含特殊字符的路径下的文件中插入内容是否成功。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\@special#dir\\special_test.txt",
+          "line_number": 2,
+          "content": "Inserted content into special path file."
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Content inserted successfully\"\n}"
+        },
+        "execution_time": 0.005521297454833984,
+        "is_functional_test": true
+      }
+    ],
+    "delete_text_file_contents": [
+      {
+        "case_name": "Delete Middle Lines from Existing Text File",
+        "purpose": "验证delete_text_file_contents工具能否正确删除指定文本文件中的一段中间行内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_range": [
+            2,
+            4
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: Invalid line range: (2, 4)\"\n}"
+        },
+        "execution_time": 0.0041332244873046875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete All Lines in Text File",
+        "purpose": "验证delete_text_file_contents工具能否删除整个文本文件的所有行（即清空文件内容）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "line_range": [
+            1,
+            100
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: Invalid line range: (1, 100)\"\n}"
+        },
+        "execution_time": 0.003000974655151367,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Single Line from File",
+        "purpose": "验证delete_text_file_contents工具可以删除单个指定行号的内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_range": [
+            3,
+            3
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: Invalid line range: (3, 3)\"\n}"
+        },
+        "execution_time": 0.009017229080200195,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt Delete with Invalid Line Range (Start > End)",
+        "purpose": "测试当提供的行范围起始值大于结束值时，是否抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_range": [
+            5,
+            2
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: Invalid line range: (5, 2)\"\n}"
+        },
+        "execution_time": 0.007491111755371094,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete from Nonexistent File",
+        "purpose": "测试尝试从不存在的文件中删除内容是否会触发FileNotFoundError。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "line_range": [
+            1,
+            3
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\"\n}"
+        },
+        "execution_time": 0.006526947021484375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete from File with Special Characters in Path",
+        "purpose": "验证delete_text_file_contents工具能否处理包含特殊字符的路径中的文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\@special#dir\\special_test.txt",
+          "line_range": [
+            1,
+            2
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: Invalid line range: (1, 2)\"\n}"
+        },
+        "execution_time": 0.004996061325073242,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Lines Beyond Actual File Length",
+        "purpose": "测试尝试删除超出文件实际行数的范围时是否能优雅处理错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_range": [
+            100,
+            200
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error deleting lines: Invalid line range: (100, 200)\"\n}"
+        },
+        "execution_time": 0.004004955291748047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete First and Last Line of File",
+        "purpose": "验证delete_text_file_contents工具能够准确删除文件的第一行和最后一行。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "line_range": [
+            1,
+            1
+          ]
+        },
+        "response": {
+          "result": "{\n  \"success\": true,\n  \"message\": \"Lines deleted successfully\"\n}"
+        },
+        "execution_time": 0.007201671600341797,
+        "is_functional_test": true
+      }
+    ],
+    "patch_text_file_contents": [
+      {
+        "case_name": "Basic Text File Patching with Replace",
+        "purpose": "验证patch_text_file_contents工具能够正确执行替换操作并校验哈希一致性。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "modifications": [
+            {
+              "action": "replace",
+              "line_number": 1,
+              "content": "This is the modified test file content."
+            }
+          ],
+          "expected_hash": "dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Hash mismatch. Expected: dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a, Actual: c3d498ef0a8eb90f7f788bacb1406d73628b3f452fc0bf676acf7c37b064ee2b\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.004998683929443359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple Modifications on Same File",
+        "purpose": "验证patch_text_file_contents支持多个修改操作（插入、删除、替换）在同一文件中。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "modifications": [
+            {
+              "action": "insert",
+              "line_number": 1,
+              "content": "Inserted line at top."
+            },
+            {
+              "action": "delete",
+              "line_number": 2
+            },
+            {
+              "action": "replace",
+              "line_number": 3,
+              "content": "Modified third line."
+            }
+          ],
+          "expected_hash": "1b3da9b9d667950d92e748e681b9c5e8d131a9b835cc41e5b8f25ffacd3b3903"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Invalid line number for replace: 3\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.006516695022583008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Hash Mismatch Rejection Test",
+        "purpose": "验证当提供的expected_hash与实际文件哈希不一致时，工具拒绝执行修改。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "modifications": [
+            {
+              "action": "replace",
+              "line_number": 1,
+              "content": "Attempt to modify without correct hash."
+            }
+          ],
+          "expected_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Hash mismatch. Expected: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, Actual: c3d498ef0a8eb90f7f788bacb1406d73628b3f452fc0bf676acf7c37b064ee2b\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.009244441986083984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Line Number Handling",
+        "purpose": "测试对无效行号（如负数或超出范围）的处理是否抛出异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "modifications": [
+            {
+              "action": "replace",
+              "line_number": -1,
+              "content": "Invalid line number test."
+            }
+          ],
+          "expected_hash": "dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Hash mismatch. Expected: dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a, Actual: c3d498ef0a8eb90f7f788bacb1406d73628b3f452fc0bf676acf7c37b064ee2b\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.0035076141357421875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Line at End of File",
+        "purpose": "验证在文件末尾插入新行的操作是否成功。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "modifications": [
+            {
+              "action": "insert",
+              "line_number": 100,
+              "content": "Appended line at end of file."
+            }
+          ],
+          "expected_hash": "1b3da9b9d667950d92e748e681b9c5e8d131a9b835cc41e5b8f25ffacd3b3903"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Invalid line number for insert: 100\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.008513927459716797,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Line from Middle of File",
+        "purpose": "验证从文件中间删除一行是否成功。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.txt",
+          "modifications": [
+            {
+              "action": "delete",
+              "line_number": 2
+            }
+          ],
+          "expected_hash": "1b3da9b9d667950d92e748e681b9c5e8d131a9b835cc41e5b8f25ffacd3b3903"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Invalid line number for delete: 2\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.005165576934814453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Replacement Content",
+        "purpose": "验证替换内容中包含特殊字符是否被正确写入。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\test_output.txt",
+          "modifications": [
+            {
+              "action": "replace",
+              "line_number": 1,
+              "content": "Line with special characters: !@#$%^&*()_+{}[]|:\"<>?~`"
+            }
+          ],
+          "expected_hash": "dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: Hash mismatch. Expected: dddb3cd3dbaf57421a0b001e3f8224c71d742133e1482ba3211f70e8f794796a, Actual: c3d498ef0a8eb90f7f788bacb1406d73628b3f452fc0bf676acf7c37b064ee2b\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.0035140514373779297,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Not Found Error Handling",
+        "purpose": "测试指定路径不存在文件时是否抛出ValueError异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "modifications": [
+            {
+              "action": "replace",
+              "line_number": 1,
+              "content": "This should not be applied."
+            }
+          ],
+          "expected_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "response": {
+          "result": "{\n  \"success\": false,\n  \"message\": \"Error applying modifications: File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\",\n  \"new_hash\": \"\"\n}"
+        },
+        "execution_time": 0.004510164260864258,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 47
+}

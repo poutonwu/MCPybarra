@@ -1,0 +1,510 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_automated_data_analysis",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_automated_data_analysis/refined/server.py",
+  "timestamp": "2025-07-11T20:56:05.878823",
+  "tools": [
+    {
+      "name": "load_csv",
+      "description": "\n    Load a CSV file into memory and store it with a user-defined dataset name.\n\n    Args:\n        file_path (str): The path to the CSV file to be loaded.\n        dataset_name (str): A unique name to associate with the dataset.\n\n    Returns:\n        str: JSON-formatted string indicating success or error.\n\n    Example:\n        load_csv(\"data/sales.csv\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "dataset_name"
+        ],
+        "title": "load_csvArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "run_script",
+      "description": "\n    Execute a Python script dynamically using a dataset loaded in memory.\n\n    Args:\n        script_code (str): The Python code to execute as a string.\n        dataset_name (str): The name of the dataset to pass to the script.\n\n    Returns:\n        str: JSON-formatted string indicating success or error with execution output.\n\n    Example:\n        run_script(\"print(dataset.head())\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "script_code": {
+            "title": "Script Code",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "script_code",
+          "dataset_name"
+        ],
+        "title": "run_scriptArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "explore_data",
+      "description": "\n    Generate an automated profile report for a dataset in memory.\n\n    Args:\n        dataset_name (str): The name of the dataset to explore.\n\n    Returns:\n        str: JSON-formatted string with summary insights and the path to the generated report.\n\n    Example:\n        explore_data(\"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "explore_dataArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_csv": [
+      {
+        "case_name": "Load CSV with valid file and dataset name",
+        "purpose": "验证工具能够成功加载一个有效的CSV文件并使用指定的dataset名称存储",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'equipment_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 0.015944480895996094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to load non-CSV file",
+        "purpose": "验证工具拒绝非CSV格式的文件",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpg",
+          "dataset_name": "image_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Only .csv or .zip files are supported.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.0039975643157958984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with empty dataset name",
+        "purpose": "验证工具是否处理空的dataset名称参数",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset '' loaded successfully.\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 0.008276224136352539,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with special characters in dataset name",
+        "purpose": "验证工具是否能正确处理包含特殊字符的dataset名称",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "data@#$%^&*"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'data@#$%^&*' loaded successfully.\", \"outputs\": {\"dataset_name\": \"data@#$%^&*\"}}"
+        },
+        "execution_time": 0.011031389236450195,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load non-existent CSV file",
+        "purpose": "验证工具在指定路径不存在CSV文件时能否优雅地报错",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv",
+          "dataset_name": "missing_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv\", \"outputs\": {}}"
+        },
+        "execution_time": 0.00600433349609375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with very long dataset name",
+        "purpose": "验证工具对极长字符串作为dataset名称的处理能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly' loaded successfully.\", \"outputs\": {\"dataset_name\": \"a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly\"}}"
+        },
+        "execution_time": 0.008038997650146484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with null file path",
+        "purpose": "验证工具在传入空文件路径时的错误处理",
+        "args": {
+          "file_path": "",
+          "dataset_name": "empty_file_path_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: \", \"outputs\": {}}"
+        },
+        "execution_time": 0.006062030792236328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with duplicate dataset name",
+        "purpose": "验证工具是否允许重复的dataset名称，或是否进行覆盖/合并等操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'equipment_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 0.007500886917114258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with spaces in dataset name",
+        "purpose": "验证工具是否支持带空格的dataset名称",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "Equipment Data With Spaces"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'Equipment Data With Spaces' loaded successfully.\", \"outputs\": {\"dataset_name\": \"Equipment Data With Spaces\"}}"
+        },
+        "execution_time": 0.010738849639892578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with Chinese dataset name",
+        "purpose": "验证工具是否支持中文命名的dataset",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "机械数据"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset '\\u673a\\u68b0\\u6570\\u636e' loaded successfully.\", \"outputs\": {\"dataset_name\": \"\\u673a\\u68b0\\u6570\\u636e\"}}"
+        },
+        "execution_time": 0.0070040225982666016,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with read-only file",
+        "purpose": "验证工具在尝试加载只读CSV文件时的行为",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\converted_images\\nature.png",
+          "dataset_name": "readonly_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Only .csv or .zip files are supported.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.0035097599029541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with invalid Windows path characters",
+        "purpose": "验证工具是否安全地处理非法文件路径字符",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\me<tadata>.csv",
+          "dataset_name": "invalid_path_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\me<tadata>.csv\", \"outputs\": {}}"
+        },
+        "execution_time": 0.007001161575317383,
+        "is_functional_test": false
+      }
+    ],
+    "explore_data": [
+      {
+        "case_name": "Explore loaded dataset successfully",
+        "purpose": "验证工具能够成功生成已加载数据集的概要报告",
+        "args": {
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at equipment_data_profile_report.html\", \"report_path\": \"equipment_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 4.360637664794922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to explore non-existent dataset",
+        "purpose": "验证工具在指定的数据集不存在时能否优雅地报错",
+        "args": {
+          "dataset_name": "nonexistent_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_data' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.003728628158569336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with empty name",
+        "purpose": "验证工具是否能处理空名称的数据集探索请求",
+        "args": {
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at _profile_report.html\", \"report_path\": \"_profile_report.html\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 4.431720733642578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with special characters in name",
+        "purpose": "验证工具是否支持包含特殊字符的dataset名称进行探索",
+        "args": {
+          "dataset_name": "data@#$%^&*"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"[Errno 22] Invalid argument: 'data@#$%^&*_profile_report.html'\", \"outputs\": {}}"
+        },
+        "execution_time": 3.3167622089385986,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore dataset with very long name",
+        "purpose": "验证工具对极长字符串作为dataset名称的探索支持能力",
+        "args": {
+          "dataset_name": "a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly_profile_report.html\", \"report_path\": \"a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly_profile_report.html\", \"outputs\": {\"dataset_name\": \"a_very_very_long_dataset_name_that_exceeds_normal_length_requirements_and_may_cause_internal_issues_if_not_handled_properly\"}}"
+        },
+        "execution_time": 4.341628074645996,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore dataset with spaces in name",
+        "purpose": "验证工具是否支持带空格的dataset名称进行探索",
+        "args": {
+          "dataset_name": "Equipment Data With Spaces"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at Equipment Data With Spaces_profile_report.html\", \"report_path\": \"Equipment Data With Spaces_profile_report.html\", \"outputs\": {\"dataset_name\": \"Equipment Data With Spaces\"}}"
+        },
+        "execution_time": 3.1939761638641357,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore dataset with Chinese name",
+        "purpose": "验证工具是否支持中文命名的dataset进行探索",
+        "args": {
+          "dataset_name": "机械数据"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at \\u673a\\u68b0\\u6570\\u636e_profile_report.html\", \"report_path\": \"\\u673a\\u68b0\\u6570\\u636e_profile_report.html\", \"outputs\": {\"dataset_name\": \"\\u673a\\u68b0\\u6570\\u636e\"}}"
+        },
+        "execution_time": 3.649888753890991,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore dataset when name contains SQL injection pattern",
+        "purpose": "验证工具是否安全处理潜在SQL注入模式的dataset名称",
+        "args": {
+          "dataset_name": "test_data'; DROP TABLE datasets;--"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'test_data'; DROP TABLE datasets;--' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004472494125366211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with invalid Windows path characters in name",
+        "purpose": "验证工具是否安全处理非法文件路径字符作为dataset名称的情况",
+        "args": {
+          "dataset_name": "invalid<name>"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'invalid<name>' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.002003908157348633,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with null input",
+        "purpose": "验证工具在传入空值作为dataset名称时的错误处理",
+        "args": {
+          "dataset_name": "\u0000"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset '\\u0000' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.003505706787109375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with invalid JSON characters",
+        "purpose": "验证工具是否能正确转义或处理JSON特殊字符",
+        "args": {
+          "dataset_name": "dataset\"with\"quotes"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'dataset\\\"with\\\"quotes' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.007009267807006836,
+        "is_functional_test": false
+      }
+    ],
+    "run_script": [
+      {
+        "case_name": "Execute simple print script on loaded dataset",
+        "purpose": "验证工具能够成功执行一个简单的Python脚本，打印加载的dataset前几行",
+        "args": {
+          "script_code": "print(dataset.head())",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 0.008709430694580078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute script with empty code and valid dataset",
+        "purpose": "验证工具在空脚本内容下是否能正确处理",
+        "args": {
+          "script_code": "",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 0.0054666996002197266,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Attempt to execute script on non-existent dataset",
+        "purpose": "验证工具在指定的数据集不存在时能否优雅地报错",
+        "args": {
+          "script_code": "print(dataset.shape)",
+          "dataset_name": "nonexistent_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_data' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.006256818771362305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script that modifies the dataset",
+        "purpose": "验证工具允许对dataset进行修改操作并保留结果",
+        "args": {
+          "script_code": "dataset['new_column'] = 'test'",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 0.0044536590576171875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute script with syntax error",
+        "purpose": "验证工具是否能捕获Python语法错误并返回可读错误信息",
+        "args": {
+          "script_code": "prnt(dataset.head())",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"name 'prnt' is not defined\", \"outputs\": {}}"
+        },
+        "execution_time": 0.007132530212402344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script with special characters in code",
+        "purpose": "验证工具是否支持包含特殊字符的Python代码",
+        "args": {
+          "script_code": "print(dataset.iloc[0]['设备名称'])",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"'\\u8bbe\\u5907\\u540d\\u79f0'\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004002094268798828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Run script attempting SQL injection via dataset name",
+        "purpose": "验证工具是否安全处理潜在SQL注入尝试",
+        "args": {
+          "script_code": "import sqlite3; conn = sqlite3.connect(':memory:')",
+          "dataset_name": "test_data'; DROP TABLE datasets;--"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'test_data'; DROP TABLE datasets;--' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.0039975643157958984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script with null code input",
+        "purpose": "验证工具在传入空脚本内容时的错误处理",
+        "args": {
+          "script_code": "\u0000",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"source code string cannot contain null bytes\", \"outputs\": {}}"
+        },
+        "execution_time": 0.003696441650390625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script with dangerous system operations",
+        "purpose": "验证工具是否限制或阻止危险系统调用（如文件删除、系统命令）",
+        "args": {
+          "script_code": "import os; os.remove('D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\机械设备精简.csv')",
+          "dataset_name": "equipment_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"equipment_data\"}}"
+        },
+        "execution_time": 0.006659507751464844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script with dataset name containing spaces",
+        "purpose": "验证工具是否支持带空格的dataset名称执行脚本",
+        "args": {
+          "script_code": "print(dataset.shape)",
+          "dataset_name": "Equipment Data With Spaces"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"Equipment Data With Spaces\"}}"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Run script with dataset name containing special characters",
+        "purpose": "验证工具是否支持特殊字符命名的dataset执行脚本",
+        "args": {
+          "script_code": "print(dataset.columns)",
+          "dataset_name": "data@#$%^&*"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"data@#$%^&*\"}}"
+        },
+        "execution_time": 0.0039174556732177734,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 34
+}

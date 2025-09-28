@@ -1,0 +1,959 @@
+{
+  "server_name": "server",
+  "parent_dir": "flights-mcp-main",
+  "report_name": "flights-mcp-main-server",
+  "server_path": "workspace\\public-mcp-servers\\flights-mcp-main\\server.py",
+  "timestamp": "2025-07-01T15:58:08.279341",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "Search for flights based on parameters.",
+      "args_schema": {
+        "$defs": {
+          "FlightSearch": {
+            "description": "Model for flight search parameters.",
+            "properties": {
+              "type": {
+                "description": "Type of flight: 'one_way', 'round_trip', or 'multi_city'",
+                "title": "Type",
+                "type": "string"
+              },
+              "origin": {
+                "description": "Origin airport code",
+                "title": "Origin",
+                "type": "string"
+              },
+              "destination": {
+                "description": "Destination airport code",
+                "title": "Destination",
+                "type": "string"
+              },
+              "departure_date": {
+                "description": "Departure date (YYYY-MM-DD)",
+                "title": "Departure Date",
+                "type": "string"
+              },
+              "return_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Return date for round trips (YYYY-MM-DD)",
+                "title": "Return Date"
+              },
+              "departure_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Preferred departure time range"
+              },
+              "arrival_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Preferred arrival time range"
+              },
+              "cabin_class": {
+                "default": "economy",
+                "description": "Cabin class (economy, business, first)",
+                "title": "Cabin Class",
+                "type": "string"
+              },
+              "adults": {
+                "default": 1,
+                "description": "Number of adult passengers",
+                "title": "Adults",
+                "type": "integer"
+              },
+              "max_connections": {
+                "default": null,
+                "description": "Maximum number of connections (0 for non-stop)",
+                "title": "Max Connections",
+                "type": "integer"
+              },
+              "additional_stops": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Additional stops for multi-city trips",
+                "title": "Additional Stops"
+              }
+            },
+            "required": [
+              "type",
+              "origin",
+              "destination",
+              "departure_date"
+            ],
+            "title": "FlightSearch",
+            "type": "object"
+          },
+          "TimeSpec": {
+            "description": "Model for time range specification.",
+            "properties": {
+              "from_time": {
+                "description": "Start time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "From Time",
+                "type": "string"
+              },
+              "to_time": {
+                "description": "End time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "To Time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from_time",
+              "to_time"
+            ],
+            "title": "TimeSpec",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/FlightSearch"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "Get detailed information about a specific flight offer.",
+      "args_schema": {
+        "$defs": {
+          "OfferDetails": {
+            "description": "Model for getting detailed offer information.",
+            "properties": {
+              "offer_id": {
+                "description": "The ID of the offer to get details for",
+                "title": "Offer Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "offer_id"
+            ],
+            "title": "OfferDetails",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/OfferDetails"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "Search for multi-city flights.",
+      "args_schema": {
+        "$defs": {
+          "FlightSegment": {
+            "description": "Model for a single flight segment in a multi-city trip.",
+            "properties": {
+              "origin": {
+                "description": "Origin airport code",
+                "title": "Origin",
+                "type": "string"
+              },
+              "destination": {
+                "description": "Destination airport code",
+                "title": "Destination",
+                "type": "string"
+              },
+              "departure_date": {
+                "description": "Departure date (YYYY-MM-DD)",
+                "title": "Departure Date",
+                "type": "string"
+              }
+            },
+            "required": [
+              "origin",
+              "destination",
+              "departure_date"
+            ],
+            "title": "FlightSegment",
+            "type": "object"
+          },
+          "MultiCityRequest": {
+            "description": "Model for multi-city flight search.",
+            "properties": {
+              "type": {
+                "const": "multi_city",
+                "title": "Type",
+                "type": "string"
+              },
+              "segments": {
+                "description": "Flight segments",
+                "items": {
+                  "$ref": "#/$defs/FlightSegment"
+                },
+                "minItems": 2,
+                "title": "Segments",
+                "type": "array"
+              },
+              "cabin_class": {
+                "default": "economy",
+                "description": "Cabin class",
+                "title": "Cabin Class",
+                "type": "string"
+              },
+              "adults": {
+                "default": 1,
+                "description": "Number of adult passengers",
+                "title": "Adults",
+                "type": "integer"
+              },
+              "max_connections": {
+                "default": null,
+                "description": "Maximum number of connections (0 for non-stop)",
+                "title": "Max Connections",
+                "type": "integer"
+              },
+              "departure_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Optional departure time range"
+              },
+              "arrival_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Optional arrival time range"
+              }
+            },
+            "required": [
+              "type",
+              "segments"
+            ],
+            "title": "MultiCityRequest",
+            "type": "object"
+          },
+          "TimeSpec": {
+            "description": "Model for time range specification.",
+            "properties": {
+              "from_time": {
+                "description": "Start time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "From Time",
+                "type": "string"
+              },
+              "to_time": {
+                "description": "End time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "To Time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from_time",
+              "to_time"
+            ],
+            "title": "TimeSpec",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/MultiCityRequest"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic One Way Flight Search",
+        "purpose": "验证基本单程航班搜索功能是否正常工作，使用默认参数如经济舱、1位成人",
+        "args": {
+          "type": "one_way",
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2023-12-25'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.009508609771728516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Round Trip Flight Search With Return Date",
+        "purpose": "测试往返航班搜索功能，包含出发和返回日期",
+        "args": {
+          "type": "round_trip",
+          "origin": "ORD",
+          "destination": "MIA",
+          "departure_date": "2023-12-20",
+          "return_date": "2023-12-27"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'round_trip', 'o...urn_date': '2023-12-27'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.005022287368774414,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search With Additional Stops",
+        "purpose": "验证多城市航班搜索功能，包括额外经停点",
+        "args": {
+          "type": "multi_city",
+          "origin": "SFO",
+          "destination": "CHI",
+          "departure_date": "2024-01-05",
+          "additional_stops": [
+            {
+              "stop": "DEN",
+              "date": "2024-01-06"
+            },
+            {
+              "stop": "ATL",
+              "date": "2024-01-08"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 'o... 'date': '2024-01-08'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0035080909729003906,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search With Preferred Departure Time",
+        "purpose": "测试带有首选出发时间范围的航班搜索",
+        "args": {
+          "type": "one_way",
+          "origin": "EWR",
+          "destination": "SEA",
+          "departure_date": "2023-12-15",
+          "departure_time": {
+            "from_time": "08:00",
+            "to_time": "12:00"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...0', 'to_time': '12:00'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.007000446319580078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search With Preferred Arrival Time",
+        "purpose": "测试带有首选到达时间范围的航班搜索",
+        "args": {
+          "type": "one_way",
+          "origin": "DFW",
+          "destination": "MCO",
+          "departure_date": "2023-12-18",
+          "arrival_time": {
+            "from_time": "14:00",
+            "to_time": "18:00"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...0', 'to_time': '18:00'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.006676912307739258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Business Class Round Trip Search",
+        "purpose": "验证商务舱往返航班搜索功能",
+        "args": {
+          "type": "round_trip",
+          "origin": "BOS",
+          "destination": "LAS",
+          "departure_date": "2024-02-01",
+          "return_date": "2024-02-05",
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'round_trip', 'o...abin_class': 'business'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004506349563598633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search With Max Connections",
+        "purpose": "测试最大中转次数限制是否生效",
+        "args": {
+          "type": "one_way",
+          "origin": "PHX",
+          "destination": "CLT",
+          "departure_date": "2023-12-22",
+          "max_connections": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...', 'max_connections': 1}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.005739450454711914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non Stop Flight Search",
+        "purpose": "测试直飞航班（无中转）搜索功能",
+        "args": {
+          "type": "one_way",
+          "origin": "MSP",
+          "destination": "SAN",
+          "departure_date": "2023-12-30",
+          "max_connections": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...', 'max_connections': 0}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.006025791168212891,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Origin Airport Code",
+        "purpose": "验证工具对无效出发机场代码的处理",
+        "args": {
+          "type": "one_way",
+          "origin": "XYZ",
+          "destination": "LAX",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2023-12-25'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.00903010368347168,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Future Departure Date",
+        "purpose": "测试未来日期是否被接受",
+        "args": {
+          "type": "one_way",
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2099-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2099-12-31'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.008348464965820312,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Past Departure Date",
+        "purpose": "验证工具对过去日期的处理",
+        "args": {
+          "type": "one_way",
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2020-01-01"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2020-01-01'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0060002803802490234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Time Format",
+        "purpose": "测试非法时间格式是否被拒绝",
+        "args": {
+          "type": "one_way",
+          "origin": "EWR",
+          "destination": "SEA",
+          "departure_date": "2023-12-15",
+          "departure_time": {
+            "from_time": "25:00",
+            "to_time": "12:00"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...0', 'to_time': '12:00'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.006539821624755859,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Airport Codes",
+        "purpose": "验证工具对机场代码中的特殊字符的处理",
+        "args": {
+          "type": "one_way",
+          "origin": "J@F",
+          "destination": "L#X",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2023-12-25'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004505157470703125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt In Origin Field",
+        "purpose": "测试工具对潜在SQL注入攻击的防护能力",
+        "args": {
+          "type": "one_way",
+          "origin": "JFK'; DROP TABLE flights;",
+          "destination": "LAX",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2023-12-25'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.007007122039794922,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attack Attempt In Destination Field",
+        "purpose": "验证工具对跨站脚本攻击的防护能力",
+        "args": {
+          "type": "one_way",
+          "origin": "JFK",
+          "destination": "<script>alert('xss')</script>",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\nparams\n  Field required [type=missing, input_value={'type': 'one_way', 'orig...ure_date': '2023-12-25'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.01674032211303711,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi City Flight Search",
+        "purpose": "验证基本多城市航班搜索功能是否正常工作，使用默认参数如经济舱、1位成人",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "LAX",
+              "destination": "CHI",
+              "departure_date": "2023-12-27"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...e_date': '2023-12-27'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.009521722793579102,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search With Business Class",
+        "purpose": "测试多城市航班搜索功能在商务舱下的表现",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "ORD",
+              "destination": "MIA",
+              "departure_date": "2023-12-20"
+            },
+            {
+              "origin": "MIA",
+              "destination": "NYC",
+              "departure_date": "2023-12-22"
+            }
+          ],
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...abin_class': 'business'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.008507490158081055,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search With Multiple Adults",
+        "purpose": "验证多城市航班搜索支持多位成年乘客的功能",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "SFO",
+              "destination": "DEN",
+              "departure_date": "2024-01-05"
+            },
+            {
+              "origin": "DEN",
+              "destination": "ATL",
+              "departure_date": "2024-01-08"
+            }
+          ],
+          "adults": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...4-01-08'}], 'adults': 3}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.017020463943481445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search With Departure Time Range",
+        "purpose": "测试带有出发时间范围的多城市航班搜索",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "EWR",
+              "destination": "SEA",
+              "departure_date": "2023-12-15"
+            },
+            {
+              "origin": "SEA",
+              "destination": "BOS",
+              "departure_date": "2023-12-18"
+            }
+          ],
+          "departure_time": {
+            "from_time": "08:00",
+            "to_time": "12:00"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...0', 'to_time': '12:00'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.01051020622253418,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search With Arrival Time Range",
+        "purpose": "测试带有到达时间范围的多城市航班搜索",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "DFW",
+              "destination": "MCO",
+              "departure_date": "2023-12-18"
+            },
+            {
+              "origin": "MCO",
+              "destination": "PHX",
+              "departure_date": "2023-12-20"
+            }
+          ],
+          "arrival_time": {
+            "from_time": "14:00",
+            "to_time": "18:00"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...0', 'to_time': '18:00'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.007993936538696289,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search With Max Connections",
+        "purpose": "测试最大中转次数限制是否在多城市航班搜索中生效",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "PHX",
+              "destination": "CLT",
+              "departure_date": "2023-12-22"
+            },
+            {
+              "origin": "CLT",
+              "destination": "MSP",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "max_connections": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...], 'max_connections': 1}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.00750732421875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Non Stop Flights Only",
+        "purpose": "测试仅直飞航班（无中转）的多城市航班搜索",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "MSP",
+              "destination": "SAN",
+              "departure_date": "2023-12-30"
+            },
+            {
+              "origin": "SAN",
+              "destination": "JFK",
+              "departure_date": "2024-01-02"
+            }
+          ],
+          "max_connections": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...], 'max_connections': 0}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.009035348892211914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt In Origin Field",
+        "purpose": "测试工具对潜在SQL注入攻击的防护能力",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "JFK'; DROP TABLE flights;",
+              "destination": "LAX",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "LAX",
+              "destination": "CHI",
+              "departure_date": "2023-12-27"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...e_date': '2023-12-27'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.008529186248779297,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attack Attempt In Destination Field",
+        "purpose": "验证工具对跨站脚本攻击的防护能力",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "JFK",
+              "destination": "<script>alert('xss')</script>",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "<script>alert('xss')</script>",
+              "destination": "CHI",
+              "departure_date": "2023-12-27"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...e_date': '2023-12-27'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.009507417678833008,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Origin Airport Code",
+        "purpose": "验证工具对无效出发机场代码的处理",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "XYZ",
+              "destination": "LAX",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "LAX",
+              "destination": "ABC",
+              "departure_date": "2023-12-27"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...e_date': '2023-12-27'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.010516643524169922,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Time Format In Departure Time",
+        "purpose": "测试非法时间格式是否被拒绝",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "EWR",
+              "destination": "SEA",
+              "departure_date": "2023-12-15"
+            },
+            {
+              "origin": "SEA",
+              "destination": "BOS",
+              "departure_date": "2023-12-18"
+            }
+          ],
+          "departure_time": {
+            "from_time": "25:00",
+            "to_time": "12:00"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...0', 'to_time': '12:00'}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.012523889541625977,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Airport Codes",
+        "purpose": "验证工具对机场代码中的特殊字符的处理",
+        "args": {
+          "type": "multi_city",
+          "segments": [
+            {
+              "origin": "J@F",
+              "destination": "L#X",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "L#X",
+              "destination": "C$Y",
+              "departure_date": "2023-12-27"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nparams\n  Field required [type=missing, input_value={'type': 'multi_city', 's...e_date': '2023-12-27'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.013512849807739258,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Request",
+        "purpose": "验证获取航班报价基本信息的功能是否正常工作，使用默认参数",
+        "args": {
+          "offer_id": "OFFER12345"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams\n  Field required [type=missing, input_value={'offer_id': 'OFFER12345'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.013381719589233398,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt In Offer ID Field",
+        "purpose": "测试工具对潜在SQL注入攻击的防护能力",
+        "args": {
+          "offer_id": "OFFER12345'; DROP TABLE offers;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams\n  Field required [type=missing, input_value={'offer_id': \"OFFER12345'; DROP TABLE offers;\"}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.011538028717041016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attack Attempt In Offer ID Field",
+        "purpose": "验证工具对跨站脚本攻击的防护能力",
+        "args": {
+          "offer_id": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams\n  Field required [type=missing, input_value={'offer_id': \"<script>alert('xss')</script>\"}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.005431175231933594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Offer ID Format",
+        "purpose": "测试工具对非法格式的Offer ID的处理",
+        "args": {
+          "offer_id": "OFFER#123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams\n  Field required [type=missing, input_value={'offer_id': 'OFFER#123'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0071032047271728516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Offer ID",
+        "purpose": "验证工具对空Offer ID的错误处理",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams\n  Field required [type=missing, input_value={'offer_id': ''}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004515647888183594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Offer ID",
+        "purpose": "测试工具对不存在的Offer ID的处理",
+        "args": {
+          "offer_id": "NONEXISTENT_OFFER"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams\n  Field required [type=missing, input_value={'offer_id': 'NONEXISTENT_OFFER'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 33
+}

@@ -1,0 +1,140 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_markdown_converter",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_markdown_converter/refined/server.py",
+  "timestamp": "2025-07-13T04:10:19.777204",
+  "tools": [
+    {
+      "name": "convert_to_markdown",
+      "description": "\n    Converts various content sources to structured Markdown format while preserving original structure elements.\n\n    Args:\n        content_source: URI or path specifying the content location. Supports:\n            * HTTP/HTTPS URLs (e.g., \"https://example.com/page.html\")\n            * File system paths (e.g., \"/documents/report.docx\")\n            * Data URIs (e.g., \"data:text/html;base64,...\")\n        content_type: Optional explicitly specified content type when automatic detection fails. Supported types:\n            * \"text/html\"\n            * \"application/pdf\"\n            * \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\" (DOCX)\n            * \"application/vnd.openxmlformats-officedocument.presentationml.presentation\" (PPTX)\n            * \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\" (XLSX)\n\n    Returns:\n        A dictionary containing:\n            * \"markdown\": Structured Markdown content preserving:\n                * Heading hierarchy (# H1, ## H2, etc.)\n                * Ordered and unordered lists\n                * Hyperlinks ([text](url))\n                * Tables (pipe-style)\n                * Code blocks (fenced)\n            * \"metadata\": Additional information including:\n                * Source type detected\n                * Conversion timestamp\n                * Original content statistics (word count, page count, etc.)\n\n    Raises:\n        ValueError: If input validation, content fetching, or conversion fails\n        FileNotFoundError: If a local file path is provided but the file doesn't exist\n        httpx.HTTPStatusError: If an HTTP request fails\n\n    Example:\n        >>> convert_to_markdown(content_source=\"https://example.com/page.html\")\n        {\n            \"markdown\": \"# Example Page\\nThis is an example HTML page that has been converted to Markdown.\",\n            \"metadata\": {\n                \"source_type\": \"text/html\",\n                \"conversion_timestamp\": \"2025-04-05T12:34:56.789Z\",\n                \"original_stats\": {\n                    \"size_bytes\": 12345,\n                    \"page_count\": 1,\n                    \"word_count\": 250\n                },\n                \"detected_mime_type\": \"text/html\",\n                \"used_explicit_type\": False\n            }\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "content_source": {
+            "title": "Content Source",
+            "type": "string"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Content Type"
+          }
+        },
+        "required": [
+          "content_source"
+        ],
+        "title": "convert_to_markdownArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_to_markdown": [
+      {
+        "case_name": "Basic HTML to Markdown Conversion",
+        "purpose": "验证工具能否正确将HTML文件转换为Markdown格式并保留结构",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\present.html"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.25969862937927246,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "PDF to Markdown Conversion with Explicit Content Type",
+        "purpose": "测试明确指定内容类型时PDF文件的转换功能",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "content_type": "application/pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.26800036430358887,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "DOCX File Conversion Using Default Parameters",
+        "purpose": "验证使用默认参数将DOCX文件转换为Markdown的功能",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\re2.doc"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Could not determine or validate content type. Please provide an explicit content_type."
+        },
+        "execution_time": 0.21911096572875977,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Data URI HTML Content Conversion",
+        "purpose": "测试工具处理Base64编码HTML数据URI的能力",
+        "args": {
+          "content_source": "data:text/html;base64,PCFET0NUWVBFIGh0bWw+PGh0bWw+PGhlYWQ+PHRpdGxlPkV4YW1wbGU8L3RpdGxlPjwvaGVhZD48Ym9keT48aDE+SGVsbG8gV29ybGQ8L2gxPjwvYm9keT48L2h0bWw+"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Could not determine or validate content type. Please provide an explicit content_type."
+        },
+        "execution_time": 0.15351247787475586,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty File Handling",
+        "purpose": "验证工具在空文件输入时的错误处理能力",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Could not determine or validate content type. Please provide an explicit content_type."
+        },
+        "execution_time": 0.3828864097595215,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-existent File Error",
+        "purpose": "测试工具对不存在文件路径的错误处理",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Failed to fetch content: Failed to read file: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.docx"
+        },
+        "execution_time": 0.18706965446472168,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unsupported File Type Detection",
+        "purpose": "验证工具对不支持的文件类型的检测和错误提示",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Could not determine or validate content type. Please provide an explicit content_type."
+        },
+        "execution_time": 0.21529650688171387,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Character in File Path",
+        "purpose": "测试包含特殊字符的文件路径是否能被正确处理",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\refs\\heads\\feature\\中文_branch"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Could not determine or validate content type. Please provide an explicit content_type."
+        },
+        "execution_time": 0.22553563117980957,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 8
+}

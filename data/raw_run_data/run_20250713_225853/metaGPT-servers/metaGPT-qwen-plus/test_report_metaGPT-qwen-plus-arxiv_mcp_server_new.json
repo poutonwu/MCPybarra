@@ -1,0 +1,460 @@
+{
+  "server_name": "arxiv_mcp_server_new",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-arxiv_mcp_server_new",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\arxiv_mcp_server_new.py",
+  "timestamp": "2025-07-13T22:58:56.816883",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    根据用户输入的查询条件搜索arXiv论文。\n\n    Args:\n        query: 搜索关键词或表达式。\n        max_results: 返回的最大结果数，默认为5，范围1-20。\n\n    Returns:\n        JSON格式字符串，包含匹配的论文列表，每个论文包含id、标题、摘要、发表日期和链接。\n\n    Raises:\n        ValueError: 如果查询为空或max_results超出范围。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    下载指定arXiv论文的PDF文件并存储至本地。\n\n    Args:\n        paper_id: 论文的arXiv ID（如1607.08567）。\n\n    Returns:\n        下载文件的存储路径。\n\n    Raises:\n        ValueError: 如果paper_id格式无效。\n        FileNotFoundError: 如果无法找到指定的论文。\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    列出本地存储的所有论文。\n\n    Returns:\n        JSON格式字符串，包含本地存储的论文列表，每个论文包含文件名和大小。\n\n    Raises:\n        ValueError: 如果论文目录不存在。\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    读取指定论文的内容。\n\n    Args:\n        filename: 要读取的论文文件名（需存在于论文存储目录中）。\n\n    Returns:\n        文件内容的文本字符串。\n\n    Raises:\n        ValueError: 如果文件名无效或文件不存在。\n        IOError: 如果读取文件时发生错误。\n    ",
+      "args_schema": {
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证工具在正常输入下能否正确搜索arXiv论文并返回结果",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[{\"id\": \"2208.00733v1\", \"title\": \"The Rise of Quantum Internet Computing\", \"summary\": \"This article highlights quantum Internet computing as referring to\\ndistributed quantum computing over the quantum Internet, analogous to\\n(classical) Internet computing involving (classical) distributed computing over\\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\\nof study such as quantum protocols for distributed nodes using quantum\\ninformation for computations, quantum cloud computing, delegated verifiable\\nblind or private computing, non-local gates, and distributed quantum\\napplications, over Internet-scale distances.\", \"published\": \"2022-08-01T10:36:13+00:00\", \"url\": \"http://arxiv.org/abs/2208.00733v1\"}, {\"id\": \"quant-ph/0003151v1\", \"title\": \"Unconventional Quantum Computing Devices\", \"summary\": \"This paper investigates a variety of unconventional quantum computation\\ndevices, including fermionic quantum computers and computers that exploit\\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\\ndevices can in principle compute some quantities more rapidly than\\n`conventional' quantum computers.\", \"published\": \"2000-03-31T22:07:23+00:00\", \"url\": \"http://arxiv.org/abs/quant-ph/0003151v1\"}, {\"id\": \"1311.4939v1\", \"title\": \"Geometrical perspective on quantum states and quantum computation\", \"summary\": \"We interpret quantum computing as a geometric evolution process by\\nreformulating finite quantum systems via Connes' noncommutat...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计4679字符，剩余3179字符"
+        },
+        "execution_time": 0.9653568267822266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "默认max_results参数测试",
+        "purpose": "验证当不指定max_results时是否使用默认值5",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "[{\"id\": \"1909.03550v1\", \"title\": \"Lecture Notes: Optimization for Machine Learning\", \"summary\": \"Lecture notes on optimization for machine learning, derived from a course at\\nPrinceton University and tutorials given in MLSS, Buenos Aires, as well as\\nSimons Foundation, Berkeley.\", \"published\": \"2019-09-08T21:49:42+00:00\", \"url\": \"http://arxiv.org/abs/1909.03550v1\"}, {\"id\": \"1811.04422v1\", \"title\": \"An Optimal Control View of Adversarial Machine Learning\", \"summary\": \"I describe an optimal control view of adversarial machine learning, where the\\ndynamical system is the machine learner, the input are adversarial actions, and\\nthe control costs are defined by the adversary's goals to do harm and be hard\\nto detect. This view encompasses many types of adversarial machine learning,\\nincluding test-item attacks, training-data poisoning, and adversarial reward\\nshaping. The view encourages adversarial machine learning researcher to utilize\\nadvances in control theory and reinforcement learning.\", \"published\": \"2018-11-11T14:28:34+00:00\", \"url\": \"http://arxiv.org/abs/1811.04422v1\"}, {\"id\": \"1707.04849v1\", \"title\": \"Minimax deviation strategies for machine learning and recognition with short learning samples\", \"summary\": \"The article is devoted to the problem of small learning samples in machine\\nlearning. The flaws of maximum likelihood learning and minimax learning are\\nlooked into and the concept of minimax deviation learning is introduced that is\\nfree of those flaws.\", \"published...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计4098字符，剩余2598字符"
+        },
+        "execution_time": 1.1647653579711914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大结果数边界测试",
+        "purpose": "验证工具是否能处理max_results的最大允许值20",
+        "args": {
+          "query": "deep learning",
+          "max_results": 20
+        },
+        "response": {
+          "result": "[{\"id\": \"1805.08355v1\", \"title\": \"Opening the black box of deep learning\", \"summary\": \"The great success of deep learning shows that its technology contains\\nprofound truth, and understanding its internal mechanism not only has important\\nimplications for the development of its technology and effective application in\\nvarious fields, but also provides meaningful insights into the understanding of\\nhuman brain mechanism. At present, most of the theoretical research on deep\\nlearning is based on mathematics. This dissertation proposes that the neural\\nnetwork of deep learning is a physical system, examines deep learning from\\nthree different perspectives: microscopic, macroscopic, and physical world\\nviews, answers multiple theoretical puzzles in deep learning by using physics\\nprinciples. For example, from the perspective of quantum mechanics and\\nstatistical physics, this dissertation presents the calculation methods for\\nconvolution calculation, pooling, normalization, and Restricted Boltzmann\\nMachine, as well as the selection of cost functions, explains why deep learning\\nmust be deep, what characteristics are learned in deep learning, why\\nConvolutional Neural Networks do not have to be trained layer by layer, and the\\nlimitations of deep learning, etc., and proposes the theoretical direction and\\nbasis for the further development of deep learning now and in the future. The\\nbrilliance of physics flashes in deep learning, we try to establish the deep\\nlearning technology ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计22104字符，剩余20604字符"
+        },
+        "execution_time": 2.089724540710449,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最小结果数边界测试",
+        "purpose": "验证工具是否能处理min_results的最小允许值1",
+        "args": {
+          "query": "neural networks",
+          "max_results": 1
+        },
+        "response": {
+          "result": "[{\"id\": \"2304.05133v2\", \"title\": \"Lecture Notes: Neural Network Architectures\", \"summary\": \"These lecture notes provide an overview of Neural Network architectures from\\na mathematical point of view. Especially, Machine Learning with Neural Networks\\nis seen as an optimization problem. Covered are an introduction to Neural\\nNetworks and the following architectures: Feedforward Neural Network,\\nConvolutional Neural Network, ResNet, and Recurrent Neural Network.\", \"published\": \"2023-04-11T10:54:36+00:00\", \"url\": \"http://arxiv.org/abs/2304.05133v2\"}]"
+        },
+        "execution_time": 1.5170624256134033,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询错误处理测试",
+        "purpose": "验证工具是否抛出ValueError异常，当查询为空字符串",
+        "args": {
+          "query": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 查询不能为空"
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超出范围的max_results错误处理测试",
+        "purpose": "验证当max_results超过20时是否抛出ValueError",
+        "args": {
+          "query": "blockchain",
+          "max_results": 25
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: max_results必须在1-20之间，当前值: 25"
+        },
+        "execution_time": 0.004001617431640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具是否能安全处理包含特殊字符的查询",
+        "args": {
+          "query": "AI & robotics + future",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[{\"id\": \"2307.10690v2\", \"title\": \"Bridging Intelligence and Instinct: A New Control Paradigm for Autonomous Robots\", \"summary\": \"As the advent of artificial general intelligence (AGI) progresses at a\\nbreathtaking pace, the application of large language models (LLMs) as AI Agents\\nin robotics remains in its nascent stage. A significant concern that hampers\\nthe seamless integration of these AI Agents into robotics is the\\nunpredictability of the content they generate, a phenomena known as\\n``hallucination''. Drawing inspiration from biological neural systems, we\\npropose a novel, layered architecture for autonomous robotics, bridging AI\\nagent intelligence and robot instinct. In this context, we define Robot\\nInstinct as the innate or learned set of responses and priorities in an\\nautonomous robotic system that ensures survival-essential tasks, such as safety\\nassurance and obstacle avoidance, are carried out in a timely and effective\\nmanner. This paradigm harmoniously combines the intelligence of LLMs with the\\ninstinct of robotic behaviors, contributing to a more safe and versatile\\nautonomous robotic system. As a case study, we illustrate this paradigm within\\nthe context of a mobile robot, demonstrating its potential to significantly\\nenhance autonomous robotics and enabling a future where robots can operate\\nindependently and safely across diverse environments.\", \"published\": \"2023-07-20T08:35:13+00:00\", \"url\": \"http://arxiv.org/abs/2307.10690v2\"}, {\"id\": \"2502.11312v1\"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计6463字符，剩余4963字符"
+        },
+        "execution_time": 1.7586967945098877,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 潜在注入攻击模拟",
+        "purpose": "验证工具是否对潜在恶意输入进行过滤或拒绝执行",
+        "args": {
+          "query": "'; DROP TABLE papers; --",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.640650987625122,
+        "is_functional_test": false
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "基本下载功能测试",
+        "purpose": "验证工具在正常输入下能否正确下载arXiv论文的PDF文件并返回存储路径",
+        "args": {
+          "paper_id": "1607.08567"
+        },
+        "response": {
+          "result": "downloaded_papers\\Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf"
+        },
+        "execution_time": 1.6534175872802734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效paper_id格式错误处理测试",
+        "purpose": "验证当提供格式不正确的paper_id时，工具是否抛出ValueError异常",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: 'invalid_id_format'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.003990650177001953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的论文ID测试",
+        "purpose": "验证当提供的paper_id对应论文不存在时，工具是否抛出FileNotFoundError异常",
+        "args": {
+          "paper_id": "9999.99999"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 下载论文时发生错误: 未找到ID为'9999.99999'的论文"
+        },
+        "execution_time": 0.9778783321380615,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "paper_id边界值测试 - 最短有效ID",
+        "purpose": "验证工具是否能处理最短形式的有效arXiv ID（如hep-th/0003151）",
+        "args": {
+          "paper_id": "hep-th/0003151"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: 'hep-th/0003151'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 恶意路径注入尝试",
+        "purpose": "验证工具是否对潜在恶意输入进行安全过滤或拒绝执行",
+        "args": {
+          "paper_id": "../../etc/passwd"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '../../etc/passwd'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.0031385421752929688,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符paper_id测试",
+        "purpose": "验证工具是否能安全处理包含特殊字符但合法的paper_id",
+        "args": {
+          "paper_id": "quant-ph/0003151v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: 'quant-ph/0003151v1'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.003000497817993164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空paper_id错误处理测试",
+        "purpose": "验证当提供空字符串作为paper_id时，工具是否抛出ValueError异常",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: ''. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.007010936737060547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用已知存在论文的重复下载测试",
+        "purpose": "验证工具是否能够重复下载同一论文并返回一致的存储路径",
+        "args": {
+          "paper_id": "2208.00733v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '2208.00733v1'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.005991697311401367,
+        "is_functional_test": true
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "基本功能测试 - 正常论文列表获取",
+        "purpose": "验证工具在论文目录存在的情况下能否正确列出所有本地存储的论文",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.004999876022338867,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 隐藏文件不暴露",
+        "purpose": "验证list_papers工具不会返回隐藏文件或系统敏感文件（如.git目录内容）",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.004511356353759766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 论文目录不存在",
+        "purpose": "验证当论文存储目录不存在时，工具是否抛出ValueError异常",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.009006500244140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 空论文目录",
+        "purpose": "验证工具在论文目录为空时是否返回空列表而非错误",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.011994123458862305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "功能性测试 - 包含PDF论文文件",
+        "purpose": "验证工具能正确识别并列出实际存在的论文PDF文件及其大小",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.01299905776977539,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "错误处理测试 - 权限不足无法访问目录",
+        "purpose": "验证当工具没有权限访问论文目录时是否能优雅处理并提示错误",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.014001846313476562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 单个论文文件",
+        "purpose": "验证工具在仅存在一个论文文件时是否能正确返回包含单个元素的列表",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.011999368667602539,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 特殊字符文件名处理",
+        "purpose": "验证工具是否能安全处理包含特殊字符的论文文件名",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.00700831413269043,
+        "is_functional_test": false
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "基本读取功能测试",
+        "purpose": "验证工具在正常输入下能否正确读取论文文件内容",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "%PDF-1.5\n%\n142 0 obj\n<<\n/Length 349       \n/Filter /FlateDecode\n>>\nstream\nxڅRn0\u0010\u0015>\u0014\u001fǦiVQ*H=4=Pb\bj\u00145,!Q.\u0005;;f\u001f3b\u0019;G&\bd\u0014(\"0D,\n\u0004G\u0011\u000bSE\u001bϧ\u001c:؞\u0014\u0000xl\u001e!y$uueN\u0006&\nMvG|\u0003NK<ݼ?vPcPඵ\u0000u7K9dF9ެwv\u0007b,IJWbi0AAj\u0014K\t=P\u001aQ\"jS!\u0002,#\u0013\u001cH.lRU~Qf4\u001d7\\;ctZ$m\u001buYwp3Yd-\n\u0016\u0017p0OC\u0010\u000b0\"\u0001&\f@i8$\u0015˱n$eVyqj1L\u0006/_J\u001b,Io086q{.\u0004e-\u0007\nendstream\nendobj\n45 0 obj\n<<\n/Type /XObject\n/Subtype /Form\n/FormType 1\n/PTEX.FileName (./examples/W7-NLP-OSS/nlposs-2023/papers/33.pdf)\n/PTEX.PageNumber 1\n/PTEX.InfoDict 150 0 R\n/BBox [0 0 595.276 841.89]\n/Resources <<\n/Font << /F105 153 0 R /F111 156 0 R /F84 159 0 R >>\n/ProcSet [ /PDF /Text ]\n>>\n/Length 4086\n/Filter /FlateDecode\n>>\nstream\nxZ[6~_ᷕFԙ$s`s2\b\u0007Ȓ#3+VQlhE\u0014,*G&Mz~w*7ʆ&z0&uLy(7\bûbvq\u0014\\\u000fݥߪ,W:\u0015X}ͧ\u001b{>7\u0018\u001dzM&K7;\u0015-|\u0016M\u001eb\u0018+Y\u001d>U/E[\nn\u0018eS\u0005}\u0011;\u0002rh\u0015q̇B$UaDrǍo\u0005\nüR˵\n2ؼ3^uԿ}H\u001f\u0017)iovƥļ0~\u0006vy\u0013Z΃hŦv\u0013&LtpZ\u000f|9&AZ\u0013?\u001d\u0011.T\u0017ƛ͟<$S9ZBHqhs\nJihRÔv?M0\u0002߮y,\u0006US\u0018;y\u0013VVfs\u0014y\u0016Ο0\u00035jmPc(hxn\nwZ\u0016q\u001b3xF;G\u0015'yY9Ι/M7X\"8F.5[}击bPp)Ϻ\u0019.ve\u0010\u0017t\u0000h@G\bӑ\nmu\u0012|8&[\u0002\u0012|(w_FOy%K\u001f8Z3B{M،Gں̓h\u001b\u0006dgw+\u0005\u001a`X\\91xp\u0003\u0014\u001f|Y((;\u0012Oؑ`4BL\u0013w\u0017\u001cS{Y/.\u0016E\nr`^23S!}%6Rnd\b 0J¶s5#IZz}T'}s)+\u001e\f|h>V#%0Jn_$R*Oa%#\n[-\u0015|'(]\u0011\u0012X鰗~_\u0011bWRkr'\u0010\u000e \u0002ԝ= ?$4\u0017b'7+ʩ\n5䚕~M<lG9Oo\u001f\u001a&_\u000bi}l~~ػ?bs8\u00068\u0012X%\u001b=mRGRXqK'mءtr\u0003\u001bRl(Թ|≯!3\nh=T0{\u0004MCZ\u00113\u0000\u0015i\u0015e~3'$\u000ep=̃Ud\u0006\u0007Rb-,d\u001cñ:\u0001B\u001d\u0005\u0002$\u001ewyǯ\n~T}NA.\u001f[\u0005D$3\f\u0006oyDK\u0005?fSKoՓXnnz\u001b\u0010ʲ0}ĜAIӓ+3B+`#A=q+0a+<*P'\u0002M:\u0007\u0018;Mk=z/⽯K/t%R\u000685Nԣǹ\u0013I@ʑ{w\u0017#ib˿LI/\u001b8L\u0012lR`;k\u0003>;0broy\u0018-\u001au^\n]\"%+±\nX]j*\u0016\u000fS+\u000b7O\u0004\u000b:h>#ƙ\u000e\\\u001d\u001dIo!tX\u0000ݑiL^*-Y\b>X5\u001eoY(c0D\u0002)8X\u001fk\u0007\u0006ӌ#S;Hg~Rt\u0003\fBOeae\u0013ײ|\u0002=hꝊ\b\u0000F\u0013+\nV(&-Q\u0012fFNxG\bO\u0007h}G\f&N\u001a?eu=#lcH\u0000>+\u0004<<v\u0014\u0010,rBH\u000eX3՟H\u001chQk\t3wl n|ɘT$\"I\u000fG\u0010\u001c#\u001amDkt\u0001Ϭ\n\"[&\u0003W&\u0015:)T4\"m\n(=،s^zg׎GD~>]ڽ,\u0017MV\u0002:ΡaO\\Mu\u0017\u0012=\\8 P\u0013}\u001bPߧcT3\u001dsS\u001dϊMG...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计101944字符，剩余100444字符"
+        },
+        "execution_time": 0.05481386184692383,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空文件名错误处理测试",
+        "purpose": "验证当提供空字符串作为文件名时，工具是否抛出ValueError异常",
+        "args": {
+          "filename": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.004998207092285156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的文件错误处理测试",
+        "purpose": "验证当提供的文件名对应文件不存在时，工具是否抛出FileNotFoundError异常",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_paper.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 文件不存在: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_paper.pdf"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "读取空文件测试",
+        "purpose": "验证工具能否正确处理空文件的情况并返回空字符串",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_pages_output.pdf"
+        },
+        "response": {
+          "result": "%PDF-1.3\n%\n1 0 obj\n<<\n/Type /Pages\n/Count 0\n/Kids [ ]\n>>\nendobj\n2 0 obj\n<<\n/Producer (PyPDF2)\n>>\nendobj\n3 0 obj\n<<\n/Type /Catalog\n/Pages 1 0 R\n>>\nendobj\nxref\n0 4\n0000000000 65535 f \n0000000015 00000 n \n0000000068 00000 n \n0000000108 00000 n \ntrailer\n<<\n/Size 4\n/Root 3 0 R\n/Info 2 0 R\n>>\nstartxref\n157\n%%EOF\n"
+        },
+        "execution_time": 0.007004261016845703,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符文件名测试",
+        "purpose": "验证工具是否能安全处理包含特殊字符的合法文件名",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_@#$.pdf"
+        },
+        "response": {
+          "result": "%PDF-1.5\n%\n1 0 obj\n<<\n/Type /Pages\n/Count 1\n/Kids [ 4 0 R ]\n>>\nendobj\n2 0 obj\n<<\n/Producer (PyPDF2)\n>>\nendobj\n3 0 obj\n<<\n/Type /Catalog\n/Pages 1 0 R\n>>\nendobj\n4 0 obj\n<<\n/Type /Page\n/Contents 5 0 R\n/Resources 6 0 R\n/MediaBox [ 0 0 595.276 841.89 ]\n/Annots [ 39 0 R 40 0 R 41 0 R 42 0 R 43 0 R 44 0 R 45 0 R 46 0 R 47 0 R 48 0 R 49 0 R 50 0 R 51 0 R 52 0 R 53 0 R 54 0 R 55 0 R 56 0 R 57 0 R ]\n/Parent 1 0 R\n>>\nendobj\n5 0 obj\n<<\n/Filter /FlateDecode\n/Length 349\n>>\nstream\nxڅRn0\u0010\u0015>\u0014\u001fǦiVQ*H=4=Pb\bj\u00145,!Q.\u0005;;f\u001f3b\u0019;G&\bd\u0014(\"0D,\n\u0004G\u0011\u000bSE\u001bϧ\u001c:؞\u0014\u0000xl\u001e!y$uueN\u0006&\nMvG|\u0003NK<ݼ?vPcPඵ\u0000u7K9dF9ެwv\u0007b,IJWbi0AAj\u0014K\t=P\u001aQ\"jS!\u0002,#\u0013\u001cH.lRU~Qf4\u001d7\\;ctZ$m\u001buYwp3Yd-\n\u0016\u0017p0OC\u0010\u000b0\"\u0001&\f@i8$\u0015˱n$eVyqj1L\u0006/_J\u001b,Io086q{.\u0004e-\u0007\nendstream\nendobj\n6 0 obj\n<<\n/Font <<\n/F38 7 0 R\n/F39 13 0 R\n>>\n/XObject <<\n/Im4 18 0 R\n>>\n/ProcSet [ /PDF /Text ]\n>>\nendobj\n7 0 obj\n<<\n/Type /Font\n/Subtype /Type1\n/BaseFont /APJQZH+NimbusRomNo9L-ReguItal\n/FontDescriptor 8 0 R\n/FirstChar 40\n/LastChar 119\n/Widths 10 0 R\n/Encoding 11 0 R\n/ToUnicode 12 0 R\n>>\nendobj\n8 0 obj\n<<\n/Type /FontDescriptor\n/FontName /APJQZH+NimbusRomNo9L-ReguItal\n/Flags 4\n/FontBBox [ -169 -270 1010 924 ]\n/Ascent 924\n/CapHeight 924\n/Descent -270\n/ItalicAngle -15\n/StemV 78\n/CharSet (\\057A\\057C\\057E\\057H\\057I\\057J\\057K\\057L\\057M\\057N\\057O\\057P\\057R\\057S\\057T\\057U\\057V\\057W\\057X\\057a\\057c\\057colon\\057comma\\057d\\057e\\057f\\057four\\057g\\057h\\057hyphen\\057i\\057k\\057l\\057m\\057n\\057nine\\057o\\057one\\057p\\057parenleft\\057parenright\\057period\\057r\\057s\\057seven\\057six\\057t\\057three\\057two\\057u\\057v\\057w\\...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计53104字符，剩余51604字符"
+        },
+        "execution_time": 0.01998615264892578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "隐藏文件读取安全性测试",
+        "purpose": "验证工具是否能安全处理隐藏文件的读取请求",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.hidden_test_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大文件读取边界测试",
+        "purpose": "验证工具是否能处理较大文件的读取请求",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_full_copy.pdf"
+        },
+        "response": {
+          "result": "%PDF-1.5\n%\n1 0 obj\n<<\n/Type /Pages\n/Count 5\n/Kids [ 4 0 R 58 0 R 91 0 R 98 0 R 103 0 R ]\n>>\nendobj\n2 0 obj\n<<\n/Producer (PyPDF2)\n>>\nendobj\n3 0 obj\n<<\n/Type /Catalog\n/Pages 1 0 R\n>>\nendobj\n4 0 obj\n<<\n/Type /Page\n/Contents 5 0 R\n/Resources 6 0 R\n/MediaBox [ 0 0 595.276 841.89 ]\n/Annots [ 39 0 R 40 0 R 41 0 R 42 0 R 43 0 R 44 0 R 45 0 R 46 0 R 47 0 R 48 0 R 49 0 R 50 0 R 51 0 R 52 0 R 53 0 R 54 0 R 55 0 R 56 0 R 57 0 R ]\n/Parent 1 0 R\n>>\nendobj\n5 0 obj\n<<\n/Filter /FlateDecode\n/Length 349\n>>\nstream\nxڅRn0\u0010\u0015>\u0014\u001fǦiVQ*H=4=Pb\bj\u00145,!Q.\u0005;;f\u001f3b\u0019;G&\bd\u0014(\"0D,\n\u0004G\u0011\u000bSE\u001bϧ\u001c:؞\u0014\u0000xl\u001e!y$uueN\u0006&\nMvG|\u0003NK<ݼ?vPcPඵ\u0000u7K9dF9ެwv\u0007b,IJWbi0AAj\u0014K\t=P\u001aQ\"jS!\u0002,#\u0013\u001cH.lRU~Qf4\u001d7\\;ctZ$m\u001buYwp3Yd-\n\u0016\u0017p0OC\u0010\u000b0\"\u0001&\f@i8$\u0015˱n$eVyqj1L\u0006/_J\u001b,Io086q{.\u0004e-\u0007\nendstream\nendobj\n6 0 obj\n<<\n/Font <<\n/F38 7 0 R\n/F39 13 0 R\n>>\n/XObject <<\n/Im4 18 0 R\n>>\n/ProcSet [ /PDF /Text ]\n>>\nendobj\n7 0 obj\n<<\n/Type /Font\n/Subtype /Type1\n/BaseFont /APJQZH+NimbusRomNo9L-ReguItal\n/FontDescriptor 8 0 R\n/FirstChar 40\n/LastChar 119\n/Widths 10 0 R\n/Encoding 11 0 R\n/ToUnicode 12 0 R\n>>\nendobj\n8 0 obj\n<<\n/Type /FontDescriptor\n/FontName /APJQZH+NimbusRomNo9L-ReguItal\n/Flags 4\n/FontBBox [ -169 -270 1010 924 ]\n/Ascent 924\n/CapHeight 924\n/Descent -270\n/ItalicAngle -15\n/StemV 78\n/CharSet (\\057A\\057C\\057E\\057H\\057I\\057J\\057K\\057L\\057M\\057N\\057O\\057P\\057R\\057S\\057T\\057U\\057V\\057W\\057X\\057a\\057c\\057colon\\057comma\\057d\\057e\\057f\\057four\\057g\\057h\\057hyphen\\057i\\057k\\057l\\057m\\057n\\057nine\\057o\\057one\\057p\\057parenleft\\057parenright\\057period\\057r\\057s\\057seven\\057six\\057t\\05...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计114197字符，剩余112697字符"
+        },
+        "execution_time": 0.03304862976074219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "恶意路径注入安全性测试",
+        "purpose": "验证工具是否对潜在恶意路径注入进行安全过滤或拒绝执行",
+        "args": {
+          "filename": "../../etc/passwd"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.0060024261474609375,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 32
+}

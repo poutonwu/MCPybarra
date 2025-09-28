@@ -1,0 +1,72 @@
+# Pipeline 模型性能横向对比报告
+
+本报告对比了不同AI模型在相同服务器生成任务上的表现，分数越高代表性能越好。
+
+| project_name                           |   gemini |   gpt |   qwen |
+|:---------------------------------------|---------:|------:|-------:|
+| 2.5-pro-mcp_academic_paper_search      |    74    |  0    |   0    |
+| 2.5-pro-mcp_arxiv_paper_manager        |    76    |  0    |   0    |
+| 2.5-pro-mcp_automated_data_explorer    |    91    |  0    |   0    |
+| 2.5-pro-mcp_automated_screenshoter     |    97    |  0    |   0    |
+| 2.5-pro-mcp_computer_vision_toolkit    |    80    |  0    |   0    |
+| 2.5-pro-mcp_content_to_markdown_conver |    95    |  0    |   0    |
+| 2.5-pro-mcp_duckduckgo_search_fetcher  |    81    |  0    |   0    |
+| 2.5-pro-mcp_duffeld_flight_search      |    78    |  0    |   0    |
+| 2.5-pro-mcp_everything_file_searcher   |    93    |  0    |   0    |
+| 2.5-pro-mcp_financialdatasets_api_hand |    67    |  0    |   0    |
+| 2.5-pro-mcp_git_repository_manager     |    92    |  0    |   0    |
+| 2.5-pro-mcp_huggingface_hub_manager    |    76    |  0    |   0    |
+| 2.5-pro-mcp_image_format_converter     |   100    |  0    |   0    |
+| 2.5-pro-mcp_image_icon_handler         |    88    |  0    |   0    |
+| 2.5-pro-mcp_mongodb_database_manager   |    90    |  0    |   0    |
+| 2.5-pro-mcp_mysql_db_manager           |    78    |  0    |   0    |
+| 2.5-pro-mcp_outlook_manager            |    91    |  0    |   0    |
+| 2.5-pro-mcp_pdf_toolkit                |    94    |  0    |   0    |
+| 2.5-pro-mcp_ssh_remote_manager         |    92    |  0    |   0    |
+| 2.5-pro-mcp_tavily_web_search          |    93    |  0    |   0    |
+| 2.5-pro-mcp_text_file_manipulator      |    84    |  0    |   0    |
+| 2.5-pro-mcp_unsplash_search_photos     |    91    |  0    |   0    |
+| 2.5-pro-mcp_word_document_automation   |    79    |  0    |   0    |
+| 2.5-pro-mcp_word_document_processor    |    94    |  0    |   0    |
+| 2.5-pro-mcp_zotero_library_manager     |    92    |  0    |   0    |
+| 4o-mcp_academic_paper_tool             |     0    | 46    |   0    |
+| 4o-mcp_arxiv_paper_manager             |     0    | 89    |   0    |
+| 4o-mcp_automated_data_analysis         |     0    | 70    |   0    |
+| 4o-mcp_duckduckgo_search_scraper       |     0    | 72    |   0    |
+| 4o-mcp_duffeld_flight_info             |     0    | 80    |   0    |
+| 4o-mcp_financial_data_processor        |     0    | 73    |   0    |
+| 4o-mcp_git_repo_manager                |     0    | 91    |   0    |
+| 4o-mcp_huggingface_resource_manag      |     0    | 91    |   0    |
+| 4o-mcp_image_format_converter          |     0    | 80    |   0    |
+| 4o-mcp_image_search_download_icon      |     0    | 97    |   0    |
+| 4o-mcp_markdown_converter              |     0    | 69    |   0    |
+| 4o-mcp_mongodb_manager                 |     0    | 96    |   0    |
+| 4o-mcp_mysql_db_manager                |     0    | 95    |   0    |
+| 4o-mcp_opencv_image_processing         |     0    | 96    |   0    |
+| 4o-mcp_outlook_email_manager           |     0    | 84    |   0    |
+| 4o-mcp_screenshot_automation           |     0    | 89    |   0    |
+| 4o-mcp_tavily_web_tools                |     0    | 60    |   0    |
+| 4o-mcp_text_file_manager               |     0    | 92    |   0    |
+| 4o-mcp_unsplash_photo_search           |     0    | 80    |   0    |
+| 4o-mcp_word_document_automation        |     0    | 93    |   0    |
+| 4o-mcp_word_document_processor         |     0    | 87    |   0    |
+| 4o-mcp_zotero_library_manager          |     0    | 75    |   0    |
+| plus-everything_dll_search_server      |     0    |  0    |  89    |
+| plus-mcp_academic_paper_search_quer    |     0    |  0    |  84    |
+| plus-mcp_data_exploration_analyzer     |     0    |  0    |  72    |
+| plus-mcp_duffeld_flight_info_proces    |     0    |  0    |  70    |
+| plus-mcp_git_repo_manager              |     0    |  0    |  86    |
+| plus-mcp_image_format_converter        |     0    |  0    |  71    |
+| plus-mcp_image_search_download_icon    |     0    |  0    |  84    |
+| plus-mcp_markdown_converter            |     0    |  0    |  64    |
+| plus-mcp_mysql_database_manager        |     0    |  0    |  94    |
+| plus-mcp_opencv_image_processing_cv    |     0    |  0    |  97    |
+| plus-mcp_outlook_automation_manager    |     0    |  0    |  69    |
+| plus-mcp_pdf_file_processor            |     0    |  0    |  93    |
+| plus-mcp_screenshot_automation         |     0    |  0    |  58    |
+| plus-mcp_ssh_automation_manager        |     0    |  0    |  95    |
+| plus-mcp_text_file_processor           |     0    |  0    |  63    |
+| plus-mcp_unsplash_photo_searcher       |     0    |  0    |  94    |
+| plus-mcp_word_document_processor       |     0    |  0    |  98    |
+| plus-mcp_zotero                        |     0    |  0    |  97    |
+| Average Score                          |    33.32 | 27.77 |  22.74 |

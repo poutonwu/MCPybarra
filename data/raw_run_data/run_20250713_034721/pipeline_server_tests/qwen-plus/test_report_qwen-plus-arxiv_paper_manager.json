@@ -1,0 +1,436 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-arxiv_paper_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/arxiv_paper_manager/refined/server.py",
+  "timestamp": "2025-07-13T04:07:07.051017",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Searches for academic papers on arXiv based on user-provided query conditions and returns a list of matching papers.\n\n    Args:\n        query: A string containing the search query (e.g., keywords, author names, or other criteria).\n\n    Returns:\n        A JSON-formatted string containing a list of paper metadata (titles, authors, abstracts, and arXiv IDs).\n\n    Example:\n        search_papers(query=\"quantum computing\")\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    Downloads the PDF file of a specified arXiv paper using its arXiv ID and stores it locally.\n\n    Args:\n        paper_id: A string representing the unique identifier of the arXiv paper (e.g., '1706.03762').\n\n    Returns:\n        A JSON-formatted string message indicating success or failure of the download operation.\n\n    Example:\n        download_paper(paper_id=\"1706.03762\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    Lists all papers that have been downloaded and stored locally, providing an interface for querying and managing these papers.\n\n    Returns:\n        A JSON-formatted string containing a list of locally stored papers' metadata (titles, authors, and local file paths).\n\n    Example:\n        list_papers()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    Reads and provides access to the textual content of a specified academic paper by parsing its locally stored PDF file.\n\n    Args:\n        paper_id: A string representing the unique identifier of the arXiv paper whose content needs to be accessed.\n\n    Returns:\n        A JSON-formatted string containing the parsed text content of the specified paper.\n\n    Example:\n        read_paper(paper_id=\"1706.03762\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search",
+        "purpose": "验证工具能够根据关键词搜索学术论文并返回结果",
+        "args": {
+          "query": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"abstract\": \"This article highlights quantum Internet computing as referring to\\ndistributed quantum computing over the quantum Internet, analogous to\\n(classical) Internet computing involving (classical) distributed computing over\\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\\nof study such as quantum protocols for distributed nodes using quantum\\ninformation for computations, quantum cloud computing, delegated verifiable\\nblind or private computing, non-local gates, and distributed quantum\\napplications, over Internet-scale distances.\", \"arxiv_id\": \"2208.00733v1\"}, {\"title\": \"Unconventional Quantum Computing Devices\", \"authors\": [\"Seth Lloyd\"], \"abstract\": \"This paper investigates a variety of unconventional quantum computation\\ndevices, including fermionic quantum computers and computers that exploit\\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\\ndevices can in principle compute some quantities more rapidly than\\n`conventional' quantum computers.\", \"arxiv_id\": \"0003151v1\"}, {\"title\": \"Geometrical perspective on quantum states and quantum computation\", \"authors\": [\"Zeqian Chen\"], \"abstract\": \"We interpret quantum computing as a geometric evolution process by\\nreformulating finite quantum systems via Connes' noncommutative geometry. In\\nthis formulation, quantum states are represented as noncommutative connections,\\nwhile gaug...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计9047字符，剩余7547字符"
+        },
+        "execution_time": 0.9746530055999756,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Search",
+        "purpose": "验证工具在空查询时是否能正确处理",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while searching for papers: Query cannot be empty or contain only whitespace.\"}"
+        },
+        "execution_time": 0.009000301361083984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具能否正确处理包含特殊字符的查询字符串",
+        "args": {
+          "query": "machine learning !@#$%^&*()"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.114201545715332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Query String",
+        "purpose": "验证工具能否处理较长的查询字符串",
+        "args": {
+          "query": "This is a very long query string that tests the maximum length of input the tool can handle before encountering issues or truncation."
+        },
+        "response": {
+          "result": "[{\"title\": \"Consensus Patterns parameterized by input string length is W[1]-hard\", \"authors\": [\"Laurent Bulteau\"], \"abstract\": \"We consider the Consensus Patterns problem, where, given a set of input\\nstrings, one is asked to extract a long-enough pattern which appears (with some\\nerrors) in all strings. We prove that this problem is W[1]-hard when\\nparameterized by the maximum length of input strings.\", \"arxiv_id\": \"1702.08238v1\"}, {\"title\": \"Querying for Paths in Graphs using Context-Free Path Queries\", \"authors\": [\"Jelle Hellings\"], \"abstract\": \"Navigational queries for graph-structured data, such as the regular path\\nqueries and the context-free path queries, are usually evaluated to a relation\\nof node-pairs $(m, n)$ such that there is a path from $m$ to $n$ satisfying the\\nconditions of the query. Although this relational query semantics has practical\\nvalue, we believe that the relational query semantics can only provide limited\\ninsight in the structure of the graph data. To address the limits of the\\nrelational query semantics, we introduce the all-path query semantics and the\\nsingle-path query semantics. Under these path-based query semantics, a query is\\nevaluated to all paths satisfying the conditions of the query, or,\\nrespectively, to a single such path.\\n  While focusing on context-free path queries, we provide a formal framework\\nfor evaluating queries on graphs using both path-based query semantics. For the\\nall-path query semantics, we show that the result ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计16047字符，剩余14547字符"
+        },
+        "execution_time": 1.835770606994629,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Non-English Characters",
+        "purpose": "验证工具能否处理包含非英文字符（如中文）的查询",
+        "args": {
+          "query": "量子计算"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.1372168064117432,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Query",
+        "purpose": "验证工具是否对潜在的SQL注入攻击进行了安全防护",
+        "args": {
+          "query": "'; DROP TABLE papers; --"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.1221883296966553,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "验证工具是否对潜在的跨站脚本攻击进行了防护",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "[{\"title\": \"Structural Learning of Attack Vectors for Generating Mutated XSS Attacks\", \"authors\": [\"Yi-Hsun Wang\", \"Ching-Hao Mao\", \"Hahn-Ming Lee\"], \"abstract\": \"Web applications suffer from cross-site scripting (XSS) attacks that\\nresulting from incomplete or incorrect input sanitization. Learning the\\nstructure of attack vectors could enrich the variety of manifestations in\\ngenerated XSS attacks. In this study, we focus on generating more threatening\\nXSS attacks for the state-of-the-art detection approaches that can find\\npotential XSS vulnerabilities in Web applications, and propose a mechanism for\\nstructural learning of attack vectors with the aim of generating mutated XSS\\nattacks in a fully automatic way. Mutated XSS attack generation depends on the\\nanalysis of attack vectors and the structural learning mechanism. For the\\nkernel of the learning mechanism, we use a Hidden Markov model (HMM) as the\\nstructure of the attack vector model to capture the implicit manner of the\\nattack vector, and this manner is benefited from the syntax meanings that are\\nlabeled by the proposed tokenizing mechanism. Bayes theorem is used to\\ndetermine the number of hidden states in the model for generalizing the\\nstructure model. The paper has the contributions as following: (1)\\nautomatically learn the structure of attack vectors from practical data\\nanalysis to modeling a structure model of attack vectors, (2) mimic the manners\\nand the elements of attack vectors to extend the abilit...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计15851字符，剩余14351字符"
+        },
+        "execution_time": 1.9829344749450684,
+        "is_functional_test": false
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic Paper Download",
+        "purpose": "验证工具能够根据有效的arXiv ID下载论文PDF文件",
+        "args": {
+          "paper_id": "1706.03762"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: '1706.03762'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.009521722793579102,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download with Empty Paper ID",
+        "purpose": "验证工具在空的arXiv ID输入时能否正确处理错误情况",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: ''. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.012511491775512695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download with Invalid Paper ID Format",
+        "purpose": "验证工具能否处理格式不正确的arXiv ID输入",
+        "args": {
+          "paper_id": "invalid-id-123"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: 'invalid-id-123'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.009909868240356445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Nonexistent Paper",
+        "purpose": "验证工具在尝试下载不存在的论文时能否优雅地处理失败情况",
+        "args": {
+          "paper_id": "9999.99999"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: '9999.99999'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.008533000946044922,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Paper with Special Characters in ID",
+        "purpose": "验证工具是否能正确处理包含特殊字符的arXiv ID（虽然理论上不应出现）",
+        "args": {
+          "paper_id": "1706.03762v!@#"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: '1706.03762v!@#'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.010514020919799805,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection in Paper ID",
+        "purpose": "验证工具是否对潜在的SQL注入攻击进行了安全防护",
+        "args": {
+          "paper_id": "'; DROP TABLE papers; --"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: ''; DROP TABLE papers; --'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.007002115249633789,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt in Paper ID",
+        "purpose": "验证工具是否对潜在的跨站脚本攻击进行了防护",
+        "args": {
+          "paper_id": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: '<script>alert('xss')</script>'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.010107278823852539,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Maximum Length Paper ID",
+        "purpose": "验证工具能否处理超长的Paper ID输入",
+        "args": {
+          "paper_id": "12345678901234567890123456789012345678901234567890"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while downloading the paper: Invalid arXiv ID format: '12345678901234567890123456789012345678901234567890'. Expected format is 'YYYY.XXXXX'.\"}"
+        },
+        "execution_time": 0.010000944137573242,
+        "is_functional_test": false
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "Basic Paper Listing",
+        "purpose": "验证工具能够正确列出所有本地存储的论文元数据",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Paper List Handling",
+        "purpose": "验证当没有本地存储论文时，工具是否能返回空列表而不是错误",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.004515886306762695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper List Format Validation",
+        "purpose": "验证返回的JSON格式是否包含预期字段（title, authors, file_path）",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.007055044174194336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - SQL Injection in List Query",
+        "purpose": "验证工具在list_papers操作中是否对潜在SQL注入攻击进行防护",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.007997989654541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Corrupted Metadata File",
+        "purpose": "验证工具在检测到损坏的元数据文件时能否优雅处理而非崩溃",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.00400090217590332,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Large Number of Papers",
+        "purpose": "验证工具在存在大量本地论文时能否正确处理并完整返回列表",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Paper Titles",
+        "purpose": "验证工具能否正确处理标题中包含特殊字符或非英文字符的论文条目",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.005001068115234375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Path Integrity Check",
+        "purpose": "验证返回的file_path字段是否指向实际存在的本地文件",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.007998943328857422,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic Paper Read",
+        "purpose": "验证工具能够根据有效的arXiv ID读取并返回论文的文本内容",
+        "args": {
+          "paper_id": "1706.03762"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: 1706.03762\"}"
+        },
+        "execution_time": 0.005997419357299805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read with Empty Paper ID",
+        "purpose": "验证工具在空的arXiv ID输入时能否正确处理错误情况",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: \"}"
+        },
+        "execution_time": 0.004997968673706055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read with Invalid Paper ID Format",
+        "purpose": "验证工具能否处理格式不正确的arXiv ID输入",
+        "args": {
+          "paper_id": "invalid-id-123"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: invalid-id-123\"}"
+        },
+        "execution_time": 0.004998445510864258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Nonexistent Paper",
+        "purpose": "验证工具在尝试读取不存在的论文时能否优雅地处理失败情况",
+        "args": {
+          "paper_id": "9999.99999"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: 9999.99999\"}"
+        },
+        "execution_time": 0.00899958610534668,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection in Paper ID",
+        "purpose": "验证工具是否对潜在的SQL注入攻击进行了安全防护",
+        "args": {
+          "paper_id": "'; DROP TABLE papers; --"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: '; DROP TABLE papers; --\"}"
+        },
+        "execution_time": 0.007001161575317383,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt in Paper ID",
+        "purpose": "验证工具是否对潜在的跨站脚本攻击进行了防护",
+        "args": {
+          "paper_id": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: <script>alert('xss')</script>\"}"
+        },
+        "execution_time": 0.005999088287353516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Maximum Length Paper ID",
+        "purpose": "验证工具能否处理超长的Paper ID输入",
+        "args": {
+          "paper_id": "12345678901234567890123456789012345678901234567890"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: 12345678901234567890123456789012345678901234567890\"}"
+        },
+        "execution_time": 0.007000923156738281,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Paper from Existing Local File",
+        "purpose": "验证工具能否正确从本地存储的PDF文件中解析论文内容（使用测试区提供的paper1.pdf）",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: No downloaded paper found with ID: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\paper1.pdf\"}"
+        },
+        "execution_time": 0.0050029754638671875,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 31
+}

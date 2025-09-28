@@ -1,0 +1,497 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp_data_explorer_with_pandas__refined",
+  "report_name": "mcp_data_explorer_with_pandas__refined-server",
+  "server_path": "workspace\\refinement\\mcp_data_explorer_with_pandas__refined\\server.py",
+  "timestamp": "2025-07-01T17:03:42.155643",
+  "tools": [
+    {
+      "name": "load_dataset",
+      "description": "\n    加载CSV文件到内存中，以便进行数据分析。\n\n    Args:\n        file_path: CSV文件的完整路径。\n        dataset_name: 给数据集指定一个名称，用于后续引用。\n\n    Returns:\n        一个字符串，表示操作结果。\n\n    Raises:\n        ValueError: 如果文件路径无效或文件不是CSV格式。\n        FileNotFoundError: 如果指定的文件不存在。\n        pd.errors.ParserError: 如果CSV文件解析失败。\n        Exception: 捕获并处理所有其他异常。\n    \n    示例:\n        load_dataset(file_path=\"/path/to/data.csv\", dataset_name=\"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "dataset_name"
+        ],
+        "title": "load_datasetArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_basic_stats",
+      "description": "\n    获取指定数据集的基本统计信息。\n\n    Args:\n        dataset_name: 要分析的数据集名称。\n\n    Returns:\n        一个包含基本统计信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果数据集不存在。\n        Exception: 捕获并处理所有其他异常。\n    \n    示例:\n        get_basic_stats(dataset_name=\"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "get_basic_statsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_column_info",
+      "description": "\n    获取指定数据集中特定列的详细信息。\n\n    Args:\n        dataset_name: 数据集名称。\n        column_name: 列名。\n\n    Returns:\n        一个包含列详细信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果数据集不存在或列不存在。\n        Exception: 捕获并处理所有其他异常。\n    \n    示例:\n        get_column_info(dataset_name=\"sales_data\", column_name=\"product_id\")\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          },
+          "column_name": {
+            "title": "Column Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name",
+          "column_name"
+        ],
+        "title": "get_column_infoArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_dataset": [
+      {
+        "case_name": "加载有效CSV文件",
+        "purpose": "验证工具能够成功加载一个有效的CSV文件并指定数据集名称。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8.csv",
+          "dataset_name": "utf8_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 'utf-8' codec can't decode byte 0x96 in position 10: invalid start byte"
+        },
+        "execution_time": 0.0075109004974365234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用中文命名数据集加载CSV",
+        "purpose": "测试工具是否支持用中文作为数据集名称加载CSV文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "dataset_name": "机械数据"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"\\u6210\\u529f\\u52a0\\u8f7d\\u6570\\u636e\\u96c6 '\\u673a\\u68b0\\u6570\\u636e'\", \"shape\": [1524, 5]}"
+        },
+        "execution_time": 0.012202262878417969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "加载非UTF8编码CSV文件",
+        "purpose": "验证工具是否能处理非标准UTF-8编码的CSV文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8.csv",
+          "dataset_name": "non_utf8_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 'utf-8' codec can't decode byte 0x96 in position 10: invalid start byte"
+        },
+        "execution_time": 0.007149696350097656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试加载不存在的文件",
+        "purpose": "验证工具在文件路径无效时是否抛出FileNotFoundError。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv",
+          "dataset_name": "invalid_file_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 找不到文件: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv"
+        },
+        "execution_time": 0.004500865936279297,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "加载非CSV格式文件",
+        "purpose": "验证工具是否正确拒绝非CSV扩展名的文件（如PDF）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "dataset_name": "pdf_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 文件必须是CSV格式"
+        },
+        "execution_time": 0.007087230682373047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用空文件路径加载",
+        "purpose": "测试当file_path为空字符串时是否引发ValueError。",
+        "args": {
+          "file_path": "",
+          "dataset_name": "empty_path_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 文件必须是CSV格式"
+        },
+        "execution_time": 0.0025107860565185547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符作为文件路径",
+        "purpose": "验证工具是否能正确处理包含特殊字符的文件路径。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_repo\\中文文件名-副本.docx",
+          "dataset_name": "special_chars_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 文件必须是CSV格式"
+        },
+        "execution_time": 0.008514642715454102,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "不提供数据集名称",
+        "purpose": "测试未提供dataset_name参数是否会引发异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8.csv",
+          "dataset_name": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 'utf-8' codec can't decode byte 0x96 in position 10: invalid start byte"
+        },
+        "execution_time": 0.004998922348022461,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "加载包含非法内容的CSV文件",
+        "purpose": "验证工具能否正确处理解析失败的CSV文件（例如含有非法转义符）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8.csv",
+          "dataset_name": "malformed_csv_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 'utf-8' codec can't decode byte 0x96 in position 10: invalid start byte"
+        },
+        "execution_time": 0.004087686538696289,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "长文件路径和长数据集名称",
+        "purpose": "测试工具对超长文件路径和数据集名称的处理能力。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_repo\\new_文件#1@2025.docx",
+          "dataset_name": "this_is_a_very_long_dataset_name_that_tests_boundary_conditions"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 文件必须是CSV格式"
+        },
+        "execution_time": 0.006009340286254883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多次加载相同文件到不同数据集",
+        "purpose": "验证工具是否允许将同一文件加载为多个不同的数据集名称。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8.csv",
+          "dataset_name": "sales_data_copy"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 'utf-8' codec can't decode byte 0x96 in position 10: invalid start byte"
+        },
+        "execution_time": 0.004431724548339844,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试注入恶意路径字符串",
+        "purpose": "测试工具是否安全地处理可能的路径遍历攻击或注入攻击。",
+        "args": {
+          "file_path": "..\\..\\etc\\passwd",
+          "dataset_name": "malicious_attempt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_dataset: 加载数据集时发生错误: 文件必须是CSV格式"
+        },
+        "execution_time": 0.004004240036010742,
+        "is_functional_test": false
+      }
+    ],
+    "get_basic_stats": [
+      {
+        "case_name": "获取销售数据基本统计信息",
+        "purpose": "验证工具能够成功获取已加载的CSV数据集的基本统计信息。",
+        "args": {
+          "dataset_name": "utf8_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'utf8_data' 未加载"
+        },
+        "execution_time": 0.004506587982177734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取中文命名数据集统计信息",
+        "purpose": "测试工具是否支持用中文作为数据集名称并获取其统计信息。",
+        "args": {
+          "dataset_name": "机械数据"
+        },
+        "response": {
+          "result": "{\"shape\": [1524, 5], \"columns\": [\"id\", \"url\", \"名称\", \"品牌\", \"机械设备类型\"], \"numeric_columns\": {\"id\": {\"mean\": 337848.8274278215, \"median\": 340018.5, \"std\": 23262.93102513622, \"min\": 159159.0, \"max\": 361402.0, \"missing\": 0}}, \"categorical_columns\": {\"url\": {\"unique_count\": 1524, \"top_values\": {\"https://zj.lmjx.net/shaifenji/zoomlion/zfgh1660/\": 1, \"https://zj.lmjx.net/xiaoxingyaluji/xgma/xg6011d/\": 1, \"https://zj.lmjx.net/bozhongji/nonghaha/2byqf6/\": 1, \"https://zj.lmjx.net/kuangyongkache/zhongguozhongqi/zz5707s3842aj/\": 1, \"https://zj.lmjx.net/lvdaiqizhongji/sany/scc5000we/\": 1}, \"missing\": 0}, \"名称\": {\"unique_count\": 1524, \"top_values\": {\"中联重科 ZFGH1660 棒条式振动给料机\": 1, \"厦工 XG6011D 小型压路机\": 1, \"农哈哈 2BYQF-6轻型气吸式 种植施肥机械\": 1, \"中国重汽 ZZ5707S3842AJ 矿山霸王自卸车\": 1, \"三一重工 SCC5000WE 履带起重机\": 1}, \"missing\": 0}, \"品...[截断]，共计1042字符，剩余242字符"
+        },
+        "execution_time": 0.013527870178222656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试获取未加载数据集统计信息",
+        "purpose": "验证工具在请求不存在的数据集时是否抛出ValueError。",
+        "args": {
+          "dataset_name": "non_existent_dataset"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'non_existent_dataset' 未加载"
+        },
+        "execution_time": 0.007512807846069336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取空数据集统计信息",
+        "purpose": "测试工具对空数据集（无行或列）的处理能力。",
+        "args": {
+          "dataset_name": "empty_dataset"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'empty_dataset' 未加载"
+        },
+        "execution_time": 0.0062940120697021484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取超大数值范围数据集统计信息",
+        "purpose": "验证工具能否正确计算包含极大/极小数值的列的统计指标。",
+        "args": {
+          "dataset_name": "large_number_dataset"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'large_number_dataset' 未加载"
+        },
+        "execution_time": 0.005511760711669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取包含非法字符的列名的数据集统计信息",
+        "purpose": "测试工具是否能处理列名中包含特殊字符（如#、@、空格）的情况。",
+        "args": {
+          "dataset_name": "special_chars_columns_dataset"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'special_chars_columns_dataset' 未加载"
+        },
+        "execution_time": 0.007544755935668945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取路径穿越攻击模拟数据集统计信息",
+        "purpose": "测试工具是否拒绝执行可能涉及路径穿越攻击的恶意输入。",
+        "args": {
+          "dataset_name": "../etc/passwd"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 '../etc/passwd' 未加载"
+        },
+        "execution_time": 0.004508018493652344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取超长数据集名称的统计信息",
+        "purpose": "验证工具对超长数据集名称的处理能力。",
+        "args": {
+          "dataset_name": "this_is_a_very_long_dataset_name_that_tests_boundary_conditions_and_edge_cases"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'this_is_a_very_long_dataset_name_that_tests_boundary_conditions_and_edge_cases' 未加载"
+        },
+        "execution_time": 0.00800943374633789,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取重复调用同一数据集的统计信息",
+        "purpose": "验证工具是否允许多次获取同一数据集的统计信息且结果一致。",
+        "args": {
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'sales_data' 未加载"
+        },
+        "execution_time": 0.006010770797729492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取非CSV格式数据集的统计信息",
+        "purpose": "验证工具是否拒绝非CSV格式的数据集请求。",
+        "args": {
+          "dataset_name": "pdf_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'pdf_data' 未加载"
+        },
+        "execution_time": 0.009522438049316406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取带空格和特殊字符数据集的统计信息",
+        "purpose": "测试工具是否能正确解析数据集名称中包含空格和特殊字符的情况。",
+        "args": {
+          "dataset_name": "dataset with spaces & special chars"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_basic_stats: 获取统计数据时发生错误: 数据集 'dataset with spaces & special chars' 未加载"
+        },
+        "execution_time": 0.00950932502746582,
+        "is_functional_test": true
+      }
+    ],
+    "get_column_info": [
+      {
+        "case_name": "获取销售数据集的product_id列信息",
+        "purpose": "验证工具能够成功获取指定数据集中特定列的详细信息。",
+        "args": {
+          "dataset_name": "sales_data",
+          "column_name": "product_id"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'sales_data' 未加载"
+        },
+        "execution_time": 0.004999637603759766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取中文命名数据集的列信息",
+        "purpose": "测试工具是否支持用中文作为数据集名称并获取其列信息。",
+        "args": {
+          "dataset_name": "机械数据",
+          "column_name": "品牌"
+        },
+        "response": {
+          "result": "{\"column_name\": \"品牌\", \"data_type\": \"object\", \"is_numeric\": false, \"missing_count\": 0, \"unique_count\": 433, \"top_values\": {\"徐工\": 117, \"卡特彼勒\": 87, \"三一重工\": 78, \"中联重科\": 63, \"楚飞\": 30}}"
+        },
+        "execution_time": 0.009515047073364258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试获取不存在的数据集列信息",
+        "purpose": "验证工具在请求不存在的数据集时是否抛出ValueError。",
+        "args": {
+          "dataset_name": "non_existent_dataset",
+          "column_name": "any_column"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'non_existent_dataset' 未加载"
+        },
+        "execution_time": 0.009513139724731445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试获取存在数据集中不存在的列信息",
+        "purpose": "验证工具在请求数据集中不存在的列时是否抛出ValueError。",
+        "args": {
+          "dataset_name": "sales_data",
+          "column_name": "non_existent_column"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'sales_data' 未加载"
+        },
+        "execution_time": 0.007307291030883789,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取空数据集的列信息",
+        "purpose": "测试工具对空数据集（无行或列）的处理能力。",
+        "args": {
+          "dataset_name": "empty_dataset",
+          "column_name": "any_column"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'empty_dataset' 未加载"
+        },
+        "execution_time": 0.008533000946044922,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符作为列名获取信息",
+        "purpose": "测试工具是否能处理列名中包含特殊字符（如#、@、空格）的情况。",
+        "args": {
+          "dataset_name": "special_chars_columns_dataset",
+          "column_name": "column#with@special space"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'special_chars_columns_dataset' 未加载"
+        },
+        "execution_time": 0.006166934967041016,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取超长列名的信息",
+        "purpose": "验证工具对超长列名的处理能力。",
+        "args": {
+          "dataset_name": "long_column_dataset",
+          "column_name": "this_is_a_very_long_column_name_that_tests_boundary_conditions_and_edge_cases"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'long_column_dataset' 未加载"
+        },
+        "execution_time": 0.00951528549194336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试注入恶意路径字符串作为数据集名称",
+        "purpose": "测试工具是否安全地处理可能的路径遍历攻击或注入攻击。",
+        "args": {
+          "dataset_name": "../etc/passwd",
+          "column_name": "any_column"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 '../etc/passwd' 未加载"
+        },
+        "execution_time": 0.0055675506591796875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取已加载数据集中边界长度列名的信息",
+        "purpose": "验证工具能否正确处理极端长度的列名。",
+        "args": {
+          "dataset_name": "utf8_data",
+          "column_name": "col1234567890abcdefghijklmnopqrstuv"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'utf8_data' 未加载"
+        },
+        "execution_time": 0.007514238357543945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "重复调用获取同一列信息",
+        "purpose": "验证工具是否允许多次获取同一列信息且结果一致。",
+        "args": {
+          "dataset_name": "sales_data",
+          "column_name": "product_id"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_column_info: 获取列信息时发生错误: 数据集 'sales_data' 未加载"
+        },
+        "execution_time": 0.010042667388916016,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 33
+}

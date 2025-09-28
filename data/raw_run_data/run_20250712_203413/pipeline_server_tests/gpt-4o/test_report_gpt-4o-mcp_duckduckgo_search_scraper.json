@@ -1,0 +1,242 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_duckduckgo_search_scraper",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_duckduckgo_search_scraper/refined/server.py",
+  "timestamp": "2025-07-12T20:34:18.102424",
+  "tools": [
+    {
+      "name": "wrapper",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "args": {
+            "title": "args",
+            "type": "string"
+          },
+          "kwargs": {
+            "title": "kwargs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "args",
+          "kwargs"
+        ],
+        "title": "wrapperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Extracts the main textual content from a webpage given its URL.\n\n    Args:\n        url (str): The URL of the webpage to scrape.\n            Example: \"https://example.com/article\"\n\n    Returns:\n        str: A JSON string containing the main textual content of the webpage, stripped of irrelevant elements.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        Exception: If the webpage content cannot be fetched or parsed.\n\n    Example:\n        fetch_content(url=\"https://example.com/article\")\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "fetch_content": [
+      {
+        "case_name": "Basic Valid URL Content Fetch",
+        "purpose": "验证工具能够从一个有效的URL中提取主要内容并返回JSON格式结果",
+        "args": {
+          "url": "https://example.com/article"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: HTTPSConnectionPool(host='example.com', port=443): Read timed out. (read timeout=3.05)\"}"
+        },
+        "execution_time": 3.0629186630249023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty URL Input",
+        "purpose": "验证当提供空字符串作为URL时，是否抛出ValueError",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "result": "{\"error\": \"URL cannot be empty.\"}"
+        },
+        "execution_time": 0.004386425018310547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "验证当提供无效的URL格式（如缺少协议）时，是否抛出ValueError",
+        "args": {
+          "url": "example.com/article"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: Invalid URL 'example.com/article': No scheme supplied. Perhaps you meant https://example.com/article?\"}"
+        },
+        "execution_time": 0.007009744644165039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch From Local HTML File",
+        "purpose": "验证工具可以从本地HTML文件路径中提取内容（模拟本地服务器文件访问）",
+        "args": {
+          "url": "file:///D:/devWorkspace/MCPServer-Generator/testSystem/testFiles/present.html"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: No connection adapters were found for 'file:///D:/devWorkspace/MCPServer-Generator/testSystem/testFiles/present.html'\"}"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Malformed URL with Special Characters",
+        "purpose": "验证工具能否处理包含特殊字符的URL，并正确解析或抛出异常",
+        "args": {
+          "url": "http://exa<mple>.com/arti\"cle"
+        },
+        "response": {
+          "result": "{\"error\": \"b'exa'\"}"
+        },
+        "execution_time": 0.00600433349609375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Webpage",
+        "purpose": "验证当提供的URL指向不存在的网页时，是否抛出Exception",
+        "args": {
+          "url": "https://example.com/nonexistent-article"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: 404 Client Error: Not Found for url: https://example.com/nonexistent-article\"}"
+        },
+        "execution_time": 1.651824951171875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetching Binary File as URL",
+        "purpose": "验证工具尝试抓取非文本资源（如图片）时的行为是否符合预期",
+        "args": {
+          "url": "file:///D:/devWorkspace/MCPServer-Generator/testSystem/testFiles/nature.jpg"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: No connection adapters were found for 'file:///D:/devWorkspace/MCPServer-Generator/testSystem/testFiles/nature.jpg'\"}"
+        },
+        "execution_time": 0.006000041961669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - SSRF Attempt",
+        "purpose": "验证工具是否能防止SSRF攻击尝试（例如访问本地文件系统）",
+        "args": {
+          "url": "file:///etc/passwd"
+        },
+        "response": {
+          "result": "{\"error\": \"Request failed: No connection adapters were found for 'file:///etc/passwd'\"}"
+        },
+        "execution_time": 0.007005453109741211,
+        "is_functional_test": false
+      }
+    ],
+    "wrapper": [
+      {
+        "case_name": "Basic Wrapper Execution",
+        "purpose": "验证工具能够使用基本参数执行包装器功能并返回结果",
+        "args": {
+          "args": "echo 'Hello World'",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Wrapper With Empty Args",
+        "purpose": "验证当提供空字符串作为args时，是否抛出错误",
+        "args": {
+          "args": "",
+          "kwargs": "{}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.00500178337097168,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Wrapper With Invalid Kwargs Format",
+        "purpose": "验证当提供无效的kwargs格式时，是否抛出错误",
+        "args": {
+          "args": "echo 'Test'",
+          "kwargs": "invalid_json"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0069959163665771484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Wrapper Execute System Command",
+        "purpose": "验证包装器可以执行基础系统命令（无害化测试）",
+        "args": {
+          "args": "echo 'System command executed'",
+          "kwargs": "{\"shell\": true}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0029981136322021484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt File System Access",
+        "purpose": "验证包装器是否能防止SSRF或本地文件访问尝试",
+        "args": {
+          "args": "cat /etc/passwd",
+          "kwargs": "{\"shell\": true}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.0035033226013183594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling For Nonexistent Command",
+        "purpose": "验证包装器在执行不存在的命令时能否正确处理错误",
+        "args": {
+          "args": "nonexistent_command",
+          "kwargs": "{\"shell\": true}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.002998828887939453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Args",
+        "purpose": "验证包装器能否处理包含特殊字符的参数",
+        "args": {
+          "args": "echo 'special!@#$%^&*()_+{}|:\"<>?`~'",
+          "kwargs": "{\"shell\": true}"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed after maximum retries due to rate limiting.\"}"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 15
+}

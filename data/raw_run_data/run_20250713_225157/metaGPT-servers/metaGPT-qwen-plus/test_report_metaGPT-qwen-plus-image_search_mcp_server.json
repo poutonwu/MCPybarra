@@ -1,0 +1,394 @@
+{
+  "server_name": "image_search_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-image_search_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\image_search_mcp_server.py",
+  "timestamp": "2025-07-13T22:52:00.039791",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    根据关键词在指定图片源中检索图片。\n\n    Args:\n        keyword: 搜索关键词。\n        source: 图片源（unsplash, pexels, pixabay）。\n\n    Returns:\n        包含图片链接、作者等信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果图片源无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "keyword": {
+            "title": "Keyword",
+            "type": "string"
+          },
+          "source": {
+            "default": "unsplash",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyword"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    下载并保存指定URL的图片。\n\n    Args:\n        url: 图片URL。\n        filename: 保存的文件名。\n\n    Returns:\n        包含保存状态和路径的JSON字符串。\n\n    Raises:\n        httpx.HTTPStatusError: 如果图片下载失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "filename"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    根据描述生成指定尺寸的图标。\n\n    Args:\n        description: 图标描述。\n        size: 图标尺寸，默认为64。\n\n    Returns:\n        包含保存状态和路径的JSON字符串。\n\n    Raises:\n        ValueError: 如果尺寸小于16或大于256。\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "default": 64,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search with Default Source",
+        "purpose": "验证使用默认图片源（unsplash）和关键词搜索图片的基本功能是否正常",
+        "args": {
+          "keyword": "nature"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '401 Unauthorized' for url 'https://api.unsplash.com/search/photos?query=nature&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+        },
+        "execution_time": 1.578852653503418,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search from Pexels",
+        "purpose": "验证从指定图片源pexels中根据关键词搜索图片的功能是否正常",
+        "args": {
+          "keyword": "mountains",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\"page\":1,\"per_page\":5,\"photos\":[{\"id\":9754,\"width\":1920,\"height\":1200,\"url\":\"https://www.pexels.com/photo/aerial-photography-of-pine-trees-on-the-mountain-9754/\",\"photographer\":\"Creative Vix\",\"photographer_url\":\"https://www.pexels.com/@creative-vix\",\"photographer_id\":2674,\"avg_color\":\"#768083\",\"src\":{\"original\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg\",\"large2x\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026dpr=2\\u0026h=650\\u0026w=940\",\"large\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026h=650\\u0026w=940\",\"medium\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026h=350\",\"small\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026h=130\",\"portrait\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026fit=crop\\u0026h=1200\\u0026w=800\",\"landscape\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026fit=crop\\u0026h=627\\u0026w=1200\",\"tiny\":\"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg?auto=compress\\u0026cs=tinysrgb\\u0026dpr=1\\u0026fit=crop\\u0026h=200\\u0026w=280\"},\"liked\":false,\"alt\":\"A scenic view of misty mountains and dense forest, perfect for nature lovers.\"},{\"id\":618833,\"width\":2200,\"h...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计7201字符，剩余5701字符"
+        },
+        "execution_time": 1.8138279914855957,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search from Pixabay",
+        "purpose": "验证从指定图片源pixabay中根据关键词搜索图片的功能是否正常",
+        "args": {
+          "keyword": "ocean",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\"total\":1479179,\"totalHits\":500,\"hits\":[{\"id\":9704301,\"pageURL\":\"https://pixabay.com/photos/wheat-cereal-ear-seeds-field-9704301/\",\"type\":\"photo\",\"tags\":\"wheat, cereal, ear, seeds, field, village, rural, growth, nature, agriculture, farm, food\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/09/10/09/wheat-9704301_150.jpg\",\"previewWidth\":150,\"previewHeight\":100,\"webformatURL\":\"https://pixabay.com/get/g8db463c60e03841cd1cd8b6e3e484eff052ca36df4ef8df6fe32103486b58405772a504f3ec558fd4ac4904507bf8f4c95da8ea81cb67a085baa11e8d7a575e5_640.jpg\",\"webformatWidth\":640,\"webformatHeight\":427,\"largeImageURL\":\"https://pixabay.com/get/g5fa1f0d91ec710088218f650ba427f0a676334e5baf90f135732b52efba82fdcf8eca2b8d0163f139fb1cfcafb5e4f676b6e4d6a073f7cb49e8b052ecae25eb8_1280.jpg\",\"imageWidth\":6000,\"imageHeight\":4000,\"imageSize\":4550930,\"views\":1661,\"downloads\":1315,\"collections\":2,\"likes\":57,\"comments\":25,\"user_id\":9363663,\"user\":\"Nowaja\",\"userImageURL\":\"https://cdn.pixabay.com/user/2020/09/15/15-16-12-52_250x250.jpg\",\"noAiTraining\":false,\"isAiGenerated\":false,\"isGRated\":true,\"isLowQuality\":0,\"userURL\":\"https://pixabay.com/users/9363663/\"},{\"id\":9702173,\"pageURL\":\"https://pixabay.com/photos/eastern-yellow-robin-yellow-robin-9702173/\",\"type\":\"photo\",\"tags\":\"eastern yellow robin, yellow robin, robin, bird, eopsaltria australis, wildlife, wild, nature, avian, birdwatching, plumage, feathers, australia, australian bush\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/08/07/01/eastern-yellow-rob...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计5792字符，剩余4292字符"
+        },
+        "execution_time": 2.0815882682800293,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Empty Keyword",
+        "purpose": "验证空关键词是否能被API正确处理或返回合理结果",
+        "args": {
+          "keyword": "",
+          "source": "unsplash"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '401 Unauthorized' for url 'https://api.unsplash.com/search/photos?query=&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+        },
+        "execution_time": 1.62888503074646,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Image Source Test",
+        "purpose": "验证传入无效图片源时是否抛出ValueError",
+        "args": {
+          "keyword": "forest",
+          "source": "invalid_source"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: 无效的图片源: invalid_source"
+        },
+        "execution_time": 0.003000497817993164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Keyword",
+        "purpose": "验证包含特殊字符的关键词是否能被正确处理",
+        "args": {
+          "keyword": "sunset!@#",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\"page\":1,\"per_page\":5,\"photos\":[{\"id\":32962488,\"width\":4000,\"height\":6000,\"url\":\"https://www.pexels.com/photo/confident-woman-with-hoe-in-rural-setting-32962488/\",\"photographer\":\"Ayobami Adepoju\",\"photographer_url\":\"https://www.pexels.com/@ayobami-adepoju-61080370\",\"photographer_id\":61080370,\"avg_color\":\"#876B56\",\"src\":{\"original\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg\",\"large2x\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026dpr=2\\u0026h=650\\u0026w=940\",\"large\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026h=650\\u0026w=940\",\"medium\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026h=350\",\"small\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026h=130\",\"portrait\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026fit=crop\\u0026h=1200\\u0026w=800\",\"landscape\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026fit=crop\\u0026h=627\\u0026w=1200\",\"tiny\":\"https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026dpr=1\\u0026fit=crop\\u0026h=200\\u0026w=280\"},\"liked\":false,\"alt\":\"\"},{\"id\":32982217,\"width\":3989,\"height\":5319,\"url\":\"https://www.pexels.com/photo/beach-fashion-s...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计7285字符，剩余5785字符"
+        },
+        "execution_time": 2.5216426849365234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Keyword Search",
+        "purpose": "验证长关键词是否能被API接受并返回合理响应",
+        "args": {
+          "keyword": "a beautiful sunset over the mountains with birds flying",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\"total\":1479179,\"totalHits\":500,\"hits\":[{\"id\":9704301,\"pageURL\":\"https://pixabay.com/photos/wheat-cereal-ear-seeds-field-9704301/\",\"type\":\"photo\",\"tags\":\"wheat, cereal, ear, seeds, field, village, rural, growth, nature, agriculture, farm, food\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/09/10/09/wheat-9704301_150.jpg\",\"previewWidth\":150,\"previewHeight\":100,\"webformatURL\":\"https://pixabay.com/get/g8d25b57e126465217b20b0dc35e18fe9c8fdb61867687d839bfe2c3fa6842bf1dd92d8abe89b537e3e21847485f5cf039d7ccd88445b4650da7ac82b4076df61_640.jpg\",\"webformatWidth\":640,\"webformatHeight\":427,\"largeImageURL\":\"https://pixabay.com/get/gb41846e7a0a877c5b10dadce52064fcf62ef50b748db3ba3060540466e88dab013c7e1236ced35a49929dc11ebf1f079d3a87ecc5b74a2af850420c0861a2ce4_1280.jpg\",\"imageWidth\":6000,\"imageHeight\":4000,\"imageSize\":4550930,\"views\":1661,\"downloads\":1315,\"collections\":2,\"likes\":57,\"comments\":25,\"user_id\":9363663,\"user\":\"Nowaja\",\"userImageURL\":\"https://cdn.pixabay.com/user/2020/09/15/15-16-12-52_250x250.jpg\",\"noAiTraining\":false,\"isAiGenerated\":false,\"isGRated\":true,\"isLowQuality\":0,\"userURL\":\"https://pixabay.com/users/9363663/\"},{\"id\":9702173,\"pageURL\":\"https://pixabay.com/photos/eastern-yellow-robin-yellow-robin-9702173/\",\"type\":\"photo\",\"tags\":\"eastern yellow robin, yellow robin, robin, bird, eopsaltria australis, wildlife, wild, nature, avian, birdwatching, plumage, feathers, australia, australian bush\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/08/07/01/eastern-yellow-rob...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计5792字符，剩余4292字符"
+        },
+        "execution_time": 1.5286681652069092,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Non-Existent Keyword",
+        "purpose": "验证系统对无法找到匹配结果的关键词是否能优雅处理",
+        "args": {
+          "keyword": "xyz123nonexistent",
+          "source": "unsplash"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '401 Unauthorized' for url 'https://api.unsplash.com/search/photos?query=xyz123nonexistent&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+        },
+        "execution_time": 2.2983860969543457,
+        "is_functional_test": true
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download Test",
+        "purpose": "验证工具能够成功下载并保存指定URL的图片",
+        "args": {
+          "url": "https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg",
+          "filename": "test_download.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\test_download.jpg\"}"
+        },
+        "execution_time": 1.790724277496338,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download to Existing File Path",
+        "purpose": "验证工具能否覆盖写入已存在的文件",
+        "args": {
+          "url": "https://images.pexels.com/photos/32962488/pexels-photo-32962488.jpeg",
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg\"}"
+        },
+        "execution_time": 2.4691781997680664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid URL Format Test",
+        "purpose": "验证传入非法格式的URL时是否抛出HTTP错误",
+        "args": {
+          "url": "https://example.com/nonexistentimage.jpg",
+          "filename": "invalid_image.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/nonexistentimage.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.359729766845703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filename",
+        "purpose": "验证文件名中包含特殊字符时是否能正确处理",
+        "args": {
+          "url": "https://images.pexels.com/photos/9704301/wheat-9704301_150.jpg",
+          "filename": "special@#$.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://images.pexels.com/photos/9704301/wheat-9704301_150.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.701747179031372,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty URL Input Test",
+        "purpose": "验证空URL输入是否引发异常",
+        "args": {
+          "url": "",
+          "filename": "empty_url.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Request URL is missing an 'http://' or 'https://' protocol."
+        },
+        "execution_time": 0.425978422164917,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Filename Boundary Test",
+        "purpose": "验证超长文件名是否能被系统接受并正确保存",
+        "args": {
+          "url": "https://images.pexels.com/photos/9702173/eastern-yellow-robin-9702173.jpeg",
+          "filename": "very_long_filename_that_exceeds_the_normal_length_limit_and_tests_the_system_boundaries_for_file_saving_operations_in_windows_environment.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://images.pexels.com/photos/9702173/eastern-yellow-robin-9702173.jpeg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8110365867614746,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Restricted System Path Write Attempt",
+        "purpose": "验证尝试写入受限制的系统路径是否会失败，测试安全性控制",
+        "args": {
+          "url": "https://images.pexels.com/photos/9704301/wheat-9704301_150.jpg",
+          "filename": "C:\\Windows\\System32\\restricted_write.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://images.pexels.com/photos/9704301/wheat-9704301_150.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.425588607788086,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Large Image File",
+        "purpose": "验证工具能否处理大尺寸图片文件的下载和保存",
+        "args": {
+          "url": "https://pixabay.com/get/g8db463c60e03841cd1cd8b6e3e484eff052ca36df4ef8df6fe32103486b58405772a504f3ec558fd4ac4904507bf8f4c95da8ea81cb67a085baa11e8d7a575e5_640.jpg",
+          "filename": "large_image.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\large_image.jpg\"}"
+        },
+        "execution_time": 1.6273176670074463,
+        "is_functional_test": true
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation with Default Size",
+        "purpose": "验证使用默认尺寸（64）根据描述生成图标的最基本功能是否正常",
+        "args": {
+          "description": "A red circle on a white background"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_red_circle_on_a_white_background_64x64.png\"}"
+        },
+        "execution_time": 0.007998943328857422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Size",
+        "purpose": "验证指定非默认尺寸（128）时，根据描述生成图标的功能是否正常",
+        "args": {
+          "description": "A blue square with rounded corners",
+          "size": 128
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_blue_square_with_rounded_corners_128x128.png\"}"
+        },
+        "execution_time": 0.003998279571533203,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Minimum Valid Size",
+        "purpose": "验证最小合法尺寸（16）下能否成功生成图标",
+        "args": {
+          "description": "A green checkmark symbol",
+          "size": 16
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_green_checkmark_symbol_16x16.png\"}"
+        },
+        "execution_time": 0.006001710891723633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Maximum Valid Size",
+        "purpose": "验证最大合法尺寸（256）下能否成功生成图标",
+        "args": {
+          "description": "A golden star icon",
+          "size": 256
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_golden_star_icon_256x256.png\"}"
+        },
+        "execution_time": 0.007004499435424805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Special Characters in Description",
+        "purpose": "验证包含特殊字符的描述是否能被正确处理并生成图标",
+        "args": {
+          "description": "A lightning bolt!@# with shadows",
+          "size": 64
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_lightning_bolt!@#_with_shadows_64x64.png\"}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Invalid Size Below Minimum",
+        "purpose": "验证小于最小允许值的尺寸输入是否会抛出ValueError异常",
+        "args": {
+          "description": "A simple placeholder icon",
+          "size": 15
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 尺寸超出范围: 15. 有效范围是16到256。"
+        },
+        "execution_time": 0.012521743774414062,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Icon Generation with Invalid Size Above Maximum",
+        "purpose": "验证大于最大允许值的尺寸输入是否会抛出ValueError异常",
+        "args": {
+          "description": "An application logo design",
+          "size": 300
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 尺寸超出范围: 300. 有效范围是16到256。"
+        },
+        "execution_time": 0.008525848388671875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Icon Generation with Empty Description",
+        "purpose": "验证空描述是否能被接受并生成合理图标",
+        "args": {
+          "description": "",
+          "size": 64
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon__64x64.png\"}"
+        },
+        "execution_time": 0.010519266128540039,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

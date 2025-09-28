@@ -1,0 +1,606 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_image_icon_handler",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_image_icon_handler/refined/server.py",
+  "timestamp": "2025-07-11T21:05:05.801458",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    Searches for images based on a keyword from multiple online sources.\n\n    This tool queries APIs from Unsplash, Pexels, and Pixabay to find\n    images matching the given query. It requires API keys for these\n    services to be configured as environment variables:\n    - UNSPLASH_API_KEY\n    - PEXELS_API_KEY\n    - PIXABAY_API_KEY\n\n    Args:\n        query (str): The search keyword for images (e.g., \"cats\", \"sunset\"). Must not be empty.\n        sources (Optional[List[str]]): A list of sources to search from.\n            Valid options are 'unsplash', 'pexels', 'pixabay'.\n            If None, it defaults to searching all three sources.\n        per_page (int): The number of results to request from each source.\n            Defaults to 10.\n\n    Returns:\n        str: A JSON string containing a list of image results. Each result is a\n             dictionary with details like source, id, url, photographer, and\n             description. Returns an empty list if no results are found or if\n             API keys are missing.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "sources": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sources"
+          },
+          "per_page": {
+            "default": 10,
+            "title": "Per Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    Downloads an image from a given URL and saves it to a local directory.\n\n    This function performs security checks to validate the URL scheme (HTTP/HTTPS)\n    and to prevent path traversal attacks in the filename.\n\n    Args:\n        image_url (str): The direct URL of the image to download OR a local file path.\n        filename (str): The name for the saved file, including the extension\n                        (e.g., 'my_image.jpg').\n        save_dir (str): The local directory where the image will be saved.\n                        It will be created if it doesn't exist.\n                        Defaults to './downloads'.\n\n    Returns:\n        str: A JSON string indicating the outcome. On success, it includes the\n             status, the absolute path to the saved file, and a confirmation\n             message. On failure, it provides an error status and message.\n    ",
+      "args_schema": {
+        "properties": {
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "save_dir": {
+            "default": "./downloads",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_url",
+          "filename"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    Generates a simple placeholder icon with a solid color background and text.\n\n    This is useful for creating quick, programmatic visual assets. It creates\n    an image, draws the provided text in the center, and saves it as a PNG file.\n    A default font is used if 'arial.ttf' is not available.\n\n    Args:\n        description (str): The text to display on the icon (e.g., \"App\").\n        size (Tuple[int, int]): The dimensions (width, height) of the icon in\n                                pixels. Defaults to (128, 128).\n        filename (Optional[str]): The desired filename for the icon (e.g.,\n                                  'app_icon.png'). If None, a filename is\n                                  auto-generated from the description.\n        save_dir (str): The directory where the generated icon will be saved.\n                        It will be created if it doesn't exist.\n                        Defaults to './icons'.\n\n    Returns:\n        str: A JSON string indicating the outcome. On success, it includes the\n             status, the absolute path to the saved file, and a confirmation\n             message. On failure, it provides an error status and message.\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "default": [
+              128,
+              128
+            ],
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Size",
+            "type": "array"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filename"
+          },
+          "save_dir": {
+            "default": "./icons",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search with Default Sources",
+        "purpose": "验证使用默认参数搜索图像的基本功能，确保Unsplash、Pexels和Pixabay均被调用并返回结果。",
+        "args": {
+          "query": "nature"
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"pexels\", \"id\": \"2325447\", \"url\": \"https://images.pexels.com/photos/2325447/pexels-photo-2325447.jpeg\", \"photographer\": \"Francesco Ungaro\", \"description\": \"Hot air balloons float over the mesmerizing landscape of Cappadocia, Turkey at sunrise.\"}, {\"source\": \"pexels\", \"id\": \"886521\", \"url\": \"https://images.pexels.com/photos/886521/pexels-photo-886521.jpeg\", \"photographer\": \"Alena Koval\", \"description\": \"A hand painted green holds a fresh plant sprout against a light background, symbolizing growth and sustainability.\"}, {\"source\": \"pexels\", \"id\": \"1133957\", \"url\": \"https://images.pexels.com/photos/1133957/pexels-photo-1133957.jpeg\", \"photographer\": \"Philippe Donn\", \"description\": \"A hummingbird hovers gracefully near a blooming red hibiscus, showcasing nature's delicate beauty.\"}, {\"source\": \"pexels\", \"id\": \"158063\", \"url\": \"https://images.pexels.com/photos/158063/bellingrath-gardens-alabama-landscape-scenic-158063.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"A beautiful spring garden landscape featuring vibrant pink flowers, a serene river, and a picturesque bridge.\"}, {\"source\": \"pexels\", \"id\": \"1386604\", \"url\": \"https://images.pexels.com/photos/1386604/pexels-photo-1386604.jpeg\", \"photographer\": \"Tu\\u1ea5n Ki\\u1ec7t Jr.\", \"description\": \"An elegant young woman holding pink tulips in a serene outdoor setting, embodying natural beauty and tranquility.\"}, {\"source\": \"pexels\", \"id\": \"459335\", \"url\": \"https://images.pexels.com/photos/459335/pexels-photo-459335.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Delicate lily of the valley flowers arranged on textured paper, showcasing elegance and natural beauty.\"}, {\"source\": \"pexels\", \"id\": \"250591\", \"url\": \"https://images.pexels.com/photos/250591/pexels-photo-250591.jpeg\", \"photographer\": \"John-Mark Smith\", \"description\": \"Beautiful cherry blossoms in full bloom on a clear spring day with a vibrant blue sky background.\"}, {\"source\": \"pexels\", \"id\": \"906150\", \"url\": \"https://images.pexels.com/photos/906150/pexels-photo-906150.jpeg\", \"photographer\": \"Min An\", \"description\": \"Capture of vibrant pink petunias in a hanging pot against a blurred natural background.\"}, {\"source\": \"pexels\", \"id\": \"247599\", \"url\": \"https://images.pexels.com/photos/247599/pexels-photo-247599.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Lush green terraced rice fields with a rustic hut under soft sunlight.\"}, {\"source\": \"pexels\", \"id\": \"757889\", \"url\": \"https://images.pexels.com/photos/757889/pexels-photo-757889.jpeg\", \"photographer\": \"Marianna OLE\", \"description\": \"Vibrant purple lisianthus flowers bloom beautifully in a glass vase on an urban balcony.\"}, {\"source\": \"pixabay\", \"id\": \"7373484\", \"url\": \"https://pixabay.com/get/g1213584f9835af72c3fee72b4d752c68086999effa3ff98de90cf96d71d205fa7d9265811856e650cb1fa7b701903e659c3ec16f22c50d9dd445e07e001b1081_640.jpg\", \"photographer\": \"Kanenori\", \"description\": \"landscape, rainbow, nature, tropical, atoll, lagoon, widi archipelago, nature background, indonesia, beautiful nature, hd wallpapers, hd wallpaper, nature wallpaper\"}, {\"source\": \"pixabay\", \"id\": \"7133867\", \"url\": \"https://pixabay.com/get/g3f0d1ba8dca2bf0e5df6dc32baf488fcdc5c9753e1b18ec5b4f04eacbd90390841613c694c56cfe3d244b0046566458202ed15a73138cc03b54daeeb16290435_640.jpg\", \"photographer\": \"Kanenori\", \"description\": \"sunset, sand, beach, islands, leaf, subtropical, okinawa, japan, landscape, nature background, beautiful nature, hd wallpapers, nature, hd wallpaper, nature wallpaper\"}, {\"source\": \"pixabay\", \"id\": \"815297\", \"url\": \"https://pixabay.com/get/g89cdbd7ffc81644e1d74b8232b49dc9b6408332c2e0c970dc014d10458c7770dcf7312268dd46e0bd8aed00d280795e6_640.jpg\", \"photographer\": \"bertvthul\", \"description\": \"avenue, trees, path, sunbeams, sunrays, woods, woodlands, forest, trail, forest path, forest trail, nature path, nature trail, nature, landscape, netherlands, forest, forest, nature, nature, nature, nature, nature\"}, {\"source\": \"pixabay\", \"id\": \"7619791\", \"url\": \"https://pixabay.com/get/g2d4a6ee3b451543630feee9a5b5c519af4029cff674f49fd8321618b6619d514e92d4e0500c3ffb848732a03c2ad5135203d94dc509ac39534268416d962ad50_640.jpg\", \"photographer\": \"HeckiMG\", \"description\": \"tree, autumn colors, nature wallpaper, water, fall, fall season, flora, plant, nature background, beautiful nature, nature, hd wallpaper\"}, {\"source\": \"pixabay\", \"id\": \"9295186\", \"url\": \"https://pixabay.com/get/g5c45822022fff73bf05469bfab7d99c57bd275a6645732c3913d130202a693014f2632a6e5b7453a35b142dda48d7ad7d5382080ef9bc20b0925922838293add_640.jpg\", \"photographer\": \"TieuBaoTruong\", \"description\": \"field, nature, sunlight\"}, {\"source\": \"pixabay\", \"id\": \"9597523\", \"url\": \"https://pixabay.com/get/ga69a214ad1e570459ad4c956a90905e523bd091d4df07f36e910d85b6c167c41d2a050f3c03df564a946cc025e364b9bdf84eb6af6232c1fb4ace654364d236d_640.jpg\", \"photographer\": \"classroom8200\", \"description\": \"sailboat, nature, ocean\"}, {\"source\": \"pixabay\", \"id\": \"7187291\", \"url\": \"https://pixabay.com/get/g515c6263ff50b27d78d3a7a6081d81a655674d6dc7b11a7eea026d74462565dbb406f46ecf24066ffd1d9a12900c150cbae92e3c5e4e6e85f3b8b8b9bb33a055_640.jpg\", \"photographer\": \"Janvanbizar\", \"description\": \"glacier, sea, ocean, nature wallpaper, nature background, water, nature, iceberg, antarctica, blue, cold, beautiful nature, climate, hd wallpaper\"}, {\"source\": \"pixabay\", \"id\": \"9614087\", \"url\": \"https://pixabay.com/get/gecfb569d35af0d9148f8bc3c8d90f6ef24feee41942db046eb48f68db3422b50bbd9dd61ed625659c23bfabd6a7f9e57ec96ca91b7c7951a7bfa67f2208d01c7_640.jpg\", \"photographer\": \"Ajdhk\", \"description\": \"snow mountain, natural, mountain, nature, tianshan\"}, {\"source\": \"pixabay\", \"id\": \"433688\", \"url\": \"https://pixabay.com/get/g4f180effd1a7dcb549c3c75291cacdb1789fd3a2f76bde5268f5942850af69e69c8ca4ab8d7643302eeac1e2ae3f882f_640.jpg\", \"photographer\": \"Ylvers\", \"description\": \"the ugly swamp, nature reserve, burning, fire, smoke, nature conservation burning, sweden, ash, forest fire, hot, forest, tree, nature, nature conservatio...[截断]，共计6438字符，剩余438字符"
+        },
+        "execution_time": 5.003393888473511,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search from Specific Source",
+        "purpose": "测试指定单一来源（如Unsplash）的图像搜索功能是否正常。",
+        "args": {
+          "query": "sunset",
+          "sources": [
+            "unsplash"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"-IMlv9Jlb24\", \"url\": \"https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Sebastien Gabriel\", \"description\": \"Beautiful evening sunset\"}, {\"source\": \"unsplash\", \"id\": \"ESEnXckWlLY\", \"url\": \"https://images.unsplash.com/photo-1512641406448-6574e777bec6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Dewang Gupta\", \"description\": \"photo of cumulus clouds during golden hour\"}, {\"source\": \"unsplash\", \"id\": \"qkfxBc2NQ18\", \"url\": \"https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Johannes Plenio\", \"description\": \"brown boat near dock\"}, {\"source\": \"unsplash\", \"id\": \"tNDvFkxkBHo\", \"url\": \"https://images.unsplash.com/photo-1422493757035-1e5e03968f95?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Igor Kasalovic\", \"description\": \"Sunset over an Australian Beach\"}, {\"source\": \"unsplash\", \"id\": \"JE01L3hB0GQ\", \"url\": \"https://images.unsplash.com/photo-1481988535861-271139e06469?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"v2osk\", \"description\": \"Richly colored sky over calm sea water\"}, {\"source\": \"unsplash\", \"id\": \"xP_AGmeEa6s\", \"url\": \"https://images.unsplash.com/photo-1494548162494-384bba4ab999?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Jordan Wozniak\", \"description\": \"burn bright.\"}, {\"source\": \"unsplash\", \"id\": \"lsoogGC_5dg\", \"url\": \"https://images.unsplash.com/photo-1586348943529-beaae6c28db9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Dave Hoefler\", \"description\": \"The Island\"}, {\"source\": \"unsplash\", \"id\": \"mBQIfKlvowM\", \"url\": \"https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Quino Al\", \"description\": \"waves of body of water splashing on sand\"}, {\"source\": \"unsplash\", \"id\": \"GPPAjJicemU\", \"url\": \"https://images.unsplash.com/photo-1495567720989-cebdbdd97913?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHxzdW5zZXR8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Jason Mavrommatis\", \"description\": \"Every sunset is unique and everytime I see my Hometown sunset it is like a magic hour. You feel relaxed and you know that is the end of the day. A beautiful shot from Patras town of Greece.\"}, {\"source\": \"unsplash\", \"id\": \"tIL1v1jSoaY\", \"url\": \"https://images.unsplash.com/photo-1517685633466-403d6955aeab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8c3Vuc2V0fGVufDB8fHx8MTc1MjIzOTE0Mnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Diego PH\", \"description\": \"Sunset series: Photo 8 Colorful Sunset 4\"}]}"
+        },
+        "execution_time": 1.3494913578033447,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple Sources Image Search",
+        "purpose": "验证同时从多个指定源（Unsplash和Pexels）进行图像搜索的功能。",
+        "args": {
+          "query": "mountains",
+          "sources": [
+            "unsplash",
+            "pexels"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"pVATCBKLH8w\", \"url\": \"https://images.unsplash.com/photo-1494806812796-244fe51b774d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Aleks Dahlberg\", \"description\": \"On the road to the home of giants, Mt Aoraki National Park.\"}, {\"source\": \"unsplash\", \"id\": \"1527pjeb6jg\", \"url\": \"https://images.unsplash.com/photo-1506905925346-21bda4d32df4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Samuel Ferrara\", \"description\": \"aerial photo of foggy mountains\"}, {\"source\": \"unsplash\", \"id\": \"Bkci_8qcdvQ\", \"url\": \"https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Kalen Emsley\", \"description\": \"travelyukon, Wet mountain valley\"}, {\"source\": \"unsplash\", \"id\": \"U2AwijfUNS4\", \"url\": \"https://images.unsplash.com/photo-1566679056462-2075774c8c07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Kseniia Rastvorova\", \"description\": \"trees near mountain\"}, {\"source\": \"unsplash\", \"id\": \"9wg5jCEPBsw\", \"url\": \"https://images.unsplash.com/photo-1454496522488-7a8e488e8606?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Rohit Tandon\", \"description\": \"A snow covered Ama Dablam with blue skies and clouds in Sagarmatha national park in Nepal, on the way to Everest Base Camp.\"}, {\"source\": \"unsplash\", \"id\": \"3i5PHVp1Fkw\", \"url\": \"https://images.unsplash.com/photo-1570641963303-92ce4845ed4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Massimiliano Morosinotto\", \"description\": \"TH\\u039e MISTY MOUNT\\u039bINS This is a composite of 5 images edited in \\u039bdobe Photoshop & Nik Software.\"}, {\"source\": \"unsplash\", \"id\": \"g30P1zcOzXo\", \"url\": \"https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Daniel Leone\", \"description\": \"Taken from the top of Poon Hill before sun rise\"}, {\"source\": \"unsplash\", \"id\": \"q3YZ4g7j9yc\", \"url\": \"https://images.unsplash.com/photo-1600298882525-1ac025c98b68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Nathan Dumlao\", \"description\": \"green trees near snow covered mountain during daytime\"}, {\"source\": \"unsplash\", \"id\": \"phIFdC6lA4E\", \"url\": \"https://images.unsplash.com/photo-1519681393784-d120267933ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHxtb3VudGFpbnN8ZW58MHx8fHwxNzUyMjM5MTQyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Benjamin Voros\", \"description\": \"snow mountain under stars\"}, {\"source\": \"unsplash\", \"id\": \"HDd-NQ_AMNQ\", \"url\": \"https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8bW91bnRhaW5zfGVufDB8fHx8MTc1MjIzOTE0Mnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Ivana Cajina\", \"description\": \"It almost seemed unreal, how beautiful the mountains looked during sunset. Almost like a painting. The entire time the sun was setting, we all just were silent and in awe of how beautiful our earth is.\"}, {\"source\": \"pexels\", \"id\": \"9754\", \"url\": \"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg\", \"photographer\": \"Creative Vix\", \"description\": \"A scenic view of misty mountains and dense forest, perfect for nature lovers.\"}, {\"source\": \"pexels\", \"id\": \"618833\", \"url\": \"https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg\", \"photographer\": \"Sagui Andrea\", \"description\": \"Stunning sunrise casting rays over the Italian Alps in Alleghe, Veneto, with lush greenery and rocky terrain.\"}, {\"source\": \"pexels\", \"id\": \"933054\", \"url\": \"https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg\", \"photographer\": \"Joyston Judah\", \"description\": \"Breathtaking sunset view of snow-capped mountains in Nepal, perfect for scenic backgrounds.\"}, {\"source\": \"pexels\", \"id\": \"210243\", \"url\": \"https://images.pexels.com/photos/210243/pexels-photo-210243.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Breathtaking autumn landscape of Grand Teton with snow-capped peaks and colorful trees.\"}, {\"source\": \"pexels\", \"id\": \"1666012\", \"url\": \"https://images.pexels.com/photos/1666012/pexels-photo-1666012.jpeg\", \"photographer\": \"Philip Ackermann\", \"description\": \"Scenic view of dramatic mountain peaks shrouded in clouds.\"}, {\"source\": \"pexels\", \"id\": \"772803\", \"url\": \"https://images.pexels.com/photos/772803/pexels-photo-772803.jpeg\", \"photographer\": \"Tyler Lastovich\", \"description\": \"Breathtaking view of snow-capped mountain peaks under a cloudy sky.\"}, {\"source\": \"pexels\", \"id\": \"808465\", \"url\": \"https://images.pexels.com/photos/808465/pexels-photo-808465.jpeg\", \"photographer\": \"Tyler Lastovich\", \"description\": \"Wooden walkway leads through rugged landscape towards majestic snow-capped mountains.\"}, {\"source\": \"pexels\", \"id\": \"1323550\", \"url\": \"https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg\", \"photographer\": \"Simon Berger\", \"description\": \"Colorful sunrise over misty mountains in Altm\\u00fcnster, Austria with a lone hiker silhouette.\"}, {\"source\": \"pexels\", \"id\": \"552785\", \"url\": \"https://images.pexels.com/photos/552785/pexels-photo-552785.jpeg\", \"photographer\": \"Krivec Ales\", \"description\":...[截断]，共计6324字符，剩余324字符"
+        },
+        "execution_time": 1.3052144050598145,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Per Page Result Count",
+        "purpose": "测试自定义每页返回结果数量的功能是否生效。",
+        "args": {
+          "query": "dogs",
+          "per_page": 5
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"U6nlG0Y5sfs\", \"url\": \"https://images.unsplash.com/photo-1529472119196-cb724127a98e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxkb2dzfGVufDB8fHx8MTc1MjIzOTE0M3ww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Hannah Lim\", \"description\": \"Pink Wall Full of Dogs\"}, {\"source\": \"unsplash\", \"id\": \"T-0EW-SEbsE\", \"url\": \"https://images.unsplash.com/photo-1548199973-03cce0bbc87b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxkb2dzfGVufDB8fHx8MTc1MjIzOTE0M3ww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Alvan Nee\", \"description\": \"two brown and white dogs running dirt road during daytime\"}, {\"source\": \"unsplash\", \"id\": \"Sg3XwuEpybU\", \"url\": \"https://images.unsplash.com/photo-1552053831-71594a27632d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxkb2dzfGVufDB8fHx8MTc1MjIzOTE0M3ww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Richard Brutyo\", \"description\": \"Happy Women\\u2019s Day!\"}, {\"source\": \"unsplash\", \"id\": \"v0_MCllHY9M\", \"url\": \"https://images.unsplash.com/photo-1568572933382-74d440642117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxkb2dzfGVufDB8fHx8MTc1MjIzOTE0M3ww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Ash\", \"description\": \"black and white Husky\"}, {\"source\": \"unsplash\", \"id\": \"BJaqPaH6AGQ\", \"url\": \"https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxkb2dzfGVufDB8fHx8MTc1MjIzOTE0M3ww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Karsten Winegeart\", \"description\": \"Green\"}, {\"source\": \"pexels\", \"id\": \"1108099\", \"url\": \"https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg\", \"photographer\": \"Chevanon Photography\", \"description\": \"Adorable golden retriever puppies sitting in a field of flowers, enjoying a sunny day.\"}, {\"source\": \"pexels\", \"id\": \"406014\", \"url\": \"https://images.pexels.com/photos/406014/pexels-photo-406014.jpeg\", \"photographer\": \"Lum3n\", \"description\": \"Adorable close-up of a brown dog's face with a curious expression and focus on its eyes and nose.\"}, {\"source\": \"pexels\", \"id\": \"850602\", \"url\": \"https://images.pexels.com/photos/850602/pexels-photo-850602.jpeg\", \"photographer\": \"Nancy Guth\", \"description\": \"Three Boxer dogs posing in a studio setting, showcasing elegance and charm.\"}, {\"source\": \"pexels\", \"id\": \"1851164\", \"url\": \"https://images.pexels.com/photos/1851164/pexels-photo-1851164.jpeg\", \"photographer\": \"Charles\", \"description\": \"Captivating portrait of a black pug gazing curiously, captured in monochrome.\"}, {\"source\": \"pexels\", \"id\": \"1633522\", \"url\": \"https://images.pexels.com/photos/1633522/pexels-photo-1633522.jpeg\", \"photographer\": \"Jozef Feh\\u00e9r\", \"description\": \"Two Belgian Malinois dogs enjoying playtime in a natural park setting.\"}, {\"source\": \"pixabay\", \"id\": \"1047521\", \"url\": \"https://pixabay.com/get/gf01c3bb1f245464d6344cd86a8f0f76c5239d1faa9346ee9d9e21a5f118d1098b672ad025fd6f1552e86d25c08ab339c46b704afcefb72b062fc67e908e3bb40_640.jpg\", \"photographer\": \"vlaaitje\", \"description\": \"puppy, dog, pet, cute, brown dog, purebred, dog breed, portrait, dog portrait, mammal, animal, nature, domestic, domestic dog, canine\"}, {\"source\": \"pixabay\", \"id\": \"1903313\", \"url\": \"https://pixabay.com/get/g679f5060b49a8345c2b72268525e775f6977af28eb955137107b8d6c940763b4162205f74aab836d57db6f57a21300e25f2cc230478975a6e640516560bf29a7_640.jpg\", \"photographer\": \"3194556\", \"description\": \"puppy, nature, dog, pet, collar, dog collar, white puppy, white dog, domestic, domestic dog, lying down, portrait, dog portrait, animal, cute, white, adorable, canine, doggy, looking\"}, {\"source\": \"pixabay\", \"id\": \"1123016\", \"url\": \"https://pixabay.com/get/g4c9a864e8b2fbc8cf1580f41788140c71498ed7fd13ea2c3441e1b83248c32c08d0b8ee122f7331e1df666a5ac0bc1cbac45c2e5af532e3a9633cbe806156c2c_640.jpg\", \"photographer\": \"Pezibear\", \"description\": \"maltese, dog, puppy, small dog, white dog, young, pet, animal, young dog, nature, domestic dog, canine, mammal, cute, adorable, meadow, outdoors, portrait, animal portrait\"}, {\"source\": \"pixabay\", \"id\": \"5519360\", \"url\": \"https://pixabay.com/get/g3d8725871188421ac412a20ecc1f903e5f0ef01c91bd7c379749bbc531048af68532c0deaf993ccba33761b3946bea4f045a3ff69c30deba9aa173050d94fc21_640.jpg\", \"photographer\": \"Briam-Cute\", \"description\": \"dog, pet, animal, black dog, nature, mammal, canine, adorable dog, cute dog, animal portrait\"}, {\"source\": \"pixabay\", \"id\": \"3237735\", \"url\": \"https://pixabay.com/get/g03d9a7b850d21a40a7dbae347a831cbb8cb1f060c18a409d0f4c04c46a80488529715a19c1dcb4895da7862817e8d37d288015f630080f03235b4ef85dbfcae7_640.jpg\", \"photographer\": \"Couleur\", \"description\": \"australian shepherd, dog, animal, herding dog, good-natured, protective, female dog, purebred dog, animal portrait, dog head, eyes, nature, pet, dog look, snout, domestic animal, creature\"}]}"
+        },
+        "execution_time": 1.2565631866455078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "验证工具对空查询参数的处理是否符合预期（应返回错误或空列表）。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Query cannot be empty or whitespace only. Please provide a valid search term.\", \"results\": []}"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Name",
+        "purpose": "测试传入无效来源名称时工具是否能正确处理错误。",
+        "args": {
+          "query": "flowers",
+          "sources": [
+            "invalidsource"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": []}"
+        },
+        "execution_time": 0.004083871841430664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Results Per Page",
+        "purpose": "验证当每页请求结果数为0时的行为是否符合预期。",
+        "args": {
+          "query": "cars",
+          "per_page": 0
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"m3m-lnR90uM\", \"url\": \"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Peter Broomfield\", \"description\": \"I shot this while doing a job for a luxury automotive storage facility in Baltimore, MD. I wanted to create an ominous sense of intrigue, giving the feeling of a space that was both expansive and enclosed. I enjoy the journey my eyes take from the focal point of the headlamps to the contours of the Camero\\u2019s body, and then to the backdrop of stacked automobiles.\"}, {\"source\": \"unsplash\", \"id\": \"eqW1MPinEV4\", \"url\": \"https://images.unsplash.com/photo-1583121274602-3e2820c69888?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Joshua Koblin\", \"description\": \"red ferrari 458 italia parked in front of white wall\"}, {\"source\": \"unsplash\", \"id\": \"3ZUsNJhi_Ik\", \"url\": \"https://images.unsplash.com/photo-1503376780353-7e6692767b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Campbell\", \"description\": \"High Roller\"}, {\"source\": \"unsplash\", \"id\": \"oUBjd22gF6w\", \"url\": \"https://images.unsplash.com/photo-1525609004556-c46c7d6cf023?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Marek Posp\\u00ed\\u0161il\", \"description\": \"orange Lamborghini car\"}, {\"source\": \"unsplash\", \"id\": \"tMzCrBkM99Y\", \"url\": \"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Jake Blucker\", \"description\": \"Valley of Fires\"}, {\"source\": \"unsplash\", \"id\": \"2AovfzYV3rc\", \"url\": \"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Stefan Rodriguez\", \"description\": \"blue Chevrolet coupe\"}, {\"source\": \"unsplash\", \"id\": \"DwxlhTvC16Q\", \"url\": \"https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"D Panyukov\", \"description\": \"yellow porsche 911 on road during daytime\"}, {\"source\": \"unsplash\", \"id\": \"6lSBynPRaAQ\", \"url\": \"https://images.unsplash.com/photo-1542362567-b07e54358753?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Olav Tvedt\", \"description\": \"gray sports coupe parking during daytime\"}, {\"source\": \"unsplash\", \"id\": \"YApiWyp0lqo\", \"url\": \"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHxjYXJzfGVufDB8fHx8MTc1MjIzOTE0NXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Joey Banks\", \"description\": \"Black sports car front\"}, {\"source\": \"unsplash\", \"id\": \"qyfco1nfMtg\", \"url\": \"https://images.unsplash.com/photo-1553440569-bcc63803a83d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8Y2Fyc3xlbnwwfHx8fDE3NTIyMzkxNDV8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"H\\u00e5kon Sata\\u00f8en\", \"description\": \"Instagram: @haakonz \\nhttps://www.instagram.com/haakonz/\"}, {\"source\": \"pexels\", \"id\": \"164634\", \"url\": \"https://images.pexels.com/photos/164634/pexels-photo-164634.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Luxury cars lined up at an outdoor dealership, showcasing sleek designs.\"}]}"
+        },
+        "execution_time": 0.8148784637451172,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "测试包含特殊字符的搜索关键词是否能被正确处理。",
+        "args": {
+          "query": "café!@#$%^&*()_+"
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"cgmcWVGDzNM\", \"url\": \"https://images.unsplash.com/photo-1658879627289-8aa97ff47359?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Arthur A\", \"description\": \"a coffee cup on a sidewalk\"}, {\"source\": \"unsplash\", \"id\": \"TvceFePJuaE\", \"url\": \"https://images.unsplash.com/photo-1633073623899-476ecaec59c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Takafumi Yamashita\", \"description\": \"a cup of coffee on a saucer with a spoon\"}, {\"source\": \"unsplash\", \"id\": \"ckwu-vKV0zE\", \"url\": \"https://images.unsplash.com/photo-1616925648221-304fbc356503?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Marija Zaric\", \"description\": \"black metal fence with black metal fence\"}, {\"source\": \"unsplash\", \"id\": \"7emHSNQytbI\", \"url\": \"https://images.unsplash.com/photo-1718007475489-f935510caddd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Kazuo ota\", \"description\": \"a man standing in a kitchen preparing food\"}, {\"source\": \"unsplash\", \"id\": \"nRJiMTHKtFw\", \"url\": \"https://images.unsplash.com/photo-1645119917964-1b0763695ec7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"SUN STUDIO CREATIVE\", \"description\": \"a cup of coffee sitting on top of a white saucer\"}, {\"source\": \"unsplash\", \"id\": \"vkSOlg-I9K8\", \"url\": \"https://images.unsplash.com/photo-1726763580111-8bb05287de6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Ira Avtukhova\", \"description\": \"\\u0421offee break\"}, {\"source\": \"unsplash\", \"id\": \"DeV63CChWHM\", \"url\": \"https://images.unsplash.com/photo-1638917641237-606d24243360?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Arthur A\", \"description\": \"Breakfast\"}, {\"source\": \"unsplash\", \"id\": \"D2IfJwRFT_8\", \"url\": \"https://images.unsplash.com/photo-1638917641371-e11bc760f2b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Arthur A\", \"description\": \"Breakfast\"}, {\"source\": \"unsplash\", \"id\": \"zBSj_qrrrqg\", \"url\": \"https://images.unsplash.com/photo-1701292317690-d3058ccc70ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHxjYWYlQzMlQTklMjElNDAlMjMlMjQlMjUlNUUlMjYqJTI4JTI5XyUyQnxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Diego Casta\\u00f1eda\", \"description\": \"a cup of coffee sitting on a saucer next to a coffee maker\"}, {\"source\": \"unsplash\", \"id\": \"D4cnoNz25Qg\", \"url\": \"https://images.unsplash.com/photo-1729364983489-d4d569978fd7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8Y2FmJUMzJUE5JTIxJTQwJTIzJTI0JTI1JTVFJTI2KiUyOCUyOV8lMkJ8ZW58MHx8fHwxNzUyMjM5MTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Mohammad Dadkhah\", \"description\": \"A cup of latte in a dark theme cafe\"}, {\"source\": \"pexels\", \"id\": \"32935693\", \"url\": \"https://images.pexels.com/photos/32935693/pexels-photo-32935693.jpeg\", \"photographer\": \"L\\u00e9o Gilmant\", \"description\": \"Two trendy individuals in a chic Lille cafe setting. Perfect bohemian lifestyle capture.\"}, {\"source\": \"pexels\", \"id\": \"32713516\", \"url\": \"https://images.pexels.com/photos/32713516/pexels-photo-32713516.jpeg\", \"photographer\": \"kaleef  lawal\", \"description\": \"Delightful breakfast spread with croissants, tea, and pastries on a wooden table.\"}, {\"source\": \"pexels\", \"id\": \"32919737\", \"url\": \"https://images.pexels.com/photos/32919737/pexels-photo-32919737.jpeg\", \"photographer\": \"Fira  Fatul\", \"description\": \"pretty woman\"}, {\"source\": \"pexels\", \"id\": \"32919735\", \"url\": \"https://images.pexels.com/photos/32919735/pexels-photo-32919735.jpeg\", \"photographer\": \"Fira  Fatul\", \"description\": \"Free stock photo of paris, parisian, pretty\"}, {\"source\": \"pexels\", \"id\": \"32960052\", \"url\": \"https://images.pexels.com/photos/32960052/pexels-photo-32960052.jpeg\", \"photographer\": \"birmelek\\u2665\\ufe0f\", \"description\": \"sabah kahvesi\\ud83e\\ude84\"}, {\"source\": \"pexels\", \"id\": \"32960362\", \"url\": \"https://images.pexels.com/photos/32960362/pexels-photo-32960362.jpeg\", \"photographer\": \"Lisa from Pexels\", \"description\": \"No description\"}, {\"source\": \"pexels\", \"id\": \"32960890\", \"url\": \"https://images.pexels.com/photos/32960890/pexels-photo-32960890.jpeg\", \"photographer\": \"D\\u01b0\\u01a1ng Nh\\u00e2n\", \"description\": \"No description\"}, {\"source\": \"pexels\", \"id\": \"32935543\", \"url\": \"https://images.pexels.com/photos/32935543/pexels-photo-32935543.jpeg\", \"photographer\": \"Nazl\\u0131 Gaylan Azili\", \"description\": \"Edited in Tezza with: Cocoa Processed with VSCO with a8pro preset\"}, {\"source\": \"pexels\", \"id\": \"32951573\", \"url\": \"https://images.pexels.com/photos/32951573/pexels-photo-32951573.jpeg\", \"photographer\": \"meomupmofilm\", \"description\": \"No description\"}, {\"source\": \"pexels\", \"id\": \"32927777\", \"url\": \"https://images.pexels.com/photos/32927777/pexels-photo-32927777.jpeg\", \"photographer\": \"\\ud83c\\uddfb\\ud83c\\uddf3\\ud83c\\uddfb\\ud83c\\uddf3Ngu...[截断]，共计6115字符，剩余115字符"
+        },
+        "execution_time": 0.8890612125396729,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Per Page Limit",
+        "purpose": "验证最大每页结果限制是否被正确处理（例如100）。",
+        "args": {
+          "query": "technology",
+          "per_page": 100
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"xSiQBSq-I0M\", \"url\": \"https://images.unsplash.com/photo-1649972904349-6e44c42644a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MXwxfHNlYXJjaHwxfHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Surface\", \"description\": \"a woman sitting on a bed using a laptop\"}, {\"source\": \"unsplash\", \"id\": \"XJXWbfSo2f0\", \"url\": \"https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Luca Bravo\", \"description\": \"Code on a laptop screen\"}, {\"source\": \"unsplash\", \"id\": \"Im7lZjxeLhg\", \"url\": \"https://images.unsplash.com/photo-1531297484001-80022131f5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Ales Nesetril\", \"description\": \"Follow @alesnesetril on Instagram for more dope photos!\\r\\nWallpaper by @jdiegoph (https://unsplash.com/photos/-xa9XSA7K9k)\"}, {\"source\": \"unsplash\", \"id\": \"FO7JIlwjOtU\", \"url\": \"https://images.unsplash.com/photo-1518770660439-4636190af475?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Alexandre Debi\\u00e8ve\", \"description\": \"i was cleaning my laptop and i found it wonderful. see ya.\"}, {\"source\": \"unsplash\", \"id\": \"SYTO3xs06fU\", \"url\": \"https://images.unsplash.com/photo-1519389950473-47ba0277781c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Marvin Meyer\", \"description\": \"people sitting down near table with assorted laptop computers\"}, {\"source\": \"unsplash\", \"id\": \"Q1p7bh3SHj8\", \"url\": \"https://images.unsplash.com/photo-1451187580459-43490279c0fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"NASA\", \"description\": \"photo of outer space\"}, {\"source\": \"unsplash\", \"id\": \"iar-afB0QQw\", \"url\": \"https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Markus Spiske\", \"description\": \"Hacker binary attack code. Made with Canon 5d Mark III and analog vintage lens, Leica APO Macro Elmarit-R 2.8 100mm (Year: 1993)\"}, {\"source\": \"unsplash\", \"id\": \"F4ottWBnCpM\", \"url\": \"https://images.unsplash.com/photo-1648737966636-2fc3a5fffc8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MXwxfHNlYXJjaHw4fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Surface\", \"description\": \"a laptop computer sitting on top of a white table\"}, {\"source\": \"unsplash\", \"id\": \"sbVu5zitZt0\", \"url\": \"https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHx0ZWNobm9sb2d5fGVufDB8fHx8MTc1MjIzOTE0Nnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"ThisisEngineering\", \"description\": \"Prosthetic arm visualisation\"}, {\"source\": \"unsplash\", \"id\": \"npxXWgQ33ZQ\", \"url\": \"https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8dGVjaG5vbG9neXxlbnwwfHx8fDE3NTIyMzkxNDZ8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Glenn Carstens-Peters\", \"description\": \"If you feel the desire to write a book, what would it be about?\"}, {\"source\": \"pexels\", \"id\": \"546819\", \"url\": \"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg\", \"photographer\": \"luis gomes\", \"description\": \"Close-up of a computer screen displaying programming code in a dark environment.\"}, {\"source\": \"pexels\", \"id\": \"356056\", \"url\": \"https://images.pexels.com/photos/356056/pexels-photo-356056.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"A contemporary office desk setup with laptops, gadgets, and accessories, creating a tech-savvy workplace.\"}, {\"source\": \"pexels\", \"id\": \"1148820\", \"url\": \"https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg\", \"photographer\": \"panumas nikhomkhai\", \"description\": \"Detailed image of a server rack with glowing lights in a modern data center.\"}, {\"source\": \"pexels\", \"id\": \"158826\", \"url\": \"https://images.pexels.com/photos/158826/structure-light-led-movement-158826.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Vibrant abstract pattern of illuminated red LED lights forming a dynamic design.\"}, {\"source\": \"pexels\", \"id\": \"2047905\", \"url\": \"https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg\", \"photographer\": \"Junior Teixeira\", \"description\": \"Laptop partially opened, emitting vibrant multicolored lights in dark setting.\"}, {\"source\": \"pexels\", \"id\": \"1714208\", \"url\": \"https://images.pexels.com/photos/1714208/pexels-photo-1714208.jpeg\", \"photographer\": \"Josh Sorenson\", \"description\": \"A contemporary office desk featuring a dual monitor setup with stylish lighting, ideal for tech enthusiasts.\"}, {\"source\": \"pexels\", \"id\": \"1089438\", \"url\": \"https://images.pexels.com/photos/1089438/pexels-photo-1089438.jpeg\", \"photographer\": \"Markus Spiske\", \"description\": \"Abstract green matrix code background with binary style.\"}, {\"source\": \"pexels\", \"id\": \"3184460\", \"url\": \"https://images.pexels.com/photos/3184460/pexels-photo-3184460.jpeg\", \"photographer\": \"fauxels\", \"description\": \"A minimalist workspace flat lay with keyboard, mouse, notebook, and succulent on a beige background.\"}, {\"source\": \"pexels\", \"id\": \"414860\", \"url\": \"https://images.pexels.com/photos/414860/pexels-photo-414860.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Close-up of a plasma globe with vibrant neon sparks against a dark background.\"}, {\"source\":...[截断]，共计74608字符，剩余68608字符"
+        },
+        "execution_time": 1.8109593391418457,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Missing API Keys",
+        "purpose": "测试在未配置API密钥的情况下工具是否安全地返回空列表。",
+        "args": {
+          "query": "city"
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"Nyvq2juw4_o\", \"url\": \"https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Pedro Lastra\", \"description\": \"City architecture and skyscrapers near waterfront\"}, {\"source\": \"unsplash\", \"id\": \"VmX3vmBecFE\", \"url\": \"https://images.unsplash.com/photo-1519501025264-65ba15a82390?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Max Bender\", \"description\": \"Caught this photo walking around after work. Streets were packed with cars and the sun was setting and it made me so glad that I was driving and could just be taking pictures.\"}, {\"source\": \"unsplash\", \"id\": \"wpU4veNGnHg\", \"url\": \"https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"ben o'bro\", \"description\": \"7am shot\"}, {\"source\": \"unsplash\", \"id\": \"nV7GJmSq3zc\", \"url\": \"https://images.unsplash.com/photo-1449824913935-59a10b8d2000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Andrea Cau\", \"description\": \"Crossing the street\"}, {\"source\": \"unsplash\", \"id\": \"ukvgqriuOgo\", \"url\": \"https://images.unsplash.com/photo-1444723121867-7a241cacace9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Henning Witzel\", \"description\": \"Los Angeles by Night\"}, {\"source\": \"unsplash\", \"id\": \"6oUsyeYXgTg\", \"url\": \"https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Piotr Chrobot\", \"description\": \"Dubai at sunrise\"}, {\"source\": \"unsplash\", \"id\": \"fT6-YkB0nfg\", \"url\": \"https://images.unsplash.com/photo-1541336032412-2048a678540d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Timo Wagner\", \"description\": \"The Empire State. Vertically framed.\"}, {\"source\": \"unsplash\", \"id\": \"VviFtDJakYk\", \"url\": \"https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Matthew Henry\", \"description\": \"Foggy skyscrapers\"}, {\"source\": \"unsplash\", \"id\": \"HhmCIJTLuGY\", \"url\": \"https://images.unsplash.com/photo-1496871455396-14e56815f1f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHxjaXR5fGVufDB8fHx8MTc1MjIzOTE0OHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Denys Nevozhai\", \"description\": \"This was my second time in NY city and I had a mission to take a good picture of this landmark because I failed to do it first time. I used my Joby Gorillapod and ND filter in order to capture a crisp long exposure shot and spent quite some time sitting on the ground, playing with different settings, trying to catch a perfect vehicle trail.\"}, {\"source\": \"unsplash\", \"id\": \"W_MUqtuHwyY\", \"url\": \"https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8Y2l0eXxlbnwwfHx8fDE3NTIyMzkxNDh8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Dawson Lovell\", \"description\": \"Historical Landmark in Toronto, the Flatiron building stands and is seen by many each day. This weekend, I found my way into the Greater Toronto Area to capture this photo.\"}, {\"source\": \"pexels\", \"id\": \"2129796\", \"url\": \"https://images.pexels.com/photos/2129796/pexels-photo-2129796.png\", \"photographer\": \"David Skyrius\", \"description\": \"Captivating aerial view of illuminated skyscrapers in New York City during the night.\"}, {\"source\": \"pexels\", \"id\": \"169647\", \"url\": \"https://images.pexels.com/photos/169647/pexels-photo-169647.jpeg\", \"photographer\": \"Peng LIU\", \"description\": \"Majestic view of Shanghai's illuminated skyline featuring iconic skyscrapers at night.\"}, {\"source\": \"pexels\", \"id\": \"466685\", \"url\": \"https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg\", \"photographer\": \"Lukas Kloeppel\", \"description\": \"A stunning aerial view of New York City's skyline featuring the iconic Empire State Building under a bright blue sky.\"}, {\"source\": \"pexels\", \"id\": \"325185\", \"url\": \"https://images.pexels.com/photos/325185/pexels-photo-325185.jpeg\", \"photographer\": \"Aleksandar Pasaric\", \"description\": \"A stunning view of Dubai skyscrapers emerging through a blanket of fog, showcasing modern architecture.\"}, {\"source\": \"pexels\", \"id\": \"290595\", \"url\": \"https://images.pexels.com/photos/290595/pexels-photo-290595.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Stunning New York City skyline with modern skyscrapers reflecting on a calm river.\"}, {\"source\": \"pexels\", \"id\": \"378570\", \"url\": \"https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg\", \"photographer\": \"Nout Gons\", \"description\": \"Vibrant street view of New York City with pedestrians, yellow cabs, and skyscrapers.\"}, {\"source\": \"pexels\", \"id\": \"1563256\", \"url\": \"https://images.pexels.com/photos/1563256/pexels-photo-1563256.jpeg\", \"photographer\": \"Ricky Esquivel\", \"description\": \"Classic view of a pedestrian crossing a bustling Chicago street lined with skyscrapers.\"}, {\"source\": \"pexels\", \"id\": \"773471\", \"url\": \"https://images.pexels.com/photos/773471/pexels-photo-773471.jpeg\", \"photographer\": \"H. Emre\", \"description\": \"A tram travels down a leaf-strewn street in autumnal Z\\u00fcrich, Switzerland's urban landscape.\"}, {\"source\": \"pexels\", \"id\": \"169677\", \"url...[截断]，共计11270字符，剩余5270字符"
+        },
+        "execution_time": 1.2543559074401855,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Query Support",
+        "purpose": "验证中文等非英文语言作为搜索词是否被支持。",
+        "args": {
+          "query": "自然风光"
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"cd-PX9nZsuQ\", \"url\": \"https://images.unsplash.com/photo-1574579423678-3a9fc592812e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"zhou xuan\", \"description\": \"rocky mountain under cloudy sky during daytime\"}, {\"source\": \"unsplash\", \"id\": \"FmyIBz2JDHU\", \"url\": \"https://images.unsplash.com/photo-1526025202335-cf944dc3f799?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"zhang kaiyv\", \"description\": \"\\u81ea\\u7136#\\u6811\\u6797\"}, {\"source\": \"unsplash\", \"id\": \"7oP0SunsCzQ\", \"url\": \"https://images.unsplash.com/photo-1739637771675-56df81d463f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Ellen Wang\", \"description\": \"The Rainier Mountain that I captured on the ferry back from Bainbridge Island to Downtown Seattle.\"}, {\"source\": \"unsplash\", \"id\": \"2AW0PtwgcL4\", \"url\": \"https://images.unsplash.com/photo-1588433939968-14275b30d5ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"zhou xuan\", \"description\": \"brown and white mountains under white clouds and blue sky during daytime\"}, {\"source\": \"unsplash\", \"id\": \"9pZCh8Jwf4s\", \"url\": \"https://images.unsplash.com/photo-1684154739620-ef7b1e078d4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Zhao Yangjun\", \"description\": \"\\u751f\\u957f\\u4e2d\\u7684\\u5c0f\\u9ea6\\u9ea6\\u7a57\\u7279\\u5199 \\u9ea6\\u7530\"}, {\"source\": \"unsplash\", \"id\": \"06An_E23k0g\", \"url\": \"https://images.unsplash.com/photo-1684154740378-49d4ec79ccdb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Zhao Yangjun\", \"description\": \"\\u751f\\u957f\\u4e2d\\u7684\\u5c0f\\u9ea6\\u9ea6\\u7a57\\u7279\\u5199 \\u9ea6\\u7530\"}, {\"source\": \"unsplash\", \"id\": \"jq1AOs6mKu4\", \"url\": \"https://images.unsplash.com/photo-1712130618742-e956c6ec4907?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Khristina Sergeychik\", \"description\": \"a single plant is standing in the fog\"}, {\"source\": \"unsplash\", \"id\": \"6m4qxOwlagM\", \"url\": \"https://images.unsplash.com/photo-1624247935614-ea5dbc812654?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Tu\\u1ea5n Tr\\u1ea7n\", \"description\": \"black cable wire under blue sky\"}, {\"source\": \"unsplash\", \"id\": \"PB6fCMfdYJo\", \"url\": \"https://images.unsplash.com/photo-1718778693880-6c0e10f92650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHwlRTglODclQUElRTclODQlQjYlRTklQTMlOEUlRTUlODUlODl8ZW58MHx8fHwxNzUyMjM5MTUwfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Karthi poduri\", \"description\": \"Blues. Skies\"}, {\"source\": \"unsplash\", \"id\": \"Qfc79HRBTtQ\", \"url\": \"https://images.unsplash.com/photo-1737568120928-3600286a297d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8JUU4JTg3JUFBJUU3JTg0JUI2JUU5JUEzJThFJUU1JTg1JTg5fGVufDB8fHx8MTc1MjIzOTE1MHww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Hamna Asif\", \"description\": \"Bluess\"}, {\"source\": \"pexels\", \"id\": \"28894587\", \"url\": \"https://images.pexels.com/photos/28894587/pexels-photo-28894587.jpeg\", \"photographer\": \"Fernando Hung\", \"description\": \"Stunning view of snow-capped Andes mountains reflecting on Lake Nahuel Huapi, Argentina.\"}, {\"source\": \"pexels\", \"id\": \"30703623\", \"url\": \"https://images.pexels.com/photos/30703623/pexels-photo-30703623.jpeg\", \"photographer\": \"Janmesh Shah\", \"description\": \"Moody photograph of dark green leaves highlighted in soft natural light.\"}, {\"source\": \"pexels\", \"id\": \"28894832\", \"url\": \"https://images.pexels.com/photos/28894832/pexels-photo-28894832.jpeg\", \"photographer\": \"Trie Wrn\", \"description\": \"A vibrant depiction of a rural village with children practicing stilt walking.\"}, {\"source\": \"pexels\", \"id\": \"19541576\", \"url\": \"https://images.pexels.com/photos/19541576/pexels-photo-19541576.jpeg\", \"photographer\": \"Vietrov\", \"description\": \"Calm sea view with the silhouette of Odessa skyline on the horizon under clear skies.\"}, {\"source\": \"pexels\", \"id\": \"31829081\", \"url\": \"https://images.pexels.com/photos/31829081/pexels-photo-31829081.jpeg\", \"photographer\": \"Ted Gao\", \"description\": \"Scenic view of a rural Chinese landscape with a house, hills, and lush greenery under a bright blue sky.\"}, {\"source\": \"pexels\", \"id\": \"15969588\", \"url\": \"https://images.pexels.com/photos/15969588/pexels-photo-15969588.jpeg\", \"photographer\": \"fei wang\", \"description\": \"Picturesque view of a mountain town with lush fields and a serene lake under dramatic skies.\"}, {\"source\": \"pexels\", \"id\": \"17211439\", \"url\": \"https://images.pexels.com/photos/17211439/pexels-photo-17211439.jpeg\", \"photographer\": \"Emre Ate\\u015fo\\u011flu\", \"description\": \"Turkish flag waving between lush trees against a bright blue sky in \\u015eanl\\u0131urfa, T\\u00fcrkiye.\"}, {\"source\": \"pexels\", \"id\": \"32912854\", \"url\": \"https://images.pexels.com/photos/32912854/pexels-photo-32912854.jpeg\", \"photographer\": \"Leongsan Don\", \"description\": \"Iconic Tsutenkaku Tower against a bright blue sky in Osaka, Japan.\"...[截断]，共计10580字符，剩余4580字符"
+        },
+        "execution_time": 1.286449909210205,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Large Number of Sources",
+        "purpose": "测试传递多个重复来源是否会引发异常行为。",
+        "args": {
+          "query": "animals",
+          "sources": [
+            "unsplash",
+            "pexels",
+            "pixabay",
+            "unsplash",
+            "pexels"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"nKC772R_qog\", \"url\": \"https://images.unsplash.com/photo-1529778873920-4da4926a72c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Edgar\", \"description\": \"little cat, \\r\\nThank you all who downloaded this lovely cat for the likes\"}, {\"source\": \"unsplash\", \"id\": \"Wzj7rBxxMaw\", \"url\": \"https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Daniel Octavian\", \"description\": \"I See You\"}, {\"source\": \"unsplash\", \"id\": \"qQWV91TTBrE\", \"url\": \"https://images.unsplash.com/photo-1589656966895-2f33e7653819?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Hans-Jurgen Mager\", \"description\": \"polar bear\"}, {\"source\": \"unsplash\", \"id\": \"Fbdr6gXJBVY\", \"url\": \"https://images.unsplash.com/photo-1591824438708-ce405f36ba3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Hans-Jurgen Mager\", \"description\": \"tiger on the road, Kanha nat. park, India\"}, {\"source\": \"unsplash\", \"id\": \"D6TqIa-tWRY\", \"url\": \"https://images.unsplash.com/photo-1574870111867-089730e5a72b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Andy Holmes\", \"description\": \"A Giraffe at Calgary Zoo poking his tongue out\"}, {\"source\": \"unsplash\", \"id\": \"XucH5JNRFig\", \"url\": \"https://images.unsplash.com/photo-1493962853295-0fd70327578a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw2fHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Eric Welch\", \"description\": \"King of the Hillside\"}, {\"source\": \"unsplash\", \"id\": \"ny_5l4QKBnE\", \"url\": \"https://images.unsplash.com/photo-1466721591366-2d5fba72006d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw3fHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"joel herzog\", \"description\": \"Antelope and zebras\"}, {\"source\": \"unsplash\", \"id\": \"_9a-3NO5KJE\", \"url\": \"https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw4fHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Sid Balachandran\", \"description\": \"The Hungry Panda\"}, {\"source\": \"unsplash\", \"id\": \"K_Na5gCmh38\", \"url\": \"https://images.unsplash.com/photo-1484406566174-9da000fda645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw5fHxhbmltYWxzfGVufDB8fHx8MTc1MjIzOTE1MXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Laura College\", \"description\": \"In New Braunfels, Texas, the deer often flood the golf course and surrounding residential yards around sunset. The locals feed them, and they love the grass on the golf course. This buck was kind enough to pose for me long enough to take several shots. He looked so regal that I couldn\\u2019t resist him, and I loved the symmetry of his antlers.\"}, {\"source\": \"unsplash\", \"id\": \"Nbv7PkL_rvI\", \"url\": \"https://images.unsplash.com/photo-1574068468668-a05a11f871da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxMHx8YW5pbWFsc3xlbnwwfHx8fDE3NTIyMzkxNTF8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Deepak Nautiyal\", \"description\": \"Plumbeous Water Redstart \\ud83d\\udd4a\\ufe0f in Dehradun\"}, {\"source\": \"pexels\", \"id\": \"45170\", \"url\": \"https://images.pexels.com/photos/45170/kittens-cat-cat-puppy-rush-45170.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"A group of five cute kittens exploring and playing on lush green grass outdoors.\"}, {\"source\": \"pexels\", \"id\": \"66898\", \"url\": \"https://images.pexels.com/photos/66898/elephant-cub-tsavo-kenya-66898.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Adult African elephant and calf walking side by side in the sunny savanna.\"}, {\"source\": \"pexels\", \"id\": \"47547\", \"url\": \"https://images.pexels.com/photos/47547/squirrel-animal-cute-rodents-47547.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Close-up of a charming red squirrel in natural habitat, showcasing its vibrant fur and curious expression.\"}, {\"source\": \"pexels\", \"id\": \"34098\", \"url\": \"https://images.pexels.com/photos/34098/south-africa-hluhluwe-giraffes-pattern.jpg\", \"photographer\": \"Pixabay\", \"description\": \"Three giraffes standing on a dirt road in a South African national park.\"}, {\"source\": \"pexels\", \"id\": \"792381\", \"url\": \"https://images.pexels.com/photos/792381/pexels-photo-792381.jpeg\", \"photographer\": \"GEORGE DESIPRIS\", \"description\": \"Close-up portrait of a Bengal tiger showcasing its fierce gaze and striking stripes in a dramatic setting.\"}, {\"source\": \"pexels\", \"id\": \"37833\", \"url\": \"https://images.pexels.com/photos/37833/rainbow-lorikeet-parrots-australia-rainbow-37833.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Colorful rainbow lorikeets perched in a natural setting, showcasing vibrant plumage and wildlife charm.\"}, {\"source\": \"pexels\", \"id\": \"62289\", \"url\": \"https://images.pexels.com/photos/62289/yemen-chameleon-chamaeleo-calyptratus-chameleon-reptile-62289.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Detailed image of a colorful chameleon perched on a branch, showcasing its distinctive textures.\"}, {\"source\": \"pexels\", \"id\": \"45201\", \"url\": \"https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Close-up portrait of an adorable cream-colored kitten with blue eyes resting indoors.\"}, {\"source\": \"pexels\", \"id\": \"814898\", \"url\": \"https://images.pexels.com/photos/814898/pexels-photo-814898.jpeg\", \"photographer\": \"Thomas B...[截断]，共计16569字符，剩余10569字符"
+        },
+        "execution_time": 2.0496482849121094,
+        "is_functional_test": true
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download from URL",
+        "purpose": "验证从有效URL下载图像并保存到默认目录的基本功能。",
+        "args": {
+          "image_url": "https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080",
+          "filename": "downloaded_image.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\downloaded_image.jpg\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\downloaded_image.jpg\"}"
+        },
+        "execution_time": 3.3095386028289795,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download to Custom Directory",
+        "purpose": "验证将图像下载到自定义指定目录的功能。",
+        "args": {
+          "image_url": "https://images.pexels.com/photos/2325447/pexels-photo-2325447.jpeg",
+          "filename": "custom_dir_image.png",
+          "save_dir": "./test_downloads"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\test_downloads\\\\custom_dir_image.png\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\test_downloads\\\\custom_dir_image.png\"}"
+        },
+        "execution_time": 2.3245797157287598,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Local File Path as Image Source",
+        "purpose": "验证工具支持使用本地文件路径作为图像源进行复制。",
+        "args": {
+          "image_url": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpg",
+          "filename": "copied_local_image.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\copied_local_image.jpg\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\copied_local_image.jpg\"}"
+        },
+        "execution_time": 0.010261774063110352,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid URL Scheme",
+        "purpose": "测试对非HTTP(S)协议的URL拒绝处理。",
+        "args": {
+          "image_url": "ftp://example.com/image.jpg",
+          "filename": "invalid_scheme.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid URL scheme. Only HTTP, HTTPS, and local file paths are allowed.\"}"
+        },
+        "execution_time": 0.006378650665283203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Path Traversal Attempt",
+        "purpose": "测试工具是否阻止路径穿越攻击尝试。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "../../../malicious_file.txt"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid filename. It cannot contain path traversal elements.\"}"
+        },
+        "execution_time": 0.007216691970825195,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Filename",
+        "purpose": "验证空文件名参数是否被正确拒绝。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": ""
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"\"}"
+        },
+        "execution_time": 5.765726327896118,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Parameters",
+        "purpose": "测试缺少必填参数时的行为是否符合预期。",
+        "args": {
+          "image_url": "https://example.com/image.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: 1 validation error for download_imageArguments\nfilename\n  Field required [type=missing, input_value={'image_url': 'https://example.com/image.jpg'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Local File",
+        "purpose": "测试当提供的本地文件路径不存在时的行为。",
+        "args": {
+          "image_url": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "filename": "nonexistent_copy.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid URL scheme. Only HTTP, HTTPS, and local file paths are allowed.\"}"
+        },
+        "execution_time": 0.010085821151733398,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filename",
+        "purpose": "验证文件名中包含特殊字符时是否能正确处理。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "special@#%&()_file.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Client error '404 Not Found' for url 'https://example.com/image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"}"
+        },
+        "execution_time": 1.8192205429077148,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Filename Support",
+        "purpose": "测试文件名支持中文等Unicode字符。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "自然风光.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Client error '404 Not Found' for url 'https://example.com/image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"}"
+        },
+        "execution_time": 1.9526963233947754,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Overwrite Existing File",
+        "purpose": "验证覆盖已存在文件的行为是否安全可控。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "existing_file.txt"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"\"}"
+        },
+        "execution_time": 5.43001127243042,
+        "is_functional_test": true
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation with Default Parameters",
+        "purpose": "验证使用默认参数生成图标的最基本功能是否正常工作。",
+        "args": {
+          "description": "App"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\app_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\app_icon.png\"}"
+        },
+        "execution_time": 0.0262300968170166,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Size Icon Generation",
+        "purpose": "测试使用自定义尺寸(256x256)生成图标的功能是否正常。",
+        "args": {
+          "description": "Settings",
+          "size": [
+            256,
+            256
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\settings_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\settings_icon.png\"}"
+        },
+        "execution_time": 0.02001786231994629,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Filename and Save Directory",
+        "purpose": "验证指定自定义文件名和保存目录时的图标生成功能。",
+        "args": {
+          "description": "User",
+          "filename": "user_icon.png",
+          "save_dir": "./custom_icons"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\custom_icons\\\\user_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\custom_icons\\\\user_icon.png\"}"
+        },
+        "execution_time": 0.014155387878417969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Auto-generated Filename with Custom Save Directory",
+        "purpose": "测试当未提供文件名但指定了保存目录时，是否能正确自动生成文件名并保存。",
+        "args": {
+          "description": "Home",
+          "save_dir": "./output_icons"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\output_icons\\\\home_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\output_icons\\\\home_icon.png\"}"
+        },
+        "execution_time": 0.029541492462158203,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Description Input",
+        "purpose": "验证空描述输入是否被拒绝处理。",
+        "args": {
+          "description": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\_icon.png\"}"
+        },
+        "execution_time": 0.025535106658935547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only Description",
+        "purpose": "测试仅包含空白字符的描述是否被拒绝处理。",
+        "args": {
+          "description": "   "
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\__icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\__icon.png\"}"
+        },
+        "execution_time": 0.016135454177856445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Size Values",
+        "purpose": "测试传递无效尺寸值（负数）是否会触发错误处理。",
+        "args": {
+          "description": "Error",
+          "size": [
+            -100,
+            -100
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Icon dimensions must be positive integers\"}"
+        },
+        "execution_time": 0.015547513961791992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Integer Size Values",
+        "purpose": "验证传递非整数值的尺寸参数是否会触发错误。",
+        "args": {
+          "description": "Test",
+          "size": [
+            "abc",
+            "def"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 2 validation errors for generate_iconArguments\nsize.0\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='abc', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing\nsize.1\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='def', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.027051448822021484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Path Traversal in Save Directory",
+        "purpose": "测试路径穿越攻击尝试是否被阻止。",
+        "args": {
+          "description": "Security",
+          "save_dir": "../../../malicious_dir"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\malicious_dir\\\\security_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\malicious_dir\\\\security_icon.png\"}"
+        },
+        "execution_time": 0.014578580856323242,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filename",
+        "purpose": "验证文件名中包含特殊字符时是否能正确处理。",
+        "args": {
+          "description": "Test",
+          "filename": "icon@#%&().png"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\icon@#%&().png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\icon@#%&().png\"}"
+        },
+        "execution_time": 0.029542922973632812,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Characters in Description",
+        "purpose": "测试支持中文等Unicode字符的描述生成图标。",
+        "args": {
+          "description": "应用"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\\\u5e94\\u7528_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\\\u5e94\\u7528_icon.png\"}"
+        },
+        "execution_time": 0.020564556121826172,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Allowed Size Test",
+        "purpose": "测试最大允许尺寸(1024x1024)的图标生成是否正常。",
+        "args": {
+          "description": "Large",
+          "size": [
+            1024,
+            1024
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\large_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\large_icon.png\"}"
+        },
+        "execution_time": 0.03191804885864258,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 35
+}

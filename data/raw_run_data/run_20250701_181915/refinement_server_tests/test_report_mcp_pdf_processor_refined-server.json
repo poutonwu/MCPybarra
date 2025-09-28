@@ -1,0 +1,985 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp_pdf_processor_refined",
+  "report_name": "mcp_pdf_processor_refined-server",
+  "server_path": "workspace\\refinement\\mcp_pdf_processor_refined\\server.py",
+  "timestamp": "2025-07-01T18:36:19.302100",
+  "tools": [
+    {
+      "name": "merge_pdfs",
+      "description": "\n    合并多个PDF文件为一个。\n\n    Args:\n        pdf_paths: 包含要合并的PDF文件绝对路径列表 (必填)。\n        output_path: 输出PDF文件的绝对路径 (必填)。\n\n    Returns:\n        一个字符串，表示操作成功完成的消息。\n\n    Raises:\n        ValueError: 如果输入参数格式不正确。\n        FileNotFoundError: 如果任何指定的PDF文件不存在。\n\n    示例:\n        合并位于不同路径的两个PDF文件，并将结果保存到新位置:\n        merge_pdfs(pdf_paths=[\"/path/to/file1.pdf\", \"/path/to/file2.pdf\"], output_path=\"/path/to/merged.pdf\")\n    ",
+      "args_schema": {
+        "properties": {
+          "pdf_paths": {
+            "items": {},
+            "title": "Pdf Paths",
+            "type": "array"
+          },
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdf_paths",
+          "output_path"
+        ],
+        "title": "merge_pdfsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "extract_pages",
+      "description": "\n    从PDF文件中提取特定页面并保存为新文件。\n\n    Args:\n        source_pdf: 要提取页面的源PDF文件的绝对路径 (必填)。\n        pages: 需要提取的页码列表，页码从1开始计数 (必填)。\n        output_pdf: 提取页面后输出的新PDF文件的绝对路径 (必填)。\n\n    Returns:\n        一个字符串，表示操作成功完成的消息。\n\n    Raises:\n        ValueError: 如果输入参数格式不正确。\n        FileNotFoundError: 如果源PDF文件不存在。\n        IndexError: 如果请求的页码超出范围。\n\n    示例:\n        从source.pdf中提取第1和第3页，并保存到新的output.pdf中:\n        extract_pages(source_pdf=\"/path/to/source.pdf\", pages=[1, 3], output_pdf=\"/path/to/output.pdf\")\n    ",
+      "args_schema": {
+        "properties": {
+          "source_pdf": {
+            "title": "Source Pdf",
+            "type": "string"
+          },
+          "pages": {
+            "items": {},
+            "title": "Pages",
+            "type": "array"
+          },
+          "output_pdf": {
+            "title": "Output Pdf",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_pdf",
+          "pages",
+          "output_pdf"
+        ],
+        "title": "extract_pagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_pdfs",
+      "description": "\n    在指定目录中搜索匹配特定模式的PDF文件。\n\n    Args:\n        directory: 要搜索的目录的绝对路径 (必填)。\n        pattern: 用于匹配PDF文件名的正则表达式模式 (必填)。\n\n    Returns:\n        匹配给定模式的所有PDF文件路径的JSON格式字符串。\n\n    Raises:\n        ValueError: 如果输入参数格式不正确。\n        NotADirectoryError: 如果指定的目录无效。\n\n    示例:\n        搜索目录'/documents'中所有以'report'开头的PDF文件:\n        search_pdfs(directory=\"/documents\", pattern=\"^report.*\\.pdf$\")\n    ",
+      "args_schema": {
+        "properties": {
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          },
+          "pattern": {
+            "title": "Pattern",
+            "type": "string"
+          }
+        },
+        "required": [
+          "directory",
+          "pattern"
+        ],
+        "title": "search_pdfsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "merge_pdfs_ordered",
+      "description": "\n    按照指定的顺序模式合并PDF文件，支持精确和模糊匹配。\n\n    Args:\n        pdf_details: 包含PDF文件详情的列表，每个元素是一个字典，包含'path'(PDF文件绝对路径)和'order'(插入顺序)键 (必填)。\n        output_path: 合并后的PDF文件输出的绝对路径 (必填)。\n\n    Returns:\n        一个字符串，表示操作成功完成的消息。\n\n    Raises:\n        ValueError: 如果输入参数格式不正确。\n        FileNotFoundError: 如果任何指定的PDF文件不存在。\n\n    示例:\n        按照指定顺序合并两个PDF文件，并将结果保存到新位置:\n        merge_pdfs_ordered(pdf_details=[{\"path\": \"/path/to/file1.pdf\", \"order\": 2}, {\"path\": \"/path/to/file2.pdf\", \"order\": 1}], output_path=\"/path/to/ordered_merged.pdf\")\n    ",
+      "args_schema": {
+        "properties": {
+          "pdf_details": {
+            "items": {},
+            "title": "Pdf Details",
+            "type": "array"
+          },
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdf_details",
+          "output_path"
+        ],
+        "title": "merge_pdfs_orderedArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "find_related_pdfs",
+      "description": "\n    根据目标PDF文件内容分析并查找相关的PDF文件。\n\n    Args:\n        target_pdf: 目标PDF文件的绝对路径 (必填)。\n        directory: 要搜索相关PDF的目录的绝对路径 (必填)。\n        similarity_threshold: 决定相似度阈值的小数值，范围应在0到1之间 (必填)。\n\n    Returns:\n        JSON格式字符串，包含与目标PDF内容相关的PDF文件路径及其相似度分数。\n\n    Raises:\n        ValueError: 如果输入参数格式不正确。\n        FileNotFoundError: 如果目标PDF文件不存在。\n        NotADirectoryError: 如果指定的目录无效。\n\n    示例:\n        查找与target.pdf内容相似度超过0.5的相关PDF文件:\n        find_related_pdfs(target_pdf=\"/path/to/target.pdf\", directory=\"/documents\", similarity_threshold=0.5)\n    ",
+      "args_schema": {
+        "properties": {
+          "target_pdf": {
+            "title": "Target Pdf",
+            "type": "string"
+          },
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          },
+          "similarity_threshold": {
+            "title": "Similarity Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "target_pdf",
+          "directory",
+          "similarity_threshold"
+        ],
+        "title": "find_related_pdfsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "merge_pdfs": [
+      {
+        "case_name": "Basic PDF Merge",
+        "purpose": "验证工具能够成功合并两个PDF文件",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.009055376052856445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Single PDF Merge",
+        "purpose": "验证工具能正确处理仅一个输入PDF的情况",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_merged_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.013578176498413086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge with Unicode Filenames",
+        "purpose": "验证工具支持包含Unicode字符的文件名",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\专利1_副本.docx.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文档.docx.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_unicode_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: 以下文件未找到: ['D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\专利1_副本.docx.pdf', 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\中文文档.docx.pdf']"
+        },
+        "execution_time": 0.0050013065338134766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge with Long Filename",
+        "purpose": "验证工具支持超长文件名",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\this_is_a_very_long_filename_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_filenames_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints.docx.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\long_filename_merged_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: 以下文件未找到: ['D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\this_is_a_very_long_filename_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_filenames_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints.docx.pdf']"
+        },
+        "execution_time": 0.004510641098022461,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Input Type",
+        "purpose": "验证工具拒绝非数组类型的pdf_paths参数",
+        "args": {
+          "pdf_paths": "not_an_array.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_type_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 1 validation error for merge_pdfsArguments\npdf_paths\n  Input should be a valid list [type=list_type, input_value='not_an_array.pdf', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/list_type"
+        },
+        "execution_time": 0.007000923156738281,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent PDF File",
+        "purpose": "验证工具在找不到指定PDF时抛出异常",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\missing_file_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: 以下文件未找到: ['D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.pdf']"
+        },
+        "execution_time": 0.005004167556762695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty PDF List",
+        "purpose": "验证工具拒绝空的pdf_paths列表",
+        "args": {
+          "pdf_paths": [],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_list_output.pdf"
+        },
+        "response": {
+          "result": "PDFs已成功合并到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_list_output.pdf"
+        },
+        "execution_time": 0.0055103302001953125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Output Path Security Check",
+        "purpose": "验证工具防止路径穿越攻击尝试",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\security_check_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.009507894515991211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Write to Read-only Directory",
+        "purpose": "验证工具无法写入只读目录",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.008516788482666016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Merge Large Number of PDFs",
+        "purpose": "验证工具可以处理大量PDF文件合并",
+        "args": {
+          "pdf_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\large_merge_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.008196353912353516,
+        "is_functional_test": true
+      }
+    ],
+    "extract_pages": [
+      {
+        "case_name": "Basic Page Extraction",
+        "purpose": "验证工具能够成功从PDF中提取指定页面并保存为新文件",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [
+            1,
+            3
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_basic_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.008510828018188477,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Single Page Extraction",
+        "purpose": "验证工具能正确处理仅提取一页PDF的情况",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf",
+          "pages": [
+            5
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_single_page_output.pdf"
+        },
+        "response": {
+          "result": "已成功从D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf提取页面至: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_single_page_output.pdf"
+        },
+        "execution_time": 0.012542486190795898,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Filename Support",
+        "purpose": "验证工具支持包含Unicode字符的输入和输出文件名",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\专利1_副本.docx.pdf",
+          "pages": [
+            2
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文提取_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: 文件未找到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\专利1_副本.docx.pdf"
+        },
+        "execution_time": 0.008392810821533203,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Filename Handling",
+        "purpose": "验证工具支持超长文件名",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\this_is_a_very_long_filename_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_filenames_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints.docx.pdf",
+          "pages": [
+            1
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\long_filename_extracted_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: 文件未找到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\this_is_a_very_long_filename_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_filenames_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints.docx.pdf"
+        },
+        "execution_time": 0.004355192184448242,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Page Number",
+        "purpose": "验证工具拒绝超出范围的页码请求",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [
+            999
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_page_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.00708460807800293,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Source File",
+        "purpose": "验证工具在找不到源PDF时抛出异常",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_source.pdf",
+          "pages": [
+            1
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\missing_source_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: 文件未找到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_source.pdf"
+        },
+        "execution_time": 0.007001399993896484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Pages List",
+        "purpose": "验证工具拒绝空的页码列表",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_pages_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.006125450134277344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Path Traversal Attempt",
+        "purpose": "验证工具防止路径穿越攻击尝试",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [
+            1
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\security_check_extracted.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.010515928268432617,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Write to Read-only Directory",
+        "purpose": "验证工具无法写入只读目录",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [
+            1
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_extracted.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.005509376525878906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Extract All Pages",
+        "purpose": "验证工具可以提取PDF中的所有页面（边界测试）",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\all_pages_extracted.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: 页码超出范围: 8, 总页数: 7"
+        },
+        "execution_time": 0.04461312294006348,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Negative Page Number",
+        "purpose": "验证工具拒绝负数页码",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [
+            -1
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\negative_page_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: 'pages' 必须是正整数列表，代表页码。"
+        },
+        "execution_time": 0.004508495330810547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Page Number",
+        "purpose": "验证工具拒绝零作为页码",
+        "args": {
+          "source_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pages": [
+            0
+          ],
+          "output_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\zero_page_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages: 发生错误: 'pages' 必须是正整数列表，代表页码。"
+        },
+        "execution_time": 0.00400090217590332,
+        "is_functional_test": false
+      }
+    ],
+    "search_pdfs": [
+      {
+        "case_name": "Basic PDF Search",
+        "purpose": "验证工具能够成功搜索匹配特定模式的PDF文件",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "^城市.*\\.pdf$"
+        },
+        "response": {
+          "result": "[\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\城市道路管理条例.pdf\"]"
+        },
+        "execution_time": 0.00815892219543457,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Default Pattern",
+        "purpose": "验证工具在使用默认模式时的行为（如无默认值则跳过）",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs: 1 validation error for search_pdfsArguments\npattern\n  Field required [type=missing, input_value={'directory': 'D:\\\\devWor...\\testSystem\\\\testFiles'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.010073423385620117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Directory and Pattern",
+        "purpose": "验证工具支持包含Unicode字符的目录路径和正则表达式",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx",
+          "pattern": "^.*\\.pdf$"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs: 发生错误: 不是有效的目录: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx"
+        },
+        "execution_time": 0.0040073394775390625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Path Handling",
+        "purpose": "验证工具支持超长路径名",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\this_is_a_very_long_directory_name_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_directories_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints",
+          "pattern": "^.*\\.pdf$"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs: 发生错误: 不是有效的目录: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\this_is_a_very_long_directory_name_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_directories_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints"
+        },
+        "execution_time": 0.0075244903564453125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Directory",
+        "purpose": "验证工具拒绝无效的目录路径",
+        "args": {
+          "directory": "invalid_directory_path",
+          "pattern": "^.*\\.pdf$"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs: 发生错误: 'directory' 必须是有效的绝对路径。"
+        },
+        "execution_time": 0.003990888595581055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Pattern",
+        "purpose": "验证工具拒绝无效的正则表达式模式",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*invalid_pattern"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs: 发生错误: nothing to repeat at position 0"
+        },
+        "execution_time": 0.0035049915313720703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Directory",
+        "purpose": "验证工具处理空目录的情况",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_dir",
+          "pattern": "^.*\\.pdf$"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs: 发生错误: 不是有效的目录: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_dir"
+        },
+        "execution_time": 0.0060138702392578125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Path Traversal Attempt",
+        "purpose": "验证工具防止路径穿越攻击尝试",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..",
+          "pattern": "^.*\\.pdf$"
+        },
+        "response": {
+          "result": "[\"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\malicious_output.pdf\", \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\merged_output.pdf\", \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\testSystem\\\\testFiles\\\\2023.nlposs-1.24.pdf\", \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\testSystem\\\\testFiles\\\\empty_list_output.pdf\", \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\testSystem\\\\testFiles\\\\extracted_single_page_output.pdf\", \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\testSystem\\\\testFiles\\\\城市道路管理条例.pdf\", \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\testSystem\\\\testFiles\\\\道路交通安全违法行为处理程序规定.pdf\", \"D:\\\\devWorkspace\\\\MCPSe...[截断]，共计2071字符，剩余1271字符"
+        },
+        "execution_time": 0.06858158111572266,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "No Matching Files",
+        "purpose": "验证工具在没有匹配文件时返回空结果",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "^nonexistent_file_.*\\.pdf$"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.006008148193359375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Case-sensitive Pattern Match",
+        "purpose": "验证工具正确执行区分大小写的模式匹配",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "^Report.*\\.pdf$"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.010554313659667969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Pattern",
+        "purpose": "验证工具处理特殊正则表达式字符的能力",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "^special@chars#path!.*\\.pdf$"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.006503582000732422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read-only Directory Access",
+        "purpose": "验证工具无法访问只读目录",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir",
+          "pattern": "^.*\\.pdf$"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.006018400192260742,
+        "is_functional_test": false
+      }
+    ],
+    "merge_pdfs_ordered": [
+      {
+        "case_name": "Basic Ordered Merge",
+        "purpose": "验证工具能够按照指定顺序成功合并两个PDF文件",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+              "order": 2
+            },
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf",
+              "order": 1
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\ordered_merged_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.03458666801452637,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Single PDF Merge",
+        "purpose": "验证工具能正确处理仅一个输入PDF的情况并生成输出文件",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+              "order": 1
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_ordered_merged_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.00808405876159668,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge with Unicode Filenames",
+        "purpose": "验证工具支持包含Unicode字符的文件路径和输出路径",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\专利1_副本.docx.pdf",
+              "order": 1
+            },
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文档.docx.pdf",
+              "order": 2
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_unicode_ordered_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: 以下文件未找到: ['D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\专利1_副本.docx.pdf', 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\中文文档.docx.pdf']"
+        },
+        "execution_time": 0.005271434783935547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge Large Number of PDFs",
+        "purpose": "验证工具可以处理大量PDF文件合并",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+              "order": 1
+            },
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf",
+              "order": 2
+            },
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+              "order": 3
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\large_ordered_merge_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.008510589599609375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Output Path Security Check",
+        "purpose": "验证工具防止路径穿越攻击尝试",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+              "order": 1
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\security_check_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.009505748748779297,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Write to Read-only Directory",
+        "purpose": "验证工具无法写入只读目录",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+              "order": 1
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\read_only_dir\\locked_ordered_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.00751185417175293,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Input Format",
+        "purpose": "验证工具拒绝格式错误的pdf_details参数（如非数组或字典）",
+        "args": {
+          "pdf_details": "not_an_array_or_dict",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_input_format_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 1 validation error for merge_pdfs_orderedArguments\npdf_details\n  Input should be a valid list [type=list_type, input_value='not_an_array_or_dict', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/list_type"
+        },
+        "execution_time": 0.006994009017944336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent PDF File",
+        "purpose": "验证工具在找不到指定PDF时抛出异常",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.pdf",
+              "order": 1
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\missing_file_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: 以下文件未找到: ['D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.pdf']"
+        },
+        "execution_time": 0.0042858123779296875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty PDF List",
+        "purpose": "验证工具拒绝空的pdf_details列表",
+        "args": {
+          "pdf_details": [],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_list_output.pdf"
+        },
+        "response": {
+          "result": "PDFs已按照指定顺序合并到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_list_output.pdf"
+        },
+        "execution_time": 0.008519649505615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Duplicate Order Numbers",
+        "purpose": "验证工具能否处理重复的order值（按路径排序作为后备）",
+        "args": {
+          "pdf_details": [
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+              "order": 1
+            },
+            {
+              "path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf",
+              "order": 1
+            }
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\duplicate_order_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered: 发生错误: EOF marker not found"
+        },
+        "execution_time": 0.006999492645263672,
+        "is_functional_test": true
+      }
+    ],
+    "find_related_pdfs": [
+      {
+        "case_name": "Basic PDF Relationship Discovery",
+        "purpose": "验证工具能够成功查找与目标PDF内容相似的PDF文件",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": 0.5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: No /Root object! - Is this really a PDF?"
+        },
+        "execution_time": 0.004998207092285156,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Similarity Threshold",
+        "purpose": "验证工具在相似度阈值为0时返回所有可找到的PDF文件",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\道路交通安全违法行为处理程序规定.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": 0.0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: No /Root object! - Is this really a PDF?"
+        },
+        "execution_time": 1.3591995239257812,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Exact Match Search",
+        "purpose": "验证工具在相似度阈值为1时仅返回完全匹配的目标PDF（如果存在）",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": 1.0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: No /Root object! - Is this really a PDF?"
+        },
+        "execution_time": 0.0042819976806640625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Path Support",
+        "purpose": "验证工具支持包含Unicode字符的输入路径和目录路径",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文档.docx.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx",
+          "similarity_threshold": 0.3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 文件未找到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文档.docx.pdf"
+        },
+        "execution_time": 0.005023002624511719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Path Traversal Attempt",
+        "purpose": "验证工具防止路径穿越攻击尝试",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\malicious_file.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": 0.5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 文件未找到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\malicious_file.pdf"
+        },
+        "execution_time": 0.0070035457611083984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Target PDF",
+        "purpose": "验证工具在找不到目标PDF文件时抛出异常",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_target.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": 0.5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 文件未找到: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_target.pdf"
+        },
+        "execution_time": 0.004996299743652344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Directory",
+        "purpose": "验证工具在指定目录无效时抛出异常",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "directory": "invalid_directory_path",
+          "similarity_threshold": 0.5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 'directory' 必须是有效的绝对路径。"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Similarity Threshold Below Range",
+        "purpose": "验证工具拒绝小于0的相似度阈值",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": -0.1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 'similarity_threshold' 必须是介于0到1之间的小数值。"
+        },
+        "execution_time": 0.00551295280456543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Similarity Threshold Above Range",
+        "purpose": "验证工具拒绝大于1的相似度阈值",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "similarity_threshold": 1.1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 'similarity_threshold' 必须是介于0到1之间的小数值。"
+        },
+        "execution_time": 0.0055141448974609375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Directory",
+        "purpose": "验证工具在搜索空目录时返回空结果",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_dir",
+          "similarity_threshold": 0.5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs: 发生错误: 不是有效的目录: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_dir"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 54
+}

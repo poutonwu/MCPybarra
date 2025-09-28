@@ -1,0 +1,141 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_markdown_converter",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_markdown_converter/refined/server.py",
+  "timestamp": "2025-07-13T03:04:35.784431",
+  "tools": [
+    {
+      "name": "convert_to_markdown",
+      "description": "\n    Converts various content sources to structured Markdown format while preserving original structure elements.\n\n    Args:\n        content_source: URI or path specifying the content location. Supports:\n            * HTTP/HTTPS URLs (e.g., \"https://example.com/page.html\")\n            * File system paths (e.g., \"/documents/report.docx\")\n            * Data URIs (e.g., \"data:text/html;base64,...\")\n        content_type: Optional explicitly specified content type when automatic detection fails. Supported types:\n            * \"text/html\"\n            * \"application/pdf\"\n            * \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\" (DOCX)\n            * \"application/vnd.openxmlformats-officedocument.presentationml.presentation\" (PPTX)\n            * \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\" (XLSX)\n\n    Returns:\n        A dictionary containing:\n            * \"markdown\": Structured Markdown content preserving:\n                * Heading hierarchy (# H1, ## H2, etc.)\n                * Ordered and unordered lists\n                * Hyperlinks ([text](url))\n                * Tables (pipe-style)\n                * Code blocks (fenced)\n            * \"metadata\": Additional information including:\n                * Source type detected\n                * Conversion timestamp\n                * Original content statistics (word count, page count, etc.)\n\n    Raises:\n        ValueError: If input validation, content fetching, or conversion fails\n        FileNotFoundError: If a local file path is provided but the file doesn't exist\n        httpx.HTTPStatusError: If an HTTP request fails\n\n    Example:\n        >>> convert_to_markdown(content_source=\"https://example.com/page.html\")\n        {\n            \"markdown\": \"# Example Page\\nThis is an example HTML page that has been converted to Markdown.\",\n            \"metadata\": {\n                \"source_type\": \"text/html\",\n                \"conversion_timestamp\": \"2025-04-05T12:34:56.789Z\",\n                \"original_stats\": {\n                    \"size_bytes\": 12345,\n                    \"page_count\": 1,\n                    \"word_count\": 250\n                },\n                \"detected_mime_type\": \"text/html\",\n                \"used_explicit_type\": False\n            }\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "content_source": {
+            "title": "Content Source",
+            "type": "string"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Content Type"
+          }
+        },
+        "required": [
+          "content_source"
+        ],
+        "title": "convert_to_markdownArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_to_markdown": [
+      {
+        "case_name": "Basic HTML to Markdown Conversion",
+        "purpose": "验证工具能够正确将HTML文件转换为Markdown格式并保留结构",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\present.html"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.004998683929443359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "DOCX File Conversion with Default Content Type",
+        "purpose": "验证工具能自动检测并转换DOCX文件为Markdown格式",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\saved_document.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.011516809463500977,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "PDF File Conversion with Explicit Content Type",
+        "purpose": "验证工具在指定内容类型时能正确处理PDF文件",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "content_type": "application/pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.009512186050415039,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "PPTX File Conversion Test",
+        "purpose": "验证工具是否支持PPTX文件的Markdown转换",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\swe.pptx",
+          "content_type": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.0040035247802734375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Not Found Error Handling",
+        "purpose": "验证工具对不存在的本地文件路径的错误处理能力",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Failed to fetch content: Failed to read file: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.docx"
+        },
+        "execution_time": 0.004997968673706055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in DOCX File Name",
+        "purpose": "验证工具是否能正确处理包含特殊字符的文件名",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_chars_doc.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.0070552825927734375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long File Name Boundary Test",
+        "purpose": "验证工具是否能处理超过255字符的长文件名",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\this_is_a_very_long_file_name_that_exceeds_the_typical_limit_of_255_characters_and_might_cause_issues_in_some_systems_or_applications_but_should_be_handled_properly_by_this_tool.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.012006521224975586,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Hidden File Conversion Test",
+        "purpose": "验证工具是否能处理隐藏文件（以点开头）的转换",
+        "args": {
+          "content_source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.hidden_saved_document.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Conversion failed: StreamInfo.__init__() got an unexpected keyword argument 'name'"
+        },
+        "execution_time": 0.012025833129882812,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 8
+}

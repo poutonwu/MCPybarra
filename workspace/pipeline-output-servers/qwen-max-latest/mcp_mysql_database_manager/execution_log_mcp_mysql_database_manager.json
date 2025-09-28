@@ -1,0 +1,151 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all available tables in the database to verify basic connectivity."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table_data",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_all_tables[0]"
+      },
+      "description": "Dependent call (list access): Read data from the first table returned by list_resources."
+    },
+    "substituted_params": {
+      "table_name": "addresses"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query_on_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `$outputs.list_all_tables[0]` LIMIT 10"
+      },
+      "description": "Execute a SELECT SQL query on the same table used in read_resource to validate consistency of results."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `$outputs.list_all_tables[0]` LIMIT 10"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_sql",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `non_existent_table`"
+      },
+      "description": "Edge case: Execute a query on a non-existent table to test error handling."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `non_existent_table`"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_update_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "UPDATE `$outputs.list_all_tables[0]` SET name = 'TestUser' WHERE id = 1"
+      },
+      "description": "Execute an UPDATE statement to test write operations and affected rows reporting."
+    },
+    "substituted_params": {
+      "query": "UPDATE `$outputs.list_all_tables[0]` SET name = 'TestUser' WHERE id = 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_update_result",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `$outputs.list_all_tables[0]` WHERE id = 1"
+      },
+      "description": "Verify that the update operation was successful by re-querying the updated row."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `$outputs.list_all_tables[0]` WHERE id = 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_invalid_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "invalid_table_for_testing"
+      },
+      "description": "Edge case: Attempt to read from a non-existent table to test error handling."
+    },
+    "substituted_params": {
+      "table_name": "invalid_table_for_testing"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_with_empty_table_name",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": ""
+      },
+      "description": "Edge case: Test with an empty string as the table name to ensure validation works."
+    },
+    "substituted_params": {
+      "table_name": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Invalid table_name provided. Must be a non-empty string.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_sql_with_invalid_syntax",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELCT * FORM `$outputs.list_all_tables[0]`"
+      },
+      "description": "Edge case: Test SQL execution with invalid syntax to verify error handling."
+    },
+    "substituted_params": {
+      "query": "SELCT * FORM `$outputs.list_all_tables[0]`"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"2017 (HY000): Can't open named pipe to host: .  pipe: MySQL (2)\"}"
+    }
+  }
+]

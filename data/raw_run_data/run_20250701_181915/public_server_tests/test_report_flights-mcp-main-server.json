@@ -1,0 +1,1045 @@
+{
+  "server_name": "server",
+  "parent_dir": "flights-mcp-main",
+  "report_name": "flights-mcp-main-server",
+  "server_path": "workspace\\public-mcp-servers\\flights-mcp-main\\server.py",
+  "timestamp": "2025-07-01T18:19:18.365202",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "Search for flights based on parameters.",
+      "args_schema": {
+        "$defs": {
+          "FlightSearch": {
+            "description": "Model for flight search parameters.",
+            "properties": {
+              "type": {
+                "description": "Type of flight: 'one_way', 'round_trip', or 'multi_city'",
+                "title": "Type",
+                "type": "string"
+              },
+              "origin": {
+                "description": "Origin airport code",
+                "title": "Origin",
+                "type": "string"
+              },
+              "destination": {
+                "description": "Destination airport code",
+                "title": "Destination",
+                "type": "string"
+              },
+              "departure_date": {
+                "description": "Departure date (YYYY-MM-DD)",
+                "title": "Departure Date",
+                "type": "string"
+              },
+              "return_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Return date for round trips (YYYY-MM-DD)",
+                "title": "Return Date"
+              },
+              "departure_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Preferred departure time range"
+              },
+              "arrival_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Preferred arrival time range"
+              },
+              "cabin_class": {
+                "default": "economy",
+                "description": "Cabin class (economy, business, first)",
+                "title": "Cabin Class",
+                "type": "string"
+              },
+              "adults": {
+                "default": 1,
+                "description": "Number of adult passengers",
+                "title": "Adults",
+                "type": "integer"
+              },
+              "max_connections": {
+                "default": null,
+                "description": "Maximum number of connections (0 for non-stop)",
+                "title": "Max Connections",
+                "type": "integer"
+              },
+              "additional_stops": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Additional stops for multi-city trips",
+                "title": "Additional Stops"
+              }
+            },
+            "required": [
+              "type",
+              "origin",
+              "destination",
+              "departure_date"
+            ],
+            "title": "FlightSearch",
+            "type": "object"
+          },
+          "TimeSpec": {
+            "description": "Model for time range specification.",
+            "properties": {
+              "from_time": {
+                "description": "Start time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "From Time",
+                "type": "string"
+              },
+              "to_time": {
+                "description": "End time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "To Time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from_time",
+              "to_time"
+            ],
+            "title": "TimeSpec",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/FlightSearch"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "Get detailed information about a specific flight offer.",
+      "args_schema": {
+        "$defs": {
+          "OfferDetails": {
+            "description": "Model for getting detailed offer information.",
+            "properties": {
+              "offer_id": {
+                "description": "The ID of the offer to get details for",
+                "title": "Offer Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "offer_id"
+            ],
+            "title": "OfferDetails",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/OfferDetails"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "Search for multi-city flights.",
+      "args_schema": {
+        "$defs": {
+          "FlightSegment": {
+            "description": "Model for a single flight segment in a multi-city trip.",
+            "properties": {
+              "origin": {
+                "description": "Origin airport code",
+                "title": "Origin",
+                "type": "string"
+              },
+              "destination": {
+                "description": "Destination airport code",
+                "title": "Destination",
+                "type": "string"
+              },
+              "departure_date": {
+                "description": "Departure date (YYYY-MM-DD)",
+                "title": "Departure Date",
+                "type": "string"
+              }
+            },
+            "required": [
+              "origin",
+              "destination",
+              "departure_date"
+            ],
+            "title": "FlightSegment",
+            "type": "object"
+          },
+          "MultiCityRequest": {
+            "description": "Model for multi-city flight search.",
+            "properties": {
+              "type": {
+                "const": "multi_city",
+                "title": "Type",
+                "type": "string"
+              },
+              "segments": {
+                "description": "Flight segments",
+                "items": {
+                  "$ref": "#/$defs/FlightSegment"
+                },
+                "minItems": 2,
+                "title": "Segments",
+                "type": "array"
+              },
+              "cabin_class": {
+                "default": "economy",
+                "description": "Cabin class",
+                "title": "Cabin Class",
+                "type": "string"
+              },
+              "adults": {
+                "default": 1,
+                "description": "Number of adult passengers",
+                "title": "Adults",
+                "type": "integer"
+              },
+              "max_connections": {
+                "default": null,
+                "description": "Maximum number of connections (0 for non-stop)",
+                "title": "Max Connections",
+                "type": "integer"
+              },
+              "departure_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Optional departure time range"
+              },
+              "arrival_time": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TimeSpec"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Optional arrival time range"
+              }
+            },
+            "required": [
+              "type",
+              "segments"
+            ],
+            "title": "MultiCityRequest",
+            "type": "object"
+          },
+          "TimeSpec": {
+            "description": "Model for time range specification.",
+            "properties": {
+              "from_time": {
+                "description": "Start time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "From Time",
+                "type": "string"
+              },
+              "to_time": {
+                "description": "End time (HH:MM)",
+                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+                "title": "To Time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "from_time",
+              "to_time"
+            ],
+            "title": "TimeSpec",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "params": {
+            "$ref": "#/$defs/MultiCityRequest"
+          }
+        },
+        "required": [
+          "params"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "基本单程航班搜索",
+        "purpose": "验证工具能正确处理最基础的单程航班搜索请求",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "JFK",
+            "destination": "LAX",
+            "departure_date": "2023-12-25"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.6082417964935303,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "往返航班搜索带默认舱位",
+        "purpose": "测试往返航班搜索功能并使用默认经济舱设置",
+        "args": {
+          "params": {
+            "type": "round_trip",
+            "origin": "ORD",
+            "destination": "SFO",
+            "departure_date": "2024-01-10",
+            "return_date": "2024-01-17"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3322184085845947,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多城市航班搜索带附加停靠点",
+        "purpose": "验证多城市航班搜索功能，包括多个停靠点",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "origin": "ATL",
+            "destination": "MIA",
+            "departure_date": "2024-02-01",
+            "additional_stops": [
+              {
+                "city": "CHI",
+                "date": "2024-02-02"
+              },
+              {
+                "city": "DAL",
+                "date": "2024-02-04"
+              }
+            ]
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 'origin'"
+        },
+        "execution_time": 0.032555580139160156,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "带时间范围限制的单程航班搜索",
+        "purpose": "测试带有出发和到达时间偏好的搜索功能",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "SEA",
+            "destination": "LAS",
+            "departure_date": "2023-12-28",
+            "departure_time": {
+              "from_time": "08:00",
+              "to_time": "12:00"
+            },
+            "arrival_time": {
+              "from_time": "10:00",
+              "to_time": "14:00"
+            }
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.4003417491912842,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "非直飞航班搜索最大中转次数限制",
+        "purpose": "验证最大中转次数参数对搜索结果的影响",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "BOS",
+            "destination": "DEN",
+            "departure_date": "2024-03-15",
+            "max_connections": 2
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3939311504364014,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "商务舱往返航班搜索",
+        "purpose": "测试自定义舱位设置（商务舱）下的航班搜索功能",
+        "args": {
+          "params": {
+            "type": "round_trip",
+            "origin": "EWR",
+            "destination": "MCO",
+            "departure_date": "2024-04-01",
+            "return_date": "2024-04-08",
+            "cabin_class": "business"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.419036865234375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多人出行航班搜索",
+        "purpose": "验证多人出行场景下参数处理是否正确",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "PHX",
+            "destination": "CLT",
+            "departure_date": "2024-05-10",
+            "adults": 4
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.452746868133545,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL注入攻击尝试",
+        "purpose": "测试工具对恶意输入的防护能力",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "JFK",
+            "destination": "SELECT * FROM flights",
+            "departure_date": "2024-06-01"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.4336841106414795,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效机场代码处理",
+        "purpose": "验证工具在提供无效机场代码时的错误处理能力",
+        "args": {
+          "params": {
+            "type": "round_trip",
+            "origin": "XYZ",
+            "destination": "ABC",
+            "departure_date": "2024-07-01",
+            "return_date": "2024-07-05"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.378523588180542,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未来日期超出范围",
+        "purpose": "测试工具对不合理未来日期的处理能力",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "LGA",
+            "destination": "MSP",
+            "departure_date": "2099-12-31"
+          }
+        },
+        "response": {
+          "result": "{\n  \"request_id\": \"orq_0000AvgcMKuYRboNfeOmBs\",\n  \"offers\": [\n    {\n      \"offer_id\": \"off_0000AvgcMLIezz5ssPg1lQ\",\n      \"price\": {\n        \"amount\": \"120.06\",\n        \"currency\": \"USD\"\n      },\n      \"slices\": [\n        {\n          \"origin\": \"LGA\",\n          \"destination\": \"MSP\",\n          \"departure\": \"2099-12-31T23:13:00\",\n          \"arrival\": \"2100-01-01T00:59:00\",\n          \"duration\": \"PT2H46M\",\n          \"carrier\": \"American Airlines\",\n          \"stops\": 0,\n          \"stops_description\": \"Non-stop\",\n          \"connections\": []\n        }\n      ]\n    },\n    {\n      \"offer_id\": \"off_0000AvgcMLIJ1IoIrJVkDB\",\n      \"price\": {\n        \"amount\": \"120.64\",\n        \"currency\": \"USD\"\n      },\n      \"slices\": [\n        {\n          \"origin\": \"LGA\",\n          \"destination\": \"MSP\",\n          \"de...[截断]，共计1071字符，剩余271字符"
+        },
+        "execution_time": 2.4751718044281006,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "时间格式边界测试",
+        "purpose": "验证最小和最大有效时间格式的处理",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "DTW",
+            "destination": "STL",
+            "departure_date": "2024-08-01",
+            "departure_time": {
+              "from_time": "00:00",
+              "to_time": "23:59"
+            }
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3890388011932373,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符机场代码处理",
+        "purpose": "测试包含特殊字符的机场代码处理能力",
+        "args": {
+          "params": {
+            "type": "one_way",
+            "origin": "!@#$",
+            "destination": "^&*(",
+            "departure_date": "2024-09-01"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=15000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.2732625007629395,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "获取有效航班详情",
+        "purpose": "验证工具能够成功获取一个已知有效航班的详细信息",
+        "args": {
+          "params": {
+            "offer_id": "off_0000AvgcMLIezz5ssPg1lQ"
+          }
+        },
+        "response": {
+          "result": "{\n  \"data\": {\n    \"total_emissions_kg\": \"108\",\n    \"intended_payment_methods\": [],\n    \"payment_requirements\": {\n      \"requires_instant_payment\": false,\n      \"price_guarantee_expires_at\": \"2025-07-03T10:20:14Z\",\n      \"payment_required_by\": \"2025-07-04T10:20:14Z\"\n    },\n    \"available_services\": [],\n    \"supported_passenger_identity_document_types\": [\n      \"passport\",\n      \"known_traveler_number\",\n      \"passenger_redress_number\"\n    ],\n    \"passenger_identity_documents_required\": false,\n    \"tax_currency\": \"USD\",\n    \"base_currency\": \"USD\",\n    \"supported_loyalty_programmes\": [\n      \"AA\",\n      \"CX\",\n      \"MH\",\n      \"BA\",\n      \"AY\",\n      \"UL\",\n      \"QF\",\n      \"IB\",\n      \"JM\",\n      \"AS\",\n      \"QR\",\n      \"UM\",\n      \"RJ\",\n      \"AT\"\n    ],\n    \"base_amount\": \"101.75\",\n    \"pr...[截断]，共计9056字符，剩余8256字符"
+        },
+        "execution_time": 1.342801570892334,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试获取不存在的航班详情",
+        "purpose": "测试工具在请求不存在的航班ID时是否能正确处理错误",
+        "args": {
+          "params": {
+            "offer_id": "invalid_offer_id"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Invalid offer ID format - must start with 'off_'"
+        },
+        "execution_time": 0.06358480453491211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入攻击尝试-航班详情",
+        "purpose": "测试工具对恶意输入的防护能力",
+        "args": {
+          "params": {
+            "offer_id": "SELECT * FROM offers WHERE id = '1'"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Invalid offer ID format - must start with 'off_'"
+        },
+        "execution_time": 0.061383724212646484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符航班ID处理",
+        "purpose": "测试包含特殊字符的航班ID处理能力",
+        "args": {
+          "params": {
+            "offer_id": "!@#$%^&*()_+{}[]|\\:;\"'<>,.?/"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Invalid offer ID format - must start with 'off_'"
+        },
+        "execution_time": 0.05811572074890137,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空航班ID处理",
+        "purpose": "验证工具在未提供航班ID时的错误处理能力",
+        "args": {
+          "params": {
+            "offer_id": ""
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Invalid offer ID format - must start with 'off_'"
+        },
+        "execution_time": 0.05134224891662598,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取未来航班详情",
+        "purpose": "验证工具能够成功获取未来日期的航班详细信息",
+        "args": {
+          "params": {
+            "offer_id": "off_0000AvgcMLIezz5ssPg1lQ"
+          }
+        },
+        "response": {
+          "result": "{\n  \"data\": {\n    \"total_emissions_kg\": \"108\",\n    \"intended_payment_methods\": [],\n    \"payment_requirements\": {\n      \"requires_instant_payment\": false,\n      \"price_guarantee_expires_at\": \"2025-07-03T10:20:14Z\",\n      \"payment_required_by\": \"2025-07-04T10:20:14Z\"\n    },\n    \"available_services\": [],\n    \"supported_passenger_identity_document_types\": [\n      \"passport\",\n      \"known_traveler_number\",\n      \"passenger_redress_number\"\n    ],\n    \"passenger_identity_documents_required\": false,\n    \"tax_currency\": \"USD\",\n    \"base_currency\": \"USD\",\n    \"base_amount\": \"101.75\",\n    \"supported_loyalty_programmes\": [\n      \"AA\",\n      \"CX\",\n      \"MH\",\n      \"BA\",\n      \"AY\",\n      \"UL\",\n      \"QF\",\n      \"IB\",\n      \"JM\",\n      \"AS\",\n      \"QR\",\n      \"UM\",\n      \"RJ\",\n      \"AT\"\n    ],\n    \"pr...[截断]，共计9056字符，剩余8256字符"
+        },
+        "execution_time": 1.5106444358825684,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取历史航班详情",
+        "purpose": "验证工具能够成功获取过去日期的航班详细信息",
+        "args": {
+          "params": {
+            "offer_id": "off_0000AvgcMLIezz5ssPg1lQ"
+          }
+        },
+        "response": {
+          "result": "{\n  \"data\": {\n    \"total_emissions_kg\": \"108\",\n    \"intended_payment_methods\": [],\n    \"payment_requirements\": {\n      \"requires_instant_payment\": false,\n      \"price_guarantee_expires_at\": \"2025-07-03T10:20:14Z\",\n      \"payment_required_by\": \"2025-07-04T10:20:14Z\"\n    },\n    \"available_services\": [],\n    \"supported_passenger_identity_document_types\": [\n      \"passport\",\n      \"known_traveler_number\",\n      \"passenger_redress_number\"\n    ],\n    \"passenger_identity_documents_required\": false,\n    \"tax_currency\": \"USD\",\n    \"base_currency\": \"USD\",\n    \"base_amount\": \"101.75\",\n    \"supported_loyalty_programmes\": [\n      \"AA\",\n      \"CX\",\n      \"MH\",\n      \"BA\",\n      \"AY\",\n      \"UL\",\n      \"QF\",\n      \"IB\",\n      \"JM\",\n      \"AS\",\n      \"QR\",\n      \"UM\",\n      \"RJ\",\n      \"AT\"\n    ],\n    \"pr...[截断]，共计9056字符，剩余8256字符"
+        },
+        "execution_time": 1.373633623123169,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多次重复获取相同航班详情",
+        "purpose": "测试工具在重复请求同一航班信息时的稳定性",
+        "args": {
+          "params": {
+            "offer_id": "off_0000AvgcMLIezz5ssPg1lQ"
+          }
+        },
+        "response": {
+          "result": "{\n  \"data\": {\n    \"total_emissions_kg\": \"108\",\n    \"intended_payment_methods\": [],\n    \"payment_requirements\": {\n      \"requires_instant_payment\": false,\n      \"price_guarantee_expires_at\": \"2025-07-03T10:20:14Z\",\n      \"payment_required_by\": \"2025-07-04T10:20:14Z\"\n    },\n    \"available_services\": [],\n    \"supported_passenger_identity_document_types\": [\n      \"passport\",\n      \"known_traveler_number\",\n      \"passenger_redress_number\"\n    ],\n    \"passenger_identity_documents_required\": false,\n    \"tax_currency\": \"USD\",\n    \"base_currency\": \"USD\",\n    \"base_amount\": \"101.75\",\n    \"supported_loyalty_programmes\": [\n      \"AA\",\n      \"CX\",\n      \"MH\",\n      \"BA\",\n      \"AY\",\n      \"UL\",\n      \"QF\",\n      \"IB\",\n      \"JM\",\n      \"AS\",\n      \"QR\",\n      \"UM\",\n      \"RJ\",\n      \"AT\"\n    ],\n    \"pr...[截断]，共计9056字符，剩余8256字符"
+        },
+        "execution_time": 1.531196117401123,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取带特殊字符数据的航班详情",
+        "purpose": "测试工具在返回包含特殊字符的航班信息时的处理能力",
+        "args": {
+          "params": {
+            "offer_id": "off_special_chars_!@#"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Client error '404 Not Found' for url 'https://api.duffel.com/air/offers/off_special_chars_!@#'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.4639732837677002,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用NULL值作为航班ID",
+        "purpose": "测试工具在参数为NULL时的错误处理能力",
+        "args": {
+          "params": {
+            "offer_id": null
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\nparams.offer_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.01117396354675293,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS攻击尝试-航班详情",
+        "purpose": "测试工具对跨站脚本攻击的防护能力",
+        "args": {
+          "params": {
+            "offer_id": "<script>alert('xss')</script>"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Invalid offer ID format - must start with 'off_'"
+        },
+        "execution_time": 0.054067373275756836,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "基本多城市航班搜索",
+        "purpose": "验证工具能正确处理最基础的多城市航班搜索请求",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "JFK",
+                "destination": "LAX",
+                "departure_date": "2023-12-25"
+              },
+              {
+                "origin": "LAX",
+                "destination": "ORD",
+                "departure_date": "2023-12-28"
+              }
+            ]
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3047974109649658,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "带默认舱位的多城市航班搜索",
+        "purpose": "测试多城市航班搜索功能并使用默认经济舱设置",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "ORD",
+                "destination": "SFO",
+                "departure_date": "2024-01-10"
+              },
+              {
+                "origin": "SFO",
+                "destination": "CHI",
+                "departure_date": "2024-01-12"
+              }
+            ]
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3219451904296875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "带时间范围限制的多城市航班搜索",
+        "purpose": "测试带有出发和到达时间偏好的多城市航班搜索功能",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "SEA",
+                "destination": "LAS",
+                "departure_date": "2023-12-28"
+              },
+              {
+                "origin": "LAS",
+                "destination": "PHX",
+                "departure_date": "2023-12-30"
+              }
+            ],
+            "departure_time": {
+              "from_time": "08:00",
+              "to_time": "12:00"
+            },
+            "arrival_time": {
+              "from_time": "10:00",
+              "to_time": "14:00"
+            }
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.5731441974639893,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "非直飞多城市航班搜索最大中转次数限制",
+        "purpose": "验证最大中转次数参数对多城市航班搜索结果的影响",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "BOS",
+                "destination": "DEN",
+                "departure_date": "2024-03-15"
+              },
+              {
+                "origin": "DEN",
+                "destination": "MIA",
+                "departure_date": "2024-03-17"
+              }
+            ],
+            "max_connections": 2
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3457047939300537,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "商务舱多城市航班搜索",
+        "purpose": "测试自定义舱位设置（商务舱）下的多城市航班搜索功能",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "EWR",
+                "destination": "MCO",
+                "departure_date": "2024-04-01"
+              },
+              {
+                "origin": "MCO",
+                "destination": "ATL",
+                "departure_date": "2024-04-03"
+              }
+            ],
+            "cabin_class": "business"
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3415067195892334,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多人出行多城市航班搜索",
+        "purpose": "验证多人出行场景下多城市航班参数处理是否正确",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "PHX",
+                "destination": "CLT",
+                "departure_date": "2024-05-10"
+              },
+              {
+                "origin": "CLT",
+                "destination": "NYC",
+                "departure_date": "2024-05-12"
+              }
+            ],
+            "adults": 4
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.4640300273895264,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效机场代码处理 - 多城市",
+        "purpose": "验证多城市航班搜索时在提供无效机场代码时的错误处理能力",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "XYZ",
+                "destination": "ABC",
+                "departure_date": "2024-07-01"
+              },
+              {
+                "origin": "DEF",
+                "destination": "GHI",
+                "departure_date": "2024-07-03"
+              }
+            ]
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3887455463409424,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符机场代码处理 - 多城市",
+        "purpose": "测试包含特殊字符的机场代码在多城市航班中的处理能力",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "!@#$",
+                "destination": "^&*(",
+                "departure_date": "2024-09-01"
+              },
+              {
+                "origin": "%^&*",
+                "destination": "_+{}",
+                "departure_date": "2024-09-03"
+              }
+            ]
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3999745845794678,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入攻击尝试 - 多城市",
+        "purpose": "测试多城市航班搜索工具对恶意输入的防护能力",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "JFK",
+                "destination": "SELECT * FROM flights",
+                "departure_date": "2024-06-01"
+              },
+              {
+                "origin": "SELECT * FROM airports",
+                "destination": "LAX",
+                "departure_date": "2024-06-03"
+              }
+            ]
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.525914192199707,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未来日期超出范围 - 多城市",
+        "purpose": "测试多城市航班搜索工具对不合理未来日期的处理能力",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "LGA",
+                "destination": "MSP",
+                "departure_date": "2099-12-31"
+              },
+              {
+                "origin": "MSP",
+                "destination": "ORD",
+                "departure_date": "2100-01-01"
+              }
+            ]
+          }
+        },
+        "response": {
+          "result": "{\n  \"request_id\": \"orq_0000AvgcWhwDgaCdz17gYa\",\n  \"offers\": [\n    {\n      \"offer_id\": \"off_0000AvgcWiFiW5naxUFFwo\",\n      \"price\": {\n        \"amount\": \"145.57\",\n        \"currency\": \"USD\"\n      },\n      \"slices\": [\n        {\n          \"origin\": \"LGA\",\n          \"destination\": \"MSP\",\n          \"departure\": \"2099-12-31T23:13:00\",\n          \"arrival\": \"2100-01-01T00:59:00\",\n          \"duration\": \"PT2H46M\",\n          \"carrier\": \"Duffel Airways\",\n          \"stops\": 0,\n          \"stops_description\": \"Non-stop\",\n          \"connections\": []\n        },\n        {\n          \"origin\": \"MSP\",\n          \"destination\": \"ORD\",\n          \"departure\": \"2100-01-01T00:00:00\",\n          \"arrival\": \"2100-01-01T01:17:00\",\n          \"duration\": \"PT1H17M\",\n          \"carrier\": \"Duffel Airways\",\n          \"stops\": 0...[截断]，共计1744字符，剩余944字符"
+        },
+        "execution_time": 1.2928886413574219,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界时间格式测试 - 多城市",
+        "purpose": "验证最小和最大有效时间格式在多城市航班中的处理",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "DTW",
+                "destination": "STL",
+                "departure_date": "2024-08-01"
+              },
+              {
+                "origin": "STL",
+                "destination": "DAL",
+                "departure_date": "2024-08-03"
+              }
+            ],
+            "departure_time": {
+              "from_time": "00:00",
+              "to_time": "23:59"
+            }
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.3792579174041748,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "零中转次数限制 - 多城市",
+        "purpose": "验证最大中转次数为0（即非直飞）时的多城市航班搜索功能",
+        "args": {
+          "params": {
+            "type": "multi_city",
+            "segments": [
+              {
+                "origin": "BOS",
+                "destination": "DEN",
+                "departure_date": "2024-03-15"
+              },
+              {
+                "origin": "DEN",
+                "destination": "PHX",
+                "departure_date": "2024-03-17"
+              }
+            ],
+            "max_connections": 0
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Client error '422 unknown' for url 'https://api.duffel.com/air/offer_requests?return_offers=true&supplier_timeout=30000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422"
+        },
+        "execution_time": 1.432082176208496,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 35
+}

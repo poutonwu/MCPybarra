@@ -1,0 +1,231 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_folders",
+      "tool_name": "list_folders",
+      "parameters": {},
+      "description": "Happy path: List all available Outlook folders to verify basic connectivity and folder scanning functionality."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "[\"GAL Contacts\", \"Organizational Contacts\", \"PeopleCentricConversation Buddies\", \"Recipient Cache\", \"{06967759-274D-40B2-A3EB-D7F9E73727D7}\", \"{A9E2BC46-B3A0-4243-B315-60D991004455}\", \"\\u4efb\\u52a1\", \"\\u516c\\u53f8\", \"\\u51b2\\u7a81\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u63d0\\u9192\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u65e5\\u5386\", \"\\u65e5\\u8bb0\", \"\\u670d\\u52a1\\u5668\\u6545\\u969c\", \"\\u672c\\u5730\\u6545\\u969c\", \"\\u6ce8\\u91ca\", \"\\u8054\\u7cfb\\u4eba\", \"\\u8349\\u7a3f\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_recent_emails_invalid_days",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": -5,
+        "folder_name": "Inbox"
+      },
+      "description": "Edge case: Attempt to search for recent emails with an invalid negative number of days."
+    },
+    "substituted_params": {
+      "days": -5,
+      "folder_name": "Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Parameter 'days' must be a positive integer.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_recent_emails_valid",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": 7,
+        "folder_name": "Inbox"
+      },
+      "description": "Happy path: Search for emails received in the last 7 days in the Inbox folder."
+    },
+    "substituted_params": {
+      "days": 7,
+      "folder_name": "Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Folder 'Inbox' not found in Outlook.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_email_details",
+      "tool_name": "get_email_by_number",
+      "parameters": {
+        "email_number": "$outputs.search_recent_emails_valid[0].number"
+      },
+      "description": "Dependent call: Retrieve full details of the first email from the previous list. Assumes at least one email was found."
+    },
+    "substituted_params": {
+      "email_number": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_recent_emails_valid[0].number'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_emails_by_keyword",
+      "tool_name": "search_emails",
+      "parameters": {
+        "query": "project update",
+        "start_date": "2023-01-01",
+        "end_date": "2024-12-31",
+        "folder_name": "Inbox"
+      },
+      "description": "Happy path: Search for emails containing 'project update' within a broad date range."
+    },
+    "substituted_params": {
+      "query": "project update",
+      "start_date": "2023-01-01",
+      "end_date": "2024-12-31",
+      "folder_name": "Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Folder 'Inbox' not found in Outlook.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_emails_invalid_date_format",
+      "tool_name": "search_emails",
+      "parameters": {
+        "query": "test",
+        "start_date": "01-01-2023",
+        "end_date": "31-12-2023",
+        "folder_name": "Inbox"
+      },
+      "description": "Edge case: Test server's handling of incorrect date formats (DD-MM-YYYY instead of YYYY-MM-DD)."
+    },
+    "substituted_params": {
+      "query": "test",
+      "start_date": "01-01-2023",
+      "end_date": "31-12-2023",
+      "folder_name": "Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Invalid date format. Please use 'YYYY-MM-DD'.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "reply_to_email",
+      "tool_name": "reply_to_email_by_number",
+      "parameters": {
+        "email_number": "$outputs.search_recent_emails_valid[0].number",
+        "reply_body": "Thank you for your message. I'll get back to you shortly."
+      },
+      "description": "Dependent call: Send a reply to the first email from the previous valid search results. Only one test case for sending actions."
+    },
+    "substituted_params": {
+      "email_number": null,
+      "reply_body": "Thank you for your message. I'll get back to you shortly."
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_recent_emails_valid[0].number'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "reply_to_email_invalid_number",
+      "tool_name": "reply_to_email_by_number",
+      "parameters": {
+        "email_number": 999999,
+        "reply_body": "This is a test reply body."
+      },
+      "description": "Edge case: Attempt to reply to an email with an invalid, non-existent email number."
+    },
+    "substituted_params": {
+      "email_number": 999999,
+      "reply_body": "This is a test reply body."
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Invalid email number: 999999. Please run list_recent_emails or search_emails first.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "compose_new_email",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "Test Email from MCP Server",
+        "body": "This is a test email sent by the MCP testing framework.",
+        "recipients": [
+          "test@example.com"
+        ],
+        "cc_recipients": [
+          "cc_test@example.com"
+        ]
+      },
+      "description": "Happy path: Compose and send a new email with CC field populated. Only one test case for sending actions."
+    },
+    "substituted_params": {
+      "subject": "Test Email from MCP Server",
+      "body": "This is a test email sent by the MCP testing framework.",
+      "recipients": [
+        "test@example.com"
+      ],
+      "cc_recipients": [
+        "cc_test@example.com"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"status\": \"Email with subject 'Test Email from MCP Server' sent successfully.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "compose_email_empty_subject",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "",
+        "body": "This email has an empty subject line.",
+        "recipients": [
+          "test@example.com"
+        ]
+      },
+      "description": "Edge case: Attempt to send an email with an empty subject line."
+    },
+    "substituted_params": {
+      "subject": "",
+      "body": "This email has an empty subject line.",
+      "recipients": [
+        "test@example.com"
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Parameter 'subject' cannot be empty.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "compose_email_no_recipients",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "Test No Recipients",
+        "body": "This email should fail due to missing recipients.",
+        "recipients": []
+      },
+      "description": "Edge case: Attempt to send an email with no recipients specified."
+    },
+    "substituted_params": {
+      "subject": "Test No Recipients",
+      "body": "This email should fail due to missing recipients.",
+      "recipients": []
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Parameter 'recipients' list cannot be empty.\"}"
+    }
+  }
+]

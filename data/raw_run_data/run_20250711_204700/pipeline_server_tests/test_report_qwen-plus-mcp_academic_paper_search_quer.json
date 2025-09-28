@@ -1,0 +1,537 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_academic_paper_search_quer",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_academic_paper_search_quer/refined/server.py",
+  "timestamp": "2025-07-11T20:47:03.555458",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Search academic papers based on keywords from Semantic Scholar and Crossref APIs.\n\n    Args:\n        keywords (str): Keywords used for searching papers (required).\n        limit (int): Maximum number of results to return, default is 5 (optional).\n\n    Returns:\n        str: A JSON array containing paper information including title, authors, year, and DOI.\n\n    Raises:\n        ValueError: If input validation fails.\n        httpx.HTTPStatusError: If API request fails.\n        RuntimeError: If both Semantic Scholar and Crossref APIs fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    Fetch detailed information about a specific paper based on its ID and source.\n\n    Args:\n        paper_id (str): Unique identifier of the paper (DOI or Semantic Scholar ID) (required).\n        source (str): Data source (\"Semantic Scholar\" or \"Crossref\") (required).\n\n    Returns:\n        str: A JSON object containing detailed paper information including title, authors, abstract, and publication venue.\n\n    Raises:\n        ValueError: If input validation fails or invalid source is provided.\n        httpx.HTTPStatusError: If API request fails.\n        RuntimeError: If paper details cannot be retrieved.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    Search papers by topic with optional year range filtering.\n\n    Args:\n        topic (str): Topic keywords for paper search (required).\n        year_range (str): Year range in format \"YYYY-YYYY\" (optional).\n        limit (int): Maximum number of results to return, default is 5 (optional).\n\n    Returns:\n        str: A JSON array containing paper information including title, authors, year, and DOI.\n\n    Raises:\n        ValueError: If input validation fails.\n        httpx.HTTPStatusError: If API request fails.\n        RuntimeError: If both search methods fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "year_range": {
+            "default": null,
+            "title": "Year Range",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证使用默认限制值搜索论文的基本功能是否正常工作",
+        "args": {
+          "keywords": "machine learning"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Client error '400 Bad Request' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400, "
+        },
+        "execution_time": 16.06540036201477,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证指定自定义结果数量限制时搜索论文的功能是否正常",
+        "args": {
+          "keywords": "deep learning",
+          "limit": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Reinforcement Learning and Deep Reinforcement Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/9781108955652.016\", \"source\": \"Crossref\"}, {\"title\": \"Introduction to Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11171.003.0004\", \"source\": \"Crossref\"}, {\"title\": \"Computer Vision, Deep Learning, Deep Reinforcement Learning\", \"authors\": [\"Farshid PirahanSiah\"], \"year\": 0, \"doi\": \"10.14293/s2199-1006.1.sor-uncat.clzwyuz.v1\", \"source\": \"Crossref\"}, {\"title\": \"The Future of Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11171.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Deep Reinforcement Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/9781108891530.017\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning in Python: Introduction to Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.4135/9781526493446\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning Fundamentals\", \"authors\": [\"Hisham El-Amir\", \"Mahmoud Hamdy\"], \"year\": 0, \"doi\": \"10.1007/978-1-4842-5349-6_9\", \"source\": \"Crossref\"}, {\"title\": \"Introduction to Deep Learning\", \"authors\": [\"Harsh Bhasin\"], \"year\": 0, \"doi\": \"10.1007/979-8-8688-1035-0_2\", \"source\": \"Crossref\"}, {\"title\": \"A Brief History of Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11171.003.0007\", \"source\": \"Crossref\"}, {\"title\": \"The Deep Learning Channel\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/9781108955652.009\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 11.984674215316772,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Special Characters in Keywords",
+        "purpose": "验证包含特殊字符的关键词是否能被正确处理",
+        "args": {
+          "keywords": "natural language processing & AI",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"AI Linguistics\", \"authors\": [\"Guosheng Zhang\"], \"year\": 0, \"doi\": \"10.1016/j.nlp.2025.100137\", \"source\": \"Crossref\"}, {\"title\": \"When Creative AI Meets Conversational AI\", \"authors\": [\"Xianchao Wu\"], \"year\": 0, \"doi\": \"10.5715/jnlp.28.881\", \"source\": \"Crossref\"}, {\"title\": \"Natural Language Processing in AI Chatbots\", \"authors\": [\"Nipun Bhardwaj\"], \"year\": 0, \"doi\": \"10.2139/ssrn.5044217\", \"source\": \"Crossref\"}, {\"title\": \"Natural Language Processing, Information Retrieval and AI\", \"authors\": [], \"year\": 0, \"doi\": \"10.5121/csit.2023.1303\", \"source\": \"Crossref\"}, {\"title\": \"Towards a Better Understanding of Noise in Natural Language Processing\", \"authors\": [\"\", \"Khetam Al Sharou\", \"Zhenhao Li\", \"\", \"Lucia Specia\", \"\"], \"year\": 0, \"doi\": \"10.26615/978-954-452-072-4_007\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 10.214427471160889,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Input",
+        "purpose": "验证当关键词为空时是否抛出正确的参数验证错误",
+        "args": {
+          "keywords": "",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: keywords parameter cannot be empty string"
+        },
+        "execution_time": 0.005179405212402344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value Test",
+        "purpose": "验证负数作为limit参数时是否抛出参数验证错误",
+        "args": {
+          "keywords": "quantum computing",
+          "limit": -3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: limit must be a positive integer"
+        },
+        "execution_time": 0.012514829635620117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Limit Value Test",
+        "purpose": "验证limit为0时是否返回空结果或抛出错误",
+        "args": {
+          "keywords": "blockchain",
+          "limit": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: limit must be a positive integer"
+        },
+        "execution_time": 0.0030660629272460938,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Large Limit Value Test",
+        "purpose": "验证极大limit值是否会被API正确处理或返回合理响应",
+        "args": {
+          "keywords": "neural networks",
+          "limit": 1000
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Server error '500 Internal Server Error' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=neural+networks&limit=1000&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500, "
+        },
+        "execution_time": 16.184268474578857,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid API Endpoint Simulation",
+        "purpose": "模拟API请求失败情况下的错误处理机制",
+        "args": {
+          "keywords": "robotics",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Learning Robotics: Users' Representation of Robots\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781119335740.ch1\", \"source\": \"Crossref\"}, {\"title\": \"Learning Robotics, with Robotics, by Robotics\", \"authors\": [\"Ilaria Gaudiello\", \"Elisabetta Zibetti\"], \"year\": 0, \"doi\": \"10.1002/9781119335740\", \"source\": \"Crossref\"}, {\"title\": \"Front Matter\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781119335740.fmatter\", \"source\": \"Crossref\"}, {\"title\": \"Bibliography\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781119335740.biblio\", \"source\": \"Crossref\"}, {\"title\": \"Acknowledgement to Reviewers of Robotics in 2017\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.3390/robotics7010006\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 16.000609159469604,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Both APIs Failure Simulation",
+        "purpose": "验证当两个API均不可用时是否抛出RuntimeError",
+        "args": {
+          "keywords": "data science",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Data Governance is Key to Interpretation: Reconceptualizing Data in Data Science\", \"authors\": [\"Sabina Leonelli\"], \"year\": 0, \"doi\": \"10.1162/99608f92.17405bb6\", \"source\": \"Crossref\"}, {\"title\": \"Data, Data, Everywhere\\u2026\", \"authors\": [\"Nicole Lazar\"], \"year\": 0, \"doi\": \"10.1162/99608f92.a6e7a24e\", \"source\": \"Crossref\"}, {\"title\": \"Analytics and Data Science Standardization and Assessment Framework\", \"authors\": [], \"year\": 0, \"doi\": \"10.1162/99608f92.1a99e67a\", \"source\": \"Crossref\"}, {\"title\": \"When Quantum Computation Meets Data Science: Making Data Science Quantum\", \"authors\": [\"Yazhen Wang\"], \"year\": 0, \"doi\": \"10.1162/99608f92.ef5d8928\", \"source\": \"Crossref\"}, {\"title\": \"Harvard Data Science Review\", \"authors\": [], \"year\": 0, \"doi\": \"10.21428/99608f92\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 11.631752490997314,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Keywords",
+        "purpose": "测试系统是否对恶意输入进行安全过滤",
+        "args": {
+          "keywords": "cybersecurity OR 1=1",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=cybersecurity+OR+1%3D1&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429, "
+        },
+        "execution_time": 15.183358192443848,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Keywords",
+        "purpose": "验证系统是否对潜在的跨站脚本攻击输入进行安全处理",
+        "args": {
+          "keywords": "<script>alert('xss')</script>",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Script S1: RatePartitions script\", \"authors\": [], \"year\": 0, \"doi\": \"10.7717/peerj.5498/supp-1\", \"source\": \"Crossref\"}, {\"title\": \"Jurnal Script\", \"authors\": [], \"year\": 0, \"doi\": \"10.34151/script\", \"source\": \"Crossref\"}, {\"title\": \"SCRIPT-ed\", \"authors\": [], \"year\": 0, \"doi\": \"10.2966/scrip\", \"source\": \"Crossref\"}, {\"title\": \"THE SCRIPT: 2 Body of script Size of script\", \"authors\": [], \"year\": 0, \"doi\": \"10.4324/9780080503059-14\", \"source\": \"Crossref\"}, {\"title\": \"Script to Screen\", \"authors\": [], \"year\": 0, \"doi\": \"10.5040/9781350923812\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 11.397106409072876,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Characters in Keywords",
+        "purpose": "验证非ASCII字符（如中文）作为关键词时是否能正常工作",
+        "args": {
+          "keywords": "人工智能",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"\\u5168\\u7403\\u4eba\\u5de5\\u667a\\u80fd\\u6cbb\\u7406\\u5dee\\u8ddd\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.18356/9789211068863c005\", \"source\": \"Crossref\"}, {\"title\": \"\\u5173\\u4e8e\\u4eba\\u5de5\\u667a\\u80fd\\u9ad8\\u7ea7\\u522b\\u54a8\\u8be2\\u673a\\u6784\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.18356/9789211068863c001\", \"source\": \"Crossref\"}, {\"title\": \"\\u4eba\\u5de5\\u667a\\u80fd\\u524d\\u6cbf\\u4e0e\\u5e94\\u7528\", \"authors\": [], \"year\": 0, \"doi\": \"10.52810/faai\", \"source\": \"Crossref\"}, {\"title\": \"\\u6cbb\\u7406\\u4eba\\u5de5\\u667a\\u80fd\\uff0c\\u52a9\\u529b\\u9020\\u798f\\u4eba\\u7c7b\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.18356/9789211068863\", \"source\": \"Crossref\"}, {\"title\": \"\\u4eba\\u5de5\\u667a\\u80fd\\u80cc\\u666f\\u4e0b\\u65b0\\u5de5\\u79d1\\u4eba\\u624d\\u5c31\\u4e1a\\u80fd\\u529b\\u63d0\\u5347\\u7b56\\u7565\\u7814\\u7a76\", \"authors\": [\"\\u9ad8\\u542f\\u660e \\u5434\\u8389\\u8389\"], \"year\": 0, \"doi\": \"10.69979/3029-2735.24.11.057\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 9.986375093460083,
+        "is_functional_test": true
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证使用默认限制值搜索论文的基本功能是否正常工作",
+        "args": {
+          "topic": "machine learning"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Unexpected error in search_by_topic: Failed to search by topic: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429, Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Client error '400 Bad Request' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400, "
+        },
+        "execution_time": 18.257064819335938,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证指定自定义结果数量限制时搜索论文的功能是否正常",
+        "args": {
+          "topic": "deep learning",
+          "limit": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Reinforcement Learning and Deep Reinforcement Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/9781108955652.016\", \"source\": \"Crossref\"}, {\"title\": \"Introduction to Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11171.003.0004\", \"source\": \"Crossref\"}, {\"title\": \"Computer Vision, Deep Learning, Deep Reinforcement Learning\", \"authors\": [\"Farshid PirahanSiah\"], \"year\": 0, \"doi\": \"10.14293/s2199-1006.1.sor-uncat.clzwyuz.v1\", \"source\": \"Crossref\"}, {\"title\": \"The Future of Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11171.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Deep Reinforcement Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/9781108891530.017\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning in Python: Introduction to Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.4135/9781526493446\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning Fundamentals\", \"authors\": [\"Hisham El-Amir\", \"Mahmoud Hamdy\"], \"year\": 0, \"doi\": \"10.1007/978-1-4842-5349-6_9\", \"source\": \"Crossref\"}, {\"title\": \"Introduction to Deep Learning\", \"authors\": [\"Harsh Bhasin\"], \"year\": 0, \"doi\": \"10.1007/979-8-8688-1035-0_2\", \"source\": \"Crossref\"}, {\"title\": \"A Brief History of Deep Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11171.003.0007\", \"source\": \"Crossref\"}, {\"title\": \"The Deep Learning Channel\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/9781108955652.009\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 14.89704942703247,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Year Range Filtering",
+        "purpose": "验证按年份范围筛选论文的搜索功能是否正常工作",
+        "args": {
+          "topic": "quantum computing",
+          "year_range": "2015-2020"
+        },
+        "response": {
+          "result": "[{\"title\": \"Quantum Computing I\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198854227.003.0015\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing II\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198854227.003.0016\", \"source\": \"Crossref\"}, {\"title\": \"Application: Quantum Computing\", \"authors\": [\"Michael G. Raymer\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190250720.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Distributed Quantum Computing\\u2009\\u2013\\u2009Classical and Quantum\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781394185542.ch3\", \"source\": \"Crossref\"}, {\"title\": \"Quantum computing for network medicine-based epistatic disease mechanism mining - Ready for quantum computing?\", \"authors\": [\"Jan Baumbach\"], \"year\": 0, \"doi\": \"10.58647/rexpo.25000079.v1\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 19.19115662574768,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Topic Input Test",
+        "purpose": "验证当主题为空时是否抛出参数验证错误",
+        "args": {
+          "topic": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: topic parameter cannot be empty string"
+        },
+        "execution_time": 0.004555463790893555,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value Test",
+        "purpose": "验证负数作为limit参数时是否抛出参数验证错误",
+        "args": {
+          "topic": "blockchain",
+          "limit": -3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: limit must be a positive integer"
+        },
+        "execution_time": 0.007025957107543945,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Limit Value Test",
+        "purpose": "验证limit为0时是否返回空结果或抛出错误",
+        "args": {
+          "topic": "blockchain",
+          "limit": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: limit must be a positive integer"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Year Range Format Test",
+        "purpose": "验证非法格式的年份范围输入是否被正确拒绝",
+        "args": {
+          "topic": "robotics",
+          "year_range": "2020-2015"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Invalid year_range: min year 2020 should be less than max year 2015"
+        },
+        "execution_time": 0.0064945220947265625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Topic",
+        "purpose": "测试系统是否对恶意输入进行安全过滤",
+        "args": {
+          "topic": "cybersecurity OR 1=1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Unexpected error in search_by_topic: Failed to search by topic: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=cybersecurity+OR+1%3D1&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429, Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=cybersecurity+OR+1%3D1&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429, "
+        },
+        "execution_time": 16.323601961135864,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Topic",
+        "purpose": "验证系统是否对潜在的跨站脚本攻击输入进行安全处理",
+        "args": {
+          "topic": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "[{\"title\": \"Script S1: RatePartitions script\", \"authors\": [], \"year\": 0, \"doi\": \"10.7717/peerj.5498/supp-1\", \"source\": \"Crossref\"}, {\"title\": \"Jurnal Script\", \"authors\": [], \"year\": 0, \"doi\": \"10.34151/script\", \"source\": \"Crossref\"}, {\"title\": \"SCRIPT-ed\", \"authors\": [], \"year\": 0, \"doi\": \"10.2966/scrip\", \"source\": \"Crossref\"}, {\"title\": \"THE SCRIPT: 2 Body of script Size of script\", \"authors\": [], \"year\": 0, \"doi\": \"10.4324/9780080503059-14\", \"source\": \"Crossref\"}, {\"title\": \"Script to Screen\", \"authors\": [], \"year\": 0, \"doi\": \"10.5040/9781350923812\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 15.184445858001709,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Characters in Topic",
+        "purpose": "验证非ASCII字符（如中文）作为关键词时是否能正常工作",
+        "args": {
+          "topic": "人工智能"
+        },
+        "response": {
+          "result": "[{\"title\": \"\\u5168\\u7403\\u4eba\\u5de5\\u667a\\u80fd\\u6cbb\\u7406\\u5dee\\u8ddd\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.18356/9789211068863c005\", \"source\": \"Crossref\"}, {\"title\": \"\\u5173\\u4e8e\\u4eba\\u5de5\\u667a\\u80fd\\u9ad8\\u7ea7\\u522b\\u54a8\\u8be2\\u673a\\u6784\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.18356/9789211068863c001\", \"source\": \"Crossref\"}, {\"title\": \"\\u4eba\\u5de5\\u667a\\u80fd\\u524d\\u6cbf\\u4e0e\\u5e94\\u7528\", \"authors\": [], \"year\": 0, \"doi\": \"10.52810/faai\", \"source\": \"Crossref\"}, {\"title\": \"\\u6cbb\\u7406\\u4eba\\u5de5\\u667a\\u80fd\\uff0c\\u52a9\\u529b\\u9020\\u798f\\u4eba\\u7c7b\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.18356/9789211068863\", \"source\": \"Crossref\"}, {\"title\": \"\\u4eba\\u5de5\\u667a\\u80fd\\u80cc\\u666f\\u4e0b\\u65b0\\u5de5\\u79d1\\u4eba\\u624d\\u5c31\\u4e1a\\u80fd\\u529b\\u63d0\\u5347\\u7b56\\u7565\\u7814\\u7a76\", \"authors\": [\"\\u9ad8\\u542f\\u660e \\u5434\\u8389\\u8389\"], \"year\": 0, \"doi\": \"10.69979/3029-2735.24.11.057\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 16.969894647598267,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Topic",
+        "purpose": "验证包含特殊字符的关键词是否能被正确处理",
+        "args": {
+          "topic": "natural language processing & AI"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Unexpected error in search_by_topic: Failed to search by topic: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=natural+language+processing+%26+AI&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429, Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=natural+language+processing+%26+AI&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429, "
+        },
+        "execution_time": 15.795625925064087,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Very Large Limit Value Test",
+        "purpose": "验证极大limit值是否会被API正确处理或返回合理响应",
+        "args": {
+          "topic": "neural networks",
+          "limit": 1000
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Unexpected error in search_by_topic: Failed to search by topic: Server error '500 Internal Server Error' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=neural+networks&limit=1000&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500, Unexpected error in search_papers: Both Semantic Scholar and Crossref APIs failed: Server error '500 Internal Server Error' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=neural+networks&limit=1000&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500, "
+        },
+        "execution_time": 15.884453773498535,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "Basic Paper Details Fetch with DOI",
+        "purpose": "验证使用有效的DOI从Semantic Scholar获取论文详细信息的基本功能是否正常工作",
+        "args": {
+          "paper_id": "10.48550/arXiv.2106.15928",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Semantic Scholar: Client error '404 Not Found' for url 'https://api.semanticscholar.org/graph/v1/paper/10.48550/arXiv.2106.15928?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.7246832847595215,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper Details with Semantic Scholar ID",
+        "purpose": "验证使用有效的Semantic Scholar ID获取论文详细信息的功能是否正常工作",
+        "args": {
+          "paper_id": "abcd1234abcd1234abcd1234abcd1234abcd1234",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Semantic Scholar: Client error '404 Not Found' for url 'https://api.semanticscholar.org/graph/v1/paper/abcd1234abcd1234abcd1234abcd1234abcd1234?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.7379975318908691,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper Details from Crossref Source",
+        "purpose": "验证从Crossref数据源获取论文详细信息的功能是否正常工作",
+        "args": {
+          "paper_id": "10.1109/access.2021.3084332",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/10.1109/access.2021.3084332'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 3.0837063789367676,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Paper ID Validation",
+        "purpose": "验证当paper_id为空字符串时是否抛出参数验证错误",
+        "args": {
+          "paper_id": "",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: paper_id parameter cannot be empty string"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Validation",
+        "purpose": "验证当提供无效的数据源时是否抛出参数验证错误",
+        "args": {
+          "paper_id": "10.48550/arXiv.2106.15928",
+          "source": "Invalid Source"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Invalid source: Invalid Source. Must be 'Semantic Scholar' or 'Crossref'"
+        },
+        "execution_time": 0.004514217376708984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper Details Fetch Failure Simulation",
+        "purpose": "验证当API请求失败时是否抛出HTTPStatusError",
+        "args": {
+          "paper_id": "invalid-paper-id-12345",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Semantic Scholar: Client error '404 Not Found' for url 'https://api.semanticscholar.org/graph/v1/paper/invalid-paper-id-12345?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.3545384407043457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Paper ID",
+        "purpose": "测试系统是否对恶意输入进行安全过滤",
+        "args": {
+          "paper_id": "10.48550/arXiv.2106.15928 OR 1=1",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Semantic Scholar: Client error '404 Not Found' for url 'https://api.semanticscholar.org/graph/v1/paper/10.48550/arXiv.2106.15928%20OR%201=1?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.263598918914795,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Paper ID",
+        "purpose": "验证系统是否对潜在的跨站脚本攻击输入进行安全处理",
+        "args": {
+          "paper_id": "<script>alert('xss')</script>",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/%3Cscript%3Ealert('xss')%3C/script%3E'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 3.54309344291687,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Characters in Paper ID",
+        "purpose": "验证非ASCII字符作为paper_id时是否能正确抛出错误",
+        "args": {
+          "paper_id": "10.48550/arXiv.中文论文ID",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/10.48550/arXiv.%E4%B8%AD%E6%96%87%E8%AE%BA%E6%96%87ID'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.238910436630249,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in DOI",
+        "purpose": "验证包含特殊字符的DOI是否能被正确处理",
+        "args": {
+          "paper_id": "10.1002/9781119335740.ch1",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"title\": \"Learning Robotics: Users' Representation of Robots\", \"authors\": [], \"abstract\": \"N/A\", \"publication_venue\": \"Learning Robotics, with Robotics, by Robotics\"}"
+        },
+        "execution_time": 3.6418349742889404,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Details for Non-Existent Paper",
+        "purpose": "验证当请求不存在的论文ID时是否抛出RuntimeError",
+        "args": {
+          "paper_id": "10.99999/nonexistentpaper12345",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/10.99999/nonexistentpaper12345'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 4.312926530838013,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 35
+}

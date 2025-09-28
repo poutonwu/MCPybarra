@@ -1,0 +1,459 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_arxiv_paper_manager",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_arxiv_paper_manager/refined/server.py",
+  "timestamp": "2025-07-12T20:38:11.907485",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Searches the arXiv repository for papers matching a given query.\n\n    This function queries the arXiv API for academic papers based on a search\n    term. It can search by keywords, author names, or other arXiv-supported\n    syntax. The results are sorted by their submission date.\n\n    Args:\n        query (str): The search query (e.g., \"quantum computing\", \"author:John Doe\").\n        max_results (int): The maximum number of results to return. Defaults to 10.\n\n    Returns:\n        str: A JSON string representing a list of papers with their metadata,\n             including ID, title, authors, and summary. Returns a JSON object\n             with an \"error\" key if the search fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    Downloads the PDF of a specific paper using its arXiv ID.\n\n    This function fetches a paper's metadata from arXiv using its unique ID,\n    retrieves the PDF URL, and downloads the file into a local 'papers'\n    directory. The downloaded file is named using its arXiv ID (e.g., '2301.12345.pdf').\n\n    Args:\n        paper_id (str): The unique arXiv ID of the paper to download (e.g., '2301.12345').\n\n    Returns:\n        str: A JSON string indicating the result of the download operation.\n             On success, it returns a message confirming the download. On failure,\n             it returns a JSON object with an \"error\" key.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    Lists all the academic papers that have been downloaded locally.\n\n    This function scans the 'papers' directory and returns a list of all\n    files that end with the '.pdf' extension. This provides a quick way to see\n    which papers are available for local reading.\n\n    Returns:\n        str: A JSON string representing a list of filenames of downloaded papers.\n             If the directory doesn't exist or is empty, it returns an empty list.\n             Returns a JSON object with an \"error\" key if an unexpected error occurs.\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    Reads the text content from a specified, locally stored PDF file.\n\n    This function opens a PDF from the local 'papers' directory and uses the\n    PyMuPDF library (fitz) to extract all text content from its pages.\n    The extracted text is returned as a single string.\n\n    Args:\n        filename (str): The filename of the paper to read from the 'papers'\n                        directory (e.g., '2301.12345.pdf').\n\n    Returns:\n        str: A JSON string containing the filename and the full extracted text\n             of the paper. If the file is not found or an error occurs during\n             reading, it returns a JSON object with an \"error\" key.\n    ",
+      "args_schema": {
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search with Default Results",
+        "purpose": "验证使用默认max_results参数搜索关键词的基本功能是否正常",
+        "args": {
+          "query": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.08000v1\", \"title\": \"Impact of Pretraining Word Co-occurrence on Compositional Generalization in Multimodal Models\", \"authors\": [\"Helen Qu\", \"Sang Michael Xie\"], \"summary\": \"CLIP and large multimodal models (LMMs) have better accuracy on examples\\ninvolving concepts that are highly represented in the training data. However,\\nthe role of concept combinations in the training data on compositional\\ngeneralization is largely unclear -- for instance, how does accuracy vary when\\na common object appears in an uncommon pairing with another object? In this\\npaper, we investigate how word co-occurrence statistics in the pretraining\\ndataset (a proxy for co-occurrence of visual concepts) impacts CLIP/LMM\\nperformance. To disentangle the effects of word co-occurrence frequencies from\\nsingle-word frequencies, we measure co-occurrence with pointwise mutual\\ninformation (PMI), which normalizes the joint probability of two words\\nco-occurring by the probability of co-occurring independently. Using\\nsynthetically generated images with a variety of concept pairs, we show a\\nstrong correlation between PMI in the CLIP pretraining data and zero-shot\\naccuracy in CLIP models trained on LAION-400M (r=0.97 and 14% accuracy gap\\nbetween images in the top and bottom 5% of PMI values), demonstrating that even\\naccuracy on common concepts is affected by the combination of concepts in the\\nimage. Leveraging this finding, we reproduce this effect in natural images by\\nediting them to contai...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计14968字符，剩余13468字符"
+        },
+        "execution_time": 2.372602701187134,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search by Author",
+        "purpose": "验证通过作者名称进行搜索的功能是否正常",
+        "args": {
+          "query": "author:Einstein",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.3768401145935059,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Search",
+        "purpose": "验证空查询时工具的错误处理能力",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.8722262382507324,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Results Boundary Test",
+        "purpose": "验证最大允许返回结果数的边界情况",
+        "args": {
+          "query": "machine learning",
+          "max_results": 1000
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred during search: Page of results was unexpectedly empty (https://export.arxiv.org/api/query?search_query=machine+learning&id_list=&sortBy=submittedDate&sortOrder=descending&start=400&max_results=100)\"}"
+        },
+        "execution_time": 28.146551609039307,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证包含特殊字符的查询是否能被正确处理",
+        "args": {
+          "query": "AI & ML: deep learning",
+          "max_results": 3
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.08000v1\", \"title\": \"Impact of Pretraining Word Co-occurrence on Compositional Generalization in Multimodal Models\", \"authors\": [\"Helen Qu\", \"Sang Michael Xie\"], \"summary\": \"CLIP and large multimodal models (LMMs) have better accuracy on examples\\ninvolving concepts that are highly represented in the training data. However,\\nthe role of concept combinations in the training data on compositional\\ngeneralization is largely unclear -- for instance, how does accuracy vary when\\na common object appears in an uncommon pairing with another object? In this\\npaper, we investigate how word co-occurrence statistics in the pretraining\\ndataset (a proxy for co-occurrence of visual concepts) impacts CLIP/LMM\\nperformance. To disentangle the effects of word co-occurrence frequencies from\\nsingle-word frequencies, we measure co-occurrence with pointwise mutual\\ninformation (PMI), which normalizes the joint probability of two words\\nco-occurring by the probability of co-occurring independently. Using\\nsynthetically generated images with a variety of concept pairs, we show a\\nstrong correlation between PMI in the CLIP pretraining data and zero-shot\\naccuracy in CLIP models trained on LAION-400M (r=0.97 and 14% accuracy gap\\nbetween images in the top and bottom 5% of PMI values), demonstrating that even\\naccuracy on common concepts is affected by the combination of concepts in the\\nimage. Leveraging this finding, we reproduce this effect in natural images by\\nediting them to contai...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计5657字符，剩余4157字符"
+        },
+        "execution_time": 2.539698600769043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Negative Max Results Value",
+        "purpose": "验证负值作为max_results参数时的错误处理",
+        "args": {
+          "query": "robotics",
+          "max_results": -5
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Max Results",
+        "purpose": "验证设置max_results为0时的行为",
+        "args": {
+          "query": "neural networks",
+          "max_results": 0
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred during search: Page of results was unexpectedly empty (https://export.arxiv.org/api/query?search_query=neural+networks&id_list=&sortBy=submittedDate&sortOrder=descending&start=100&max_results=100)\"}"
+        },
+        "execution_time": 15.41283917427063,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-English Query Search",
+        "purpose": "验证非英文搜索词是否能正常工作",
+        "args": {
+          "query": "量子力学",
+          "max_results": 2
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.9179227352142334,
+        "is_functional_test": true
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic Paper Download",
+        "purpose": "验证使用有效arXiv ID下载论文PDF的基本功能是否正常",
+        "args": {
+          "paper_id": "2301.12345"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.01124691963196,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Paper ID Format",
+        "purpose": "验证无效格式的arXiv ID能否被正确处理",
+        "args": {
+          "paper_id": "invalid_id"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.00897979736328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Paper ID",
+        "purpose": "验证不存在的arXiv ID能否被正确处理",
+        "args": {
+          "paper_id": "9999.99999"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.013999938964844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download with Special Characters in ID",
+        "purpose": "验证包含特殊字符的ID是否能被正确拒绝",
+        "args": {
+          "paper_id": "2301.12!@#"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.01193571090698,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Paper ID",
+        "purpose": "验证空字符串作为paper_id参数时的错误处理",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.002647399902344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID Boundary Test - Minimum Length",
+        "purpose": "验证最小长度的arXiv ID是否能被正确处理",
+        "args": {
+          "paper_id": "1234.5678"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.006444454193115,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper ID Boundary Test - Maximum Length",
+        "purpose": "验证最大长度的arXiv ID是否能被正确处理",
+        "args": {
+          "paper_id": "12345.67890"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.01007604598999,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "验证工具是否能防止路径穿越攻击尝试",
+        "args": {
+          "paper_id": "../../../../etc/passwd"
+        },
+        "response": {
+          "error": "Tool call 'download_paper' was cancelled."
+        },
+        "execution_time": 40.00957202911377,
+        "is_functional_test": false
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "Basic Paper Listing",
+        "purpose": "验证list_papers工具在papers目录中存在PDF文件时是否能正确列出所有论文",
+        "args": {},
+        "response": {
+          "error": "Tool call 'list_papers' was cancelled."
+        },
+        "execution_time": 40.02010726928711,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Papers Directory",
+        "purpose": "验证当papers目录为空时，list_papers是否返回空列表",
+        "args": {},
+        "response": {
+          "error": "Tool call 'list_papers' was cancelled."
+        },
+        "execution_time": 40.011900663375854,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Missing Papers Directory",
+        "purpose": "验证当papers目录不存在时，list_papers是否返回空列表",
+        "args": {},
+        "response": {
+          "error": "Tool call 'list_papers' was cancelled."
+        },
+        "execution_time": 39.99645280838013,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Directory with Non-PDF Files",
+        "purpose": "验证list_papers是否只列出.pdf扩展名的文件，忽略其他类型的文件",
+        "args": {},
+        "response": {
+          "error": "Tool call 'list_papers' was cancelled."
+        },
+        "execution_time": 39.9939751625061,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Directory",
+        "purpose": "验证list_papers是否安全地处理路径穿越尝试（如目录名包含../）",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 3.0500593185424805,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling for Invalid File Permissions",
+        "purpose": "验证当用户没有访问papers目录权限时，list_papers是否优雅地返回错误信息",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.019529342651367188,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Large Number of PDF Files",
+        "purpose": "验证list_papers能否处理大量PDF文件的情况，测试性能和稳定性",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.01802849769592285,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in PDF Filenames",
+        "purpose": "验证含有特殊字符的PDF文件名是否能被正确列出",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.014525413513183594,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic PDF Text Extraction",
+        "purpose": "验证从本地存储的有效PDF文件中提取文本的基本功能是否正常",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\paper1.pdf\", \"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023), pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT 1 has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache 2 is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much faster.\\nFor instance, integrating GPTCache with the\\nGPT service offered by OpenAI can incr...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计30374字符，剩余28874字符"
+        },
+        "execution_time": 0.0454411506652832,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Nonexistent PDF File",
+        "purpose": "验证不存在的PDF文件能否被正确处理",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.pdf' not found.\"}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Filename Parameter",
+        "purpose": "验证空字符串作为filename参数时的错误处理",
+        "args": {
+          "filename": ""
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: 'papers\\\\' is no file\"}"
+        },
+        "execution_time": 0.002999544143676758,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filename",
+        "purpose": "验证包含特殊字符的文件名能否被正确处理",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_@#$.pdf"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\merged_@#$.pdf\", \"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023), pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT 1 has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache 2 is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much faster.\\nFor instance, integrating GPTCache with the\\nGPT service offered by OpenAI can ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计107752字符，剩余106252字符"
+        },
+        "execution_time": 0.04465794563293457,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "验证工具是否能防止路径穿越攻击尝试",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\..\\etc\\passwd"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\..\\\\etc\\\\passwd' not found.\"}"
+        },
+        "execution_time": 0.004198312759399414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Length Filename Test",
+        "purpose": "验证最大长度文件名是否能被正确处理",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_output_filename_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows_merged.pdf"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_long_output_filename_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows_merged.pdf\", \"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023), pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT 1 has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache 2 is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much fa...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计107838字符，剩余106338字符"
+        },
+        "execution_time": 0.044092416763305664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero-Length PDF File",
+        "purpose": "验证零字节PDF文件的错误处理能力",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_metadata_document.docx"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_metadata_document.docx\", \"content\": \"This is a basic paragraph.\\nThis paragraph contains special characters: @#$_&*{}[]\\nThis is a very long paragraph that tests the maximum allowed\\nlength for a paragraph input. It should be able to handle large\\namounts of text without any issues or truncation. This is just a\\nsample content to increase the size of the input text for testing\\npurposes.\\n\\u8fd9\\u662f\\u4e00\\u4e2a\\u5305\\u542b\\u4e2d\\u6587\\u5b57\\u7b26\\u7684\\u6bb5\\u843d\\u3002Paragraph with Unicode characters.\\nRestricted context test paragraph.\\n1234567890\\nMain Title\\nSub Title\\nTitle@#$_Test\\nMaximum Level Heading\\nRestricted Document Heading\\n\\u6807\\u9898\\u5185\\u5bb9\\u542b\\u6709Unicode\\u5b57\\u7b26\\n\"}"
+        },
+        "execution_time": 0.030777931213378906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Corrupted or Invalid PDF File",
+        "purpose": "验证无效或损坏的PDF文件能否被正确处理",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_extension_copy.txt.docx"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\invalid_extension_copy.txt.docx\", \"content\": \"This is a basic paragraph.\\nThis paragraph contains special characters: @#$_&*{}[]\\nThis is a very long paragraph that tests the maximum allowed\\nlength for a paragraph input. It should be able to handle large\\namounts of text without any issues or truncation. This is just a\\nsample content to increase the size of the input text for testing\\npurposes.\\n\\u8fd9\\u662f\\u4e00\\u4e2a\\u5305\\u542b\\u4e2d\\u6587\\u5b57\\u7b26\\u7684\\u6bb5\\u843d\\u3002Paragraph with Unicode characters.\\nRestricted context test paragraph.\\n1234567890\\nMain Title\\nSub Title\\nTitle@#$_Test\\nMaximum Level Heading\\nRestricted Document Heading\\n\\u6807\\u9898\\u5185\\u5bb9\\u542b\\u6709Unicode\\u5b57\\u7b26\\n\"}"
+        },
+        "execution_time": 0.029196500778198242,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 32
+}

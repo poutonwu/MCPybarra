@@ -1,0 +1,251 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_duckduckgo_search_and_fetc",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_duckduckgo_search_and_fetc/refined/server.py",
+  "timestamp": "2025-07-16T10:52:16.620398",
+  "tools": [
+    {
+      "name": "duckduckgo_search",
+      "description": "\n    Perform a search on DuckDuckGo and return structured results.\n\n    Args:\n        query: The search term or phrase to query on DuckDuckGo (required).\n        max_results: Maximum number of search results to return (default: 5).\n\n    Returns:\n        A dictionary containing search results with 'title', 'url', and 'snippet' under 'results' key.\n\n    Raises:\n        ValueError: If the query is empty or max_results is invalid.\n        httpx.HTTPStatusError: If the API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "duckduckgo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetch and parse the main text content of a webpage.\n\n    Args:\n        url: The URL of the webpage to scrape (required).\n\n    Returns:\n        A string containing the cleaned, main text content of the webpage.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.HTTPStatusError: If the request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "duckduckgo_search": [
+      {
+        "case_name": "Basic Search with Default Results",
+        "purpose": "验证使用默认max_results参数的基本搜索功能是否正常工作",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Artificial intelligence Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence\\\">Artificial intelligence</a> Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\"\n    },\n    {\n      \"title\": \"A.I. Artificial Intelligence A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\",\n      \"url\": \"https://duckduckgo.com/A.I._Artificial_Intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/A.I._Artificial_Intelligence\\\">A.I. Artificial Intelligence</a> A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\"\n    },\n    {\n      \"title\": \"Artificial intelligence in video games In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence_in_video_games\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence_in_video_games\\\">Artificial intelligence in video games</a>In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\"\n    }\n  ]\n}"
+        },
+        "execution_time": 1.4491698741912842,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Result Limit",
+        "purpose": "验证可以自定义返回的最大搜索结果数量",
+        "args": {
+          "query": "machine learning",
+          "max_results": 10
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Machine learning Category\",\n      \"url\": \"https://duckduckgo.com/c/Machine_learning\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Machine_learning\\\">Machine learning Category</a>\"\n    },\n    {\n      \"title\": \"Deep learning — branch of ML concerned with artificial neural network s.\",\n      \"url\": \"https://duckduckgo.com/Deep_learning\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Deep_learning\\\">Deep learning</a> — branch of ML concerned with <a href=\\\"https://duckduckgo.com/?q=Artificial%20neural%20network\\\">artificial neural network</a>s.\"\n    },\n    {\n      \"title\": \"M-theory (learning framework) - In machine learning and computer vision, M-theory is a learning framework inspired by feed-forward processing in the ventral stream of visual cortex and originally developed for recognition and classification of objects in visual scenes.\",\n      \"url\": \"https://duckduckgo.com/M-theory_(learning_framework)\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/M-theory_(learning_framework)\\\">M-theory (learning framework)</a> - In machine learning and computer vision, M-theory is a learning framework inspired by feed-forward processing in the ventral stream of visual cortex and originally developed for recognition and classification of objects in visual scenes.\"\n    },\n    {\n      \"title\": \"Machine unlearning - Machine unlearning is...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2672字符，剩余1272字符"
+        },
+        "execution_time": 1.3416926860809326,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Validation",
+        "purpose": "验证工具是否正确拒绝空查询参数",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Query cannot be empty."
+        },
+        "execution_time": 0.0035157203674316406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Max Results Handling",
+        "purpose": "验证工具是否正确处理负数的max_results参数",
+        "args": {
+          "query": "blockchain technology",
+          "max_results": -3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.0050356388092041016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能正确处理包含特殊字符的搜索查询",
+        "args": {
+          "query": "!@#$%^&*()_+{}|:\"<>?"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Redirect response '301 Moved Permanently' for url 'https://api.duckduckgo.com/?q=!@#$%^&*()_+{}|:%22%3C%3E?&format=json&no_html=1&no_redirect=1'\nRedirect location: 'https://duckduckgo.com'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301"
+        },
+        "execution_time": 6.05729603767395,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "验证工具是否安全地处理潜在的跨站脚本攻击尝试",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 1.1268138885498047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Results Requested",
+        "purpose": "验证请求零个结果时的行为是否符合预期",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.003033161163330078,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Large Result Limit Test",
+        "purpose": "验证工具是否能够处理非常大的max_results值",
+        "args": {
+          "query": "climate change",
+          "max_results": 1000
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.0027320384979248047,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Basic Webpage Content Fetching",
+        "purpose": "验证fetch_content能够成功获取并清理一个标准网页的主要文本内容",
+        "args": {
+          "url": "https://duckduckgo.com/Artificial_intelligence"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Redirect response '302 Moved Temporarily' for url 'https://duckduckgo.com/Artificial_intelligence'\nRedirect location: 'https://duckduckgo.com/?q=Artificial_intelligence&&rpl=1'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302"
+        },
+        "execution_time": 1.129528522491455,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid URL Handling",
+        "purpose": "验证工具是否能正确处理无效的URL输入",
+        "args": {
+          "url": "htp:/invalid-url-format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 0.37836146354675293,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty URL Input",
+        "purpose": "验证工具是否能拒绝空URL输入并抛出ValueError",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: URL cannot be empty."
+        },
+        "execution_time": 0.0029592514038085938,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Existent Webpage Handling",
+        "purpose": "验证工具是否能优雅处理不存在的网页请求",
+        "args": {
+          "url": "https://example.com/nonexistent-page-12345"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Client error '404 Not Found' for url 'https://example.com/nonexistent-page-12345'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.7410554885864258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in URL",
+        "purpose": "验证工具是否能正确处理包含特殊字符的URL",
+        "args": {
+          "url": "https://example.com/test?query=abc&value=!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Client error '404 Not Found' for url 'https://example.com/test?query=abc&value=!@#$%^&*()'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.035855531692505,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in URL",
+        "purpose": "验证工具是否安全地处理包含潜在XSS攻击的URL",
+        "args": {
+          "url": "https://example.com/page?<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Client error '404 Not Found' for url 'https://example.com/page?%3Cscript%3Ealert('xss')%3C/script%3E'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.4607582092285156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long URL Handling",
+        "purpose": "验证工具是否能处理超长URL输入",
+        "args": {
+          "url": "https://example.com/verylongpath/1234567890/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/!@#$%^&*()_+{}[]|:\"<>?,./;'\\=-`~"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Client error '404 Not Found' for url 'https://example.com/verylongpath/1234567890/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/!@#$%^&*()_+{}[]|:%22%3C%3E?,./;'\\=-%60~'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.6720163822174072,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Content from Chinese Webpage",
+        "purpose": "验证工具是否能正确获取并清理中文网页的主要内容",
+        "args": {
+          "url": "https://zh.wikipedia.org/wiki/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD"
+        },
+        "response": {
+          "result": "维基百科，自由的百科全书\n此條目介紹的是人工智慧。关于其他用法，请见「\nAI\n」。\n此條目\n需要更新\n。\n(\n2025年7月7日\n)\n請更新本文以反映近況和新增内容。完成修改後請移除本模板。\n「人工智能」的各地常用名稱\n中国大陸\n人工智能\n港澳\n人工智能\n星馬\n人工智能、人工智慧\n臺灣\n人工智慧\n日本\n人工知能\n越南\n智慧人造\n韩国\n人工智能\n人工智能\n系列内容\n主要目标\n知识表示\n自动规划\n（\n英语\n：\nAutomated planning and scheduling\n）\n机器学习\n語言處理\n电脑视觉\n机器人学\n強人工智慧\n弱人工智慧\n人工智能对齐\n实现方式\n符号人工智能\n深度学习\n貝氏網路\n进化算法\n混合智能系統\n生成式人工智慧\n代理式人工智能\n（\n英语\n：\nAgentic AI\n）\n人工智能哲學\n伦理\n（\n英语\n：\nEthics of artificial intelligence\n）\n人工智能安全\n（\n英语\n：\nAI safety\n）\n幻觉\n存在风险\n（\n英语\n：\nExistential risk from artificial general intelligence\n）\n图灵测试\n中文房间\n可解釋人工智慧\n友好的人工智能\n（\n英语\n：\nFriendly artificial intelligence\n）\n人工智能监管\n（\n英语\n：\nRegulation of artificial intelligence\n）\n历史\n时间轴\n（\n英语\n：\nTimeline of artificial intelligence\n）\n发展\n（\n英语\n：\nProgress in artificial intelligence\n）\n人工智慧低谷\n人工智能热潮\n人工智能法案\n人工智能的应用\n应用\nAlphaFold\n深度伪造\nAI艺术\n音乐\n医疗保健\n工业\n机器翻译\n军事\n项目\n（\n英语\n：\nList of artificial intelligence projects\n）\n编程语言\n（\n英语\n：\nList of programming languages for artificial intelligence\n）\n列表\nAI概述\n术语表\n查\n论\n编\n人工智能\n（英語：\nartificial intelligence\n，缩写为\nAI\n），指由人造機器所展現的\n智慧\n。通常人工智能是指用普通電腦程式來呈現人類智能的技術。該詞也指出研究這樣的智能系統是否能夠實現，以及如何實現。同时，隨著\n醫學\n、\n神經科學\n、\n机器人学\n及\n統計學\n等方面的發展，普遍認為人類的部分職業也逐漸被其取代。\n[\n1\n]\n[\n2\n]\n人工智能於一般教材中的定义领域是“\n智慧主体\n的研究与设计”\n[\n3\n]\n，智慧主体指一个可以观察周遭环境并作出行动以达致目标的系统\n[\n4\n]\n。\n约翰·麦卡锡\n于1955年對人工智能的定义是「制造智能机器的科学与工程」\n[\n5\n]\n[\n6\n]\n。\n安德烈亚斯·卡普兰\n和\n迈克尔·海恩莱因\n（Michael Haenlein）将人工智能定义为“系统正确解释外部数据，从这些数据中学习，并利用这些知识通过灵活适应实现特定目标和任务的能力”。\n[\n7\n]\n人工智能可以定義為模仿人類與人類思維相關的認知功能的機器或計算機，如學習和解決問題。人工智能是\n計算機科學\n的...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计55280字符，剩余53880字符"
+        },
+        "execution_time": 8.581519842147827,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 16
+}

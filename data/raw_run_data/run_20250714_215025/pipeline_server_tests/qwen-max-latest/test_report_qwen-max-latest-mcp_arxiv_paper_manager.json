@@ -1,0 +1,444 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_arxiv_paper_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_arxiv_paper_manager/refined/server.py",
+  "timestamp": "2025-07-14T21:50:28.655323",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "Searches arXiv for papers based on a user-provided query and returns a list of matching papers.\n\n    Args:\n        query: A string containing the search query (e.g., 'quantum computing').\n\n    Returns:\n        A JSON-formatted string representing a list of dictionaries, where each dictionary contains details \n        about a paper such as its title, authors, abstract, and arXiv ID.\n\n    Example:\n        search_papers(query=\"quantum computing\")\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "Downloads the PDF of a specified arXiv paper using its arXiv ID and saves it locally.\n\n    Args:\n        paper_id: The unique arXiv identifier for the paper (e.g., '2107.12345v1').\n\n    Returns:\n        A JSON-formatted string indicating the success or failure of the download operation and\n        the local file path where the paper is stored.\n\n    Example:\n        download_paper(paper_id=\"2107.12345v1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "Lists all papers that have been downloaded and stored locally, with optional filtering capabilities.\n\n    Args:\n        filter_query: An optional keyword to filter the list of papers by title or author.\n\n    Returns:\n        A JSON-formatted string representing a list of dictionaries, where each dictionary contains information\n        about a locally stored paper, including its title, authors, and file path.\n\n    Example:\n        list_papers(filter_query=\"quantum\")\n    ",
+      "args_schema": {
+        "properties": {
+          "filter_query": {
+            "default": null,
+            "title": "Filter Query",
+            "type": "string"
+          }
+        },
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "Reads the content of a specified paper from the local storage and provides access to its text.\n\n    Args:\n        paper_id: The unique arXiv identifier for the paper (e.g., '2107.12345v1').\n\n    Returns:\n        A JSON-formatted string containing the text content of the paper, if available.\n\n    Example:\n        read_paper(paper_id=\"2107.12345v1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search for Papers",
+        "purpose": "验证工具能否使用基本查询正常搜索arXiv论文。",
+        "args": {
+          "query": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"abstract\": \"This article highlights quantum Internet computing as referring to\\ndistributed quantum computing over the quantum Internet, analogous to\\n(classical) Internet computing involving (classical) distributed computing over\\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\\nof study such as quantum protocols for distributed nodes using quantum\\ninformation for computations, quantum cloud computing, delegated verifiable\\nblind or private computing, non-local gates, and distributed quantum\\napplications, over Internet-scale distances.\", \"paper_id\": \"2208.00733v1\"}, {\"title\": \"Unconventional Quantum Computing Devices\", \"authors\": [\"Seth Lloyd\"], \"abstract\": \"This paper investigates a variety of unconventional quantum computation\\ndevices, including fermionic quantum computers and computers that exploit\\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\\ndevices can in principle compute some quantities more rapidly than\\n`conventional' quantum computers.\", \"paper_id\": \"0003151v1\"}, {\"title\": \"Geometrical perspective on quantum states and quantum computation\", \"authors\": [\"Zeqian Chen\"], \"abstract\": \"We interpret quantum computing as a geometric evolution process by\\nreformulating finite quantum systems via Connes' noncommutative geome...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计9047字符，剩余7647字符"
+        },
+        "execution_time": 1.386183500289917,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Empty Query",
+        "purpose": "测试空查询是否被正确处理并返回错误或空结果。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: query must be a non-empty string"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Non-Existent Topic",
+        "purpose": "验证工具在提供不存在的论文主题时是否能优雅地返回空结果。",
+        "args": {
+          "query": "nonexistenttopic12345"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 8.626820087432861,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Special Characters",
+        "purpose": "确保工具可以处理包含特殊字符的查询字符串。",
+        "args": {
+          "query": "machine learning!@#$%^&*()"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 8.77489161491394,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt",
+        "purpose": "验证工具是否安全地处理可能的SQL注入尝试。",
+        "args": {
+          "query": "'; DROP TABLE papers;--"
+        },
+        "response": {
+          "result": "[{\"title\": \"Why Don't Developers Detect Improper Input Validation?'; DROP TABLE Papers; --\", \"authors\": [\"Larissa Braz\", \"Enrico Fregnan\", \"Gül Çalikli\", \"Alberto Bacchelli\"], \"abstract\": \"Improper Input Validation (IIV) is a software vulnerability that occurs when\\na system does not safely handle input data. Even though IIV is easy to detect\\nand fix, it still commonly happens in practice. In this paper, we study to what\\nextent developers can detect IIV and investigate underlying reasons. This\\nknowledge is essential to better understand how to support developers in\\ncreating secure software systems. We conduct an online experiment with 146\\nparticipants, of which 105 report at least three years of professional software\\ndevelopment experience. Our results show that the existence of a visible attack\\nscenario facilitates the detection of IIV vulnerabilities and that a\\nsignificant portion of developers who did not find the vulnerability initially\\ncould identify it when warned about its existence. Yet, a total of 60\\nparticipants could not detect the vulnerability even after the warning. Other\\nfactors, such as the frequency with which the participants perform code\\nreviews, influence the detection of IIV. Data and materials:\\nhttps://doi.org/10.5281/zenodo.3996696\", \"paper_id\": \"2102.06251v1\"}, {\"title\": \"What to Keep and What to Drop: Adaptive Table Filtering Framework\", \"a...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计10921字符，剩余9521字符"
+        },
+        "execution_time": 9.550681591033936,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt",
+        "purpose": "确保工具不会执行或传播潜在的跨站脚本攻击内容。",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "[{\"title\": \"Structural Learning of Attack Vectors for Generating Mutated XSS Attacks\", \"authors\": [\"Yi-Hsun Wang\", \"Ching-Hao Mao\", \"Hahn-Ming Lee\"], \"abstract\": \"Web applications suffer from cross-site scripting (XSS) attacks that\\nresulting from incomplete or incorrect input sanitization. Learning the\\nstructure of attack vectors could enrich the variety of manifestations in\\ngenerated XSS attacks. In this study, we focus on generating more threatening\\nXSS attacks for the state-of-the-art detection approaches that can find\\npotential XSS vulnerabilities in Web applications, and propose a mechanism for\\nstructural learning of attack vectors with the aim of generating mutated XSS\\nattacks in a fully automatic way. Mutated XSS attack generation depends on the\\nanalysis of attack vectors and the structural learning mechanism. For the\\nkernel of the learning mechanism, we use a Hidden Markov model (HMM) as the\\nstructure of the attack vector model to capture the implicit manner of the\\nattack vector, and this manner is benefited from the syntax meanings that are\\nlabeled by the proposed tokenizing mechanism. Bayes theorem is used to\\ndetermine the number of hidden states in the model for generalizing the\\nstructure model. The paper has the contributions as following: (1)\\nautomatically learn the structure of attack vectors from practical data\\nanalysis to modeling a structure mod...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计15851字符，剩余14451字符"
+        },
+        "execution_time": 4.1832826137542725,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Null Query Input",
+        "purpose": "测试当输入参数为 null 时的行为（如果允许）。",
+        "args": {
+          "query": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 1 validation error for search_papersArguments\nquery\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.003328561782836914,
+        "is_functional_test": false
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic Paper Download",
+        "purpose": "验证工具能否使用有效的arXiv ID下载论文PDF文件。",
+        "args": {
+          "paper_id": "2107.12345v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Paper downloaded successfully.\", \"file_path\": \"workspace/papers/2107.12345v1.pdf\"}"
+        },
+        "execution_time": 1.5239489078521729,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download with Invalid Paper ID Format",
+        "purpose": "测试当提供格式错误的arXiv ID时，工具是否能正确返回错误信息。",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: 'invalid_id_format'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.0035321712493896484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Non-Existent Paper",
+        "purpose": "验证工具在尝试下载不存在的论文时能否优雅地处理失败情况。",
+        "args": {
+          "paper_id": "9999.99999v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: An error occurred while downloading the paper: object has no attribute 'updated_parsed'"
+        },
+        "execution_time": 7.55851674079895,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Paper with Special Characters in ID",
+        "purpose": "确保工具可以处理包含特殊字符的arXiv ID并返回适当的错误。",
+        "args": {
+          "paper_id": "2107.12345v1!@#"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: '2107.12345v1!@#'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "验证工具是否安全地处理可能的路径穿越攻击尝试。",
+        "args": {
+          "paper_id": "../../../../etc/passwd"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: '../../../../etc/passwd'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.008006572723388672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Null Paper ID Input",
+        "purpose": "测试当输入参数为 null 时的行为（如果允许）。",
+        "args": {
+          "paper_id": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 1 validation error for download_paperArguments\npaper_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.006997823715209961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Minimal Valid Paper ID",
+        "purpose": "验证工具是否能正确处理最小合法长度的arXiv ID。",
+        "args": {
+          "paper_id": "math/0001001v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: 'math/0001001v1'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Condition - Max Length Paper ID",
+        "purpose": "验证工具是否能正确处理最大长度的arXiv ID。",
+        "args": {
+          "paper_id": "2201.00000v9"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: An error occurred while downloading the paper: StopIteration interacts badly with generators and cannot be raised into a Future"
+        },
+        "execution_time": 22.833057165145874,
+        "is_functional_test": true
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "List All Papers Without Filter",
+        "purpose": "验证在未提供过滤条件时，工具能否正确列出所有本地存储的论文。",
+        "args": {},
+        "response": {
+          "result": "[{\"title\": \"Uniqueness of Meromorphic functions concerning k-th derivatives and difference operators\", \"authors\": [\"Goutam Haldar\"], \"file_path\": \"workspace/papers/2107.12345v1.pdf\"}, {\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 4.0058674812316895,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers with Valid Filter",
+        "purpose": "测试使用有效关键词过滤论文标题或作者时，工具是否能返回匹配的结果。",
+        "args": {
+          "filter_query": "quantum"
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 7.741063356399536,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers with Empty Filter",
+        "purpose": "验证当过滤查询为空字符串时，工具是否默认返回完整列表。",
+        "args": {
+          "filter_query": ""
+        },
+        "response": {
+          "result": "[{\"title\": \"Uniqueness of Meromorphic functions concerning k-th derivatives and difference operators\", \"authors\": [\"Goutam Haldar\"], \"file_path\": \"workspace/papers/2107.12345v1.pdf\"}, {\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 6.885149240493774,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers with Non-Existent Filter",
+        "purpose": "确保工具在没有匹配结果的情况下返回空列表而不是错误。",
+        "args": {
+          "filter_query": "nonexistenttopic123"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 6.511000394821167,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Filter",
+        "purpose": "验证工具是否安全地处理可能的路径穿越攻击尝试作为过滤输入。",
+        "args": {
+          "filter_query": "../../../../etc/passwd"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 6.509410381317139,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Null Filter Input",
+        "purpose": "测试当 filter_query 参数为 null 时的行为（如果允许）。",
+        "args": {
+          "filter_query": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_papers: 1 validation error for list_papersArguments\nfilter_query\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.003000497817993164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Special Characters in Filter",
+        "purpose": "验证工具是否能正确处理包含特殊字符的过滤查询并返回合理结果。",
+        "args": {
+          "filter_query": "!@#$%^&*()_+{}[]|\\:;\"'<>,.?/"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 6.511949777603149,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic Paper Read",
+        "purpose": "验证工具能否使用有效的arXiv ID从本地存储中正确读取论文内容。",
+        "args": {
+          "paper_id": "2107.12345v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Paper content retrieved successfully.\", \"content\": \"arXiv:2107.12345v1  [math.CV]  26 Jul 2021UNIQUENESS OF MEROMORPHIC FUNCTIONS CONCERNING K-TH\\nDERIVATIVES AND DIFFERENCE OPERATORS\\nGOUTAM HALDAR\\nAMS Mathematics Subject Classiﬁcation: 30D35, 39A05, 39A10.\\nKeywords and phrases : meromorphic function, diﬀerence operator, uniqueness, weight ed shar-\\ning\\nAbstract. In this paper, we continue to study the sharing value problem s for higher order\\nderivatives of meromorphic functions with its linear diﬀer ence and q-diﬀerence operators.\\nSome of our results generalize and improve the results of Men g–Liu (J. Appl. Math. and\\nInformatics, 37(2019), 133–148) to a large extent.\\n1.Introduction\\nLetfandgbe two non-constant meromorphic functions deﬁned in the open co mplex plane\\nC. If for some a∈C∪ {∞},f−aandg−ahave the same set of zeros with the same\\nmultiplicities, we say that fandgshare the value aCM (counting multiplicities), and if we\\ndo not consider the multiplicities then fandgare said to share the value aIM (ignoring\\nmultiplicities). We assume that the readers are familiar with the stand ard notations symbols\\nsuch asT(r,f),N(r,a;f) (N(r,a;f)) of Nevanlinna’s value distribution theory (see [11]).\\nIn 2001, Lahiri ([19], [17]) introduced the deﬁnition ofweighted shar ing, which plays a key\\nrole in uniqueness theory as far as relaxation o...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计26391字符，剩余24991字符"
+        },
+        "execution_time": 0.2988622188568115,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read with Invalid Paper ID Format",
+        "purpose": "测试当提供格式错误的arXiv ID时，工具是否能正确返回错误信息。",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID 'invalid_id_format' not found in local storage."
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Non-Existent Paper",
+        "purpose": "验证工具在尝试读取不存在的论文时能否优雅地处理失败情况。",
+        "args": {
+          "paper_id": "9999.99999v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '9999.99999v1' not found in local storage."
+        },
+        "execution_time": 0.003000497817993164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "验证工具是否安全地处理可能的路径穿越攻击尝试。",
+        "args": {
+          "paper_id": "../../../../etc/passwd"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '../../../../etc/passwd' not found in local storage."
+        },
+        "execution_time": 0.004002571105957031,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Null Paper ID Input",
+        "purpose": "测试当输入参数为 null 时的行为（如果允许）。",
+        "args": {
+          "paper_id": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 1 validation error for read_paperArguments\npaper_id\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.006992816925048828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Minimal Valid Paper ID",
+        "purpose": "验证工具是否能正确处理最小合法长度的arXiv ID。",
+        "args": {
+          "paper_id": "math/0001001v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID 'math/0001001v1' not found in local storage."
+        },
+        "execution_time": 0.004001617431640625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Condition - Max Length Paper ID",
+        "purpose": "验证工具是否能正确处理最大长度的arXiv ID。",
+        "args": {
+          "paper_id": "2201.00000v9"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '2201.00000v9' not found in local storage."
+        },
+        "execution_time": 0.007004499435424805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Paper with Special Characters in ID",
+        "purpose": "确保工具可以处理包含特殊字符的arXiv ID并返回适当的错误。",
+        "args": {
+          "paper_id": "2107.12345v1!@#"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '2107.12345v1!@#' not found in local storage."
+        },
+        "execution_time": 0.0049991607666015625,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 30
+}

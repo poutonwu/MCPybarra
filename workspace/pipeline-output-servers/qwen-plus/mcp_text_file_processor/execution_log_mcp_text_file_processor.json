@@ -1,0 +1,302 @@
+[
+  {
+    "step": {
+      "step_id": "create_test_file",
+      "tool_name": "create_text_file",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "content": "Line 0\nLine 1\nLine 2\nLine 3\nLine 4"
+      },
+      "description": "Happy path: Create a test file with known content for subsequent tests."
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "content": "Line 0\nLine 1\nLine 2\nLine 3\nLine 4"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"success\": true, \"message\": \"文件 test_output.txt 创建成功\", \"hash\": \"553e3df2276282e28120e9c7be71e958f461fc0823105b5ed85297f1770f5b93\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_full_file",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Happy path: Read the full contents of the created file to verify creation and basic reading functionality."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"Line 0\\n\", \"Line 1\\n\", \"Line 2\\n\", \"Line 3\\n\", \"Line 4\"]}, \"hashes\": {\"test_output.txt\": \"553e3df2276282e28120e9c7be71e958f461fc0823105b5ed85297f1770f5b93\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_partial_file",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ],
+        "start_line": 1,
+        "end_line": 3
+      },
+      "description": "Happy path: Read a partial range of the file to verify start/end line parameters work correctly."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ],
+      "start_line": 1,
+      "end_line": 3
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"Line 1\\n\", \"Line 2\\n\", \"Line 3\\n\"]}, \"hashes\": {\"test_output.txt\": \"553e3df2276282e28120e9c7be71e958f461fc0823105b5ed85297f1770f5b93\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "append_to_file",
+      "tool_name": "append_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "content": "\nAppended Line"
+      },
+      "description": "Happy path: Append content to the file and verify it's added correctly."
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "content": "\nAppended Line"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"success\": true, \"message\": \"成功向文件 test_output.txt 追加内容\", \"new_hash\": \"d23d5e6710e186ed5034d33a7213a8e6ddbfcac0442662cfe8b2dd9ef0d00a7d\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_append",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: Read the updated file after appending content to confirm changes were applied."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"Line 0\\n\", \"Line 1\\n\", \"Line 2\\n\", \"Line 3\\n\", \"Line 4\\n\", \"Appended Line\"]}, \"hashes\": {\"test_output.txt\": \"d23d5e6710e186ed5034d33a7213a8e6ddbfcac0442662cfe8b2dd9ef0d00a7d\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_file",
+      "tool_name": "insert_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "insert_line": 2,
+        "content": "Inserted Line\nAnother Inserted Line",
+        "expected_hash": "$outputs.read_after_append.hashes.test_output.txt"
+      },
+      "description": "Happy path: Insert new lines at a specific position in the file using hash validation to avoid conflicts."
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "insert_line": 2,
+      "content": "Inserted Line\nAnother Inserted Line",
+      "expected_hash": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.read_after_append.hashes.test_output.txt'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_insert",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: Read the updated file after inserting content to confirm changes were applied correctly."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"Line 0\\n\", \"Line 1\\n\", \"Line 2\\n\", \"Line 3\\n\", \"Line 4\\n\", \"Appended Line\"]}, \"hashes\": {\"test_output.txt\": \"d23d5e6710e186ed5034d33a7213a8e6ddbfcac0442662cfe8b2dd9ef0d00a7d\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_content",
+      "tool_name": "delete_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "start_line": 2,
+        "end_line": 3,
+        "expected_hash": "$outputs.read_after_insert.hashes.test_output.txt"
+      },
+      "description": "Happy path: Delete a range of lines from the file using hash validation to ensure no concurrent modifications."
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "start_line": 2,
+      "end_line": 3,
+      "expected_hash": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.read_after_insert.hashes.test_output.txt'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_delete",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: Verify that the deleted content was successfully removed from the file."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"Line 0\\n\", \"Line 1\\n\", \"Line 2\\n\", \"Line 3\\n\", \"Line 4\\n\", \"Appended Line\"]}, \"hashes\": {\"test_output.txt\": \"d23d5e6710e186ed5034d33a7213a8e6ddbfcac0442662cfe8b2dd9ef0d00a7d\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "patch_line",
+      "tool_name": "patch_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "line_number": 1,
+        "old_content": "Line 1",
+        "new_content": "Modified Line 1",
+        "expected_hash": "$outputs.read_after_delete.hashes.test_output.txt"
+      },
+      "description": "Happy path: Modify a specific line while verifying its content and using hash validation to prevent conflicts."
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "line_number": 1,
+      "old_content": "Line 1",
+      "new_content": "Modified Line 1",
+      "expected_hash": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.read_after_delete.hashes.test_output.txt'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_patch",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: Confirm that the patch operation successfully modified the specified line."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"Line 0\\n\", \"Line 1\\n\", \"Line 2\\n\", \"Line 3\\n\", \"Line 4\\n\", \"Appended Line\"]}, \"hashes\": {\"test_output.txt\": \"d23d5e6710e186ed5034d33a7213a8e6ddbfcac0442662cfe8b2dd9ef0d00a7d\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_nonexistent_file",
+      "tool_name": "delete_text_file_contents",
+      "parameters": {
+        "file_path": "nonexistent.txt",
+        "start_line": 0,
+        "end_line": 5
+      },
+      "description": "Edge case: Attempt to delete content from a non-existent file to test error handling."
+    },
+    "substituted_params": {
+      "file_path": "nonexistent.txt",
+      "start_line": 0,
+      "end_line": 5
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"success\": false, \"message\": \"删除内容失败: 文件 nonexistent.txt 不存在\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_invalid_path",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "../outside_directory.txt"
+        ]
+      },
+      "description": "Edge case: Test path validation by attempting to read a file outside the allowed directory."
+    },
+    "substituted_params": {
+      "file_paths": [
+        "../outside_directory.txt"
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"非法的文件路径: ../outside_directory.txt. 文件路径必须位于当前工作目录内.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_with_invalid_path",
+      "tool_name": "create_text_file",
+      "parameters": {
+        "file_path": "../invalid_dir/test.txt",
+        "content": "Test content"
+      },
+      "description": "Edge case: Attempt to create a file in an invalid path to test security restrictions."
+    },
+    "substituted_params": {
+      "file_path": "../invalid_dir/test.txt",
+      "content": "Test content"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"success\": false, \"message\": \"创建文件失败: 非法的文件路径: ../invalid_dir/test.txt. 文件路径必须位于当前工作目录内.\"}"
+    }
+  }
+]

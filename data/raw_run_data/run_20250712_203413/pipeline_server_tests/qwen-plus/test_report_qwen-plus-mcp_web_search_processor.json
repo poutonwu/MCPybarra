@@ -1,0 +1,606 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_web_search_processor",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_web_search_processor/refined/server.py",
+  "timestamp": "2025-07-12T20:48:08.365825",
+  "tools": [
+    {
+      "name": "tavily_web_search",
+      "description": "\n    执行全面的网络搜索，支持基础或高级搜索深度，可通过包含或排除特定域名精确控制搜索范围。\n\n    Args:\n        query: 搜索查询字符串 (必填)。\n        search_depth: 搜索深度，可选 \"basic\" 或 \"advanced\", 默认 \"basic\"。\n        include_domains: 包含在结果中的域名列表 (可选)。\n        exclude_domains: 排除的域名列表 (可选)。\n        max_results: 返回的最大结果数 (1-5), 默认 5。\n\n    Returns:\n        List[Dict[str, str]]: 包含标题、URL 和内容摘要的搜索结果列表。\n\n    示例:\n        >>> tavily_web_search(query=\"Python 3.10 features\", search_depth=\"advanced\", \n                             include_domains=[\"python.org\"], max_results=3)\n        [\n            {\n                \"title\": \"Python 3.10 新特性详解\",\n                \"url\": \"https://docs.python.org/3.10/whatsnew/3.10.html\",\n                \"content\": \"Python 3.10 的新特性包括模式匹配、更好的类型提示等...\"\n            },\n            {\n                \"title\": \"Python 3.10 发布说明\",\n                \"url\": \"https://www.python.org/downloads/release/python-3100/\",\n                \"content\": \"Python 3.10 正式版发布，包含多项性能改进和错误修复...\"\n            },\n            {\n                \"title\": \"Python 3.10：面向未来的编程语言\",\n                \"url\": \"https://realpython.com/python310-new-features/\",\n                \"content\": \"探索 Python 3.10 中最令人期待的新特性和改进...\"\n            }\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "basic",
+            "title": "Search Depth",
+            "type": "string"
+          },
+          "include_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Domains"
+          },
+          "exclude_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Exclude Domains"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_web_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_answer_search",
+      "description": "\n    根据查询内容直接生成回答并附带支持证据，适用于需要具体答案的问题。\n\n    Args:\n        query: 要回答的问题 (必填)。\n        search_depth: 搜索深度，可选 \"basic\" 或 \"advanced\", 默认 \"advanced\".\n\n    Returns:\n        Dict[str, Union[str, List[Dict[str, str]]]]: 包含答案和证据的字典.\n\n    示例:\n        >>> tavily_answer_search(query=\"地球的卫星是什么？\")\n        {\n            \"answer\": \"地球的卫星是月球。\",\n            \"evidence\": [\n                {\n                    \"title\": \"月球 - 维基百科\",\n                    \"url\": \"https://zh.wikipedia.org/wiki/%E6%9C%88%E7%90%83\",\n                    \"content\": \"月球是地球唯一的天然卫星，也是太阳系中第五大的卫星...\"\n                }\n            ]\n        }\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "advanced",
+            "title": "Search Depth",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_answer_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_news_search",
+      "description": "\n    专门搜索近期新闻文章，支持限定查询时效性（最多可追溯365天），并可指定包含或排除的新闻源。\n\n    Args:\n        query: 新闻搜索查询 (必填)。\n        days: 查询回溯的天数 (1-365), 默认 7。\n        include_domains: 包含的新闻源域名列表 (可选)。\n        exclude_domains: 排除的新闻源域名列表 (可选)。\n        max_results: 返回的最大结果数 (1-5), 默认 5。\n\n    Returns:\n        List[Dict[str, str]]: 包含标题、URL 和内容摘要的新闻结果列表.\n\n    示例:\n        >>> tavily_news_search(query=\"人工智能最新进展\", days=3, \n                              include_domains=[\"techcrunch.com\"], max_results=2)\n        [\n            {\n                \"title\": \"AI 领域的三大突破：2024 年第一季度\",\n                \"url\": \"https://techcrunch.com/2024/03/15/ai-breakthroughs-q1-2024/\",\n                \"content\": \"本文总结了 2024 年第一季度人工智能领域的三项重大突破...\"\n            },\n            {\n                \"title\": \"大模型训练成本降低 80%，新技术革新 AI 行业\",\n                \"url\": \"https://techcrunch.com/2024/03/14/ai-training-cost-reduction/\",\n                \"content\": \"一项新技术使大模型训练成本大幅降低，为人工智能发展带来新的可能...\"\n            }\n        ]\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "days": {
+            "default": 7,
+            "title": "Days",
+            "type": "integer"
+          },
+          "include_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Domains"
+          },
+          "exclude_domains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Exclude Domains"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_news_searchArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "tavily_web_search": [
+      {
+        "case_name": "Basic Search with Default Parameters",
+        "purpose": "验证使用默认参数执行基础搜索的功能是否正常",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": [
+          "{\n  \"title\": \"Artificial intelligence - Wikipedia\",\n  \"url\": \"https://en.wikipedia.org/wiki/Artificial_intelligence\",\n  \"content\": \"Artificial intelligence (AI) is the capability of computational systems to perform tasks typically associated with human intelligence\"\n}",
+          "{\n  \"title\": \"What Is Artificial Intelligence (AI)? | Google Cloud\",\n  \"url\": \"https://cloud.google.com/learn/what-is-artificial-intelligence\",\n  \"content\": \"| Google Cloud On an operational level for business use, AI is a set of technologies that are based primarily on machine learning and deep learning, used for data analytics, predictions and forecasting, object categorization, natural language processing, recommendations, intelligent data retrieval, and more. Google offers a number of sophisticated artificial intelligence products, solutions, and applications on a trusted cloud platform that enables businesses to easily build and implement AI algorithms and models. *   Image 2: Cloud Explore all AI products and solutions Innovative AI and machine learning products, solutions, and services powered by Google’s research and technology. Image 7: Google Cloud Image 57: Google Cloud *   Why Google Cloud *   Data Cloud *   Generative AI on Google Cloud\"\n}",
+          "{\n  \"title\": \"What Is Artificial Intelligence (AI)? - IBM\",\n  \"url\": \"https://www.ibm.com/think/topics/artificial-intelligence\",\n  \"content\": \"Directly underneath AI, we have machine learning, which involves creating models by training an algorithm to make predictions or decisions based on data. Generative AI, sometimes called \\\"gen AI\\\"_,_ refers to deep learning models that can create complex original content such as long-form text, high-quality images, realistic video or audio and more in response to a user’s prompt or request. Gen AI models focus on creating content based on learned patterns; agents use that content to interact with each other and other tools to make decisions, solve problems and complete tasks. With these new generative AI practices, deep-learning models can be pretrained on large amounts of data. Train, validate, tune and deploy generative AI, foundation models and machine learning capabilities with IBM watsonx.ai, a next-generation enterprise studio for AI builders.\"\n}",
+          "{\n  \"title\": \"Artificial Intelligence (AI) - EDUCAUSE Library\",\n  \"url\": \"https://library.educause.edu/topics/infrastructure-and-research-technologies/artificial-intelligence-ai\",\n  \"content\": \"Artificial Intelligence (AI) | EDUCAUSE Library *   AI Literacy in Teaching and Learning: A Durable Framework for Higher Education, EDUCAUSE Working Group Paper - [x] Analytics (36)  + - [x] Cybersecurity (40)  - [x] Artificial Intelligence (AI) (342)  - [x] Chatbots (23)  - [x] Generative AI (51)  - [x] Research (15)  - [x] IT Organization (8)  + - [x] Libraries and Technology (19)  - [x] Higher Education Policy (6)  - [x] Privacy (24)  - [x] Student Learning Support (31)  - [x] Student Technology Use (33)  + - [x] Teaching and Learning (152)  - [x] Digital Learning (41)  - [x] Learning Analytics (25)  - [x] Online Learning (16)  - [x] Teaching with Artificial Intelligence (41)  - [x] Article (115)  - [x] Multimedia (29) \"\n}",
+          "{\n  \"title\": \"What is Artificial Intelligence? - NASA\",\n  \"url\": \"https://www.nasa.gov/what-is-artificial-intelligence/\",\n  \"content\": \"Image 9: NASA’s SpaceX Crew-11 to Support Health Studies for Deep Space Travel 4 min read ### NASA’s SpaceX Crew-11 to Support Health Studies for Deep Space Travel article 7 hours agoImage 10: NASA Announces Winners of 2025 Human Lander Challenge 2 min read ### NASA Announces Winners of 2025 Human Lander Challenge article 2 weeks agoImage 11: NASA, Australia Team Up for Artemis II Lunar Laser Communications Test 4 min read ### NASA, Australia Team Up for Artemis II Lunar Laser Communications Test article 2 weeks ago\"\n}"
+        ],
+        "execution_time": 4.054088592529297,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Advanced Search with Specific Query",
+        "purpose": "验证高级搜索深度是否能正确返回更广泛的结果",
+        "args": {
+          "query": "machine learning applications",
+          "search_depth": "advanced"
+        },
+        "response": [
+          "{\n  \"title\": \"Machine Learning in Finance - Overview, Applications\",\n  \"url\": \"https://corporatefinanceinstitute.com/resources/data-science/machine-learning-in-finance/\",\n  \"content\": \"As an application of artificial intelligence, machine learning focuses on developing systems that can access pools of data, and the system automatically adjusts its parameters to improve experiences. Computer systems run operations in the background and produce outcomes automatically according to how it is trained. [...] Robo-advisors are online applications that are built using machine learning, and they provide automated financial advice to investors. The applications use algorithms to establish a financial portfolio according to an investor’s goals and their risk tolerance. [...] Machine learning in finance is now considered a key aspect of several financial services and applications, including managing assets, evaluating levels of risk, calculating credit scores, and even approving loans. Machine learning is a subset of data science that provides the ability to learn and improve from experience without being programmed.\\n\\nImage 4\"\n}",
+          "{\n  \"title\": \"Machine Learning in Finance: 10 Applications and Use Cases\",\n  \"url\": \"https://www.coursera.org/articles/machine-learning-in-finance\",\n  \"content\": \"Regression Analysis, Applied Machine Learning, Unsupervised Learning, Feature Engineering, Deep Learning, Predictive Modeling, Machine Learning, Exploratory Data Analysis, Statistical Analysis, Generative AI, Machine Learning Algorithms, Data Access, Statistical Inference, Supervised Learning, Dimensionality Reduction, Data Science, Data Cleansing, Python Programming, Data Analysis, Reinforcement Learning, Artificial Neural Networks, Keras (Neural Network Library), Tensorflow, Technical [...] Regression Analysis, Applied Machine Learning, Unsupervised Learning, Feature Engineering, Deep Learning, Predictive Modeling, Machine Learning, Exploratory Data Analysis, Statistical Analysis, Generative AI, Machine Learning Algorithms, Data Access, Statistical Inference, Supervised Learning, Dimensionality Reduction, Data Science, Data Cleansing, Python Programming, Data Analysis, Reinforcement Learning, Artificial Neural Networks, Keras (Neural Network Library), Tensorflow, Technical [...] Regression Analysis, Applied Machine Learning, Unsupervised Learning, Feature Engineering, Deep Learning, Predictive Modeling, Machine Learning, Exploratory Data Analysis, Statistical Analysis, Generative AI, Machine Learning Algorithms, Data Access, Statistical Inference, Supervised Learning, Dimensionality Reduction, Data Science, Data Cleansing, Python Programming, Data Analysis, Reinforcement Learning, Artificial Neural Networks, Keras (Neural Network Library), Tensorflow, Technical\"\n}",
+          "{\n  \"title\": \"Machine Learning in Healthcare - PMC\",\n  \"url\": \"https://pmc.ncbi.nlm.nih.gov/articles/PMC8822225/\",\n  \"content\": \"trends, and develop disease prediction models. In large medical organizations, machine learning-based approaches have also been implemented to achieve increased efficiency in the organization of electronic health records , identification of irregularities in the blood samples , organs [6-8], and bones  using medical imaging and monitoring, as well as in robot-assisted surgeries [9, 13]. Machine learning applications have recently enabled the acceleration of testing and hospital response in the [...] data used in the ML-based approaches and their clear implementation of learning approaches with clinical applications and experiments. In the current review, we focused on ML application to healthcare in the fields of electronic health records, medical imaging, and genetic engineering. These areas also represent healthcare’s “BIG” data, or the structured and unstructured data of the field, and have shown significant promise in relation to clinical applications. [...] application of genetic modification to provide treatment for genetic disorders and mutations . With its application, ML can augment the role of physicians and redefine patient care. While the risks and challenges of the future application are addressed and corrected, the current ML algorithms can provide an excellent framework for future advancements and applications of ML in healthcare.\"\n}",
+          "{\n  \"title\": \"Machine Learning in Healthcare: Guide to Applications & Benefits\",\n  \"url\": \"https://www.foreseemed.com/blog/machine-learning-in-healthcare\",\n  \"content\": \"In contrast, deep learning has enabled the development of more advanced applications, such as automatic detection of cancerous lesions in mammograms or predicting cardiovascular risks from retinal images. These applications illustrate the potential of deep learning to perform tasks that were previously thought to be the exclusive domain of human experts. [...] Machine learning in healthcare examples include diagnostic support systems, risk assessment tools, and patient monitoring applications. These systems can help clinicians make better decisions by providing them with insights derived from vast datasets. For instance, a machine learning model might analyze electronic health records (EHRs) to predict which patients are at risk of developing a particular condition, allowing for early intervention. [...] Machine learning is a specific type of artificial intelligence that allows systems to learn from data and detect patterns without much human intervention. Instead of being told what to do, computers that use machine learning are shown patterns and data which then allows them to reach their own conclusions.\"\n}",
+          "{\n  \"title\": \"What Is Machine Learning in Health Care? - Coursera\",\n  \"url\": \"https://www.coursera.org/articles/machine-learning-in-health-care\",\n  \"content\": \"The most common applications in health care are centered around improving the quality of care and patient health outcomes. Understanding the different applications of machine learning in health care can help you find the concentration that best suits your career goals. Check out these real-world examples: [...] Disease prediction: Machine learning can be used to find trends, create connections, and make conclusions based on large data sets. Data engineers can use information to prevent disease outbreaks in communities and track habits that lead to disease.\\n    \\n\\n   Biomedical data visualizations: You can use machine learning to create 3-D visualizations of biomedical data such as RNA sequences, protein structures, and genomic profiles.\"\n}"
+        ],
+        "execution_time": 4.942786693572998,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Include Domains",
+        "purpose": "验证包含特定域名的搜索是否仅返回指定来源的结果",
+        "args": {
+          "query": "climate change news",
+          "include_domains": [
+            "nytimes.com",
+            "theguardian.com"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"Environment | The Guardian\",\n  \"url\": \"https://www.theguardian.com/uk/environment\",\n  \"content\": \"US edition View all News The Guardian view Tracing the worst coral bleaching event in recorded history – video ### The most important number of the climate crisis: ### 425.2 atmospheric CO2 in parts per million, 21 July 2024 ### 75.2 above safe level ### 27.1 in past 10 years Source: NOAA. – podcast Live colossal squid captured on video in wild for first time ever – video Miniature horses race in New Zealand’s big wilderness – in pictures 'I'm not a scientist': Dutton responds to climate change question in ABC leaders' debate – video The deep-sea scientists logging Med pollution – in pictures Most viewed Most viewed Across the guardian Most viewed Across the guardian #### Trump says China tariffs will drop ‘substantially – but it won’t be zero’\"\n}",
+          "{\n  \"title\": \"Intergovernmental Panel on Climate Change (IPCC) - The Guardian\",\n  \"url\": \"https://www.theguardian.com/environment/ipcc\",\n  \"content\": \"Greenhouse gas emissions are on track to rise by 9% by 2030, despite years. We need power to prescribe climate policy, IPCC scientists say. Dec 7 2023 08.00 EST.\"\n}",
+          "{\n  \"title\": \"Climate crisis | The Guardian\",\n  \"url\": \"https://www.theguardian.com/environment/climate-crisis\",\n  \"content\": \"*   The Guardian view *   Image 2: a man in a suit speaks   ### The 89% project Democrats and climate groups ‘too polite’ in fight against ‘malevolent’ fossil fuel giants, says key senator Sheldon Whitehouse of Rhode Island gives 300th climate speech on the US Senate floor          *   Image 3: Texas grapples with devastation following Hill Country floods<br>KERRVILLE, TEXAS - JULY 7: U.S. Senator Ted Cruz (Texas) speaks at a news briefing in Texas' Hill Country near the Guadalupe River in Kerrville, Texas on July 7, 2025. (Photo by Jorge Salgado/Anadolu via Getty Images)   ### Texas floods 2025 Ted Cruz ensured Trump spending bill slashed weather forecasting funding         *   Image 8: Luiz Inácio Lula da Silva  ### With the world in crisis, many say end globalisation. *   Most viewed Across the guardian ### Most viewed Across the guardian\"\n}",
+          "{\n  \"title\": \"Climate and Environment - The New York Times Canada\",\n  \"url\": \"https://www.nytimes.com/ca/section/climate\",\n  \"content\": \"Parts of South Korea and Japan have had short rainy seasons this year. Scientists say that climate change has helped make the summer rains more unreliable. By\"\n}",
+          "{\n  \"title\": \"Trump officials axed an online portal for its key climate report. Read ...\",\n  \"url\": \"https://www.theguardian.com/us-news/2025/jul/10/national-climate-assessment-published\",\n  \"content\": \"Guardian makes legally mandated gold standard report widely available after administration deleted website.\"\n}"
+        ],
+        "execution_time": 6.476215362548828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Exclude Domains",
+        "purpose": "验证排除特定域名的搜索是否过滤掉不需要的来源",
+        "args": {
+          "query": "blockchain technology",
+          "exclude_domains": [
+            "wikipedia.org"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"What Is Blockchain? | IBM\",\n  \"url\": \"https://www.ibm.com/think/topics/blockchain\",\n  \"content\": \"Blockchain is a shared, immutable digital ledger, enabling the recording of transactions and the tracking of assets within a business network and providing a single source of truth. In blockchain technology, each transaction is grouped into blocks, which are then linked together, forming a secure and transparent chain. Blockchain technology contains several key features that enhance security, transparency and efficiency in transactions and data management: Blockchain technology records transactions securely by linking data blocks together. *   Integrate secure messaging protocols to facilitate confidential communication within the blockchain-based network, ensuring that messages and transactions remain private and tamper-proof. Healthcare providers are using AI to analyze patient data for personalized treatments and blockchain solutions to ensure the privacy and security of medical records.\"\n}",
+          "{\n  \"title\": \"What is Blockchain? Definition, Examples and How it Works\",\n  \"url\": \"https://www.techtarget.com/searchcio/definition/blockchain\",\n  \"content\": \"What is Blockchain? What is blockchain? Blockchain is a distributed ledger technology (DLT) that's shared across a network of computers to keep a digital record of transactions. Each computer in a blockchain network maintains a copy of the ledger where transactions are recorded to prevent a single point of failure. Every node in a public blockchain network conducts transactions and participates in the consensus process. A blockchain ledger consists of two types of records: individual transactions and blocks. Organizations across various industries use blockchain-based applications as a secure and cost-effective way to create and manage a distributed database and to maintain records for all types of digital transactions. *   **Control and ownership.** Blockchain uses a shared and synchronized transaction record distributed across a network of computers.\"\n}",
+          "{\n  \"title\": \"Blockchain Facts: What Is It, How It Works, and How It Can ...\",\n  \"url\": \"https://www.investopedia.com/terms/b/blockchain.asp\",\n  \"content\": \"*   What Is a Blockchain? Blockchain  *   How Are Blockchains Used? What Is a Blockchain? Blockchain ### Blockchain How Are Blockchains Used? As we now know, blocks on Bitcoin’s blockchain store transactional data. *   Blockchain Layer 2: The Difference Between Blockchain Scaling SolutionsImage 33: An illustration of someone putting their finger on a lock symbol in a wall of blockchain-like numbers.:max_bytes(150000):strip_icc():format(webp)/GettyImages-2180899837-76a28f7fb80044789d3969c64562161f.jpg) How Blockchain Boosters Say It Can Protect the Global EconomyImage 35: A woman reading about the best crypto software wallets:max_bytes(150000):strip_icc():format(webp)/GettyImages-1822104384-067a2bb94be44ae6ae483c2173405b74.jpg) Best Crypto Software Wallets for July 2025Image 37: A person holding a smartphone displaying a Bitcoin logo and stock market graphics:max_bytes(150000):strip_icc():format(webp)/GettyImages-13697660231-e8685fc2858d4569a85d9adcd02d4fca.jpg) Crypto Investors Beware: Why 'Wrench Attacks' Are Becoming More Common and How to Stay SafeImage 39: Digital security padlock with encrypted binary code on abstract circuit board:max_bytes(150000):strip_icc():format(webp)/GettyImages-1268601565-a2ed0ccd9cc1401ebe5e0e485d7b22c7.jpg) What Are the World Bank's Blockchain-Based Bonds?\"\n}",
+          "{\n  \"title\": \"What is Blockchain Technology?\",\n  \"url\": \"https://aws.amazon.com/what-is/blockchain/\",\n  \"content\": \"*   Blockchain What are AWS Blockchain services? As a result, you can use blockchain technology to create an unalterable or immutable ledger for tracking orders, payments, accounts, and other transactions. A distributed ledger is the shared database in the blockchain network that stores the transactions, such as a shared file that everyone in the team can edit. Most participants on the distributed blockchain network must agree that the recorded transaction is valid. A public Bitcoin blockchain network creates and manages the central ledger. What are AWS Blockchain services? You can use them to build everything from a centralized ledger database that maintains an immutable record of transactions to a multi-party, fully managed blockchain network that helps eliminate intermediaries. Some useful AWS Blockchain services are as follows:\"\n}"
+        ],
+        "execution_time": 2.6191952228546143,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limit Results to Maximum Allowed",
+        "purpose": "验证最大结果数限制为5时是否有效",
+        "args": {
+          "query": "quantum computing research",
+          "max_results": 5
+        },
+        "response": [
+          "{\n  \"title\": \"Quantum Computing - Google Research\",\n  \"url\": \"https://research.google/research-areas/quantum-computing/\",\n  \"content\": \"Quantum Computing is the design of hardware and software that replaces Boolean logic by quantum law at the algorithmic level.\"\n}",
+          "{\n  \"title\": \"Quantum Computing - IBM Research\",\n  \"url\": \"https://research.ibm.com/quantum-computing\",\n  \"content\": \"Quantum Computing - IBM Research - Quantum Computing - Quantum Computing - Quantum Computing IBM is bringing useful quantum computing to the world. IBM offers the world's most powerful quantum computers via the cloud and powered by Qiskit, the quantum software stack built for performance. - Quantum Community - Quantum Research - Quantum Research - Quantum Research - Quantum Research - ### Lockheed Martin & IBM combine quantum computing with classical HPC in new research - Quantum Network - Quantum Research - See more of our work on Quantum IBM Quantum Network is a community of Fortune 500 companies, academic institutions, startups and national research labs working with IBM to advance quantum computing. - IBM Quantum Network - Quantum Computing\"\n}",
+          "{\n  \"title\": \"18 Leading Quantum Computing Research Institutions in 2024\",\n  \"url\": \"https://thequantuminsider.com/2022/05/16/quantum-research/\",\n  \"content\": \"11 Quantum Research Institutions · 1. IBM · 2. Massachusetts Institute of Technology · 3. Harvard University · 4. Max Planck Society · 5.\"\n}",
+          "{\n  \"title\": \"Google Quantum AI\",\n  \"url\": \"https://quantumai.google/\",\n  \"content\": \"Google Quantum AI Image 1: Google Quantum AI *   What is quantum computing? *   Quantum Computer Image 2: Google Quantum AI *   What is quantum computing? *   Quantum Computer *   Google Quantum AI ======================================================== Willow, Google Quantum AI's latest state-of-the-art quantum chip, is a big step towards developing a large-scale, error-corrected quantum computer. *   Featured Learn about developing for quantum error correction with Coursera View published research, blog posts, and educational resources from the Quantum AI team. Making quantum error correction work Unlocking the potential of quantum computing: a developer’s guide to error correction  Explore our hands-on quantum error correction on Coursera  Our quantum computing journey Discover the Quantum AI campus\"\n}",
+          "{\n  \"title\": \"What Is Quantum Computing? | IBM\",\n  \"url\": \"https://www.ibm.com/think/topics/quantum-computing\",\n  \"content\": \"What Is Quantum Computing? What is quantum computing? What is quantum computing? The primary difference between classical and quantum computers is that quantum computers use qubits instead of bits. While quantum computing does use binary code, qubits process information differently from classical computers. Because qubits can hold a superposition and exhibit interference, a quantum computer that uses qubits approaches problems in ways different from classical computers. IBM Quantum Computing  ### What is quantum computing? Quantum computers, like classical computers, are problem-solving machines. ### The difference between quantum and classical computing #### Quantum computing Unlike classical computers that must compute every step of a complicated calculation, quantum circuits made from logical qubits can process complex problems more efficiently.\"\n}"
+        ],
+        "execution_time": 5.182742357254028,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limit Results to Minimum Value",
+        "purpose": "验证最小结果数（1）是否可正确返回单个结果",
+        "args": {
+          "query": "nuclear fusion breakthroughs",
+          "max_results": 1
+        },
+        "response": {
+          "result": "{\n  \"title\": \"French WEST reactor breaks record in nuclear fusion\",\n  \"url\": \"https://www.advancedsciencenews.com/french-west-reactor-breaks-record-in-nuclear-fusion/\",\n  \"content\": \"French WEST reactor breaks record in nuclear fusion - Advanced Science News _Scientists at the WEST tokamak in France set a new plasma duration record, bringing us closer to achieving nuclear fusion for clean energy._ Scientists have set a new record for generating and sustaining ultrahot plasma, the essential component for nuclear fusion, using the WEST tokamak reactor. While doing this, the operators of WEST will also attempt to push the temperature of the plasma it generates to those required to achieve fusion here on Earth. _Feature image: The plasma record reached a temperature of 50 million degrees. © CEA.French WEST reactor breaks record in nuclear fusion\"\n}"
+        },
+        "execution_time": 3.1741528511047363,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Use of Include and Exclude Domains",
+        "purpose": "验证同时使用 include 和 exclude 域名时逻辑是否正确",
+        "args": {
+          "query": "AI ethics discussion",
+          "include_domains": [
+            "stanford.edu"
+          ],
+          "exclude_domains": [
+            "youtube.com"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"AI and gene-editing pioneers to discuss ethics | Stanford Report\",\n  \"url\": \"https://news.stanford.edu/stories/2019/11/ai-gene-editing-pioneers-discuss-ethics\",\n  \"content\": \"Stanford's Fei-Fei Li and Jennifer Doudna of UC Berkeley will discuss the ethics of artificial intelligence and CRISPR technology.\"\n}",
+          "{\n  \"title\": \"Bringing principles of ethics to AI and drug design - Stanford' SCOPE\",\n  \"url\": \"https://scopeblog.stanford.edu/2022/04/01/bringing-principles-of-ethics-to-ai-and-drug-design/\",\n  \"content\": \"Researchers discuss the need for ethics and its integration into research projects that harness artificial intelligence.\"\n}",
+          "{\n  \"title\": \"Responsible AI: Keeping Machines from Absorbing Human Biases\",\n  \"url\": \"https://online.stanford.edu/responsible-ai-keeping-machines-absorbing-human-biases\",\n  \"content\": \"As technological advancements in AI spread, Stanford is helping to educate future innovators on AI ethics and ensuring ethical systems.\"\n}",
+          "{\n  \"title\": \"[PDF] Technical AI Ethics - Stanford HAI - Stanford University\",\n  \"url\": \"https://hai.stanford.edu/assets/files/hai_ai-index-report-2023_chapter_3.pdf\",\n  \"content\": \"Researchers in AI ethics in China also discuss many similar issues to their Western counterparts, including matters related to Western and Eastern AI arms.\"\n}",
+          "{\n  \"title\": \"CS281: Ethics of Artificial Intelligence -- Stanford University\",\n  \"url\": \"https://cs281.stanford.edu/\",\n  \"content\": \"Through practical case studies, you will identify issues of fairness, justice, and truth inherent in AI applications.\"\n}"
+        ],
+        "execution_time": 5.2195539474487305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Search Query",
+        "purpose": "验证特殊字符是否被正确处理，如空格、符号等",
+        "args": {
+          "query": "C++ vs Python performance"
+        },
+        "response": [
+          "{\n  \"title\": \"C++ vs. Python: Full Comparison and Insights | Capaciteam Blog\",\n  \"url\": \"https://capaciteam.com/c-plus-plus-vs-python/\",\n  \"content\": \"C++ can be up to 100 times faster than Python for certain tasks. However, Python's simplicity and shorter development time also translate to lower costs.\"\n}",
+          "{\n  \"title\": \"Unusual Speed Difference between Python and C++ - Stack Overflow\",\n  \"url\": \"https://stackoverflow.com/questions/1269795/unusual-speed-difference-between-python-and-c\",\n  \"content\": \"The python program runs on average in 0.59 seconds and the c++ version runs on average in 8.5 seconds.\"\n}",
+          "{\n  \"title\": \"How much faster is C++ than Python? : r/learnprogramming - Reddit\",\n  \"url\": \"https://www.reddit.com/r/learnprogramming/comments/l8kqqq/how_much_faster_is_c_than_python/\",\n  \"content\": \"C++ is often around 10x faster than pure Python. That didn't change with Python 3. However, there are tools like Cython they can greatly speed up some Python\"\n}",
+          "{\n  \"title\": \"Python vs C++ Speed Comparison - Halim Shams - Medium\",\n  \"url\": \"https://halimshams.medium.com/python-vs-c-speed-comparison-48187511c595\",\n  \"content\": \"For Python, it took 1 minute, 19 seconds and 214 milli seconds. Simply put, 1m.19s to finally reach a billion and print it to the terminal.\"\n}",
+          "{\n  \"title\": \"Python vs C++ Speed Comparison - YouTube\",\n  \"url\": \"https://www.youtube.com/watch?v=VioxsWYzoJk\",\n  \"content\": \"Lets compare the performance of c++ vs python counting to 1 Billion...Why is python so slow?\"\n}"
+        ],
+        "execution_time": 8.1140878200531,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check for Malicious Input",
+        "purpose": "验证工具是否对潜在恶意输入（如脚本注入）进行安全处理",
+        "args": {
+          "query": "<script>alert('xss')</script> vulnerability"
+        },
+        "response": [
+          "{\n  \"title\": \"The Ultimate Beginners Guide to XSS Vulnerability - Bright Security\",\n  \"url\": \"https://www.brightsec.com/blog/cross-site-scripting-xss/\",\n  \"content\": \"1. Basic injection works <script>alert(1)</script> in the URL parameter id (broken_site/xss/1?id=<script>alert(1)</script>) 2. Basic injection doesn’t work but we get some reflection (http://100.26.239.14:3000/vuln/xss/2?id=<script>alert(1)</script>) Next payload is broken/site/xss/2?id=<sCriPt>alert(1)</ScRipt>. 3. Let’s try on another page, again we start with basic injection to scout it out broken_site/xss/3?id=<script>alert(1)</script> Again as in the previous example, let’s mix the case and see how that reacts broken/site/xss/3?id=<sCriPt>alert(1)</ScRipt> 4. Page 4, again basic injection to see what’s going on broken_site/xss/4?id=<script>alert(1)</script> Let’s try wrapping it up to see what’s happening with the payload broken_site/xss/4?id=<sc<script>ript>alert(1)</sc</script>ript> 5. Another page, again we try the basic injection to see what’s going on with the site broken_site/xss/5?id=<script>alert(1)</script> If we try to input this in the search box XSS like <img src=\\\"http://juice-shop.herokuapp.com/rest/user/change-password?new=aaaaa&repeat=aaaaa\\\"> it won’t work because it doesn’t actually send a request.\"\n}",
+          "{\n  \"title\": \"Cross-Site Scripting (XSS) Vulnerability Guide - Invicti\",\n  \"url\": \"https://www.invicti.com/learn/cross-site-scripting-xss/\",\n  \"content\": \"Cross-site scripting (XSS) is a web vulnerability that lets a malicious hacker introduce (inject) undesired commands into legitimate client-side code (usually JavaScript) executed by a browser on behalf of the web application. While most other web attacks target the server side, cross-site scripting is different in that XSS attacks use your website or web application as a tool to directly attack the users – either your business users or complete strangers. Cross-site scripting (XSS) is a web vulnerability that lets a malicious hacker introduce (inject) undesired commands into legitimate client-side code (usually JavaScript) executed by a browser on behalf of the web application. A cross-site scripting attack is a type of attack executed through a security vulnerability typically found in web applications.\"\n}",
+          "{\n  \"title\": \"Cross Site Scripting (XSS) - OWASP Foundation\",\n  \"url\": \"https://owasp.org/www-community/attacks/xss/\",\n  \"content\": \"# Cross Site Scripting (XSS) Cross-Site Scripting (XSS) attacks are a type of injection, in which XSS attacks occur when an attacker uses a web application to An attacker can use XSS to send a malicious script to an unsuspecting Cross-Site Scripting (XSS) attacks occur when: ### Reflected and Stored XSS Attacks There is a third, much less well-known type of XSS attack #### Reflected XSS Attacks #### Stored XSS Attacks #### XSS Attack Consequences vulnerable to serious reflected XSS attacks. An XSS vulnerability allowing an attacker to of XSS attacks. XSS attacks may be conducted without using `<script>...</script>` Cross-site scripting attacks may occur anywhere that possibly malicious database, an attacker can execute malicious commands in the user’s web\"\n}",
+          "{\n  \"title\": \"What is cross-site scripting (XSS) and how to prevent it? - PortSwigger\",\n  \"url\": \"https://portswigger.net/web-security/cross-site-scripting\",\n  \"content\": \"What is cross-site scripting (XSS) and how to prevent it? ### Cross-site scripting (XSS) *   - [x] Exploiting XSS vulnerabilities  *   - [x] Preventing XSS attacks  What is cross-site scripting (XSS)? Cross-site scripting (also known as XSS) is a web security vulnerability that allows an attacker to compromise the interactions that users have with a vulnerable application. Cross-site scripting vulnerabilities normally allow an attacker to masquerade as a victim user, to carry out any actions that the user is able to perform, and to access any of the user's data. Cross-site scripting works by manipulating a vulnerable web site so that it returns malicious JavaScript to users. The actual impact of an XSS attack generally depends on the nature of the application, its functionality and data, and the status of the compromised user.\"\n}",
+          "{\n  \"title\": \"Cross-site scripting (XSS) - Security - MDN Web Docs\",\n  \"url\": \"https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/XSS\",\n  \"content\": \"That's what we see in the first example: the malicious code is injected in the browser, by a script running in the page assigning the URL parameter value to the `Element.innerHTML` property, which interprets its value as HTML code. If you're rendering content in the browser, you can use the Trusted Types API to ensure that input is being passed through a sanitization function before being included in the page. So you need to protect against the case where `my_input` is HTML that defines executable code, such as `<img src=x onerror=\\\"alert('XSS')\\\">`. * When interpolating input into a page, either in the browser or in the server, use a templating engine that performs output encoding.\"\n}"
+        ],
+        "execution_time": 4.42639684677124,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Search Depth Parameter",
+        "purpose": "验证当传入无效的 search_depth 参数时是否报错或使用默认值",
+        "args": {
+          "query": "robotics trends",
+          "search_depth": "invalid_depth"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: tavily_web_search 发生错误: search_depth 必须是 'basic' 或 'advanced'"
+        },
+        "execution_time": 0.008003711700439453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Exceeding Limit",
+        "purpose": "验证当 max_results 超出允许范围（1-5）时是否自动限制为5",
+        "args": {
+          "query": "cybersecurity threats",
+          "max_results": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: tavily_web_search 发生错误: max_results 必须是 1 到 5 之间的整数"
+        },
+        "execution_time": 0.010005712509155273,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "验证空查询是否导致错误或合理提示",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: tavily_web_search 发生错误: 搜索查询不能为空"
+        },
+        "execution_time": 0.007750272750854492,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long Query String",
+        "purpose": "验证超长查询字符串是否被正确处理",
+        "args": {
+          "query": "a very long query that tests the maximum allowed length of a search string in the system which may be subject to certain limitations or truncation mechanisms"
+        },
+        "response": [
+          "{\n  \"title\": \"Solved: The query is too large. The maximum standard SQL q...\",\n  \"url\": \"https://www.googlecloudcommunity.com/gc/Data-Analytics/The-query-is-too-large-The-maximum-standard-SQL-query-length-is/m-p/699275\",\n  \"content\": \"Missing: system truncation mechanisms 12/07/2025\"\n}",
+          "{\n  \"title\": \"SQL Server truncation and 8192 limitation - Stack Overflow\",\n  \"url\": \"https://stackoverflow.com/questions/952247/sql-server-truncation-and-8192-limitation\",\n  \"content\": \"Missing: subject mechanisms 12/07/2025\"\n}",
+          "{\n  \"title\": \"String or binary data would be truncated while reading column of ...\",\n  \"url\": \"https://learn.microsoft.com/en-us/answers/questions/525290/string-or-binary-data-would-be-truncated-while-rea\",\n  \"content\": \"Missing: subject limitations mechanisms\"\n}",
+          "{\n  \"title\": \"Snowflake query text limits - \\\"The query you are trying to run is too ...\",\n  \"url\": \"https://community.snowflake.com/s/article/Snowflake-query-text-limits\",\n  \"content\": \"This article describes errors resulting from very large query texts in Snowflake.\"\n}",
+          "{\n  \"title\": \"The query is too large. The maximum standard SQL query length is ...\",\n  \"url\": \"https://help.salesforce.com/s/articleView?id=001474197&language=en_US&type=1\",\n  \"content\": \"The maximum standard SQL query length is 1024.00K characters, including comments. Cause. Google imposes a limit of 1 MB for standard SQL query\"\n}"
+        ],
+        "execution_time": 4.52741003036499,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_answer_search": [
+      {
+        "case_name": "Basic Answer Search with Default Parameters",
+        "purpose": "验证使用默认参数执行基础问答搜索功能是否正常",
+        "args": {
+          "query": "地球的卫星是什么？"
+        },
+        "response": {
+          "result": "Earth's natural satellite is the Moon. Earth also has a quasi-satellite named 2016 HO3. There are no other natural satellites of Earth."
+        },
+        "execution_time": 6.768888473510742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Advanced Answer Search for Detailed Information",
+        "purpose": "验证高级搜索深度是否能返回更详细和权威的答案信息",
+        "args": {
+          "query": "量子计算的基本原理",
+          "search_depth": "advanced"
+        },
+        "response": {
+          "result": "Quantum computing uses quantum bits (qubits) to perform calculations based on quantum superposition and entanglement, offering potential for faster problem-solving than classical computers. Qubits can represent multiple states simultaneously, enabling parallel processing. Quantum computing leverages principles like superposition and entanglement to achieve its advantages."
+        },
+        "execution_time": 8.004712343215942,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Answer Search with Special Characters in Query",
+        "purpose": "验证查询中包含特殊字符（如问号、括号）时工具能否正确处理",
+        "args": {
+          "query": "C++与Python的主要区别？"
+        },
+        "response": {
+          "result": "C++是编译型语言，执行效率高，而Python是解释型语言，开发效率高。C++需要手动管理内存，而Python自动管理内存。C++类型明确，Python类型动态。"
+        },
+        "execution_time": 10.794224739074707,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check for XSS Injection Attempt",
+        "purpose": "验证工具是否对潜在恶意输入（如脚本注入）进行安全过滤或忽略",
+        "args": {
+          "query": "<script>alert('xss')</script> vulnerability"
+        },
+        "response": {
+          "result": "Cross-site scripting (XSS) allows attackers to inject malicious scripts into web pages. Common XSS payloads include `<script>alert('XSS')</script>`. XSS exploits can bypass security policies and compromise user data."
+        },
+        "execution_time": 6.130676984786987,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input Handling",
+        "purpose": "验证空查询是否被正确检测并返回错误提示",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: 查询内容不能为空"
+        },
+        "execution_time": 0.007615804672241211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Search Depth Parameter Handling",
+        "purpose": "验证当传入无效的 search_depth 参数时是否报错或使用默认值",
+        "args": {
+          "query": "机器人技术最新进展",
+          "search_depth": "invalid_depth"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: tavily_answer_search 发生错误: search_depth 必须是 'basic' 或 'advanced'"
+        },
+        "execution_time": 0.008731842041015625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long Query String Handling",
+        "purpose": "验证超长查询字符串是否被正确截断或处理",
+        "args": {
+          "query": "a very long query that tests the maximum allowed length of a search string in the system which may be subject to certain limitations or truncation mechanisms"
+        },
+        "response": {
+          "result": "Search strings often have length limits, typically truncating or rejecting excessively long queries. Truncation and wildcards broaden search scopes. JavaScript strings have a maximum length of 2^32 - 1 characters."
+        },
+        "execution_time": 6.82160210609436,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_news_search": [
+      {
+        "case_name": "Basic News Search with Default Parameters",
+        "purpose": "验证使用默认参数执行基础新闻搜索的功能是否正常",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": [
+          "{\n  \"title\": \"Artificial intelligence (AI) | Definition, Examples, Types, Applications ...\",\n  \"url\": \"https://www.britannica.com/technology/artificial-intelligence\",\n  \"content\": \"Artificial intelligence (AI) | Definition, Examples, Types, Applications, Companies, & Facts | Britannica artificial intelligenceImage generated by the Stable Diffusion model from the prompt “the ability of a digital computer or computer-controlled robot to perform tasks commonly associated with intelligent beings,” which is the definition of artificial intelligence (AI) in the _Encyclopædia Britannica_ article on the subject. Related Topics: history of artificial intelligence (AI)Logic TheoristGeneral Problem Solvergenerative AIframe_(Show more)_ **artificial intelligence (AI)**, the ability of a digital computer or computer-controlled robot to perform tasks commonly associated with intelligent beings. Research in AI has focused chiefly on the following components of intelligence: learning, reasoning, problem solving, perception, and using language. *   artificial intelligence (AI) - Student Encyclopedia (Ages 11 and up)\"\n}",
+          "{\n  \"title\": \"We're Light-Years Away from True Artificial Intelligence, Says ...\",\n  \"url\": \"https://www.scientificamerican.com/article/were-light-years-away-from-true-artificial-intelligence-says-murderbot/\",\n  \"content\": \"It's called artificial intelligence as a marketing tool, but it's not actually artificial intelligence. A large language model is not a machine intelligence.\"\n}",
+          "{\n  \"title\": \"1 Artificial Intelligence (AI) Stock to Buy Before It Soars to $10 Trillion ...\",\n  \"url\": \"https://finance.yahoo.com/news/1-artificial-intelligence-ai-stock-072100243.html\",\n  \"content\": \"Beth Kindig at the I/O Fund thinks Nvidia could be a $10 trillion company by 2030; that implies 156% upside from its current market value of $3.9 trillion.\"\n}",
+          "{\n  \"title\": \"China tops the world in artificial intelligence publications, database ...\",\n  \"url\": \"https://www.science.org/content/article/china-tops-world-artificial-intelligence-publications-database-analysis-reveals\",\n  \"content\": \"China tops the world in artificial intelligence publications, database analysis reveals | Science | AAAS Image 1Image 2: AAAS Science Logo Image 3: journal-menu-img science Image 4: journal-menu-img science advances Image 5: journal-menu-img science immunology Image 6: journal-menu-img science robotics Image 7: journal-menu-img science signaling Image 8: journal-menu-img science translational medicine Image 9: journal-menu-img science partner journals *   science Image 10: AAAS Science Logo “U.S. influence in AI research is declining, with China now dominating,” Daniel Hook, CEO of Digital Science, which owns the Dimensions database, writes in the report _DeepSeek and the New Geopolitics of AI: China’s ascent to research pre-eminence in AI_. *   Science\"\n}"
+        ],
+        "execution_time": 3.6825814247131348,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Maximum Days Limit",
+        "purpose": "验证最大天数限制（365天）是否有效",
+        "args": {
+          "query": "climate change",
+          "days": 365
+        },
+        "response": [
+          "{\n  \"title\": \"Climate change - Wikipedia\",\n  \"url\": \"https://en.wikipedia.org/wiki/Climate_change\",\n  \"content\": \"| | Background and theory | | --- | | | Measurements |  Global surface temperature  Instrumental temperature record  Proxy \\\"Proxy (climate)\\\")  Satellite temperature measurement | | --- | | Theory |  Albedo  Carbon cycle  atmospheric  biologic  oceanic  permafrost  Carbon sink  Climate sensitivity  Climate variability and change  Cloud feedback  Cloud forcing  Fixed anvil temperature hypothesis  Cryosphere  Earth's energy budget  Extreme event attribution  Feedbacks  Global warming potential  Illustrative model of greenhouse effect on climate change  Orbital forcing  Radiative forcing | | Research and modelling |  Climate change scenario  Climate model  Coupled Model Intercomparison Project  Intergovernmental Panel on Climate Change (IPCC)  IPCC Sixth Assessment Report  Paleoclimatology  Representative Concentration Pathway  Shared Socioeconomic Pathways | | |\"\n}",
+          "{\n  \"title\": \"Climate change: Facts about our warming planet | Live Science\",\n  \"url\": \"https://www.livescience.com/planet-earth/climate-change/climate-change-facts-about-our-warming-planet\",\n  \"content\": \"Discover important facts about what climate change is, what's causing it, and what we can do to stop it. Comments ( 0 ) ( 3 ).\"\n}",
+          "{\n  \"title\": \"Climate Change - NASA Science\",\n  \"url\": \"https://science.nasa.gov/climate-change/\",\n  \"content\": \"Climate Change - NASA Science Image 3: NASA’s Hubble and Webb Telescopes Reveal Two Faces of a Star Cluster Duo 3 min read ### NASA’s Hubble and Webb Telescopes Reveal Two Faces of a Star Cluster Duo article 4 days agoImage 4: NASA Mission Monitoring Air Quality from Space Extended  4 min read ### NASA Mission Monitoring Air Quality from Space Extended article 1 week agoImage 5: Hubble Observations Give “Missing” Globular Cluster Time to Shine 2 min read ### Hubble Observations Give “Missing” Globular Cluster Time to Shine article 1 week ago\"\n}"
+        ],
+        "execution_time": 3.4382269382476807,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Minimum Results",
+        "purpose": "验证最小结果数（1）是否可正确返回单个结果",
+        "args": {
+          "query": "quantum computing breakthroughs",
+          "max_results": 1
+        },
+        "response": {
+          "result": "{\n  \"title\": \"Turning Quantum Bottlenecks into Breakthroughs\",\n  \"url\": \"https://www.engineering.columbia.edu/about/news/turning-quantum-bottlenecks-breakthroughs\",\n  \"content\": \"Columbia Engineering researchers develop a novel system that lets multiple programs run at once on a single quantum machine, promising faster scientific\"\n}"
+        },
+        "execution_time": 3.5677483081817627,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Include Specific News Sources",
+        "purpose": "验证包含特定域名的搜索是否仅返回指定来源的结果",
+        "args": {
+          "query": "AI ethics",
+          "include_domains": [
+            "stanford.edu"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"Artificial Intelligence (AI) Archives\",\n  \"url\": \"https://stvp.stanford.edu/category/ecorner-topics/artificial-intelligence-ai/\",\n  \"content\": \"Ethics · Stanford Initiative for Entrepreneurs' Resilience & Well-Being (SIER) · Annual Report · Research · Students · Learning Paths · Courses · Fellows\"\n}",
+          "{\n  \"title\": \"CodeX TechIndex - Stanford University\",\n  \"url\": \"http://techindex.law.stanford.edu/tags/pre-authorization?page=24\",\n  \"content\": \"SafeReport is a comprehensive whistleblowing platform, ethics hotline and HR tool. ... Aava AI. Aava is an AI-powered tool designed to streamline case research\"\n}",
+          "{\n  \"title\": \"[PDF] King (Vivek) Vanga\",\n  \"url\": \"https://cap.stanford.edu/profiles/frdActionServlet?choiceId=printerprofile&profileversion=full&profileId=217899\",\n  \"content\": \"King Vanga is a Stanford-trained AI researcher and the founder of CivicSentinel AI, a public-interest initiative focused on developing ethical tools to detect\"\n}",
+          "{\n  \"title\": \"Medicine and the Muse | Stanford Center for Biomedical Ethics\",\n  \"url\": \"https://med.stanford.edu/medicineandthemuse.html\",\n  \"content\": \"The ideas included using AI to create new antibiotics; the value of compelling, accurate science storytelling; retooling the ever-cumbersome electronic health\"\n}",
+          "{\n  \"title\": \"Philosophy of Artificial Intelligence\",\n  \"url\": \"https://summerinstitutes.spcs.stanford.edu/courses/2025/philosophy-artificial-intelligence\",\n  \"content\": \"## Help Navigation ## Help Navigation # Philosophy of Artificial Intelligence Artificial Intelligence (AI) is transforming the world around us, but what does this label truly mean? While many technologies are branded as \\\"AI\\\", the term raises profound philosophical, social, and ethical questions. What is thinking? Can thought and intelligence exist without conscious experience? How far removed can a form of thinking or experience be from our own and still be recognized as such? Using readings, discussion, and a variety of activities and projects, this course invites students to explore these wide-ranging issues, offering a thought-provoking journey into the philosophical depths and real-world implications of AI in our society. We offer a variety of programs designed to meet the needs of students everywhere. ### Navigate\"\n}"
+        ],
+        "execution_time": 4.74301290512085,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Exclude Specific News Sources",
+        "purpose": "验证排除特定域名的搜索是否过滤掉不需要的来源",
+        "args": {
+          "query": "blockchain technology",
+          "exclude_domains": [
+            "wikipedia.org"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"How is Blockchain in Banking Transforming the Industry\",\n  \"url\": \"https://appinventiv.com/blog/blockchain-in-banking/\",\n  \"content\": \"Blockchain technology enables banks to develop innovative products, such as asset tokenization, peer-to-peer lending platforms, and decentralized finance (DeFi)\"\n}",
+          "{\n  \"title\": \"A Blockchain Technology-Enabled Audit Governance\",\n  \"url\": \"https://www.atlantis-press.com/proceedings/ichssr-25/126013652\",\n  \"content\": \"This paper points out the key features of the blockchain, such as the advantages in the governance of audit including automation, data security and transparency\"\n}",
+          "{\n  \"title\": \"Blockchain's Multifaceted Role in Economic Development\",\n  \"url\": \"https://www.cvvc.com/blogs/blockchains-multifaceted-role-in-economic-development\",\n  \"content\": \"Blockchain specific investment activity has shown resilience, and the data indicates investor appetite in digital infrastructure solutions is growing.\"\n}",
+          "{\n  \"title\": \"CENTRE OF EXCELLENCE IN BLOCKCHAIN TECHNOLOGY\",\n  \"url\": \"https://blockchain.gov.in/\",\n  \"content\": \"As on 08-07-2025 · BlockChain Products. ×. Sl.No, Products. 1, Certificate Chain. 2, Document Chain. 3, Drug Logistics Chain. 4, Judiciary Chain. 5, Property\"\n}",
+          "{\n  \"title\": \"How Can a Blockchain Be Used in Business?\",\n  \"url\": \"https://www.impactmybiz.com/blog/how-can-blockchain-be-used-in-business/\",\n  \"content\": \"Discover the uses of a blockchain for small business such as conducting secure transactions, managing supply chains, and more in this blog.\"\n}"
+        ],
+        "execution_time": 3.3799493312835693,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Use of Include and Exclude Domains",
+        "purpose": "验证同时使用 include 和 exclude 域名时逻辑是否正确",
+        "args": {
+          "query": "AI research",
+          "include_domains": [
+            "mit.edu"
+          ],
+          "exclude_domains": [
+            "youtube.com"
+          ]
+        },
+        "response": [
+          "{\n  \"title\": \"Artificial intelligence | Massachusetts Institute of Technology\",\n  \"url\": \"https://news.mit.edu/topic/artificial-intelligence2?type=2\",\n  \"content\": \"Artificial intelligence | MIT News | Massachusetts Institute of Technology MIT News | Massachusetts Institute of Technology 1.   MIT News _Guardian_ reporter Ian Sample highlights how graduate student Alex Kachkine has developed a new approach to restoring age-damaged artwork in hours _._“The technique draws on artificial intelligence and other computer tools to create a digital reconstruction of the damaged painting,” explains Sample. MIT researchers have developed Boltz-2, an AI algorithm “that unites protein folding and prediction of small-molecule binding affinity in one package,” reports Laura Howes for _Chemical & Engineering News_. Researchers at MIT and elsewhere have developed Boltz-2, an open-source generative AI model that can help researchers find new medicines faster, reports Alex Knapp for _Forbes_.\"\n}",
+          "{\n  \"title\": \"Machine learning | MIT News | Massachusetts Institute of Technology\",\n  \"url\": \"https://news.mit.edu/topic/machine-learning?type=2\",\n  \"content\": \"Researchers at MIT have found that “AI agents can make the workplace more productive when fine-tuned for different personality types, but human co-workers pay a\"\n}",
+          "{\n  \"title\": \"Artificial intelligence | Massachusetts Institute of Technology\",\n  \"url\": \"https://news.mit.edu/topic/artificial-intelligence2\",\n  \"content\": \"Artificial intelligence | MIT News | Massachusetts Institute of Technology *   About MIT MIT News | Massachusetts Institute of Technology Subscribe to MIT News newsletter View all news coverage of MIT in the media → Listen to audio content from MIT News → 1.   MIT News Image 11: Collage image with two MIT researchers standing to the side, an inset in the center shows a robot labeled \\\"AI optimized,\\\" and two insets show other structures that are parts of the robot. The LOBSTgER research initiative at MIT Sea Grant explores how generative AI can expand scientific storytelling by building on field-based photographic data. More about MIT News at Massachusetts Institute of Technology *   About the MIT News Office *   MIT News Press Center *   About MIT\"\n}",
+          "{\n  \"title\": \"Artificial Intelligence + Machine Learning - MIT EECS\",\n  \"url\": \"https://www.eecs.mit.edu/topics/artificial-intelligence-machine-learning/\",\n  \"content\": \"A team of MIT researchers founded Themis AI to quantify AI model uncertainty and address knowledge gaps.\"\n}",
+          "{\n  \"title\": \"Changing the conversation in health care | MIT News\",\n  \"url\": \"https://news.mit.edu/2025/changing-conversation-health-care-0709\",\n  \"content\": \"The Language/AI Incubator, an MIT Human Insight Collaborative project, is investigating how AI can improve communications among patients and practitioners.\"\n}"
+        ],
+        "execution_time": 4.936908483505249,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check for XSS Injection Attempt",
+        "purpose": "验证工具是否对潜在恶意输入（如脚本注入）进行安全处理",
+        "args": {
+          "query": "<script>alert('xss')</script> vulnerability"
+        },
+        "response": [
+          "{\n  \"title\": \"Cross Site Scripting ( XSS) | PPTX - SlideShare\",\n  \"url\": \"https://www.slideshare.net/slideshow/cross-site-scripting-xss/5154250\",\n  \"content\": \"Cross Site Scripting (XSS) is a vulnerability that allows malicious users to insert client-side code into web pages that is then executed by a user's browser.\"\n}",
+          "{\n  \"title\": \"XSS (Stored XSS) in novo_memorando.php · Advisory - GitHub\",\n  \"url\": \"https://github.com/LabRedesCefetRJ/WeGIA/security/advisories/GHSA-46fm-hx2r-69fg\",\n  \"content\": \"This is a Critical Stored Cross-Site Scripting (XSS) vulnerability (CWE-79). Stored XSS is particularly severe because the malicious payload is permanently\"\n}",
+          "{\n  \"title\": \"XSS in 2025 — The Payloads That Still Work | by Santhosh Adiga U\",\n  \"url\": \"https://santhosh-adiga-u.medium.com/xss-in-2025-the-payloads-that-still-work-3aa343e0b4f2\",\n  \"content\": \"Cross-Site Scripting (XSS) is when user-controlled input is executed as JavaScript in the browser of another user. That means: Stealing cookies. Running your\"\n}",
+          "{\n  \"title\": \"Prevent Cross-Site Scripting (XSS) in ASP.NET Core | Microsoft Learn\",\n  \"url\": \"https://learn.microsoft.com/en-us/aspnet/core/security/cross-site-scripting?view=aspnetcore-9.0\",\n  \"content\": \"Prevent Cross-Site Scripting (XSS) in ASP.NET Core | Microsoft Learn This article applies primarily to ASP.NET Core MVC with views, Razor Pages, and other apps that return HTML that may be vulnerable to XSS. Web APIs that return data in the form of HTML, XML, or JSON can trigger XSS attacks in their client apps if they don't properly sanitize user input, depending on how much trust the client app places in the API. To prevent XSS attacks, web APIs should implement input validation and output encoding. Encoding at the point of output allows you to change the use of data, for example, from HTML to a query string value.\"\n}",
+          "{\n  \"title\": \"Protect Your Site from XSS: Stored, Reflected, and DOM-Based ...\",\n  \"url\": \"https://community.codenewbie.org/sharon428931/protect-your-site-from-xss-stored-reflected-and-dom-based-attacks-9em\",\n  \"content\": \"It allows attackers to inject malicious scripts into web pages viewed by other users, potentially leading to data theft, session hijacking, or unauthorized\"\n}"
+        ],
+        "execution_time": 3.3682053089141846,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input Handling",
+        "purpose": "验证空查询是否导致错误或合理提示",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: 新闻查询不能为空"
+        },
+        "execution_time": 0.004513740539550781,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Days Parameter Handling",
+        "purpose": "验证当 days 参数超出允许范围（1-365）时是否自动限制为最近7天",
+        "args": {
+          "query": "cybersecurity news",
+          "days": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: days 必须是 1 到 365 之间的整数"
+        },
+        "execution_time": 0.003997325897216797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Exceeding Limit",
+        "purpose": "验证当 max_results 超出允许范围（1-5）时是否自动限制为5",
+        "args": {
+          "query": "latest tech trends",
+          "max_results": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: tavily_news_search 发生错误: max_results 必须是 1 到 5 之间的整数"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 30
+}

@@ -1,0 +1,393 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_academic_paper_search_tool",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_academic_paper_search_tool/refined/server.py",
+  "timestamp": "2025-07-14T20:25:53.503012",
+  "tools": [
+    {
+      "name": "search_papers_tool",
+      "description": "\n    Searches for academic papers based on keywords and limits the number of results.\n\n    Args:\n        keywords (str): The search terms or phrases to look for in academic papers.\n        max_results (int): The maximum number of results to return (between 1 and 100).\n\n    Returns:\n        A JSON string representing a list of dictionaries, each containing `title`, `authors`, `year`, and `doi`.\n\n    Raises:\n        ValueError: If keywords are empty or max_results is not between 1 and 100.\n\n    Example:\n        search_papers_tool(keywords=\"machine learning\", max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "max_results": {
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords",
+          "max_results"
+        ],
+        "title": "search_papers_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details_tool",
+      "description": "\n    Retrieves detailed information about a specific paper based on its ID and source.\n\n    Args:\n        paper_id (str): The unique identifier of the paper (either DOI or Semantic Scholar ID).\n        source (str): The source to fetch details from (`Semantic Scholar` or `Crossref`).\n\n    Returns:\n        A JSON string containing the `title`, `authors`, `abstract`, and `publication_venue` of the specified paper.\n\n    Raises:\n        ValueError: If an invalid source is provided or paper_id is empty.\n\n    Example:\n        fetch_paper_details_tool(paper_id=\"10.1093/mind/lix.236.433\", source=\"Semantic Scholar\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_details_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic_tool",
+      "description": "\n    Searches for papers based on topic keywords, with optional filters for year range and result count limit.\n\n    Args:\n        topic_keywords (str): Keywords related to the topic of interest.\n        year_range_start (int, optional): Start year for filtering results.\n        year_range_end (int, optional): End year for filtering results.\n        max_results (int, optional): The maximum number of results to return (between 1 and 100).\n\n    Returns:\n        A JSON string representing a list of dictionaries, each containing `title`, `authors`, `year`, and `doi`.\n\n    Raises:\n        ValueError: If topic_keywords are empty or max_results is not between 1 and 100.\n\n    Example:\n        search_by_topic_tool(topic_keywords=\"AI ethics\", year_range_start=2015, year_range_end=2020, max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "topic_keywords": {
+            "title": "Topic Keywords",
+            "type": "string"
+          },
+          "year_range_start": {
+            "default": null,
+            "title": "Year Range Start",
+            "type": "integer"
+          },
+          "year_range_end": {
+            "default": null,
+            "title": "Year Range End",
+            "type": "integer"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic_keywords"
+        ],
+        "title": "search_by_topic_toolArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers_tool": [
+      {
+        "case_name": "Basic Paper Search with Default Results",
+        "purpose": "验证工具在提供关键词且使用默认max_results时能正确返回论文搜索结果",
+        "args": {
+          "keywords": "machine learning",
+          "max_results": 5
+        },
+        "response": {
+          "error": "Tool call 'search_papers_tool' was cancelled."
+        },
+        "execution_time": 50.01549673080444,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Maximum Allowed Results",
+        "purpose": "验证工具在max_results为最大允许值(100)时能正常处理请求",
+        "args": {
+          "keywords": "deep learning",
+          "max_results": 100
+        },
+        "response": {
+          "error": "Tool call 'search_papers_tool' was cancelled."
+        },
+        "execution_time": 50.05679273605347,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Validation",
+        "purpose": "验证工具在keywords为空时是否抛出ValueError",
+        "args": {
+          "keywords": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: Keywords cannot be empty or blank."
+        },
+        "execution_time": 0.29970526695251465,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Below Minimum Validation",
+        "purpose": "验证工具在max_results小于1时是否抛出ValueError",
+        "args": {
+          "keywords": "neural networks",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: max_results must be between 1 and 100 inclusive."
+        },
+        "execution_time": 0.4923572540283203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Above Maximum Validation",
+        "purpose": "验证工具在max_results大于100时是否抛出ValueError",
+        "args": {
+          "keywords": "computer vision",
+          "max_results": 101
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: max_results must be between 1 and 100 inclusive."
+        },
+        "execution_time": 0.3007981777191162,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Keywords",
+        "purpose": "验证工具是否能够处理包含特殊字符的搜索关键词",
+        "args": {
+          "keywords": "自然语言处理 !@#$%^&*()",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: Error while searching papers: 'NoneType' object is not iterable"
+        },
+        "execution_time": 1.8945975303649902,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Keywords",
+        "purpose": "验证工具是否安全地处理潜在的SQL注入攻击向量",
+        "args": {
+          "keywords": "machine learning; DROP TABLE papers",
+          "max_results": 5
+        },
+        "response": {
+          "error": "Tool call 'search_papers_tool' was cancelled."
+        },
+        "execution_time": 50.43452978134155,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Keywords",
+        "purpose": "验证工具是否安全地处理潜在的跨站脚本攻击向量",
+        "args": {
+          "keywords": "<script>alert('xss')</script> cybersecurity",
+          "max_results": 5
+        },
+        "response": {
+          "error": "Tool call 'search_papers_tool' was cancelled."
+        },
+        "execution_time": 50.33350944519043,
+        "is_functional_test": false
+      }
+    ],
+    "search_by_topic_tool": [
+      {
+        "case_name": "Basic Topic Search with Default Results",
+        "purpose": "验证工具在提供关键词且使用默认max_results时能正确返回论文搜索结果",
+        "args": {
+          "topic_keywords": "machine learning"
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic_tool' was cancelled."
+        },
+        "execution_time": 50.326669216156006,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Topic Search with Year Range and Default Limit",
+        "purpose": "验证工具在提供关键词和年份范围时能正确过滤并返回结果",
+        "args": {
+          "topic_keywords": "deep learning",
+          "year_range_start": 2015,
+          "year_range_end": 2020
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic_tool' was cancelled."
+        },
+        "execution_time": 50.18461203575134,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Topic Search with Maximum Allowed Results",
+        "purpose": "验证工具在max_results为最大允许值(100)时能正常处理请求",
+        "args": {
+          "topic_keywords": "neural networks",
+          "max_results": 100
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic_tool' was cancelled."
+        },
+        "execution_time": 50.00337290763855,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Topic Search with Minimum Result Limit",
+        "purpose": "验证工具在max_results为最小有效值(1)时是否正常返回单个结果",
+        "args": {
+          "topic_keywords": "natural language processing",
+          "max_results": 1
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic_tool' was cancelled."
+        },
+        "execution_time": 50.00754976272583,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Validation",
+        "purpose": "验证工具在topic_keywords为空时是否抛出ValueError",
+        "args": {
+          "topic_keywords": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic_tool: Error in search_by_topic_tool: topic_keywords cannot be empty or blank."
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Below Minimum Validation",
+        "purpose": "验证工具在max_results小于1时是否抛出ValueError",
+        "args": {
+          "topic_keywords": "computer vision",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic_tool: Error in search_by_topic_tool: max_results must be between 1 and 100 inclusive."
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Above Maximum Validation",
+        "purpose": "验证工具在max_results大于100时是否抛出ValueError",
+        "args": {
+          "topic_keywords": "AI ethics",
+          "max_results": 101
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic_tool: Error in search_by_topic_tool: max_results must be between 1 and 100 inclusive."
+        },
+        "execution_time": 0.007002115249633789,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Topic Keywords",
+        "purpose": "验证工具是否能够处理包含特殊字符的搜索关键词",
+        "args": {
+          "topic_keywords": "量子计算 !@#$%^&*()",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic_tool: Error in search_by_topic_tool: Error while searching by topic: 'NoneType' object is not iterable"
+        },
+        "execution_time": 33.676369428634644,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_paper_details_tool": [
+      {
+        "case_name": "Basic Paper Details Fetch with Semantic Scholar",
+        "purpose": "验证工具在提供有效paper_id和source为'Semantic Scholar'时能正确返回论文详细信息",
+        "args": {
+          "paper_id": "10.1093/mind/lix.236.433",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details_tool: Error in fetch_paper_details_tool: Error while fetching paper details: Internal Server Error"
+        },
+        "execution_time": 3.004408359527588,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic Paper Details Fetch with Crossref",
+        "purpose": "验证工具在提供有效paper_id且source为'Crossref'时能正常获取论文详情",
+        "args": {
+          "paper_id": "10.1109/ACCESS.2021.3051557",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"title\": \"Machine Learning Techniques for 5G and Beyond\", \"authors\": [\"Kaur, Jasneet\", \"Khan, M. Arif\", \"Iftikhar, Mohsin\", \"Imran, Muhammad\", \"Emad Ul Haq, Qazi\"], \"abstract\": \"\", \"publication_venue\": \"IEEE Access\"}"
+        },
+        "execution_time": 1.8767807483673096,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Paper ID Validation",
+        "purpose": "验证工具在paper_id为空字符串时是否抛出ValueError",
+        "args": {
+          "paper_id": "",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details_tool: Error in fetch_paper_details_tool: paper_id cannot be empty or blank."
+        },
+        "execution_time": 0.0042514801025390625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Validation",
+        "purpose": "验证工具在source参数非法时是否抛出ValueError",
+        "args": {
+          "paper_id": "10.1093/mind/lix.236.433",
+          "source": "Google Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details_tool: Error in fetch_paper_details_tool: Error while fetching paper details: Invalid source. Please choose 'Semantic Scholar' or 'Crossref'."
+        },
+        "execution_time": 0.003564596176147461,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID with Special Characters",
+        "purpose": "验证工具是否能够处理包含特殊字符的paper_id输入",
+        "args": {
+          "paper_id": "10.1093/mind/lix.236.433@special!id",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details_tool: Error in fetch_paper_details_tool: Error while fetching paper details: Paper with id 10.1093/mind/lix.236.433@special!id not found"
+        },
+        "execution_time": 1.2939908504486084,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Paper ID",
+        "purpose": "验证工具是否安全地处理潜在跨站脚本攻击向量作为paper_id输入",
+        "args": {
+          "paper_id": "<script>alert('xss')</script>",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details_tool: Error in fetch_paper_details_tool: Error while fetching paper details: 'NoneType' object has no attribute 'get'"
+        },
+        "execution_time": 2.207127809524536,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Paper ID",
+        "purpose": "验证工具是否安全地处理包含SQL注入尝试的paper_id输入",
+        "args": {
+          "paper_id": "10.1093/mind/lix.236.433; DROP TABLE papers",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details_tool: Error in fetch_paper_details_tool: Error while fetching paper details: Paper with id 10.1093/mind/lix.236.433; DROP TABLE papers not found"
+        },
+        "execution_time": 1.9804940223693848,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 23
+}

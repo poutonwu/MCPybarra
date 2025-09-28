@@ -1,0 +1,453 @@
+{
+  "server_name": "server",
+  "parent_dir": "zotero-mcp-main",
+  "report_name": "zotero-mcp-main-server",
+  "server_path": "workspace\\public-mcp-servers\\zotero-mcp-main\\server.py",
+  "timestamp": "2025-07-01T16:04:46.845093",
+  "tools": [
+    {
+      "name": "zotero_item_metadata",
+      "description": "Get metadata information about a specific Zotero item, given the item key.",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_metadataArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "zotero_item_fulltext",
+      "description": "Get the full text content of a Zotero item, given the item key of a parent item or specific attachment.",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_fulltextArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "zotero_search_items",
+      "description": "Search for items in your Zotero library, given a query string, query mode (titleCreatorYear or everything), and optional tag search (supports boolean searches). Returned results can be looked up with zotero_item_fulltext or zotero_item_metadata.",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "qmode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "titleCreatorYear",
+                  "everything"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "titleCreatorYear",
+            "title": "Qmode"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tag"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 10,
+            "title": "Limit"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_itemsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "zotero_search_items": [
+      {
+        "case_name": "Basic Title Search",
+        "purpose": "Verify basic search functionality using default query mode (titleCreatorYear) with a valid query string",
+        "args": {
+          "query": "城市道路管理条例"
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 3.475476026535034,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Full Text Search",
+        "purpose": "Test search in full text mode to ensure 'everything' query mode works correctly",
+        "args": {
+          "query": "哈尔滨工业大学",
+          "qmode": "everything"
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 9.3611900806427,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Tag Search Without Query",
+        "purpose": "Verify tag-only search works when query is empty but tag is provided",
+        "args": {
+          "tag": "research"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool zotero_search_items: 1 validation error for search_itemsArguments\nquery\n  Field required [type=missing, input_value={'tag': 'research'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.003996372222900391,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Tag Boolean Logic",
+        "purpose": "Test advanced tag search with boolean logic support",
+        "args": {
+          "query": "智能软件工",
+          "tag": "AI OR robotics"
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 1.7601401805877686,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Limit Parameter Test",
+        "purpose": "Ensure limit parameter correctly restricts number of results returned",
+        "args": {
+          "query": "工业",
+          "limit": 3
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 1.7549042701721191,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "Verify search handles special characters in query strings properly",
+        "args": {
+          "query": "new_文件#1@2025"
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 1.756392002105713,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Security Check",
+        "purpose": "Ensure system handles empty query securely and returns expected error or empty result",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "# Search Results for: ''\n\nFound 10 items.\n\nUse item keys with zotero_item_metadata or zotero_item_fulltext for more details.\n\n\n## 1. Full Text PDF\n**Type**: attachment | **Date**:  | **Key**: `9ZJK565I`\n**Authors**: No authors\n\n## 2. Snapshot\n**Type**: attachment | **Date**:  | **Key**: `EAMLVF2H`\n**Authors**: No authors\n\n## 3. Doc2Agent: Scalable Generation of Tool-Using Agents from API Documentation\n**Type**: preprint | **Date**: 2025-06-24 | **Key**: `GB3AVERM`\n**Authors**: Ni, Xinyi; Jian, Haonan; Wang, Qiuyang; et al.\n\nREST APIs play important roles in enriching the action space of web agents, yet most API-based agents rely on curated and uniform toolsets that do ...\n\n**Tags**: `Computer Science - Computation and Language`\n\n## 4. Full Text PDF\n**Type**: attachment | **Date**:  | **Key...[截断]，共计2381字符，剩余1581字符"
+        },
+        "execution_time": 4.171239376068115,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Malformed Tag Input",
+        "purpose": "Check for secure handling of potentially malicious tag input",
+        "args": {
+          "query": "test",
+          "tag": "'; DROP TABLE tags;--"
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 2.6413471698760986,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Query Mode",
+        "purpose": "Verify tool gracefully handles unsupported query modes",
+        "args": {
+          "query": "data",
+          "qmode": "invalidMode"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool zotero_search_items: 1 validation error for search_itemsArguments\nqmode\n  Input should be 'titleCreatorYear' or 'everything' [type=literal_error, input_value='invalidMode', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/literal_error"
+        },
+        "execution_time": 0.0035021305084228516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value",
+        "purpose": "Ensure tool handles invalid negative limit values correctly",
+        "args": {
+          "query": "专利",
+          "limit": -5
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 1.7550244331359863,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Limit Test",
+        "purpose": "Test upper boundary of limit parameter",
+        "args": {
+          "query": "软件",
+          "limit": 1000
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 1.8342359066009521,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Limit Boundary",
+        "purpose": "Verify behavior when limit is set to zero",
+        "args": {
+          "query": "机械",
+          "limit": 0
+        },
+        "response": {
+          "result": "No items found matching your query."
+        },
+        "execution_time": 1.7667055130004883,
+        "is_functional_test": true
+      }
+    ],
+    "zotero_item_metadata": [
+      {
+        "case_name": "Basic Item Metadata Retrieval",
+        "purpose": "Verify basic functionality by retrieving metadata for a known item using its valid key",
+        "args": {
+          "item_key": "GB3AVERM"
+        },
+        "response": {
+          "result": "## Doc2Agent: Scalable Generation of Tool-Using Agents from API Documentation\nItem Key: `GB3AVERM`\nType: preprint\nDate: 2025-06-24\nAuthors: Ni, Xinyi; Jian, Haonan; Wang, Qiuyang; Shah, Vedanshi Chetan; Hong, Pengyu\n\n### Abstract\nREST APIs play important roles in enriching the action space of web agents, yet most API-based agents rely on curated and uniform toolsets that do not reflect the complexity of real-world APIs. Building tool-using agents for arbitrary domains remains a major challenge, as it requires reading unstructured API documentation, testing APIs and inferring correct parameters. We propose Doc2Agent, a scalable pipeline to build agents that can call Python-based tools generated from API documentation. Doc2Agent generates executable tools from API documentations and iterativ...[截断]，共计1521字符，剩余721字符"
+        },
+        "execution_time": 1.9637906551361084,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Item Key Format",
+        "purpose": "Ensure the tool handles invalid item keys gracefully with proper error message",
+        "args": {
+          "item_key": "invalid_key_123"
+        },
+        "response": {
+          "result": "Error retrieving item metadata: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/INVALID_KEY_123?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.702416181564331,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Item Key Input",
+        "purpose": "Test behavior when empty item key is provided and ensure validation works correctly",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "result": "Error retrieving item metadata: list indices must be integers or slices, not str"
+        },
+        "execution_time": 3.9069972038269043,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Item Key",
+        "purpose": "Verify system handles special characters in item keys properly without crashing",
+        "args": {
+          "item_key": "key#with@special!chars"
+        },
+        "response": {
+          "result": "Error retrieving item metadata: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/KEY%23WITH%40SPECIAL%21CHARS?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.6516482830047607,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Metadata Retrieval for Nonexistent Item",
+        "purpose": "Test that the tool returns appropriate message when querying non-existent item",
+        "args": {
+          "item_key": "XYZ987NONEXISTENT"
+        },
+        "response": {
+          "result": "Error retrieving item metadata: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/XYZ987NONEXISTENT?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.6984100341796875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Item Key",
+        "purpose": "Check if the tool securely handles potential SQL injection attempts in input",
+        "args": {
+          "item_key": "'; DROP TABLE items;--"
+        },
+        "response": {
+          "result": "Error retrieving item metadata: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/%27%3B%20DROP%20TABLE%20ITEMS%3B--?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.719994068145752,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Item Key Test",
+        "purpose": "Ensure the tool supports and correctly processes Unicode characters in item keys",
+        "args": {
+          "item_key": "测试键123"
+        },
+        "response": {
+          "result": "Error retrieving item metadata: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/%E6%B5%8B%E8%AF%95%E9%94%AE123?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 2.1875977516174316,
+        "is_functional_test": true
+      }
+    ],
+    "zotero_item_fulltext": [
+      {
+        "case_name": "Basic Full Text Retrieval",
+        "purpose": "Verify basic functionality by retrieving full text content for a valid parent item key",
+        "args": {
+          "item_key": "GB3AVERM"
+        },
+        "response": {
+          "result": "## Doc2Agent: Scalable Generation of Tool-Using Agents from API Documentation\nItem Key: `GB3AVERM`\nType: preprint\nDate: 2025-06-24\nAuthors: Ni, Xinyi; Jian, Haonan; Wang, Qiuyang; Shah, Vedanshi Chetan; Hong, Pengyu\n\n### Abstract\nREST APIs play important roles in enriching the action space of web agents, yet most API-based agents rely on curated and uniform toolsets that do not reflect the complexity of real-world APIs. Building tool-using agents for arbitrary domains remains a major challenge, as it requires reading unstructured API documentation, testing APIs and inferring correct parameters. We propose Doc2Agent, a scalable pipeline to build agents that can call Python-based tools generated from API documentation. Doc2Agent generates executable tools from API documentations and iterativ...[截断]，共计95682字符，剩余94882字符"
+        },
+        "execution_time": 3.255995750427246,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Full Text Retrieval for Attachment",
+        "purpose": "Test full text retrieval for a specific attachment item key",
+        "args": {
+          "item_key": "9ZJK565I"
+        },
+        "response": {
+          "result": "## Full Text PDF\nItem Key: `9ZJK565I`\nType: attachment\nDate: No date\n\n### Identifiers\nURL: https://arxiv.org/pdf/2506.19998v1\n## Attachment Information\n- **Key**: `9ZJK565I`\n- **Type**: application/pdf\n- **Word Count**: ~14346\n\n## Document Content\n\narXiv:2506.19998v1 [cs.CL] 24 Jun 2025\nPreprint. Under review.\nDoc2Agent: Scalable Generation of Tool-Using Agents from API Documentation\nXinyi Ni, Haonan Jian, Qiuyang Wang, Vedanshi Chetan Shah & Pengyu Hong Michtom School of Computer Science Brandeis University Waltham, MA 02453, USA\n{xinyini, hongpeng}@brandeis.edu\nAbstract\nREST APIs play important roles in enriching the action space of web agents, yet most API-based agents rely on curated and uniform toolsets that do not reflect the complexity of real-world APIs. Building tool-using agents ...[截断]，共计94286字符，剩余93486字符"
+        },
+        "execution_time": 3.0099730491638184,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Item Key Format",
+        "purpose": "Ensure the tool handles invalid item keys gracefully with proper error message",
+        "args": {
+          "item_key": "invalid_key_123"
+        },
+        "response": {
+          "result": "Error retrieving item full text: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/INVALID_KEY_123?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.7350869178771973,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Item Key Input",
+        "purpose": "Test behavior when empty item key is provided and ensure validation works correctly",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "result": "Error retrieving item full text: 'list' object has no attribute 'get'"
+        },
+        "execution_time": 5.709030389785767,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Item Key",
+        "purpose": "Verify system handles special characters in item keys properly without crashing",
+        "args": {
+          "item_key": "key#with@special!chars"
+        },
+        "response": {
+          "result": "Error retrieving item full text: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/KEY%23WITH%40SPECIAL%21CHARS?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.7352430820465088,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Full Text Retrieval for Nonexistent Item",
+        "purpose": "Test that the tool returns appropriate message when querying non-existent item",
+        "args": {
+          "item_key": "XYZ987NONEXISTENT"
+        },
+        "response": {
+          "result": "Error retrieving item full text: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/XYZ987NONEXISTENT?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 2.555584192276001,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Item Key",
+        "purpose": "Check if the tool securely handles potential SQL injection attempts in input",
+        "args": {
+          "item_key": "'; DROP TABLE items;--"
+        },
+        "response": {
+          "result": "Error retrieving item full text: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/%27%3B%20DROP%20TABLE%20ITEMS%3B--?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.6987385749816895,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Item Key Test",
+        "purpose": "Ensure the tool supports and correctly processes Unicode characters in item keys",
+        "args": {
+          "item_key": "测试键123"
+        },
+        "response": {
+          "result": "Error retrieving item full text: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/%E6%B5%8B%E8%AF%95%E9%94%AE123?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.7019906044006348,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Length Item Key",
+        "purpose": "Test boundary condition with maximum length item key",
+        "args": {
+          "item_key": "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6"
+        },
+        "response": {
+          "result": "Error retrieving item full text: \nCode: 404\nURL: https://api.zotero.org/users/16026771/items/A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6?locale=en-US&format=json&limit=100\nMethod: GET\nResponse: Not found"
+        },
+        "execution_time": 1.6877951622009277,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 28
+}

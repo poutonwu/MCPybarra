@@ -1,0 +1,504 @@
+{
+  "server_name": "server",
+  "parent_dir": "academic-search-mcp-server-master",
+  "report_name": "academic-search-mcp-server-master-server",
+  "server_path": "workspace\\public-mcp-servers\\academic-search-mcp-server-master\\server.py",
+  "timestamp": "2025-07-01T15:58:08.262671",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "Search for papers across multiple sources.\n\n    args: \n        query: the search query\n        limit: the maximum number of results to return (default 10)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "Get detailed information about a specific paper.\n\n    Args:\n        paper_id: Paper identifier (DOI for Crossref, paper ID for Semantic Scholar)\n        source: Source database (\"semantic_scholar\" or \"crossref\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "default": "semantic_scholar",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "Search for papers by topic with optional date range. \n    \n    Note: Query length is limited to 300 characters. Longer queries will be automatically truncated.\n    \n    Args:\n        topic (str): Search query (max 300 chars)\n        year_start (int, optional): Start year for date range\n        year_end (int, optional): End year for date range  \n        limit (int, optional): Maximum number of results to return (default 10)\n        \n    Returns:\n        str: Formatted search results or error message\n    ",
+      "args_schema": {
+        "properties": {
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "year_start": {
+            "default": null,
+            "title": "Year Start",
+            "type": "integer"
+          },
+          "year_end": {
+            "default": null,
+            "title": "Year End",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证工具在提供基本查询参数且使用默认 limit 值时是否能正常搜索论文",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Machine learning with sklearn\nAuthors: Thomas P. Trappenberg\nYear: 2019\nDOI: 10.1093/oso/9780198828044.003.0003\t\t\n\nTitle: Optimization and Machine Learning\nAuthors: \nYear: 2022\nDOI: 10.1002/9781119902881\t\t\n\nTitle: Why Use Automated Machine Learning?\nAuthors: Kai R. Larsen, Daniel S. Becker\nYear: 2021\nDOI: 10.1093/oso/9780190941659.003.0001\t\t\n\nTitle: Machine learning\nAuthors: \nYear: 2011\nDOI: 10.1017/cbo9780511975509.007\t\t\n\nTitle: Machine learning\nAuthors: \nYear: 2012\nDOI: 10.1017/cbo9780511804779.017\t\t\n\nTitle: Front Matter\nAuthors: \nYear: 2022\nDOI: 10.1002/9781119902881.fmatter\t\t\n\nTitle: Machine learning and medical education\nAuthors: \nYear: Year unknown\nDOI: 10.37473//10.1038/s41746-018-0061-1\t\t\n\nTitle: Machine learning concepts\nAuthors: \nYear: 2012\nDOI: 1...[截断]，共计998字符，剩余198字符"
+        },
+        "execution_time": 16.391831398010254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证工具在指定查询和自定义 limit 值时是否能正确返回指定数量的结果",
+        "args": {
+          "query": "deep learning",
+          "limit": 5
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Reinforcement Learning and Deep Reinforcement Learning\nAuthors: \nYear: 2021\nDOI: 10.1017/9781108955652.016\t\t\n\nTitle: Computer Vision, Deep Learning, Deep Reinforcement Learning\nAuthors: Farshid PirahanSiah\nYear: 2019\nDOI: 10.14293/s2199-1006.1.sor-uncat.clzwyuz.v1\t\t\n\nTitle: Introduction to Deep Learning\nAuthors: \nYear: 2019\nDOI: 10.7551/mitpress/11171.003.0004\t\t\n\nTitle: The Future of Deep Learning\nAuthors: \nYear: 2019\nDOI: 10.7551/mitpress/11171.003.0010\t\t\n\nTitle: Deep Reinforcement Learning\nAuthors: \nYear: 2022\nDOI: 10.1017/9781108891530.017\t\t\n"
+        },
+        "execution_time": 13.56179928779602,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Papers Related to a Specific File",
+        "purpose": "验证工具能否根据测试文件中的内容（如文件名）进行有效搜索",
+        "args": {
+          "query": "工业问答.mp4"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: 浅谈工业建筑结构设计中需注意的问题\nAuthors: 竟业 谷\nYear: Year unknown\nDOI: 10.33142/ec.v7i4.11671\t\t\n\nTitle: 工业与民用建筑施工管理问题研究\nAuthors: 郭　锦\nYear: 2023\nDOI: 10.37155/2811-0609-0211-5\t\t\n\nTitle: 工业建筑施工问题及质量控制措施\nAuthors: 崔学武\nYear: 2024\nDOI: 10.37155/2811-0609-0313-67\t\t\n\nTitle: 企业员工管理问题及对策研究\nAuthors: 魏彦辉\nYear: 2023\nDOI: 10.37155/2972-435x-0106-15\t\t\n\nTitle: 工业机电工程安装技术问题与探讨\nAuthors: 玉双 贺\nYear: Year unknown\nDOI: 10.33142/ec.v7i5.11895\t\t\n\nTitle: 旧工业建筑再利用若干问题研究\nAuthors: 李 仲\nYear: 2023\nDOI: 10.37155/2811-0609-0205-15\t\t\n\nTitle: 工业建筑结构防腐设计问题探讨\nAuthors: 子红 王\nYear: Year unknown\nDOI: 10.33142/ect.v1i4.9332\t\t\n\nTitle: 路桥施工企业工程成本核算问题探究\nAuthors: 婷 周\nYear: Year unknown\nDOI: 10.18686/bd.v2i3.1304\t\t\n\nTitle: 林业技术推广在生态林业建设中的问题及对策分析\nAuthors: 王志峰\nYear: 2025\nDOI: 10.37155/2811-0609-0410-10\t\t\n\nTitle: 工业建筑钢结...[截断]，共计868字符，剩余68字符"
+        },
+        "execution_time": 10.126641511917114,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Using Chinese Query",
+        "purpose": "验证工具是否支持中文搜索查询",
+        "args": {
+          "query": "人工智能应用"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: 人工智能前沿与应用\nAuthors: \nYear: Year unknown\nDOI: 10.52810/faai\t\t\n\nTitle: 人工智能在数控加工中的应用\nAuthors: 新 刘, 琦 王\nYear: Year unknown\nDOI: 10.33142/sca.v7i12.14704\t\t\n\nTitle: 人工智能在工程机械创新中的应用\nAuthors: 镪 郭\nYear: Year unknown\nDOI: 10.33142/sca.v7i10.13648\t\t\n\nTitle: No title available\nAuthors: \nYear: Year unknown\nDOI: 10.52810/faai.vol1.no1\t\t\n\nTitle: No title available\nAuthors: \nYear: Year unknown\nDOI: 10.52810/faai.vol1.no2\t\t\n\nTitle: 人工智能在电子信息技术中的应用\nAuthors: 亮 陶\nYear: Year unknown\nDOI: 10.33142/sca.v6i12.10656\t\t\n\nTitle: 人工智能技术在机械电子工程领域的应用\nAuthors: 志强 徐\nYear: Year unknown\nDOI: 10.33142/sca.v5i5.7310\t\t\n\nTitle: 机器人焊接智能化在工作站中的应用\nAuthors: 焕 杨\nYear: Year unknown\nDOI: 10.33142/sca.v3i2.1877\t\t\n\nTitle: 探讨人工智能在计算机网络技术中的应用\nAuthors: 本楠 孙\nYear: Year unknown\nDOI: 10.33142/sca.v2i1.183\t\t\n\nT...[截断]，共计893字符，剩余93字符"
+        },
+        "execution_time": 13.940622329711914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证工具在未提供查询内容时的处理逻辑",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "Please provide a search query."
+        },
+        "execution_time": 0.003911256790161133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value Handling",
+        "purpose": "验证工具对负数 limit 参数的错误处理能力",
+        "args": {
+          "query": "blockchain technology",
+          "limit": -5
+        },
+        "response": {
+          "result": "No results found or error occurred while fetching papers."
+        },
+        "execution_time": 4.010538816452026,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Excessive Limit Value Handling",
+        "purpose": "验证工具对超过允许范围的 limit 参数的边界处理能力",
+        "args": {
+          "query": "climate change research",
+          "limit": 10000
+        },
+        "response": {
+          "result": "No results found or error occurred while fetching papers."
+        },
+        "execution_time": 3.251518964767456,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能够处理包含特殊字符的查询字符串",
+        "args": {
+          "query": "AI & ML: Future of Technology?"
+        },
+        "response": {
+          "result": "No results found or error occurred while fetching papers."
+        },
+        "execution_time": 3.8561363220214844,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Query",
+        "purpose": "验证工具是否安全地处理潜在的 SQL 注入攻击尝试",
+        "args": {
+          "query": "machine learning'; DROP TABLE papers;"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Machine Learning and Deep Learning Approaches for Fake News Detection: A Systematic Review of Techniques, Challenges, and Advancements_supp1-3572051.xlsx\nAuthors: Omar Bashaddadh\nYear: Year unknown\nDOI: 10.1109/access.2025.3572051/mm1\t\t\n\nTitle: Lapping machine drop table saves production time\nAuthors: \nYear: 1984\nDOI: 10.1016/0141-6359(84)90149-1\t\t\n\nTitle: Table 6: Machine learning evaluation metrics.\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerj-cs.350/table-6\t\t\n\nTitle: Table 1: Machine learning results—accuracy.\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerj-cs.2576/table-1\t\t\n\nTitle: Table 8: Machine learning based studies.\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerjcs.1092/table-8\t\t\n\nTitle: Table 4: Description of machine learning and deep learnin...[截断]，共计1422字符，剩余622字符"
+        },
+        "execution_time": 15.631480693817139,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "验证工具是否安全地处理潜在的 XSS 攻击尝试",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Script S1: RatePartitions script\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerj.5498/supp-1\t\t\n\nTitle: Jurnal Script\nAuthors: \nYear: Year unknown\nDOI: 10.34151/script\t\t\n\nTitle: SCRIPT-ed\nAuthors: \nYear: Year unknown\nDOI: 10.2966/scrip\t\t\n\nTitle: THE SCRIPT: 2 Body of script Size of script\nAuthors: \nYear: 2012\nDOI: 10.4324/9780080503059-14\t\t\n\nTitle: Script to Screen\nAuthors: \nYear: 1981\nDOI: 10.5040/9781350923812\t\t\n\nTitle: No title available\nAuthors: \nYear: Year unknown\nDOI: 10.34151/script.v11i2\t\t\n\nTitle: Supplemental Information 2: Script Statistical Analysis: R Script\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerj.7844/supp-2\t\t\n\nTitle: No title available\nAuthors: \nYear: Year unknown\nDOI: 10.34151/script.v11i1\t\t\n\nTitle: No title available\nAuthors: \nYear: Y...[截断]，共计926字符，剩余126字符"
+        },
+        "execution_time": 16.46879529953003,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search Using Non-Existent File Name as Query",
+        "purpose": "验证工具在使用不存在的文件名作为查询词时是否能正确处理",
+        "args": {
+          "query": "nonexistentfile.pdf"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Graphic technology. Variable data exchange\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30197441u\t\t\n\nTitle: Graphic technology. Variable data exchange\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30197441\t\t\n\nTitle: Document management. Engineering document format using PDF\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30148508\t\t\n\nTitle: Document management. Engineering document format using PDF\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30148508u\t\t\n\nTitle: Test PDF\nAuthors: Test PDF\nYear: Year unknown\nDOI: 10.2172/1025774\t\t\n\nTitle: EDIÇÃO COMPLETA | Full version (pdf) | Versión integral (pdf) | Versión intégrale (pdf)\nAuthors: Fernando Firmino da Silva, Paula De Souza Paes\nYear: Year unknown\nDOI: 10.22478/ufpb.2359-375x.2021v8n2.62320\t\t\n\nTitle: supp1-3197196.pdf\nAutho...[截断]，共计1216字符，剩余416字符"
+        },
+        "execution_time": 9.743702173233032,
+        "is_functional_test": true
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证工具在提供基本查询参数且使用默认 limit 值时是否能正常搜索论文",
+        "args": {
+          "topic": "machine learning"
+        },
+        "response": {
+          "result": "=== Search Results ===\nTitle: Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms\nAuthors: Han Xiao, Kashif Rasul, Roland Vollgraf\nYear: 2017\nDOI: No DOI available\nVenue: arXiv.org\nOpen Access: No\nPDF URL: \nAbstract: We present Fashion-MNIST, a new dataset comprising of 28x28 grayscale images of 70,000 fashion products from 10 categories, with 7,000 images per category. The training set has 60,000 images and the test set has 10,000 images. Fashion-MNIST is intended to serve as a direct drop-in replacement for the original MNIST dataset for benchmarking machine learning algorithms, as it shares the same image size, data format and the structure of training and testing splits. The dataset is freely available at this https URL\nTL;DR: Fashion-MNIST is intended to ...[截断]，共计12381字符，剩余11581字符"
+        },
+        "execution_time": 1.92946195602417,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证工具在指定查询和自定义 limit 值时是否能正确返回指定数量的结果",
+        "args": {
+          "topic": "deep learning",
+          "limit": 5
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Reinforcement Learning and Deep Reinforcement Learning\nAuthors: \nYear: 2021\nDOI: 10.1017/9781108955652.016\t\t\n\nTitle: Computer Vision, Deep Learning, Deep Reinforcement Learning\nAuthors: Farshid PirahanSiah\nYear: 2019\nDOI: 10.14293/s2199-1006.1.sor-uncat.clzwyuz.v1\t\t\n\nTitle: Introduction to Deep Learning\nAuthors: \nYear: 2019\nDOI: 10.7551/mitpress/11171.003.0004\t\t\n\nTitle: The Future of Deep Learning\nAuthors: \nYear: 2019\nDOI: 10.7551/mitpress/11171.003.0010\t\t\n\nTitle: Deep Reinforcement Learning\nAuthors: \nYear: 2022\nDOI: 10.1017/9781108891530.017\t\t\n"
+        },
+        "execution_time": 15.365153789520264,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Papers Related to a Specific File",
+        "purpose": "验证工具能否根据测试文件中的内容（如文件名）进行有效搜索",
+        "args": {
+          "topic": "工业问答.mp4"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: 工业与民用建筑施工管理问题研究\nAuthors: 郭　锦\nYear: 2023\nDOI: 10.37155/2811-0609-0211-5\t\t\n\nTitle: 工业机电工程安装技术问题与探讨\nAuthors: 玉双 贺\nYear: Year unknown\nDOI: 10.33142/ec.v7i5.11895\t\t\n\nTitle: 企业员工管理问题及对策研究\nAuthors: 魏彦辉\nYear: 2023\nDOI: 10.37155/2972-435x-0106-15\t\t\n\nTitle: 旧工业建筑再利用若干问题研究\nAuthors: 李 仲\nYear: 2023\nDOI: 10.37155/2811-0609-0205-15\t\t\n\nTitle: 工业建筑结构防腐设计问题探讨\nAuthors: 子红 王\nYear: Year unknown\nDOI: 10.33142/ect.v1i4.9332\t\t\n\nTitle: 路桥施工企业工程成本核算问题探究\nAuthors: 婷 周\nYear: Year unknown\nDOI: 10.18686/bd.v2i3.1304\t\t\n\nTitle: 工业建筑钢结构安装存在问题与对策\nAuthors: 黄 文\nYear: 2023\nDOI: 10.37155/2972-435x-0103-6\t\t\n\nTitle: 林业技术推广在生态林业建设中的问题及对策分析\nAuthors: 王志峰\nYear: 2025\nDOI: 10.37155/2811-0609-0410-10\t\t\n"
+        },
+        "execution_time": 11.9756338596344,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Using Chinese Query",
+        "purpose": "验证工具是否支持中文搜索查询",
+        "args": {
+          "topic": "人工智能应用"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: 人工智能前沿与应用\nAuthors: \nYear: Year unknown\nDOI: 10.52810/faai\t\t\n\nTitle: 人工智能在数控加工中的应用\nAuthors: 新 刘, 琦 王\nYear: Year unknown\nDOI: 10.33142/sca.v7i12.14704\t\t\n\nTitle: 人工智能在工程机械创新中的应用\nAuthors: 镪 郭\nYear: Year unknown\nDOI: 10.33142/sca.v7i10.13648\t\t\n\nTitle: No title available\nAuthors: \nYear: Year unknown\nDOI: 10.52810/faai.vol1.no1\t\t\n\nTitle: No title available\nAuthors: \nYear: Year unknown\nDOI: 10.52810/faai.vol1.no2\t\t\n\nTitle: 人工智能技术在机械电子工程领域的应用\nAuthors: 志强 徐\nYear: Year unknown\nDOI: 10.33142/sca.v5i5.7310\t\t\n\nTitle: 人工智能在电子信息技术中的应用\nAuthors: 亮 陶\nYear: Year unknown\nDOI: 10.33142/sca.v6i12.10656\t\t\n\nTitle: 机器人焊接智能化在工作站中的应用\nAuthors: 焕 杨\nYear: Year unknown\nDOI: 10.33142/sca.v3i2.1877\t\t\n\nTitle: 探讨人工智能在计算机网络技术中的应用\nAuthors: 本楠 孙\nYear: Year unknown\nDOI: 10.33142/sca.v2i1.183\t\t\n\nT...[截断]，共计887字符，剩余87字符"
+        },
+        "execution_time": 12.929410219192505,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证工具在未提供查询内容时的处理逻辑",
+        "args": {
+          "topic": ""
+        },
+        "response": {
+          "result": "Please provide a search query."
+        },
+        "execution_time": 1.2657148838043213,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value Handling",
+        "purpose": "验证工具对负数 limit 参数的错误处理能力",
+        "args": {
+          "topic": "blockchain technology",
+          "limit": -5
+        },
+        "response": {
+          "result": "No results found or error occurred while fetching papers."
+        },
+        "execution_time": 4.605682373046875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Excessive Limit Value Handling",
+        "purpose": "验证工具对超过允许范围的 limit 参数的边界处理能力",
+        "args": {
+          "topic": "climate change research",
+          "limit": 10000
+        },
+        "response": {
+          "result": "No results found or error occurred while fetching papers."
+        },
+        "execution_time": 4.281960725784302,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能够处理包含特殊字符的查询字符串",
+        "args": {
+          "topic": "AI & ML: Future of Technology?"
+        },
+        "response": {
+          "result": "=== Search Results ===\nTitle: A Review, Synthesizing Frameworks, and Future Research Agenda: Use of AI & ML Models in Cardiovascular Diseases Diagnosis\nAuthors: Mr. Dhavalkumar Upendrabhai Patel, Dr. Suchita Patel\nYear: 2023\nDOI: 10.35940/ijitee.k9733.10121123\nVenue: International Journal of Innovative Technology and Exploring Engineering\nOpen Access: Yes\nPDF URL: https://doi.org/10.35940/ijitee.k9733.10121123\nAbstract: Cardiovascular diseases (CVDs) continue to be a leading cause of morbidity and mortality worldwide. Early detection and accurate diagnosis of the initial phases of CVDs are crucial for effective intervention and improved patient outcomes. In recent years, advances in intelligent automation and machine learning (ML) techniques have shown promise in enhancing the accuracy and...[截断]，共计18512字符，剩余17712字符"
+        },
+        "execution_time": 1.87265944480896,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Query",
+        "purpose": "验证工具是否安全地处理潜在的 SQL 注入攻击尝试",
+        "args": {
+          "topic": "machine learning'; DROP TABLE papers;"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Machine Learning and Deep Learning Approaches for Fake News Detection: A Systematic Review of Techniques, Challenges, and Advancements_supp1-3572051.xlsx\nAuthors: Omar Bashaddadh\nYear: Year unknown\nDOI: 10.1109/access.2025.3572051/mm1\t\t\n\nTitle: Lapping machine drop table saves production time\nAuthors: \nYear: 1984\nDOI: 10.1016/0141-6359(84)90149-1\t\t\n\nTitle: Table 6: Machine learning evaluation metrics.\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerj-cs.350/table-6\t\t\n\nTitle: Table 1: Machine learning results—accuracy.\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerj-cs.2576/table-1\t\t\n\nTitle: Table 8: Machine learning based studies.\nAuthors: \nYear: Year unknown\nDOI: 10.7717/peerjcs.1092/table-8\t\t\n\nTitle: Table 4: Description of machine learning and deep learnin...[截断]，共计1422字符，剩余622字符"
+        },
+        "execution_time": 17.565889835357666,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "验证工具是否安全地处理潜在的 XSS 攻击尝试",
+        "args": {
+          "topic": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "=== Search Results ===\nTitle: Detection and Defense of XSS Attack Script Based on Machine Learning\nAuthors: Huanxi Zhao, Yi Wang\nYear: 2023\nDOI: 10.1109/ICSECE58870.2023.10263485\nVenue: 2023 IEEE International Conference on Sensors, Electronics and Computer Engineering (ICSECE)\nOpen Access: No\nPDF URL: \nAbstract: With the rapid development of the Internet, many things of people can be done online, and the Internet has been integrated into people's daily life. Web applications widely used in all walks of life are convenient for people to use, but also bring some security problems. Cross-Site Scripting(XSS) vulnerability detection method based on dynamic analysis is an effective XSS vulnerability detection method, which simulates real attack behavior to conduct penetration test on Web applic...[截断]，共计19322字符，剩余18522字符"
+        },
+        "execution_time": 1.8566906452178955,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search Using Non-Existent File Name as Query",
+        "purpose": "验证工具在使用不存在的文件名作为查询词时是否能正确处理",
+        "args": {
+          "topic": "nonexistentfile.pdf"
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Graphic technology. Variable data exchange\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30197441u\t\t\n\nTitle: Graphic technology. Variable data exchange\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30197441\t\t\n\nTitle: Document management. Engineering document format using PDF\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30148508\t\t\n\nTitle: Document management. Engineering document format using PDF\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30148508u\t\t\n\nTitle: Test PDF\nAuthors: Test PDF\nYear: Year unknown\nDOI: 10.2172/1025774\t\t\n\nTitle: Graphic technology. Prepress digital data exchange using PDF\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30393468\t\t\n\nTitle: supp1-3197196.pdf\nAuthors: Bin Dai\nYear: Year unknown\nDOI: 10.1109/tem.2022.3197196/mm1\t\t\n\nTitle: PDF-Bearbeitung\nAuth...[截断]，共计1116字符，剩余316字符"
+        },
+        "execution_time": 16.49344229698181,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Query Length Truncation Test",
+        "purpose": "验证工具是否对超过300字符的查询进行自动截断处理",
+        "args": {
+          "topic": "This is a very long query string that exceeds the maximum allowed length of 300 characters. This test ensures that the system handles long queries correctly by truncating them without causing errors or unexpected behavior."
+        },
+        "response": {
+          "result": "No results found or error occurred while fetching papers."
+        },
+        "execution_time": 13.184038162231445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Date Range Filtering Test",
+        "purpose": "验证工具在指定年份范围内是否能正确过滤结果",
+        "args": {
+          "topic": "renewable energy",
+          "year_start": 2010,
+          "year_end": 2020
+        },
+        "response": {
+          "result": "\n=== Crossref Results ===\nTitle: Renewable Energy\nAuthors: \nYear: 2002\nDOI: 10.1016/s0960-1481(01)00195-1\t\t\n\nTitle: Renewable Energy Technologies I\nAuthors: Sørensen Bent\nYear: 2018\nDOI: 10.4324/9781315793245-40\t\t\n\nTitle: WREN (World Renewable Energy Network)\nAuthors: \nYear: 1992\nDOI: 10.1016/0960-1481(92)90094-j\t\t\n\nTitle: World association for renewable energy—News\nAuthors: \nYear: 1992\nDOI: 10.1016/0960-1481(92)90108-f\t\t\n\nTitle: Energy efficiency and renewable energy sources. Common international terminology\nAuthors: \nYear: Year unknown\nDOI: 10.3403/30269797u\t\t\n\nTitle: WREN (World Renewable Energy Network)\nAuthors: \nYear: 1992\nDOI: 10.1016/0960-1481(92)90093-i\t\t\n\nTitle: Figure 5.5 Renewable energy\nAuthors: \nYear: Year unknown\nDOI: 10.1787/888932318832\t\t\n\nTitle: ISRN Renewable Energy\nAutho...[截断]，共计1021字符，剩余221字符"
+        },
+        "execution_time": 22.488369703292847,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "Basic Paper Details Fetch with Semantic Scholar",
+        "purpose": "验证工具在提供有效的paper_id和默认source参数时是否能正常获取论文详细信息",
+        "args": {
+          "paper_id": "10.1109/access.2025.3572051"
+        },
+        "response": {
+          "result": "Unable to fetch paper details from semantic_scholar."
+        },
+        "execution_time": 0.7370278835296631,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Details Fetch from Crossref",
+        "purpose": "验证工具能否从Crossref源中正确获取指定DOI的论文详细信息",
+        "args": {
+          "paper_id": "10.1109/access.2025.3572051",
+          "source": "crossref"
+        },
+        "response": {
+          "result": "Title: Machine Learning and Deep Learning Approaches for Fake News Detection: A Systematic Review of Techniques, Challenges, and Advancements\nAuthors: Omar Bashaddadh, Nazlia Omar, Masnizah Mohd, Mohd Nor Akmal Khalid\nYear: 2025\nDOI: 10.1109/access.2025.3572051\t\t\n"
+        },
+        "execution_time": 4.147069931030273,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Paper ID Handling",
+        "purpose": "验证工具对无效或不存在的paper_id的错误处理能力",
+        "args": {
+          "paper_id": "invalid_doi_12345",
+          "source": "semantic_scholar"
+        },
+        "response": {
+          "result": "Unable to fetch paper details from semantic_scholar."
+        },
+        "execution_time": 0.7429397106170654,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unsupported Source Handling",
+        "purpose": "验证工具在提供不支持的数据源时的容错能力",
+        "args": {
+          "paper_id": "10.1109/access.2025.3572051",
+          "source": "unsupported_source"
+        },
+        "response": {
+          "result": "Unsupported source. Please use 'semantic_scholar' or 'crossref'."
+        },
+        "execution_time": 0.011022567749023438,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Paper ID Test",
+        "purpose": "验证工具在未提供paper_id参数时的处理逻辑",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "result": "Unable to fetch paper details from semantic_scholar."
+        },
+        "execution_time": 1.4574553966522217,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Paper ID",
+        "purpose": "验证工具是否能够安全地处理包含特殊字符的paper_id输入",
+        "args": {
+          "paper_id": "10.1109/!@#$%.2025.12345",
+          "source": "crossref"
+        },
+        "response": {
+          "result": "Unable to fetch paper details from crossref."
+        },
+        "execution_time": 0.7939062118530273,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Paper ID",
+        "purpose": "验证工具是否安全地处理潜在的SQL注入攻击尝试",
+        "args": {
+          "paper_id": "'; DROP TABLE papers;--",
+          "source": "semantic_scholar"
+        },
+        "response": {
+          "result": "Unable to fetch paper details from semantic_scholar."
+        },
+        "execution_time": 1.5961291790008545,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Paper ID",
+        "purpose": "验证工具是否安全地处理潜在的XSS攻击尝试",
+        "args": {
+          "paper_id": "<script>alert('xss')</script>",
+          "source": "crossref"
+        },
+        "response": {
+          "result": "Unable to fetch paper details from crossref."
+        },
+        "execution_time": 0.7157397270202637,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Paper ID Truncation Test",
+        "purpose": "验证工具是否对超过系统限制长度的paper_id进行自动截断处理",
+        "args": {
+          "paper_id": "a_very_long_paper_id_that_exceeds_normal_length_requirements_and_may_cause_unexpected_behavior_in_the_system_1234567890"
+        },
+        "response": {
+          "result": "Unable to fetch paper details from semantic_scholar."
+        },
+        "execution_time": 1.4189088344573975,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 33
+}

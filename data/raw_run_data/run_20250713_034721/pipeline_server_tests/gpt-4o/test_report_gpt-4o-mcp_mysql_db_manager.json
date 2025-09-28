@@ -1,0 +1,413 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_mysql_db_manager",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_mysql_db_manager/refined/server.py",
+  "timestamp": "2025-07-13T03:51:24.691704",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "\n    Lists all available MySQL tables in the connected database.\n\n    Returns:\n        list: A list of table names as strings.\n\n    Example:\n        >>> list_resources()\n        ['users', 'orders', 'products']\n\n    Raises:\n        mysql.connector.Error: If the database query fails.\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "\n    Reads the first 100 rows from the specified MySQL table.\n\n    Args:\n        table_name (str): The name of the table to read data from.\n\n    Returns:\n        list: A list of dictionaries, where each dictionary represents a row in the table.\n\n    Example:\n        >>> read_resource(\"users\")\n        [{\"id\": 1, \"name\": \"John Doe\"}, {\"id\": 2, \"name\": \"Jane Doe\"}]\n\n    Raises:\n        ValueError: If the table_name is invalid.\n        mysql.connector.Error: If the database query fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "\n    Executes a custom SQL query on the connected MySQL database.\n\n    Args:\n        query (str): The SQL query to execute.\n\n    Returns:\n        dict: For SELECT or SHOW queries, a list of dictionaries representing the result set.\n              For INSERT, UPDATE, DELETE, or other queries, a dictionary with the number of affected rows.\n\n    Example:\n        >>> execute_sql(\"SELECT * FROM users\")\n        [{\"id\": 1, \"name\": \"John Doe\"}, {\"id\": 2, \"name\": \"Jane Doe\"}]\n\n        >>> execute_sql(\"INSERT INTO users (name) VALUES ('Alice')\")\n        {\"affected_rows\": 1}\n\n    Raises:\n        ValueError: If the query is invalid.\n        mysql.connector.Error: If the database query fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "List Available MySQL Tables",
+        "purpose": "验证 list_resources 工具可以成功列出数据库中所有的 MySQL 表名。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.2048931121826172,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Database Connection Test",
+        "purpose": "验证当数据库连接成功但没有任何表时，list_resources 是否能正确返回空列表。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.14914536476135254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Database Connection Failure Handling",
+        "purpose": "验证当数据库连接失败时，list_resources 是否能正确抛出 mysql.connector.Error 异常。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.14600038528442383,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unauthorized Access Security Check",
+        "purpose": "验证当数据库连接权限不足时，list_resources 是否不会泄露敏感信息并安全地处理错误。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.14841651916503906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Character Table Name Handling",
+        "purpose": "验证 list_resources 能否正确处理包含特殊字符的表名（如中文、符号等）。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.1495685577392578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Table Name Boundary Test",
+        "purpose": "验证 list_resources 是否能够处理非常长的表名（边界测试）。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.15308356285095215,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read-Only Database User Test",
+        "purpose": "验证在只读用户权限下，list_resources 是否仍能正常获取表列表。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.1490004062652588,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Database Credentials Handling",
+        "purpose": "验证使用无效的数据库凭证调用 list_resources 时是否能正确抛出异常。",
+        "args": {},
+        "response": [
+          "addresses",
+          "companies",
+          "order_items",
+          "orders",
+          "products",
+          "reviews",
+          "users"
+        ],
+        "execution_time": 0.14715862274169922,
+        "is_functional_test": false
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "Basic Table Read Test",
+        "purpose": "验证 read_resource 工具可以成功读取指定表的前100行数据。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": [
+          "{\n  \"id\": 1,\n  \"username\": \"user1\",\n  \"email\": \"new_email@example.com\",\n  \"age\": 28,\n  \"company_id\": 1,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 2,\n  \"username\": \"user2\",\n  \"email\": \"user2@example.com\",\n  \"age\": 35,\n  \"company_id\": 2,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 3,\n  \"username\": \"user3\",\n  \"email\": \"user3@example.com\",\n  \"age\": 42,\n  \"company_id\": 3,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 4,\n  \"username\": \"user4\",\n  \"email\": \"user4@example.com\",\n  \"age\": 25,\n  \"company_id\": 1,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 5,\n  \"username\": \"user5\",\n  \"email\": \"user5@example.com\",\n  \"age\": 31,\n  \"company_id\": 2,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 6,\n  \"username\": \"user6\",\n  \"email\": \"user6@example.com\",\n  \"age\": 29,\n  \"company_id\": null,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 7,\n  \"username\": \"new_user\",\n  \"email\": \"new_user@example.com\",\n  \"age\": 25,\n  \"company_id\": null,\n  \"created_at\": \"2025-06-30T22:13:23\"\n}"
+        ],
+        "execution_time": 0.17801451683044434,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read From Empty Table",
+        "purpose": "验证当目标表存在但为空时，read_resource 是否能正确返回空列表。",
+        "args": {
+          "table_name": "order_items"
+        },
+        "response": [
+          "{\n  \"id\": 1,\n  \"order_id\": 1,\n  \"product_id\": 1,\n  \"quantity\": 1,\n  \"unit_price\": \"899.99\"\n}",
+          "{\n  \"id\": 2,\n  \"order_id\": 2,\n  \"product_id\": 4,\n  \"quantity\": 1,\n  \"unit_price\": \"179.99\"\n}",
+          "{\n  \"id\": 3,\n  \"order_id\": 3,\n  \"product_id\": 5,\n  \"quantity\": 1,\n  \"unit_price\": \"79.99\"\n}",
+          "{\n  \"id\": 4,\n  \"order_id\": 4,\n  \"product_id\": 7,\n  \"quantity\": 1,\n  \"unit_price\": \"45000.00\"\n}",
+          "{\n  \"id\": 5,\n  \"order_id\": 5,\n  \"product_id\": 3,\n  \"quantity\": 1,\n  \"unit_price\": \"1299.99\"\n}",
+          "{\n  \"id\": 6,\n  \"order_id\": 6,\n  \"product_id\": 6,\n  \"quantity\": 1,\n  \"unit_price\": \"49.99\"\n}",
+          "{\n  \"id\": 7,\n  \"order_id\": 7,\n  \"product_id\": 2,\n  \"quantity\": 1,\n  \"unit_price\": \"249.99\"\n}"
+        ],
+        "execution_time": 0.15785455703735352,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Table Name Handling",
+        "purpose": "验证当传入非法表名时，read_resource 是否会抛出 ValueError 异常。",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to read table nonexistent_table: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist\"\n}"
+        },
+        "execution_time": 0.16706156730651855,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Character Table Name Handling",
+        "purpose": "验证 read_resource 能否正确处理包含特殊字符（如中文、符号）的表名。",
+        "args": {
+          "table_name": "用户信息表"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to read table 用户信息表: 1146 (42S02): Table 'user-db.用户信息表' doesn't exist\"\n}"
+        },
+        "execution_time": 0.17654728889465332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Table Name Boundary Test",
+        "purpose": "验证 read_resource 是否能够处理非常长的表名（边界测试）。",
+        "args": {
+          "table_name": "long_table_name_1234567890123456789012345678901234567890"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to read table long_table_name_1234567890123456789012345678901234567890: 1146 (42S02): Table 'user-db.long_table_name_1234567890123456789012345678901234567890' doesn't exist\"\n}"
+        },
+        "execution_time": 0.16168999671936035,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read-Only Database User Access Test",
+        "purpose": "验证在只读数据库用户权限下，read_resource 是否仍能正常读取表数据。",
+        "args": {
+          "table_name": "products"
+        },
+        "response": [
+          "{\n  \"id\": 1,\n  \"name\": \"超级手机X\",\n  \"price\": \"899.99\",\n  \"company_id\": 1,\n  \"category\": \"电子产品\"\n}",
+          "{\n  \"id\": 2,\n  \"name\": \"智能手表Y\",\n  \"price\": \"249.99\",\n  \"company_id\": 1,\n  \"category\": \"可穿戴设备\"\n}",
+          "{\n  \"id\": 3,\n  \"name\": \"全能笔记本Z\",\n  \"price\": \"1299.99\",\n  \"company_id\": 1,\n  \"category\": \"电脑\"\n}",
+          "{\n  \"id\": 4,\n  \"name\": \"无线耳机W\",\n  \"price\": \"179.99\",\n  \"company_id\": 1,\n  \"category\": \"音频设备\"\n}",
+          "{\n  \"id\": 5,\n  \"name\": \"商务套装A\",\n  \"price\": \"79.99\",\n  \"company_id\": 2,\n  \"category\": \"服装\"\n}",
+          "{\n  \"id\": 6,\n  \"name\": \"运动背包B\",\n  \"price\": \"49.99\",\n  \"company_id\": 2,\n  \"category\": \"箱包\"\n}",
+          "{\n  \"id\": 7,\n  \"name\": \"智能电动汽车C\",\n  \"price\": \"45000.00\",\n  \"company_id\": 3,\n  \"category\": \"交通工具\"\n}",
+          "{\n  \"id\": 8,\n  \"name\": \"家用轿车D\",\n  \"price\": \"22000.00\",\n  \"company_id\": 3,\n  \"category\": \"交通工具\"\n}",
+          "{\n  \"id\": 9,\n  \"name\": \"u8d85u7ea7u624bu673aX\",\n  \"price\": \"999.99\",\n  \"company_id\": null,\n  \"category\": null\n}"
+        ],
+        "execution_time": 0.15612006187438965,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Database Query Failure Handling",
+        "purpose": "验证当数据库查询失败时，read_resource 是否能正确抛出 mysql.connector.Error 异常。",
+        "args": {
+          "table_name": "orders"
+        },
+        "response": [
+          "{\n  \"id\": 1,\n  \"user_id\": 1,\n  \"order_date\": \"2023-01-15T10:30:00\",\n  \"total_amount\": \"899.99\",\n  \"status\": \"completed\"\n}",
+          "{\n  \"id\": 2,\n  \"user_id\": 1,\n  \"order_date\": \"2023-02-20T14:15:00\",\n  \"total_amount\": \"179.99\",\n  \"status\": \"completed\"\n}",
+          "{\n  \"id\": 3,\n  \"user_id\": 2,\n  \"order_date\": \"2023-03-05T09:45:00\",\n  \"total_amount\": \"79.99\",\n  \"status\": \"completed\"\n}",
+          "{\n  \"id\": 4,\n  \"user_id\": 3,\n  \"order_date\": \"2023-04-10T16:20:00\",\n  \"total_amount\": \"45000.00\",\n  \"status\": \"completed\"\n}",
+          "{\n  \"id\": 5,\n  \"user_id\": 4,\n  \"order_date\": \"2023-05-12T11:05:00\",\n  \"total_amount\": \"1299.99\",\n  \"status\": \"shipped\"\n}",
+          "{\n  \"id\": 6,\n  \"user_id\": 5,\n  \"order_date\": \"2023-06-18T13:30:00\",\n  \"total_amount\": \"49.99\",\n  \"status\": \"paid\"\n}",
+          "{\n  \"id\": 7,\n  \"user_id\": 1,\n  \"order_date\": \"2023-07-02T10:00:00\",\n  \"total_amount\": \"249.99\",\n  \"status\": \"pending\"\n}"
+        ],
+        "execution_time": 0.14272475242614746,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Check for Sensitive Data Exposure",
+        "purpose": "验证 read_resource 在读取数据时不会泄露敏感信息（如密码字段），应进行脱敏或过滤。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": [
+          "{\n  \"id\": 1,\n  \"username\": \"user1\",\n  \"email\": \"new_email@example.com\",\n  \"age\": 28,\n  \"company_id\": 1,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 2,\n  \"username\": \"user2\",\n  \"email\": \"user2@example.com\",\n  \"age\": 35,\n  \"company_id\": 2,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 3,\n  \"username\": \"user3\",\n  \"email\": \"user3@example.com\",\n  \"age\": 42,\n  \"company_id\": 3,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 4,\n  \"username\": \"user4\",\n  \"email\": \"user4@example.com\",\n  \"age\": 25,\n  \"company_id\": 1,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 5,\n  \"username\": \"user5\",\n  \"email\": \"user5@example.com\",\n  \"age\": 31,\n  \"company_id\": 2,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 6,\n  \"username\": \"user6\",\n  \"email\": \"user6@example.com\",\n  \"age\": 29,\n  \"company_id\": null,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}",
+          "{\n  \"id\": 7,\n  \"username\": \"new_user\",\n  \"email\": \"new_user@example.com\",\n  \"age\": 25,\n  \"company_id\": null,\n  \"created_at\": \"2025-06-30T22:13:23\"\n}"
+        ],
+        "execution_time": 0.14796137809753418,
+        "is_functional_test": false
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "Basic SELECT Query Execution",
+        "purpose": "验证 execute_sql 工具可以成功执行基本的 SELECT 查询并返回结果。",
+        "args": {
+          "query": "SELECT * FROM users LIMIT 1"
+        },
+        "response": {
+          "result": "{\n  \"id\": 1,\n  \"username\": \"user1\",\n  \"email\": \"new_email@example.com\",\n  \"age\": 28,\n  \"company_id\": 1,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}"
+        },
+        "execution_time": 0.15569758415222168,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic INSERT Query Execution",
+        "purpose": "验证 execute_sql 工具可以成功执行 INSERT 查询并返回受影响行数。",
+        "args": {
+          "query": "INSERT INTO users (name) VALUES ('Test User')"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to execute query: 1054 (42S22): Unknown column 'name' in 'field list'\"\n}"
+        },
+        "execution_time": 0.15862679481506348,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic UPDATE Query Execution",
+        "purpose": "验证 execute_sql 工具可以成功执行 UPDATE 查询并更新数据。",
+        "args": {
+          "query": "UPDATE users SET name = 'Updated Name' WHERE name = 'Test User'"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to execute query: 1054 (42S22): Unknown column 'name' in 'where clause'\"\n}"
+        },
+        "execution_time": 0.15132808685302734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic DELETE Query Execution",
+        "purpose": "验证 execute_sql 工具可以成功执行 DELETE 查询并删除数据。",
+        "args": {
+          "query": "DELETE FROM users WHERE name = 'Updated Name'"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to execute query: 1054 (42S22): Unknown column 'name' in 'where clause'\"\n}"
+        },
+        "execution_time": 0.15451574325561523,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt Handling",
+        "purpose": "验证 execute_sql 工具是否能安全处理潜在的 SQL 注入攻击尝试。",
+        "args": {
+          "query": "SELECT * FROM users WHERE id = 1; DROP TABLE users;"
+        },
+        "response": {
+          "result": "{\n  \"id\": 1,\n  \"username\": \"user1\",\n  \"email\": \"new_email@example.com\",\n  \"age\": 28,\n  \"company_id\": 1,\n  \"created_at\": \"2025-06-30T10:43:59\"\n}"
+        },
+        "execution_time": 0.1569957733154297,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid SQL Syntax Handling",
+        "purpose": "验证 execute_sql 工具在传入无效 SQL 语法时是否能正确抛出 ValueError。",
+        "args": {
+          "query": "SELEC * FROM users"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to execute query: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FROM users' at line 1\"\n}"
+        },
+        "execution_time": 0.15155696868896484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty SQL Query Handling",
+        "purpose": "验证 execute_sql 工具在传入空查询时是否能正确抛出异常。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Invalid query. It must be a non-empty string."
+        },
+        "execution_time": 0.004259586334228516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Character in SQL Query Handling",
+        "purpose": "验证 execute_sql 工具是否能正确处理包含特殊字符（如中文、符号）的 SQL 查询。",
+        "args": {
+          "query": "SELECT * FROM `用户信息表` WHERE `name` = '测试用户'"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Failed to execute query: 1146 (42S02): Table 'user-db.用户信息表' doesn't exist\"\n}"
+        },
+        "execution_time": 0.15310335159301758,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

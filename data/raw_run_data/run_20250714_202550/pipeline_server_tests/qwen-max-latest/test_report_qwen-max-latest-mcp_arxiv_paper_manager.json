@@ -1,0 +1,444 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_arxiv_paper_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_arxiv_paper_manager/refined/server.py",
+  "timestamp": "2025-07-14T20:25:53.483020",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "Searches arXiv for papers based on a user-provided query and returns a list of matching papers.\n\n    Args:\n        query: A string containing the search query (e.g., 'quantum computing').\n\n    Returns:\n        A JSON-formatted string representing a list of dictionaries, where each dictionary contains details \n        about a paper such as its title, authors, abstract, and arXiv ID.\n\n    Example:\n        search_papers(query=\"quantum computing\")\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "Downloads the PDF of a specified arXiv paper using its arXiv ID and saves it locally.\n\n    Args:\n        paper_id: The unique arXiv identifier for the paper (e.g., '2107.12345v1').\n\n    Returns:\n        A JSON-formatted string indicating the success or failure of the download operation and\n        the local file path where the paper is stored.\n\n    Example:\n        download_paper(paper_id=\"2107.12345v1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "Lists all papers that have been downloaded and stored locally, with optional filtering capabilities.\n\n    Args:\n        filter_query: An optional keyword to filter the list of papers by title or author.\n\n    Returns:\n        A JSON-formatted string representing a list of dictionaries, where each dictionary contains information\n        about a locally stored paper, including its title, authors, and file path.\n\n    Example:\n        list_papers(filter_query=\"quantum\")\n    ",
+      "args_schema": {
+        "properties": {
+          "filter_query": {
+            "default": null,
+            "title": "Filter Query",
+            "type": "string"
+          }
+        },
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "Reads the content of a specified paper from the local storage and provides access to its text.\n\n    Args:\n        paper_id: The unique arXiv identifier for the paper (e.g., '2107.12345v1').\n\n    Returns:\n        A JSON-formatted string containing the text content of the paper, if available.\n\n    Example:\n        read_paper(paper_id=\"2107.12345v1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search Query",
+        "purpose": "验证工具是否能正确搜索arXiv论文并返回结果（基本功能测试）",
+        "args": {
+          "query": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"abstract\": \"This article highlights quantum Internet computing as referring to\\ndistributed quantum computing over the quantum Internet, analogous to\\n(classical) Internet computing involving (classical) distributed computing over\\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\\nof study such as quantum protocols for distributed nodes using quantum\\ninformation for computations, quantum cloud computing, delegated verifiable\\nblind or private computing, non-local gates, and distributed quantum\\napplications, over Internet-scale distances.\", \"paper_id\": \"2208.00733v1\"}, {\"title\": \"Unconventional Quantum Computing Devices\", \"authors\": [\"Seth Lloyd\"], \"abstract\": \"This paper investigates a variety of unconventional quantum computation\\ndevices, including fermionic quantum computers and computers that exploit\\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\\ndevices can in principle compute some quantities more rapidly than\\n`conventional' quantum computers.\", \"paper_id\": \"0003151v1\"}, {\"title\": \"Geometrical perspective on quantum states and quantum computation\", \"authors\": [\"Zeqian Chen\"], \"abstract\": \"We interpret quantum computing as a geometric evolution process by\\nreformulating finite quantum systems via Connes' noncommutative geometry. In\\nthis formulation, quantum states are represented as noncommutative connections,\\nwhile gaug...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计9047字符，剩余7547字符"
+        },
+        "execution_time": 1.9279937744140625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Search Query",
+        "purpose": "验证当查询为空时工具的错误处理能力",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: query must be a non-empty string"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "测试包含特殊字符的查询是否被正确处理",
+        "args": {
+          "query": "machine learning !@#$%^&*()"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 3.589900493621826,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-English Query",
+        "purpose": "验证非英文查询是否能正确执行或返回适当响应",
+        "args": {
+          "query": "量子计算 中文测试"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 8.685314655303955,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Injection Attempt",
+        "purpose": "测试是否存在潜在注入攻击风险",
+        "args": {
+          "query": "'; DROP TABLE papers; --"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 8.674330472946167,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "No Results Found",
+        "purpose": "验证当没有匹配论文时工具的行为",
+        "args": {
+          "query": "thisqueryshouldnotmatchanything"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 8.682596921920776,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with File Path as Query",
+        "purpose": "测试使用文件路径作为查询参数是否导致异常行为",
+        "args": {
+          "query": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 3.848222494125366,
+        "is_functional_test": true
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic Paper Download",
+        "purpose": "验证工具是否能根据有效的arXiv ID下载论文PDF（基本功能测试）",
+        "args": {
+          "paper_id": "2208.00733v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Paper downloaded successfully.\", \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}"
+        },
+        "execution_time": 6.943578004837036,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Paper ID Format",
+        "purpose": "测试无效格式的paper_id是否被正确拒绝（错误处理测试）",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: 'invalid_id_format'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Paper ID",
+        "purpose": "验证工具在指定ID不存在时能否优雅处理（错误处理测试）",
+        "args": {
+          "paper_id": "9999.99999v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: An error occurred while downloading the paper: object has no attribute 'updated_parsed'"
+        },
+        "execution_time": 7.42543363571167,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID with Special Characters",
+        "purpose": "测试包含特殊字符的paper_id是否被正确拒绝（边界条件测试）",
+        "args": {
+          "paper_id": "2208.!@#456v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: '2208.!@#456v1'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "验证是否存在路径穿越漏洞风险（安全性测试）",
+        "args": {
+          "paper_id": "2208.00733v1\"/../malicious.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Invalid paper ID format: '2208.00733v1\"/../malicious.pdf'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download and Verify File Existence",
+        "purpose": "验证下载后的PDF文件是否真实存在且非空（功能验证扩展测试）",
+        "args": {
+          "paper_id": "2208.00733v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Paper downloaded successfully.\", \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}"
+        },
+        "execution_time": 4.33003044128418,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Concurrent Downloads",
+        "purpose": "测试并发调用多个下载请求的行为是否正常（边界条件测试）",
+        "args": {
+          "paper_id": "2208.00733v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Paper downloaded successfully.\", \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}"
+        },
+        "execution_time": 2.91750431060791,
+        "is_functional_test": true
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "List All Papers Without Filter",
+        "purpose": "验证在未提供过滤条件时，工具是否能正确列出所有本地存储的论文（基本功能测试）",
+        "args": {},
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 0.4441556930541992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Filter by Valid Keyword in Title",
+        "purpose": "验证使用有效关键词过滤标题时，工具是否能正确返回匹配的论文列表（基本功能测试）",
+        "args": {
+          "filter_query": "Quantum"
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 2.9034385681152344,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Filter by Valid Author Name",
+        "purpose": "验证使用作者名作为过滤条件时，工具是否能正确返回相关论文列表（基本功能测试）",
+        "args": {
+          "filter_query": "Seng W. Loke"
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 3.0419704914093018,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Filter Query",
+        "purpose": "验证空字符串作为过滤条件时工具是否安全处理并返回完整列表（错误处理测试）",
+        "args": {
+          "filter_query": ""
+        },
+        "response": {
+          "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"file_path\": \"workspace/papers/2208.00733v1.pdf\"}]"
+        },
+        "execution_time": 2.8706448078155518,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filter Query",
+        "purpose": "验证包含特殊字符的过滤条件是否被安全处理（边界条件与安全性测试）",
+        "args": {
+          "filter_query": "!@#$%^&*()"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 2.8024518489837646,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-English Filter Query",
+        "purpose": "验证使用非英文字符作为过滤条件时工具是否能正确处理（边界条件测试）",
+        "args": {
+          "filter_query": "量子计算"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 3.130321502685547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt",
+        "purpose": "验证是否存在SQL注入风险，确保恶意输入不会导致意外行为（安全性测试）",
+        "args": {
+          "filter_query": "'; DROP TABLE papers; --"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 2.5155029296875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "No Matching Papers Found",
+        "purpose": "验证当没有论文匹配过滤条件时工具的行为是否合理（错误处理测试）",
+        "args": {
+          "filter_query": "thisshouldnotmatchanydocument"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 2.918119430541992,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic Paper Read",
+        "purpose": "验证工具是否能根据有效的arXiv ID读取论文内容（基本功能测试）",
+        "args": {
+          "paper_id": "2208.00733v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Paper content retrieved successfully.\", \"content\": \"arXiv:2208.00733v1  [cs.ET]  1 Aug 2022IEEE IOT MAGAZINE, VOL. XX, NO. X, X 2022 1\\nThe Rise of Quantum Internet Computing\\nSeng W. Loke, Member, IEEE\\nAbstract —This article highlights quantum Internet computing as referring to distributed quantum computing over the quan tum Internet,\\nanalogous to (classical) Internet computing involving (cl assical) distributed computing over the (classical) Inter net. Relevant to\\nquantum Internet computing would be areas of study such as qu antum protocols for distributed nodes using quantum inform ation for\\ncomputations, quantum cloud computing, delegated veriﬁab le blind or private computing, non-local gates, and distrib uted quantum\\napplications, over Internet-scale distances.\\nIndex Terms —quantum Internet computing, quantum Internet, distribut ed quantum computing, Internet computing, distributed\\nsystems, Internet\\n”This work has been submitted to the IEEE for possible public ation. Copyright may be transferred without notice, after w hich this\\nversion may no longer be accessible.”\\n✦\\n1 I NTRODUCTION\\nTHERE have been tremendous developments in quantum\\ncomputing, quantum cryptography, quantum commu-\\nnications and the quantum Internet, and we have seen\\nincreased investments and intensive research in quantum\\ncomputing in recent years [1], [2]. The quantum Internet wil l\\nnot necessarily replace the (classical) Internet we know an d\\nuse today...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计13394字符，剩余11894字符"
+        },
+        "execution_time": 0.6467030048370361,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Paper ID Format",
+        "purpose": "测试无效格式的paper_id是否被正确拒绝（错误处理测试）",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID 'invalid_id_format' not found in local storage."
+        },
+        "execution_time": 0.3502991199493408,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Paper ID",
+        "purpose": "验证工具在指定ID不存在时能否优雅处理（错误处理测试）",
+        "args": {
+          "paper_id": "9999.99999v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '9999.99999v1' not found in local storage."
+        },
+        "execution_time": 0.6436605453491211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID with Special Characters",
+        "purpose": "测试包含特殊字符的paper_id是否被正确拒绝（边界条件测试）",
+        "args": {
+          "paper_id": "2208.!@#456v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '2208.!@#456v1' not found in local storage."
+        },
+        "execution_time": 0.7561647891998291,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "验证是否存在路径穿越漏洞风险（安全性测试）",
+        "args": {
+          "paper_id": "2208.00733v1\"/../malicious.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '2208.00733v1\"/../malicious.txt' not found in local storage."
+        },
+        "execution_time": 0.21901512145996094,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Paper with Maximum Length ID",
+        "purpose": "测试极限长度的paper_id输入是否被正确处理（边界条件测试）",
+        "args": {
+          "paper_id": "2208.00733v99"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '2208.00733v99' not found in local storage."
+        },
+        "execution_time": 0.6425521373748779,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Paper from Alternate Version",
+        "purpose": "验证工具是否支持不同版本号的paper_id读取（基本功能扩展测试）",
+        "args": {
+          "paper_id": "2208.00733v2"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '2208.00733v2' not found in local storage."
+        },
+        "execution_time": 0.3545846939086914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Paper ID Input",
+        "purpose": "测试空paper_id输入是否被正确拒绝（错误处理测试）",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: paper_id must be a non-empty string"
+        },
+        "execution_time": 0.6340856552124023,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 30
+}

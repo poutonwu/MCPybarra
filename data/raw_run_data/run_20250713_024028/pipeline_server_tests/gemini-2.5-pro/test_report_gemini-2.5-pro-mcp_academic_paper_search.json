@@ -1,0 +1,388 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_academic_paper_search",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_academic_paper_search/refined/server.py",
+  "timestamp": "2025-07-13T02:46:33.533318",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Concurrently searches for academic papers on Semantic Scholar and Crossref\n    and returns a combined list of results. This tool is useful for broad\n    searches across multiple academic databases to get a comprehensive overview\n    of the literature on a given topic.\n\n    Args:\n        query (str): The search keywords for finding papers. This can be a\n            paper title, author names, or general topics.\n        limit (int): The maximum number of papers to return from each source.\n            The total number of results may be up to 2 * limit. Defaults to 10.\n\n    Returns:\n        str: A JSON string representing a list of dictionaries. Each dictionary\n            represents a found paper and contains keys for 'title', 'authors',\n            'year', 'doi', and 'source' (either 'Semantic Scholar' or 'Crossref').\n            If an error occurs, a JSON string with an 'error' key is returned.\n\n    Example:\n        search_papers(query=\"reinforcement learning from human feedback\", limit=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    Fetches detailed information for a specific paper from either Semantic\n    Scholar or Crossref. This is an async function to better handle API requests.\n\n    Args:\n        paper_id (str): The identifier of the paper. For Crossref, this should\n            be a DOI. For Semantic Scholar, it can be a DOI or its specific ID.\n        source (str): The data source to query. Must be either 'Semantic Scholar'\n            or 'Crossref'.\n\n    Returns:\n        str: A JSON string containing the paper's details, including 'title',\n            'authors', 'abstract', and 'venue'. Returns a JSON object with an\n            'error' key if the paper is not found or an API error occurs.\n\n    Example:\n        fetch_paper_details(paper_id=\"10.1109/5.771073\", source=\"Crossref\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    Searches for papers on a specific topic, with an optional filter for a\n    range of years. This tool prioritizes Semantic Scholar for its relevance\n    ranking and falls back to Crossref if needed. It's ideal for focused\n    literature reviews within a specific timeframe.\n\n    Args:\n        topic_keywords (str): The topic keywords to search for (e.g., \"quantum computing\").\n        year_range (str, optional): A string representing the year range in\n            \"YYYY-YYYY\" format (e.g., \"2020-2023\"). Defaults to None, which\n            means no year filter is applied.\n        limit (int): The maximum number of results to return. Defaults to 10.\n\n    Returns:\n        str: A JSON string representing a list of dictionaries, where each\n            dictionary is a paper. Returns a JSON object with an 'error' key\n            if an issue occurs.\n\n    Example:\n        search_by_topic(topic_keywords=\"large language models\", year_range=\"2021-2022\", limit=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "topic_keywords": {
+            "title": "Topic Keywords",
+            "type": "string"
+          },
+          "year_range": {
+            "default": null,
+            "title": "Year Range",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic_keywords"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证工具在使用默认 limit 参数时能否正确搜索学术论文",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 50.01521348953247,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证工具在指定 limit 参数时能否正确限制搜索结果数量",
+        "args": {
+          "query": "deep learning",
+          "limit": 5
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 50.00936460494995,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Papers by Author",
+        "purpose": "验证工具是否支持通过作者名称搜索论文",
+        "args": {
+          "query": "Andrew Ng",
+          "limit": 10
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 50.015281200408936,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Empty Query",
+        "purpose": "验证工具是否能处理空查询字符串的情况",
+        "args": {
+          "query": "",
+          "limit": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Query must be a non-empty string."
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Zero Limit",
+        "purpose": "验证工具是否能处理 limit 为 0 的边界情况",
+        "args": {
+          "query": "neural networks",
+          "limit": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Limit must be a positive integer."
+        },
+        "execution_time": 0.005999088287353516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Negative Limit",
+        "purpose": "验证工具是否能正确处理负数 limit 参数",
+        "args": {
+          "query": "computer vision",
+          "limit": -5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Limit must be a positive integer."
+        },
+        "execution_time": 0.005705833435058594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Special Characters",
+        "purpose": "验证工具是否能处理包含特殊字符的查询",
+        "args": {
+          "query": "自然语言处理!@#$%^&*()",
+          "limit": 10
+        },
+        "response": {
+          "error": "Tool call 'search_papers' was cancelled."
+        },
+        "execution_time": 50.002726316452026,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Very Large Limit",
+        "purpose": "验证工具是否能处理较大的 limit 值（边界测试）",
+        "args": {
+          "query": "AI ethics",
+          "limit": 1000
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.4159085750579834,
+        "is_functional_test": false
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Topic Search with Default Limit",
+        "purpose": "验证工具在使用默认 limit 参数时能否正确搜索指定主题的论文",
+        "args": {
+          "topic_keywords": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"title\": \"Quantum computing for network medicine-based epistatic disease mechanism mining - Ready for quantum computing?\", \"authors\": [\"Jan Baumbach\"], \"year\": 2025, \"doi\": \"10.58647/rexpo.25000079.v1\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Mechanics for Beginners\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 2020, \"doi\": \"10.1093/oso/9780198854227.001.0001\", \"source\": \"Crossref\"}, {\"title\": \"Applications of Quantum Computing\", \"authors\": [], \"year\": 2023, \"doi\": \"10.1002/9781394157846.ch12\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing and the IoT\", \"authors\": [\"Ahmed Banafa\"], \"year\": 2023, \"doi\": \"10.1201/9781003440239-5\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing and High Energy Physics\", \"authors\": [\"Prasanth Shyamsundar\"], \"year\": 2024, \"doi\": \"10.2172/2426500\", \"source\": \"Crossref\"}, {\"title\": \"Towards Distributed Quantum Error Correction for Distributed Quantum Computing\", \"authors\": [\"Shahram Babaie\", \"Chunming Qiao\"], \"year\": 2025, \"doi\": \"10.1109/qcnc64685.2025.00019\", \"source\": \"Crossref\"}, {\"title\": \"Advances in SRF qubit architectures for quantum computing\", \"authors\": [\"Tanay Roy\"], \"year\": 2023, \"doi\": \"10.2172/1997127\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing Fundamentals\", \"authors\": [\"Siddhartha Bhattacharyya\"], \"year\": 2016, \"doi\": \"10.4018/978-1-5225-0768-0.les1\", \"source\": \"Crossref\"}, {\"title\": \"Copyright\", \"authors\": [], \"year\": 2021, \"doi\": \"10.1016/b978-0-12-821982-9.12001-5\", \"source\": \"Crossref\"}, {\"title\": \"Mathema...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1646字符，剩余146字符"
+        },
+        "execution_time": 46.60419297218323,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Topic Search with Custom Limit",
+        "purpose": "验证工具在指定 limit 参数时能否正确限制搜索结果数量",
+        "args": {
+          "topic_keywords": "machine learning",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Machine learning\", \"authors\": [], \"year\": 2012, \"doi\": \"10.1017/cbo9780511804779.017\", \"source\": \"Crossref\"}, {\"title\": \"Statistics for machine learning\", \"authors\": [], \"year\": 2012, \"doi\": \"10.1017/cbo9780511804779.012\", \"source\": \"Crossref\"}, {\"title\": \"Editorial: Human and Machine Learning\", \"authors\": [\"Pat Langley\"], \"year\": 1986, \"doi\": \"10.1023/a:1022854429410\", \"source\": \"Crossref\"}, {\"title\": \"Chapter 3: Classifiers in Machine Learning\", \"authors\": [], \"year\": 2020, \"doi\": \"10.1515/9781683924654-004\", \"source\": \"Crossref\"}, {\"title\": \"Supervised Learning\", \"authors\": [\"Stefan Nagel\"], \"year\": 2021, \"doi\": \"10.23943/princeton/9780691218700.003.0002\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 13.924225568771362,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Topic Search within Year Range",
+        "purpose": "验证工具是否能根据指定年份范围过滤搜索结果",
+        "args": {
+          "topic_keywords": "deep learning",
+          "year_range": "2018-2022",
+          "limit": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Chapter 4: Deep Learning Introduction\", \"authors\": [], \"year\": 2020, \"doi\": \"10.1515/9781683924654-005\", \"source\": \"Crossref\"}, {\"title\": \"The Future of Deep Learning\", \"authors\": [], \"year\": 2019, \"doi\": \"10.7551/mitpress/11171.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning Using PySpark\", \"authors\": [\"Pramod Singh\"], \"year\": 2019, \"doi\": \"10.1007/978-1-4842-4961-1_8\", \"source\": \"Crossref\"}, {\"title\": \"Genomics with Deep Learning\", \"authors\": [\"X. Chen\"], \"year\": 2021, \"doi\": \"10.1201/9780367855611-9\", \"source\": \"Crossref\"}, {\"title\": \"Artificial Intelligence, Machine Learning, and Deep Learning Models for Risk Management\", \"authors\": [], \"year\": 2022, \"doi\": \"10.1002/9781119824961.ch3\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning\", \"authors\": [], \"year\": 2021, \"doi\": \"10.1142/9789811234064_0012\", \"source\": \"Crossref\"}, {\"title\": \"The Foundations of Deep Learning\", \"authors\": [\"Hassan Ugail\"], \"year\": 2022, \"doi\": \"10.1201/9781003091356-2\", \"source\": \"Crossref\"}, {\"title\": \"Deep Learning: Practice\", \"authors\": [], \"year\": 2022, \"doi\": \"10.4135/9781529798555\", \"source\": \"Crossref\"}, {\"title\": \"Congruence of deep learning in biomedical engineering\", \"authors\": [\"Aradhana Behura\"], \"year\": 2021, \"doi\": \"10.1016/b978-0-12-823014-5.00003-x\", \"source\": \"Crossref\"}, {\"title\": \"Cultivating a Deep Learning Mindset\", \"authors\": [], \"year\": 2019, \"doi\": \"10.1017/9781108647786.010\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 42.24527883529663,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Empty Topic Keywords",
+        "purpose": "验证工具是否能处理空的主题关键词输入",
+        "args": {
+          "topic_keywords": "",
+          "limit": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Topic keywords must be a non-empty string."
+        },
+        "execution_time": 0.008539676666259766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Invalid Year Range Format",
+        "purpose": "验证工具是否能正确处理格式错误的 year_range 参数",
+        "args": {
+          "topic_keywords": "neural networks",
+          "year_range": "2020/2023",
+          "limit": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Year range must be in 'YYYY-YYYY' format."
+        },
+        "execution_time": 0.005007505416870117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Negative Limit",
+        "purpose": "验证工具是否能拒绝负数的 limit 参数",
+        "args": {
+          "topic_keywords": "AI ethics",
+          "limit": -3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Limit must be a positive integer."
+        },
+        "execution_time": 0.005110502243041992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Special Characters in Topic",
+        "purpose": "验证工具是否能处理包含特殊字符的主题关键词",
+        "args": {
+          "topic_keywords": "自然语言处理!@#",
+          "limit": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"A Survey of Transformer-Based Natural Language Processing Models\", \"authors\": [\"\\u9e23\\u59dd \\u8d56\"], \"year\": 2023, \"doi\": \"10.12677/airr.2023.123025\", \"source\": \"Crossref\"}, {\"title\": \"Implementation of Natural Language Pro-cessing Platform Based on Hadoop Cluster\", \"authors\": [\"\\u5b81 \\u8c22\"], \"year\": 2017, \"doi\": \"10.12677/csa.2017.77075\", \"source\": \"Crossref\"}, {\"title\": \"\", \"authors\": [], \"year\": 1988, \"doi\": \"10.4216/jpssj.21.145\", \"source\": \"Crossref\"}, {\"title\": \"\\u65af\\u5927\\u6797\\u5173\\u4e8e\\u8bed\\u8a00\\u5b66\\u7684\\u8457\\u4f5c\\u53ca\\u5176\\u5bf9\\u4e8e\\u81ea\\u7136\\u79d1\\u5b66\\u7684\\u610f\\u4e49\", \"authors\": [\"\\u041c.\\u7279\\u6d1b\\u7533 \\u0414.\"], \"year\": 1952, \"doi\": \"10.1360/csb1952-0-7-433\", \"source\": \"Crossref\"}, {\"title\": \"\", \"authors\": [], \"year\": 2002, \"doi\": \"10.5715/jnlp.9.4_1\", \"source\": \"Crossref\"}, {\"title\": \"\\u9678\\u4e0a\\u7af6\\u6280\\u3068\\u81ea\\u7136\\u8a00\\u8a9e\\u51e6\\u7406\", \"authors\": [], \"year\": 2019, \"doi\": \"10.5715/jnlp.26.543\", \"source\": \"Crossref\"}, {\"title\": \"Welche Qualifikationsanforderungen stellen Unternehmen an die Absolventen der angewandten Hochschulen? \\u2013 Eine Untersuchung von Stellenausschreibungen auf der Grundlage von maschinellem Lernen und nat\\u00fcrlicher Sprachverarbeitung\", \"authors\": [\"Jiaxin Li\", \"Tiantian Liu\", \"Hui Liu\"], \"year\": 2025, \"doi\": \"10.1007/978-3-658-47041-8_6\", \"source\": \"Crossref\"}, {\"title\": \"\\u65e5\\u672c\\u8a9e\\u306e\\u81e8\\u5e8a\\u81ea\\u7136\\u8a00\\u8a9e\\u51e6\\u7406\\uff1a\\u8ab2\\u984c\\u3068\\u6a5f\\u4f1a...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1912字符，剩余412字符"
+        },
+        "execution_time": 36.48826336860657,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Very Large Limit",
+        "purpose": "验证工具是否能处理较大的 limit 值（边界测试）",
+        "args": {
+          "topic_keywords": "reinforcement learning",
+          "limit": 1000
+        },
+        "response": {
+          "error": "Tool call 'search_by_topic' was cancelled."
+        },
+        "execution_time": 50.014124631881714,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "Fetch Paper Details from Semantic Scholar with DOI",
+        "purpose": "验证工具能否通过 Semantic Scholar 数据源使用 DOI 正确获取论文详细信息",
+        "args": {
+          "paper_id": "10.1109/5.771073",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: 'Paper' object has no attribute 'get'\"}"
+        },
+        "execution_time": 1.973024606704712,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper Details from Crossref with DOI",
+        "purpose": "验证工具能否通过 Crossref 数据源使用 DOI 正确获取论文详细信息",
+        "args": {
+          "paper_id": "10.1109/5.771073",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"title\": \"Toward unique identifiers\", \"authors\": [\"N. Paskin\"], \"abstract\": null, \"venue\": \"Proceedings of the IEEE\"}"
+        },
+        "execution_time": 2.2184343338012695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper Details with Invalid Source",
+        "purpose": "验证工具是否能拒绝无效的数据源参数",
+        "args": {
+          "paper_id": "10.1109/5.771073",
+          "source": "InvalidSource"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Source must be either 'Semantic Scholar' or 'Crossref'."
+        },
+        "execution_time": 0.010429143905639648,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Paper Details with Empty Paper ID",
+        "purpose": "验证工具是否能处理 paper_id 参数为空的情况",
+        "args": {
+          "paper_id": "",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Paper ID must be a non-empty string."
+        },
+        "execution_time": 0.005999326705932617,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Non-existent Paper",
+        "purpose": "验证工具在无法找到指定论文时是否返回带有 error 字段的 JSON",
+        "args": {
+          "paper_id": "invalid-doi-12345",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"error\": \"Paper not found on Crossref.\"}"
+        },
+        "execution_time": 2.1913154125213623,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Paper Details with Special Characters in Paper ID",
+        "purpose": "验证工具是否能正确处理包含特殊字符的 paper_id 参数",
+        "args": {
+          "paper_id": "10.1109/@#$.771073",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: Paper with id 10.1109/@ not found\"}"
+        },
+        "execution_time": 1.7010958194732666,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Paper Details from Semantic Scholar with Semantic Scholar ID",
+        "purpose": "验证工具是否支持使用 Semantic Scholar 的专有 ID 获取论文详细信息",
+        "args": {
+          "paper_id": "abcd1234abcd1234abcd1234abcd1234abcd1234abcd",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: Paper with id abcd1234abcd1234abcd1234abcd1234abcd1234abcd not found\"}"
+        },
+        "execution_time": 33.646124601364136,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 23
+}

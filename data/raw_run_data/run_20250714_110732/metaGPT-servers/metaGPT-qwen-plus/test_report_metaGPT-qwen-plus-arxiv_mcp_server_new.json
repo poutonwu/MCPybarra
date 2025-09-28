@@ -1,0 +1,417 @@
+{
+  "server_name": "arxiv_mcp_server_new",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-arxiv_mcp_server_new",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\arxiv_mcp_server_new.py",
+  "timestamp": "2025-07-14T11:07:35.308645",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    根据用户输入的查询条件搜索arXiv论文。\n\n    Args:\n        query: 搜索关键词或表达式。\n        max_results: 返回的最大结果数，默认为5，范围1-20。\n\n    Returns:\n        JSON格式字符串，包含匹配的论文列表，每个论文包含id、标题、摘要、发表日期和链接。\n\n    Raises:\n        ValueError: 如果查询为空或max_results超出范围。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    下载指定arXiv论文的PDF文件并存储至本地。\n\n    Args:\n        paper_id: 论文的arXiv ID（如1607.08567）。\n\n    Returns:\n        下载文件的存储路径。\n\n    Raises:\n        ValueError: 如果paper_id格式无效。\n        FileNotFoundError: 如果无法找到指定的论文。\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    列出本地存储的所有论文。\n\n    Returns:\n        JSON格式字符串，包含本地存储的论文列表，每个论文包含文件名和大小。\n\n    Raises:\n        ValueError: 如果论文目录不存在。\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    读取指定论文的内容。\n\n    Args:\n        filename: 要读取的论文文件名（需存在于论文存储目录中）。\n\n    Returns:\n        文件内容的文本字符串。\n\n    Raises:\n        ValueError: 如果文件名无效或文件不存在。\n        IOError: 如果读取文件时发生错误。\n    ",
+      "args_schema": {
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证工具在提供有效查询条件时能正确返回论文列表（使用默认max_results）",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "[{\"id\": \"1909.03550v1\", \"title\": \"Lecture Notes: Optimization for Machine Learning\", \"summary\": \"Lecture notes on optimization for machine learning, derived from a course at\\nPrinceton University and tutorials given in MLSS, Buenos Aires, as well as\\nSimons Foundation, Berkeley.\", \"published\": \"2019-09-08T21:49:42+00:00\", \"url\": \"http://arxiv.org/abs/1909.03550v1\"}, {\"id\": \"1811.04422v1\", \"title\": \"An Optimal Control View of Adversarial Machine Learning\", \"summary\": \"I describe an optimal control view of adversarial machine learning, where the\\ndynamical system is the machine learner, the input are adversarial actions, and\\nthe control costs are defined by the adversary's goals to do harm and be hard\\nto detect. This view encompasses many types of adversarial machine learning,\\nincluding test-item attacks, training-data poisoning, and adversarial reward\\nshaping. The view encourages adversarial machine learning researcher to utilize\\nadvances in control theory and reinforcement learning.\", \"published\": \"2018-11-11T14:28:34+00:00\", \"url\": \"http://arxiv.org/abs/1811.04422v1\"}, {\"id\": \"1707.04849v1\", \"title\": \"Minimax deviation strategies for machine learning and recognition with short learning samples\", \"summary\": \"The article is devoted to the problem of small learning samples in machine\\nlearning. The flaws of maximum likelihood learning and minimax learning are\\nlooked into and the concept of minimax deviation learning is introduced that is\\nfree of those flaws.\", \"published...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计4098字符，剩余2598字符"
+        },
+        "execution_time": 1.196683406829834,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定最大结果数的搜索测试",
+        "purpose": "验证工具在指定max_results参数时能正确返回相应数量的论文",
+        "args": {
+          "query": "deep learning",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[{\"id\": \"1805.08355v1\", \"title\": \"Opening the black box of deep learning\", \"summary\": \"The great success of deep learning shows that its technology contains\\nprofound truth, and understanding its internal mechanism not only has important\\nimplications for the development of its technology and effective application in\\nvarious fields, but also provides meaningful insights into the understanding of\\nhuman brain mechanism. At present, most of the theoretical research on deep\\nlearning is based on mathematics. This dissertation proposes that the neural\\nnetwork of deep learning is a physical system, examines deep learning from\\nthree different perspectives: microscopic, macroscopic, and physical world\\nviews, answers multiple theoretical puzzles in deep learning by using physics\\nprinciples. For example, from the perspective of quantum mechanics and\\nstatistical physics, this dissertation presents the calculation methods for\\nconvolution calculation, pooling, normalization, and Restricted Boltzmann\\nMachine, as well as the selection of cost functions, explains why deep learning\\nmust be deep, what characteristics are learned in deep learning, why\\nConvolutional Neural Networks do not have to be trained layer by layer, and the\\nlimitations of deep learning, etc., and proposes the theoretical direction and\\nbasis for the further development of deep learning now and in the future. The\\nbrilliance of physics flashes in deep learning, we try to establish the deep\\nlearning technology ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计10227字符，剩余8727字符"
+        },
+        "execution_time": 1.8297510147094727,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询异常处理测试",
+        "purpose": "验证工具在查询为空时抛出ValueError",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 查询不能为空"
+        },
+        "execution_time": 0.007527351379394531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超出范围的最大结果数异常处理测试",
+        "purpose": "验证工具在max_results小于1或大于20时抛出ValueError",
+        "args": {
+          "query": "neural networks",
+          "max_results": 25
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: max_results必须在1-20之间，当前值: 25"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具能正确处理包含特殊字符的查询字符串",
+        "args": {
+          "query": "\"quantum computing\" AND author:nielsen"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.1630795001983643,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最小边界值测试",
+        "purpose": "验证工具在max_results为最小允许值时的行为",
+        "args": {
+          "query": "robotics",
+          "max_results": 1
+        },
+        "response": {
+          "result": "[{\"id\": \"1907.13114v1\", \"title\": \"The Use of Agricultural Robots in Orchard Management\", \"summary\": \"Book chapter that summarizes recent research on agricultural robotics in\\norchard management, including Robotic pruning, Robotic thinning, Robotic\\nspraying, Robotic harvesting, Robotic fruit transportation, and future trends.\", \"published\": \"2019-07-30T17:56:17+00:00\", \"url\": \"http://arxiv.org/abs/1907.13114v1\"}]"
+        },
+        "execution_time": 2.3682243824005127,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大边界值测试",
+        "purpose": "验证工具在max_results为最大允许值时的行为",
+        "args": {
+          "query": "natural language processing",
+          "max_results": 20
+        },
+        "response": {
+          "result": "[{\"id\": \"1608.04434v1\", \"title\": \"Natural Language Processing using Hadoop and KOSHIK\", \"summary\": \"Natural language processing, as a data analytics related technology, is used\\nwidely in many research areas such as artificial intelligence, human language\\nprocessing, and translation. At present, due to explosive growth of data, there\\nare many challenges for natural language processing. Hadoop is one of the\\nplatforms that can process the large amount of data required for natural\\nlanguage processing. KOSHIK is one of the natural language processing\\narchitectures, and utilizes Hadoop and contains language processing components\\nsuch as Stanford CoreNLP and OpenNLP. This study describes how to build a\\nKOSHIK platform with the relevant tools, and provides the steps to analyze wiki\\ndata. Finally, it evaluates and discusses the advantages and disadvantages of\\nthe KOSHIK architecture, and gives recommendations on improving the processing\\nperformance.\", \"published\": \"2016-08-15T23:09:21+00:00\", \"url\": \"http://arxiv.org/abs/1608.04434v1\"}, {\"id\": \"2503.02435v1\", \"title\": \"NLI4DB: A Systematic Review of Natural Language Interfaces for Databases\", \"summary\": \"As the demand for querying databases in all areas of life continues to grow,\\nresearchers have devoted significant attention to the natural language\\ninterface for databases (NLIDB). This paper presents a comprehensive survey of\\nrecently proposed NLIDBs. We begin with a brief introduction to natural\\nlanguage processing te...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计24596字符，剩余23096字符"
+        },
+        "execution_time": 1.8085908889770508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "验证工具是否对潜在的恶意输入进行安全过滤或拒绝执行",
+        "args": {
+          "query": "machine learning'; DROP TABLE papers;--"
+        },
+        "response": {
+          "result": "[{\"id\": \"2010.10075v2\", \"title\": \"RDIS: Random Drop Imputation with Self-Training for Incomplete Time Series Data\", \"summary\": \"Time-series data with missing values are commonly encountered in many fields,\\nsuch as healthcare, meteorology, and robotics. The imputation aims to fill the\\nmissing values with valid values. Most imputation methods trained the models\\nimplicitly because missing values have no ground truth. In this paper, we\\npropose Random Drop Imputation with Self-training (RDIS), a novel training\\nmethod for time-series data imputation models. In RDIS, we generate extra\\nmissing values by applying a random drop on the observed values in incomplete\\ndata. We can explicitly train the imputation models by filling in the randomly\\ndropped values. In addition, we adopt self-training with pseudo values to\\nexploit the original missing values. To improve the quality of pseudo values,\\nwe set the threshold and filter them by calculating the entropy. To verify the\\neffectiveness of RDIS on the time series imputation, we test RDIS to various\\nimputation models and achieve competitive results on two real-world datasets.\", \"published\": \"2020-10-20T07:04:25+00:00\", \"url\": \"http://arxiv.org/abs/2010.10075v2\"}, {\"id\": \"2012.12182v1\", \"title\": \"Reduced Complexity Simulation of Wireless Sensor Networks for Application Development\", \"summary\": \"This paper presents an approach for low-cost simulation modeling for\\napplication development for wireless sensor networks. Computational ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计8101字符，剩余6601字符"
+        },
+        "execution_time": 1.9901576042175293,
+        "is_functional_test": false
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "基本下载功能测试",
+        "purpose": "验证工具在提供有效arXiv ID时能正确下载论文并返回存储路径",
+        "args": {
+          "paper_id": "1607.08567"
+        },
+        "response": {
+          "result": "downloaded_papers\\Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf"
+        },
+        "execution_time": 1.490553379058838,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效ID格式异常处理测试",
+        "purpose": "验证工具在提供格式不正确的paper_id时抛出ValueError",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: 'invalid_id_format'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的论文ID异常处理测试",
+        "purpose": "验证工具在提供不存在的paper_id时抛出FileNotFoundError",
+        "args": {
+          "paper_id": "9999.99999"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 下载论文时发生错误: 未找到ID为'9999.99999'的论文"
+        },
+        "execution_time": 0.9749772548675537,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符ID异常处理测试",
+        "purpose": "验证工具在提供包含特殊字符的paper_id时抛出ValueError",
+        "args": {
+          "paper_id": "1607#08567"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '1607#08567'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.003000020980834961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "最小长度有效ID测试",
+        "purpose": "验证工具能正确处理最短有效arXiv ID格式（如YYMM.NNNN）",
+        "args": {
+          "paper_id": "0001.0001"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '0001.0001'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.0040264129638671875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大长度有效ID测试",
+        "purpose": "验证工具能正确处理带版本号的长arXiv ID格式（如YYMM.NNNNVn）",
+        "args": {
+          "paper_id": "2023.12345v2"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '2023.12345v2'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL注入尝试安全测试",
+        "purpose": "验证工具是否对潜在恶意paper_id输入进行安全过滤或拒绝执行",
+        "args": {
+          "paper_id": "1607.08567'; DROP TABLE papers;--"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '1607.08567'; DROP TABLE papers;--'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "跨站脚本攻击尝试安全测试",
+        "purpose": "验证工具是否对可能的XSS paper_id输入进行安全过滤",
+        "args": {
+          "paper_id": "1607.08567<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: 无效的论文ID格式: '1607.08567<script>alert('xss')</script>'. 正确格式示例: '1607.08567' 或 'cs.LG-2403.02645'"
+        },
+        "execution_time": 0.0032591819763183594,
+        "is_functional_test": false
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "基本功能测试 - 列出论文列表",
+        "purpose": "验证工具在论文目录存在时能正确返回论文列表及其元数据",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.003606557846069336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 非法路径穿越尝试",
+        "purpose": "验证工具是否对可能的路径穿越攻击进行安全过滤",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 论文目录不存在",
+        "purpose": "验证工具在论文目录不存在时抛出ValueError",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.0032219886779785156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 空目录",
+        "purpose": "验证工具在论文目录存在但为空时返回空列表",
+        "args": {},
+        "response": {
+          "result": "[{\"filename\": \"Operator_algebras_associated_to_modules_over_an_in_1607.08567.pdf\", \"size_kb\": 182.27}]"
+        },
+        "execution_time": 0.010415792465209961,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "基本读取功能测试",
+        "purpose": "验证工具在提供有效文件名时能正确读取论文内容",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "%PDF-1.5\n%\n142 0 obj\n<<\n/Length 349       \n/Filter /FlateDecode\n>>\nstream\nxڅRn0\u0010\u0015>\u0014\u001fǦiVQ*H=4=Pb\bj\u00145,!Q.\u0005;;f\u001f3b\u0019;G&\bd\u0014(\"0D,\n\u0004G\u0011\u000bSE\u001bϧ\u001c:؞\u0014\u0000xl\u001e!y$uueN\u0006&\nMvG|\u0003NK<ݼ?vPcPඵ\u0000u7K9dF9ެwv\u0007b,IJWbi0AAj\u0014K\t=P\u001aQ\"jS!\u0002,#\u0013\u001cH.lRU~Qf4\u001d7\\;ctZ$m\u001buYwp3Yd-\n\u0016\u0017p0OC\u0010\u000b0\"\u0001&\f@i8$\u0015˱n$eVyqj1L\u0006/_J\u001b,Io086q{.\u0004e-\u0007\nendstream\nendobj\n45 0 obj\n<<\n/Type /XObject\n/Subtype /Form\n/FormType 1\n/PTEX.FileName (./examples/W7-NLP-OSS/nlposs-2023/papers/33.pdf)\n/PTEX.PageNumber 1\n/PTEX.InfoDict 150 0 R\n/BBox [0 0 595.276 841.89]\n/Resources <<\n/Font << /F105 153 0 R /F111 156 0 R /F84 159 0 R >>\n/ProcSet [ /PDF /Text ]\n>>\n/Length 4086\n/Filter /FlateDecode\n>>\nstream\nxZ[6~_ᷕFԙ$s`s2\b\u0007Ȓ#3+VQlhE\u0014,*G&Mz~w*7ʆ&z0&uLy(7\bûbvq\u0014\\\u000fݥߪ,W:\u0015X}ͧ\u001b{>7\u0018\u001dzM&K7;\u0015-|\u0016M\u001eb\u0018+Y\u001d>U/E[\nn\u0018eS\u0005}\u0011;\u0002rh\u0015q̇B$UaDrǍo\u0005\nüR˵\n2ؼ3^uԿ}H\u001f\u0017)iovƥļ0~\u0006vy\u0013Z΃hŦv\u0013&LtpZ\u000f|9&AZ\u0013?\u001d\u0011.T\u0017ƛ͟<$S9ZBHqhs\nJihRÔv?M0\u0002߮y,\u0006US\u0018;y\u0013VVfs\u0014y\u0016Ο0\u00035jmPc(hxn\nwZ\u0016q\u001b3xF;G\u0015'yY9Ι/M7X\"8F.5[}击bPp)Ϻ\u0019.ve\u0010\u0017t\u0000h@G\bӑ\nmu\u0012|8&[\u0002\u0012|(w_FOy%K\u001f8Z3B{M،Gں̓h\u001b\u0006dgw+\u0005\u001a`X\\91xp\u0003\u0014\u001f|Y((;\u0012Oؑ`4BL\u0013w\u0017\u001cS{Y/.\u0016E\nr`^23S!}%6Rnd\b 0J¶s5#IZz}T'}s)+\u001e\f|h>V#%0Jn_$R*Oa%#\n[-\u0015|'(]\u0011\u0012X鰗~_\u0011bWRkr'\u0010\u000e \u0002ԝ= ?$4\u0017b'7+ʩ\n5䚕~M<lG9Oo\u001f\u001a&_\u000bi}l~~ػ?bs8\u00068\u0012X%\u001b=mRGRXqK'mءtr\u0003\u001bRl(Թ|≯!3\nh=T0{\u0004MCZ\u00113\u0000\u0015i\u0015e~3'$\u000ep=̃Ud\u0006\u0007Rb-,d\u001cñ:\u0001B\u001d\u0005\u0002$\u001ewyǯ\n~T}NA.\u001f[\u0005D$3\f\u0006oyDK\u0005?fSKoՓXnnz\u001b\u0010ʲ0}ĜAIӓ+3B+`#A=q+0a+<*P'\u0002M:\u0007\u0018;Mk=z/⽯K/t%R\u000685Nԣǹ\u0013I@ʑ{w\u0017#ib˿LI/\u001b8L\u0012lR`;k\u0003>;0broy\u0018-\u001au^\n]\"%+±\nX]j*\u0016\u000fS+\u000b7O\u0004\u000b:h>#ƙ\u000e\\\u001d\u001dIo!tX\u0000ݑiL^*-Y\b>X5\u001eoY(c0D\u0002)8X\u001fk\u0007\u0006ӌ#S;Hg~Rt\u0003\fBOeae\u0013ײ|\u0002=hꝊ\b\u0000F\u0013+\nV(&-Q\u0012fFNxG\bO\u0007h}G\f&N\u001a?eu=#lcH\u0000>+\u0004<<v\u0014\u0010,rBH\u000eX3՟H\u001chQk\t3wl n|ɘT$\"I\u000fG\u0010\u001c#\u001amDkt\u0001Ϭ\n\"[&\u0003W&\u0015:)T4\"m\n(=،s^zg׎GD~>]ڽ,\u0017MV\u0002:ΡaO\\Mu\u0017\u0012=\\8 P\u0013}\u001bPߧcT3\u001dsS\u001dϊMG...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计101944字符，剩余100444字符"
+        },
+        "execution_time": 0.08272218704223633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效文件名异常处理测试",
+        "purpose": "验证工具在提供不存在的文件名时抛出ValueError",
+        "args": {
+          "filename": "nonexistent_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.00700688362121582,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空文件名异常处理测试",
+        "purpose": "验证工具在提供空字符串作为文件名时抛出ValueError",
+        "args": {
+          "filename": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.019005537033081055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符文件名安全测试",
+        "purpose": "验证工具是否对包含特殊字符的文件名进行安全过滤或拒绝执行",
+        "args": {
+          "filename": "malicious_file'; DROP TABLE papers;--.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.010516881942749023,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "最小长度文件名测试",
+        "purpose": "验证工具能正确处理最短有效文件名格式",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.006000041961669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "长路径文件名边界测试",
+        "purpose": "验证工具能正确处理较长路径的文件名",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\.git\\hooks\\update.sample"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.010613203048706055,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "跨目录访问尝试安全测试",
+        "purpose": "验证工具是否阻止通过相对路径进行跨目录文件访问",
+        "args": {
+          "filename": "..\\..\\..\\secret_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.01136469841003418,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非文本文件读取错误处理测试",
+        "purpose": "验证工具在尝试读取非文本文件（如PDF）时能否正确处理或抛出IOError",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: 必须提供有效的PDF文件名"
+        },
+        "execution_time": 0.014515161514282227,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 28
+}

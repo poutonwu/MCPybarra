@@ -1,0 +1,153 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_image_format_converter",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_image_format_converter/refined/server.py",
+  "timestamp": "2025-07-13T03:56:31.025144",
+  "tools": [
+    {
+      "name": "convert_image",
+      "description": "\n    Converts an image file from a source format to a specified target format.\n\n    This tool handles various image types, including those with transparency (RGBA),\n    by performing necessary color space conversions. It includes robust input\n    validation and security checks to prevent common vulnerabilities like path\n    traversal attacks.\n\n    Args:\n        source_path (str): The absolute or relative path to the source image file\n                           (e.g., '/path/to/image.png').\n        output_dir (str): The path to the directory where the converted image will\n                          be saved. The directory must exist.\n        target_format (str): The desired output image format (e.g., 'JPEG', 'PNG',\n                             'BMP', 'GIF').\n\n    Returns:\n        str: A JSON formatted string indicating success or failure.\n             On Success: {\"status\": \"success\", \"message\": \"Image converted successfully.\", \"output_path\": \"/path/to/output/image.jpeg\"}\n             On Failure: {\"status\": \"error\", \"message\": \"Error details...\"}\n\n    Example:\n        convert_image(source_path=\"C:/Users/Test/images/sample.png\", output_dir=\"C:/Users/Test/images/output\", target_format=\"JPEG\")\n    ",
+      "args_schema": {
+        "properties": {
+          "source_path": {
+            "title": "Source Path",
+            "type": "string"
+          },
+          "output_dir": {
+            "title": "Output Dir",
+            "type": "string"
+          },
+          "target_format": {
+            "title": "Target Format",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_path",
+          "output_dir",
+          "target_format"
+        ],
+        "title": "convert_imageArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_image": [
+      {
+        "case_name": "Basic Image Conversion PNG to JPEG",
+        "purpose": "验证工具能够将PNG图像成功转换为JPEG格式",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "JPEG"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Cannot identify image file. The file at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.png' may be corrupted or not a valid image.\"}"
+        },
+        "execution_time": 0.03999972343444824,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic Image Conversion JPEG to PNG",
+        "purpose": "验证工具能够将JPEG图像成功转换为PNG格式",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "PNG"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Image converted successfully.\", \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\xue.png\"}"
+        },
+        "execution_time": 1.6628832817077637,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Conversion with Transparency (PNG to BMP)",
+        "purpose": "验证带有透明通道的PNG图像能被正确转换为BMP格式",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "BMP"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Cannot identify image file. The file at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.png' may be corrupted or not a valid image.\"}"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Source Path",
+        "purpose": "测试当提供的源路径不存在时工具是否能正确处理错误",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_image.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "JPEG"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Source file not found at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_image.png'.\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Writable Output Directory",
+        "purpose": "测试输出目录不可写时的错误处理",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\",
+          "target_format": "JPEG"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Cannot identify image file. The file at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.png' may be corrupted or not a valid image.\"}"
+        },
+        "execution_time": 0.00400090217590332,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Path Traversal Attempt in Source",
+        "purpose": "验证工具是否阻止路径穿越攻击尝试",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\malicious_file.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "JPEG"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Source file not found at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\malicious_file.png'.\"}"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Target Format",
+        "purpose": "测试特殊字符作为目标格式时的行为",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "SVG"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Cannot identify image file. The file at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.png' may be corrupted or not a valid image.\"}"
+        },
+        "execution_time": 0.0030007362365722656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Length File Name",
+        "purpose": "测试最大长度文件名的转换能力",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_filename_which_may_cause_issues_but_should_still_work.png",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\",
+          "target_format": "GIF"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Source file not found at 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_long_filename_which_may_cause_issues_but_should_still_work.png'.\"}"
+        },
+        "execution_time": 0.004001140594482422,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 8
+}

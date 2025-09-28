@@ -1,0 +1,730 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_pdf_automation_tool",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_pdf_automation_tool/refined/server.py",
+  "timestamp": "2025-07-14T21:35:04.970841",
+  "tools": [
+    {
+      "name": "merge_pdfs_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "pdf_files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pdf Files",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pdf_files"
+        ],
+        "title": "merge_pdfs_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "extract_pages_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "pdf_file": {
+            "title": "Pdf File",
+            "type": "string"
+          },
+          "pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdf_file",
+          "pages",
+          "output_path"
+        ],
+        "title": "extract_pages_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_pdfs_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          },
+          "pattern": {
+            "title": "Pattern",
+            "type": "string"
+          }
+        },
+        "required": [
+          "directory",
+          "pattern"
+        ],
+        "title": "search_pdfs_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "merge_pdfs_ordered_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "pdf_files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pdf Files",
+            "type": "array"
+          },
+          "order_pattern": {
+            "title": "Order Pattern",
+            "type": "string"
+          },
+          "fuzzy_match": {
+            "default": false,
+            "title": "Fuzzy Match",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pdf_files",
+          "order_pattern"
+        ],
+        "title": "merge_pdfs_ordered_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "find_related_pdfs_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "target_pdf": {
+            "title": "Target Pdf",
+            "type": "string"
+          },
+          "content_similarity_threshold": {
+            "default": 0.8,
+            "title": "Content Similarity Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "target_pdf"
+        ],
+        "title": "find_related_pdfs_toolArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "merge_pdfs_tool": [
+      {
+        "case_name": "Basic PDF Merge with Valid Files",
+        "purpose": "验证工具能够正确合并两个有效的PDF文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+          ]
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.33484411239624023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge Single PDF File",
+        "purpose": "验证工具在仅提供一个PDF文件时也能正常处理",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+          ]
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.10287332534790039,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge PDFs with Empty Array",
+        "purpose": "验证工具是否能正确处理空数组输入",
+        "args": {
+          "pdf_files": []
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Merge PDFs with Non-PDF Files",
+        "purpose": "验证工具是否能正确处理非PDF文件输入",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\re2.doc"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.0050067901611328125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Merge PDFs with Locked Files",
+        "purpose": "验证工具在遇到只读/锁定文件时的处理能力",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+        },
+        "execution_time": 0.007989168167114258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Merge PDFs with Special Characters in Path",
+        "purpose": "验证工具是否能正确处理路径中包含特殊字符的文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: EOF marker not found"
+        },
+        "execution_time": 0.0049991607666015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge Large Number of PDFs",
+        "purpose": "验证工具是否能处理多个PDF文件合并",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+          ]
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.419130802154541,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt Merge with Sensitive System Files",
+        "purpose": "验证工具是否能阻止对敏感系统文件的操作",
+        "args": {
+          "pdf_files": [
+            "C:\\Windows\\System32\\drivers\\etc\\hosts"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: Invalid file format (expected .pdf): C:\\Windows\\System32\\drivers\\etc\\hosts"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      }
+    ],
+    "extract_pages_tool": [
+      {
+        "case_name": "Basic Page Extraction with Valid PDF",
+        "purpose": "验证工具能够正确从一个有效的PDF文件中提取指定页码的页面",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "pages": [
+            1,
+            2
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_pages_output.pdf"
+        },
+        "response": {
+          "result": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_pages_output.pdf"
+        },
+        "execution_time": 0.03300309181213379,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Extract Single Page from PDF",
+        "purpose": "验证工具能够处理仅提取一页的情况",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "pages": [
+            3
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_page_output.pdf"
+        },
+        "response": {
+          "result": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_page_output.pdf"
+        },
+        "execution_time": 0.018207073211669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Extract Multiple Pages from Large PDF",
+        "purpose": "验证工具是否能从较大的PDF文件中提取多个指定页面",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "pages": [
+            5,
+            10,
+            15
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\multi_page_large_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid page number: 5"
+        },
+        "execution_time": 0.034998178482055664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Extract from Sensitive System File",
+        "purpose": "验证工具是否能阻止对敏感系统文件的操作",
+        "args": {
+          "pdf_file": "C:\\Windows\\System32\\drivers\\etc\\hosts",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\blocked_extract_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid file format (expected .pdf): C:\\Windows\\System32\\drivers\\etc\\hosts"
+        },
+        "execution_time": 0.006997823715209961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid File Format",
+        "purpose": "验证工具在输入非PDF文件时能否正确报错",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_format_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Locked or Read-Only File",
+        "purpose": "验证工具在遇到只读/锁定文件时是否能正确处理",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\locked_file_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Page Number Out of Range",
+        "purpose": "验证工具在请求超出PDF实际页数的页面时是否能处理",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "pages": [
+            100
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\out_of_range_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid page number: 100"
+        },
+        "execution_time": 0.009993791580200195,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Path",
+        "purpose": "验证工具是否能正确处理路径中包含特殊字符的文件",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_char_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: EOF marker not found"
+        },
+        "execution_time": 0.003998994827270508,
+        "is_functional_test": true
+      }
+    ],
+    "search_pdfs_tool": [
+      {
+        "case_name": "Basic PDF Search in Valid Directory",
+        "purpose": "验证工具能够正确在指定目录中搜索符合模式的PDF文件",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*.pdf"
+        },
+        "response": [
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_pages_output.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_page_output.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+        ],
+        "execution_time": 0.004000663757324219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search PDFs with Subdirectories",
+        "purpose": "验证工具是否能递归搜索子目录中的PDF文件",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir",
+          "pattern": "*.pdf"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.012006282806396484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Search Sensitive System Files",
+        "purpose": "验证工具是否能阻止对敏感系统目录的操作",
+        "args": {
+          "directory": "C:\\Windows\\System32",
+          "pattern": "*.pdf"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.10660004615783691,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Directory Path",
+        "purpose": "验证工具在提供无效目录路径时是否能正确处理错误",
+        "args": {
+          "directory": "D:\\invalid\\path\\that\\does\\not\\exist",
+          "pattern": "*.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs_tool: Error searching PDFs: Directory not found: D:\\invalid\\path\\that\\does\\not\\exist"
+        },
+        "execution_time": 0.0030052661895751953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Empty Pattern",
+        "purpose": "验证工具在模式为空时的行为",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": ""
+        },
+        "response": [
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_pages_output.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_page_output.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+        ],
+        "execution_time": 0.00400090217590332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Directory Path",
+        "purpose": "验证工具是否能正确处理包含特殊字符的目录路径",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf",
+          "pattern": "*.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs_tool: Error searching PDFs: Directory not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+        },
+        "execution_time": 0.007010698318481445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Non-PDF Files Using PDF Pattern",
+        "purpose": "验证工具是否能正确忽略非PDF文件，当使用PDF匹配模式时",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*.pdf"
+        },
+        "response": [
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_pages_output.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\single_page_output.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+        ],
+        "execution_time": 0.0039937496185302734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search PDFs with No Matching Files",
+        "purpose": "验证工具在没有匹配文件的情况下是否返回空列表或适当响应",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*.xyz"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": true
+      }
+    ],
+    "merge_pdfs_ordered_tool": [
+      {
+        "case_name": "Basic Ordered Merge with Valid PDFs",
+        "purpose": "验证工具能够根据指定顺序合并有效的PDF文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+          ],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.005000591278076172,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge Single File with Default Pattern",
+        "purpose": "验证当仅提供一个PDF文件时，工具使用默认模式进行合并",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+          ],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge PDFs Using Fuzzy Match Order",
+        "purpose": "验证启用模糊匹配功能后是否能正确识别并排序文件名相近的PDF",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+          ],
+          "order_pattern": "sample*.pdf",
+          "fuzzy_match": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: EOF marker not found"
+        },
+        "execution_time": 0.03700065612792969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Merge Sensitive System Files",
+        "purpose": "验证工具能否阻止对敏感系统文件（如hosts）的合并操作",
+        "args": {
+          "pdf_files": [
+            "C:\\Windows\\System32\\drivers\\etc\\hosts"
+          ],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: Invalid file format (expected .pdf): C:\\Windows\\System32\\drivers\\etc\\hosts"
+        },
+        "execution_time": 0.006999492645263672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-PDF Files in List",
+        "purpose": "验证工具在列表中包含非PDF文件时能否正确报错",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\re2.doc"
+          ],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.005000591278076172,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Locked or Read-Only File",
+        "purpose": "验证工具在遇到只读/锁定文件时是否能正确处理",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+          ],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Special Characters in Path",
+        "purpose": "验证工具是否能正确处理路径中包含特殊字符的文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+          ],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.003998994827270508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Condition - Empty File List",
+        "purpose": "验证工具在空文件列表输入下是否能优雅地处理",
+        "args": {
+          "pdf_files": [],
+          "order_pattern": "{file}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.00299835205078125,
+        "is_functional_test": false
+      }
+    ],
+    "find_related_pdfs_tool": [
+      {
+        "case_name": "Basic Related PDF Search with Default Threshold",
+        "purpose": "验证工具能够使用默认相似度阈值正确查找与目标PDF内容相关的PDF文件",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: EOF marker not found"
+        },
+        "execution_time": 0.6049249172210693,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Related PDF Search with Custom Similarity Threshold",
+        "purpose": "验证工具能够使用自定义相似度阈值查找相关PDF文件",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "content_similarity_threshold": 0.7
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: EOF marker not found"
+        },
+        "execution_time": 0.6063435077667236,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Find Related PDFs for Sensitive System File",
+        "purpose": "验证工具是否能阻止对敏感系统文件的操作",
+        "args": {
+          "target_pdf": "C:\\Windows\\System32\\drivers\\etc\\hosts"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: Invalid file format (expected .pdf): C:\\Windows\\System32\\drivers\\etc\\hosts"
+        },
+        "execution_time": 0.004999637603759766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid File Format",
+        "purpose": "验证工具在输入非PDF文件时能否正确报错",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.005997657775878906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Locked or Read-Only File",
+        "purpose": "验证工具在遇到只读/锁定文件时是否能正确处理",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\locked_file.docx"
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Very Low Similarity Threshold",
+        "purpose": "验证工具在极低相似度阈值下是否仍能正常运行",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "content_similarity_threshold": 0.1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: EOF marker not found"
+        },
+        "execution_time": 0.556981086730957,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Path",
+        "purpose": "验证工具是否能正确处理路径中包含特殊字符的文件",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\~$ample1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: EOF marker not found"
+        },
+        "execution_time": 0.0037279129028320312,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Related PDFs in Large Document",
+        "purpose": "验证工具是否能正确处理大型PDF文档并找到相关内容相关PDF",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: EOF marker not found"
+        },
+        "execution_time": 0.5379908084869385,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 40
+}

@@ -1,0 +1,397 @@
+{
+  "server_name": "paper_search_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-paper_search_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\paper_search_mcp_server.py",
+  "timestamp": "2025-07-14T11:10:01.420385",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    根据关键词搜索学术论文，返回来自 Semantic Scholar 和 Crossref 的格式化论文列表。\n    \n    Args:\n        query: 搜索关键词 (必填)。\n        limit: 返回结果数量限制，默认为5，最大不超过10。\n    \n    Returns:\n        包含来自 Semantic Scholar 和 Crossref 的格式化论文列表，每个条目包含标题、作者、年份和 DOI。\n        \n    Raises:\n        ValueError: 如果查询为空或无效。\n        httpx.HTTPStatusError: 如果 API 请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    根据论文ID（DOI或Semantic Scholar ID）和指定来源获取详细信息。\n    \n    Args:\n        paper_id: 论文的唯一标识符 (必填)。\n        source: 论文来源，可选值为 \"semantic_scholar\" 或 \"crossref\"，默认为 \"semantic_scholar\"。\n    \n    Returns:\n        包含论文详细信息的字典，包括标题、作者、摘要和出版场所。\n    \n    Raises:\n        ValueError: 如果参数无效。\n        httpx.HTTPStatusError: 如果 API 请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "default": "semantic_scholar",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    根据主题关键词搜索论文，优先使用 Semantic Scholar 并支持回退到通用搜索。\n    \n    Args:\n        topic: 主题关键词 (必填)。\n        limit: 结果数量限制，默认为5，最大不超过10。\n        min_year: 可选的最小年份。\n        max_year: 可选的最大年份。\n    \n    Returns:\n        包含来自 Semantic Scholar 的格式化论文列表，如果失败则回退到 Crossref。\n    \n    Raises:\n        ValueError: 如果参数无效。\n        httpx.HTTPStatusError: 如果 API 请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "min_year": {
+            "default": null,
+            "title": "Min Year",
+            "type": "integer"
+          },
+          "max_year": {
+            "default": null,
+            "title": "Max Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证工具在提供有效关键词时能否返回默认数量的论文结果",
+        "args": {
+          "query": "machine learning",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=machine+learning&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.414369821548462,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "自定义结果数量测试",
+        "purpose": "验证工具是否能根据指定 limit 返回正确数量的结果",
+        "args": {
+          "query": "deep learning",
+          "limit": 8
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=deep+learning&limit=8&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.365295171737671,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "极限值结果数量测试",
+        "purpose": "验证工具在 limit 达到最大值（10）时的行为",
+        "args": {
+          "query": "neural networks",
+          "limit": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '400 Bad Request' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=neural+networks&limit=10&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+        },
+        "execution_time": 2.2439699172973633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询参数测试",
+        "purpose": "验证当 query 参数为空时工具是否抛出 ValueError",
+        "args": {
+          "query": "",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 搜索查询不能为空。"
+        },
+        "execution_time": 0.002504110336303711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具是否能够处理包含特殊字符的查询",
+        "args": {
+          "query": "quantum@computing!",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=quantum%40computing%21&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.6006665229797363,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效API调用测试",
+        "purpose": "验证当外部 API 不可用时工具是否抛出 HTTPStatusError",
+        "args": {
+          "query": "test api failure",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=test+api+failure&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.3390543460845947,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "极小结果数量限制测试",
+        "purpose": "验证工具在 limit 为最小允许值（1）时的行为",
+        "args": {
+          "query": "blockchain in education",
+          "limit": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '400 Bad Request' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=blockchain+in+education&limit=1&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+        },
+        "execution_time": 2.683242082595825,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL注入风格参数测试",
+        "purpose": "验证工具是否对恶意构造的查询字符串具有防御能力",
+        "args": {
+          "query": "'; DROP TABLE papers;--",
+          "limit": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=%27%3B+DROP+TABLE+papers%3B--&limit=5&fields=title%2Cauthors%2Cyear%2Cdoi'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.2771403789520264,
+        "is_functional_test": false
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证工具在提供有效关键词时能否返回默认数量的论文结果",
+        "args": {
+          "topic": "machine learning"
+        },
+        "response": {
+          "result": "{\n  \"papers\": [\n    {\n      \"title\": \"Machine learning with sklearn\",\n      \"authors\": [\n        \"Thomas P. Trappenberg\"\n      ],\n      \"year\": 2020,\n      \"doi\": \"10.1093/oso/9780198828044.003.0003\"\n    },\n    {\n      \"title\": \"Optimization and Machine Learning\",\n      \"authors\": [],\n      \"year\": 2022,\n      \"doi\": \"10.1002/9781119902881\"\n    },\n    {\n      \"title\": \"Why Use Automated Machine Learning?\",\n      \"authors\": [\n        \"Kai R. Larsen\",\n        \"Daniel S. Becker\"\n      ],\n      \"year\": 2021,\n      \"doi\": \"10.1093/oso/9780190941659.003.0001\"\n    },\n    {\n      \"title\": \"Machine learning\",\n      \"authors\": [],\n      \"year\": 2012,\n      \"doi\": \"10.1017/cbo9780511804779.017\"\n    },\n    {\n      \"title\": \"Machine Learning and Qualitative Reasoning\",\n      \"authors\": [\n        \"Ivan Bratko\"\n      ],\n      \"year\": 2003,\n      \"doi\": \"10.1023/a:1022661713654\"\n    }\n  ]\n}"
+        },
+        "execution_time": 7.977088451385498,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "自定义结果数量测试",
+        "purpose": "验证工具是否能根据指定 limit 返回正确数量的结果",
+        "args": {
+          "topic": "deep learning",
+          "limit": 8
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: "
+        },
+        "execution_time": 8.593104839324951,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "时间范围过滤测试",
+        "purpose": "验证工具是否能根据 min_year 和 max_year 参数筛选论文",
+        "args": {
+          "topic": "blockchain technology",
+          "min_year": 2015,
+          "max_year": 2020
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: "
+        },
+        "execution_time": 8.024479150772095,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "回退到Crossref测试",
+        "purpose": "验证当 Semantic Scholar API 不可用时，工具是否能自动回退到 Crossref",
+        "args": {
+          "topic": "test fallback"
+        },
+        "response": {
+          "result": "{\n  \"papers\": [\n    {\n      \"title\": \"Human Rights as a Fallback Apparatus\",\n      \"authors\": [\n        \"Joseph Chan\"\n      ],\n      \"year\": 2017,\n      \"doi\": \"10.23943/princeton/9780691158617.003.0006\"\n    },\n    {\n      \"title\": \"Characterizing the Fallback Pig\",\n      \"authors\": [\n        \"Cassandra Katherine Jones\"\n      ],\n      \"year\": 2018,\n      \"doi\": \"10.31274/etd-180810-497\"\n    },\n    {\n      \"title\": \"A Fallback Position (1)\",\n      \"authors\": [],\n      \"year\": 2018,\n      \"doi\": \"10.7551/mitpress/10139.003.0010\"\n    },\n    {\n      \"title\": \"Analysis and prediction of fallback at Mount Tom Price\",\n      \"authors\": [\n        \"David Anderson\"\n      ],\n      \"year\": 2024,\n      \"doi\": \"10.14264/338617\"\n    },\n    {\n      \"title\": \"Fallback Statements\",\n      \"authors\": [],\n      \"year\": 2013,\n      \"doi\": \"10.4135/9781412963947.n177\"\n    }\n  ]\n}"
+        },
+        "execution_time": 5.416789770126343,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具是否能够处理包含特殊字符的查询",
+        "args": {
+          "topic": "quantum@computing!"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: "
+        },
+        "execution_time": 8.428956985473633,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入风格参数测试",
+        "purpose": "验证工具是否对恶意构造的查询字符串具有防御能力",
+        "args": {
+          "topic": "'; DROP TABLE papers;--"
+        },
+        "response": {
+          "result": "{\n  \"papers\": [\n    {\n      \"title\": \"Why Don’t Developers Detect Improper Input Validation? '; DROP TABLE Papers; --\",\n      \"authors\": [\n        \"Larissa Braz\",\n        \"Enrico Fregnan\",\n        \"Gul Calikli\",\n        \"Alberto Bacchelli\"\n      ],\n      \"year\": 2021,\n      \"doi\": \"10.1109/icse43902.2021.00054\"\n    },\n    {\n      \"title\": \"Data and Materials for: Why Don’t Developers Detect Improper Input Validation?'; DROP TABLE Papers; --\",\n      \"authors\": [\n        \"Larissa Braz\",\n        \"Enrico Fregnan\",\n        \"Gul Calikli\",\n        \"Alberto Bacchelli\"\n      ],\n      \"year\": 2021,\n      \"doi\": \"10.1109/icse-companion52605.2021.00090\"\n    },\n    {\n      \"title\": \"Table 1: Test metrics under different drop heights and landing strategies.\",\n      \"authors\": [],\n      \"year\": 2025,\n      \"doi\": \"10.7717/peerj.19490/table-1\"\n    },\n    {\n      \"title\": \"Table 1. Summary of ssDNA drop-in mediated homologous recombination in S2R+ cells\",\n      \"authors\": [],\n      \"year\": 2019,\n      \"doi\": \"10.7554/elife.51539.007\"\n    },\n    {\n      \"title\": \"Table of Contents\",\n      \"authors\": [],\n      \"year\": 2018,\n      \"doi\": \"10.2307/j.ctv47w921.2\"\n    }\n  ]\n}"
+        },
+        "execution_time": 6.735460996627808,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空主题参数测试",
+        "purpose": "验证当 topic 参数为空时工具是否抛出 ValueError",
+        "args": {
+          "topic": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题关键词不能为空。"
+        },
+        "execution_time": 0.0050542354583740234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效年份参数测试",
+        "purpose": "验证当 min_year 大于 max_year 时是否抛出 ValueError",
+        "args": {
+          "topic": "artificial intelligence",
+          "min_year": 2023,
+          "max_year": 2020
+        },
+        "response": {
+          "result": "{\n  \"papers\": []\n}"
+        },
+        "execution_time": 7.525191783905029,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "基本功能测试 - Semantic Scholar ID",
+        "purpose": "验证工具在提供有效的Semantic Scholar ID时能否返回论文详细信息",
+        "args": {
+          "paper_id": "10.1109/icse43902.2021.00054"
+        },
+        "response": {
+          "result": "{\n  \"title\": \"Why Don’t Developers Detect Improper Input Validation? '; DROP TABLE Papers; --\",\n  \"authors\": [\n    \"Larissa Braz\",\n    \"Enrico Fregnan\",\n    \"Gul cCalikli\",\n    \"Alberto Bacchelli\"\n  ],\n  \"abstract\": \"Improper Input Validation (IIV) is a software vulnerability that occurs when a system does not safely handle input data. Even though IIV is easy to detect and fix, it still commonly happens in practice. In this paper, we study to what extent developers can detect IIV and investigate underlying reasons. This knowledge is essential to better understand how to support developers in creating secure software systems. We conduct an online experiment with 146 participants, of which 105 report at least three years of professional software development experience. Our results show that the existence of a visible attack scenario facilitates the detection of IIV vulnerabilities and that a significant portion of developers who did not find the vulnerability initially could identify it when warned about its existence. Yet, a total of 60 participants could not detect the vulnerability even after the warning. Other factors, such as the frequency with which the participants perform code reviews, influence the detection of IIV. Preprint: https://arxiv.org/abs/2102.06251. Data and materials: https://doi.org/10.5281/zenodo.3996696.\",\n  \"venue\": \"International Conference on Software Engineering\"\n}"
+        },
+        "execution_time": 1.5359859466552734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能测试 - Crossref 源",
+        "purpose": "验证工具在指定Crossref源和有效DOI时能否返回论文详细信息",
+        "args": {
+          "paper_id": "10.1093/oso/9780198828044.003.0003",
+          "source": "crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: "
+        },
+        "execution_time": 6.864832639694214,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效参数测试 - 空Paper ID",
+        "purpose": "验证当paper_id为空字符串时是否抛出ValueError",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 论文ID不能为空。"
+        },
+        "execution_time": 0.006136417388916016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效参数测试 - 不支持的Source",
+        "purpose": "验证当source参数为非允许值时是否抛出ValueError",
+        "args": {
+          "paper_id": "10.1109/icse43902.2021.00054",
+          "source": "invalid_source"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 论文来源必须是以下之一: semantic_scholar, crossref"
+        },
+        "execution_time": 0.004506111145019531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 极长Paper ID",
+        "purpose": "验证工具在输入极长Paper ID（如特殊构造的UUID）时的行为",
+        "args": {
+          "paper_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee......"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Client error '414 Request-URI Too Long' for url 'https://api.semanticscholar.org/graph/v1/paper/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee......?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/414"
+        },
+        "execution_time": 1.7540311813354492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "错误处理测试 - 外部API不可用",
+        "purpose": "验证当外部API返回HTTP错误时是否抛出HTTPStatusError",
+        "args": {
+          "paper_id": "invalid_id_12345"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/invalid_id_12345?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.7308320999145508,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "安全性测试 - SQL注入风格Paper ID",
+        "purpose": "验证工具是否对恶意构造的Paper ID具有防御能力",
+        "args": {
+          "paper_id": "'; DROP TABLE papers;--"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/';%20DROP%20TABLE%20papers;--?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.5748605728149414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "安全性测试 - 特殊字符Paper ID",
+        "purpose": "验证工具是否能安全处理包含特殊字符的Paper ID输入",
+        "args": {
+          "paper_id": "test@paper!id#123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/test@paper!id?fields=title%2Cauthors%2Cabstract%2Cvenue#123'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.3041975498199463,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

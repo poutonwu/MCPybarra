@@ -1,0 +1,335 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_mysql_database_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_mysql_database_manager/refined/server.py",
+  "timestamp": "2025-07-14T20:31:24.051589",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "Lists all available MySQL tables in the database and provides access to them as resources.\n\nReturns:\n    A JSON string representing a list of strings, where each string represents the name of a table in the MySQL database.\n\nExample:\n    list_resources()\n    # Returns: [\"table1\", \"table2\", \"table3\"]\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "Reads the full data content of a specified table and returns it in rows and columns format.\n    The result is limited to a maximum of 100 records.\n\nArgs:\n    table_name: The name of the MySQL table to read (e.g., 'users').\n\nReturns:\n    A JSON string representing a list of dictionaries, where each dictionary represents a row in the table with column names as keys and row values as values.\n\nExample:\n    read_resource(table_name=\"users\")\n    # Returns: [{\"id\": 1, \"name\": \"Alice\"}, {\"id\": 2, \"name\": \"Bob\"}]\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "Executes custom SQL queries on the MySQL database. Supports various SQL operations such as SELECT, SHOW, INSERT, UPDATE, etc., and returns structured results including affected rows or query result sets depending on the type of query executed.\n\nArgs:\n    query: The SQL query to execute (e.g., 'SELECT * FROM users WHERE id = 1').\n\nReturns:\n    A JSON string representing the result set for SELECT and SHOW queries, or an integer indicating the number of affected rows for INSERT, UPDATE, DELETE queries.\n\nExample:\n    execute_sql(query=\"SELECT * FROM users WHERE id = 1\")\n    # Returns: [{\"id\": 1, \"name\": \"Alice\"}]\n\n    execute_sql(query=\"UPDATE users SET name = 'Bob' WHERE id = 1\")\n    # Returns: {\"affected_rows\": 1}\"\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "Basic List Resources",
+        "purpose": "验证 list_resources 能够成功列出数据库中的所有 MySQL 表名",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.2670881748199463,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources With No Tables",
+        "purpose": "验证当数据库中没有表时，list_resources 返回空数组",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.16490840911865234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources Returns Valid JSON Format",
+        "purpose": "验证 list_resources 返回的格式是合法的 JSON 字符串且为字符串数组",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.18881916999816895,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources Access Control Check",
+        "purpose": "验证未授权用户无法通过此工具访问数据库资源列表（模拟安全限制）",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1732635498046875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Resources When Database Connection Fails",
+        "purpose": "验证在数据库连接失败的情况下，list_resources 能优雅处理错误并返回有意义信息",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1848607063293457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Resources Parameter Validation",
+        "purpose": "验证当传入非法参数时，工具能正确拒绝请求并提示参数错误",
+        "args": {
+          "invalid_param": "test"
+        },
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1911149024963379,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Resources With Special Characters in Table Names",
+        "purpose": "验证工具能正确处理包含特殊字符的表名（如带下划线、数字等）",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.16312384605407715,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources Performance Boundary Test",
+        "purpose": "验证工具在大量表存在时仍能正常响应（模拟边界条件）",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.16015172004699707,
+        "is_functional_test": true
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "Basic Read Users Table",
+        "purpose": "验证 read_resource 能成功读取 'users' 表并返回最多100条记录",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.1467149257659912,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Nonexistent Table",
+        "purpose": "验证当表不存在时，read_resource 返回空数组或错误提示",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist\"}"
+        },
+        "execution_time": 0.16039299964904785,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Table With Special Characters",
+        "purpose": "验证 read_resource 能正确处理包含特殊字符的表名",
+        "args": {
+          "table_name": "order_items"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type Decimal is not JSON serializable"
+        },
+        "execution_time": 0.17690086364746094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Table With Maximum 100 Records",
+        "purpose": "验证 read_resource 返回的记录数不超过100条",
+        "args": {
+          "table_name": "orders"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.16424846649169922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Table Without Permission",
+        "purpose": "验证未授权用户无法通过 read_resource 读取敏感表数据（模拟安全限制）",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.18163013458251953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Table With Invalid Parameter Type",
+        "purpose": "验证当传入错误类型参数时，read_resource 拒绝请求并提示参数错误",
+        "args": {
+          "table_name": 123
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: 1 validation error for read_resourceArguments\ntable_name\n  Input should be a valid string [type=string_type, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.006999969482421875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Empty Table",
+        "purpose": "验证当表存在但无数据时，read_resource 返回空数组",
+        "args": {
+          "table_name": "reviews"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.16424059867858887,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Large Table Performance Test",
+        "purpose": "验证 read_resource 在读取大表时仍能保持合理响应时间（模拟边界条件）",
+        "args": {
+          "table_name": "products"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type Decimal is not JSON serializable"
+        },
+        "execution_time": 0.15921664237976074,
+        "is_functional_test": true
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "Basic SELECT Query Execution",
+        "purpose": "验证 execute_sql 工具能够成功执行基本的 SELECT 查询并返回结构化结果",
+        "args": {
+          "query": "SELECT * FROM users WHERE id = 1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.17113399505615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic INSERT Query Execution",
+        "purpose": "验证 execute_sql 能够正确执行 INSERT 操作并返回受影响行数",
+        "args": {
+          "query": "INSERT INTO users (name, email) VALUES ('Charlie', 'charlie@example.com')"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1054 (42S22): Unknown column 'name' in 'field list'\"}"
+        },
+        "execution_time": 0.17081665992736816,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic UPDATE Query Execution",
+        "purpose": "验证 execute_sql 能够正确执行 UPDATE 操作并返回受影响行数",
+        "args": {
+          "query": "UPDATE users SET name = 'David' WHERE id = 1"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1054 (42S22): Unknown column 'name' in 'field list'\"}"
+        },
+        "execution_time": 0.1752302646636963,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic DELETE Query Execution",
+        "purpose": "验证 execute_sql 能够正确执行 DELETE 操作并返回受影响行数",
+        "args": {
+          "query": "DELETE FROM users WHERE id = 1"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`user-db`.`addresses`, CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`))\"}"
+        },
+        "execution_time": 0.17803478240966797,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt Blocked",
+        "purpose": "验证 execute_sql 对潜在 SQL 注入尝试进行安全处理或拒绝执行",
+        "args": {
+          "query": "SELECT * FROM users WHERE id = 1; DROP TABLE users;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.1976156234741211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid SQL Syntax Handling",
+        "purpose": "验证 execute_sql 在接收到语法错误的 SQL 查询时能正确返回错误信息",
+        "args": {
+          "query": "SELEC * FROM users"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FROM users' at line 1\"}"
+        },
+        "execution_time": 0.16967558860778809,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Query on Nonexistent Table",
+        "purpose": "验证对不存在表执行查询时，execute_sql 返回有意义的错误信息",
+        "args": {
+          "query": "SELECT * FROM nonexistent_table"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist\"}"
+        },
+        "execution_time": 0.16591358184814453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Query Performance Test",
+        "purpose": "验证 execute_sql 在执行复杂长查询时仍能保持合理响应时间（模拟边界条件）",
+        "args": {
+          "query": "SELECT * FROM orders JOIN order_items ON orders.id = order_items.order_id LIMIT 1000"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Object of type datetime is not JSON serializable"
+        },
+        "execution_time": 0.18385910987854004,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

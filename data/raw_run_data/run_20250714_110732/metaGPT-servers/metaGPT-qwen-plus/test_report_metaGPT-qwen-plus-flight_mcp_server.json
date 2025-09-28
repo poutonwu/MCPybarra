@@ -1,0 +1,554 @@
+{
+  "server_name": "flight_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-flight_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\flight_mcp_server.py",
+  "timestamp": "2025-07-14T11:07:35.352752",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    根据参数查询航班信息，支持单程、往返航班查询。\n\n    Args:\n        origin: 出发地机场代码（例如 'PEK' 表示北京首都国际机场）。\n        destination: 目的地机场代码（例如 'SHA' 表示上海虹桥国际机场）。\n        departure_date: 出发日期，格式为 'YYYY-MM-DD'。\n        return_date: 返回日期，格式为 'YYYY-MM-DD'，仅在往返查询时提供。\n        cabin_class: 舱位等级（可选值：economy, premium_economy, business, first），默认为 economy。\n        adults: 成人旅客数量，默认为 1。\n        children: 儿童旅客数量，默认为 0。\n        infants: 婴儿旅客数量，默认为 0。\n\n    Returns:\n        包含航班详细信息的JSON字符串，包括：\n        - 航班号\n        - 出发时间\n        - 到达时间\n        - 航空公司\n        - 价格详情（经济舱、商务舱等）\n        - 总飞行时间\n        - 中转信息（如有）\n\n    Raises:\n        ValueError: 如果输入参数不符合要求（如日期格式错误、无效的机场代码等）。\n        httpx.HTTPStatusError: 如果API请求失败。\n\n    示例:\n        单程查询:\n        search_flights(origin=\"PEK\", destination=\"SHA\", departure_date=\"2023-12-25\")\n        \n        往返查询:\n        search_flights(\n            origin=\"PEK\", \n            destination=\"SHA\", \n            departure_date=\"2023-12-25\", \n            return_date=\"2023-12-30\"\n        )\n    ",
+      "args_schema": {
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "departure_date": {
+            "title": "Departure Date",
+            "type": "string"
+          },
+          "return_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Return Date"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "adults": {
+            "default": 1,
+            "title": "Adults",
+            "type": "integer"
+          },
+          "children": {
+            "default": 0,
+            "title": "Children",
+            "type": "integer"
+          },
+          "infants": {
+            "default": 0,
+            "title": "Infants",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure_date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    获取特定航班报价的详细信息。\n\n    Args:\n        offer_id: 航班报价唯一标识符（由 search_flights 或 search_multi_city 返回）。\n\n    Returns:\n        包含完整报价详情的JSON字符串，包括：\n        - 完整的行程信息\n        - 所有乘客类型的票价详情\n        - 税费明细\n        - 退改签政策\n        - 行李额度\n        - 座位选择选项\n        - 餐食选项\n\n    Raises:\n        ValueError: 如果 offer_id 格式无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n\n    示例:\n        get_offer_details(offer_id=\"OFFER-20231225-PEK-SHA-CZ3104-ECONOMY\")\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    处理多城市航班查询，支持复杂的行程规划。\n\n    Args:\n        route_segments: 行程段列表，每个字典包含以下字段：\n            - origin: 出发地机场代码（例如 'PEK'）\n            - destination: 目的地机场代码（例如 'SHA'）\n            - departure_date: 出发日期，格式为 'YYYY-MM-DD'\n        cabin_class: 舱位等级（可选值：economy, premium_economy, business, first），默认为 economy。\n        adults: 成人旅客数量，默认为 1。\n        children: 儿童旅客数量，默认为 0。\n        infants: 婴儿旅客数量，默认为 0。\n\n    Returns:\n        包含多城市航班详细信息的JSON字符串，包括：\n        - 整个行程的航班组合\n        - 每个航段的详细信息\n        - 总价格及各航段价格分配\n        - 转机等待时间\n        - 航空公司联盟信息\n        - 共享航班信息\n\n    Raises:\n        ValueError: 如果输入参数不符合要求（如日期格式错误、无效的机场代码等）。\n        httpx.HTTPStatusError: 如果API请求失败。\n\n    示例:\n        search_multi_city(\n            route_segments=[\n                {\"origin\": \"PEK\", \"destination\": \"SHA\", \"departure_date\": \"2023-12-25\"},\n                {\"origin\": \"SHA\", \"destination\": \"CAN\", \"departure_date\": \"2023-12-28\"},\n                {\"origin\": \"CAN\", \"destination\": \"PEK\", \"departure_date\": \"2023-12-30\"}\n            ]\n        )\n    ",
+      "args_schema": {
+        "properties": {
+          "route_segments": {
+            "items": {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            "title": "Route Segments",
+            "type": "array"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "adults": {
+            "default": 1,
+            "title": "Adults",
+            "type": "integer"
+          },
+          "children": {
+            "default": 0,
+            "title": "Children",
+            "type": "integer"
+          },
+          "infants": {
+            "default": 0,
+            "title": "Infants",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "route_segments"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic One-way Flight Search",
+        "purpose": "验证使用默认参数进行单程航班查询的基本功能是否正常",
+        "args": {
+          "origin": "PEK",
+          "destination": "SHA",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: "
+        },
+        "execution_time": 2.325922727584839,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Round-trip Flight Search with Return Date",
+        "purpose": "验证往返航班查询功能，确保返回日期被正确处理",
+        "args": {
+          "origin": "PEK",
+          "destination": "SHA",
+          "departure_date": "2023-12-25",
+          "return_date": "2023-12-30"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: "
+        },
+        "execution_time": 2.1623740196228027,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Custom Cabin Class",
+        "purpose": "验证指定舱位等级的航班查询功能是否生效",
+        "args": {
+          "origin": "PEK",
+          "destination": "SHA",
+          "departure_date": "2023-12-25",
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: "
+        },
+        "execution_time": 2.0370099544525146,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Multiple Passengers",
+        "purpose": "验证包含成人、儿童和婴儿旅客数量的查询是否正常",
+        "args": {
+          "origin": "PEK",
+          "destination": "SHA",
+          "departure_date": "2023-12-25",
+          "adults": 2,
+          "children": 1,
+          "infants": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: "
+        },
+        "execution_time": 2.0492711067199707,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Airport Code Handling",
+        "purpose": "验证工具对无效机场代码的错误处理机制",
+        "args": {
+          "origin": "XYZ",
+          "destination": "ABC",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: "
+        },
+        "execution_time": 2.054009199142456,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Incorrect Date Format Handling",
+        "purpose": "验证工具对非法日期格式的输入是否能正确抛出异常",
+        "args": {
+          "origin": "PEK",
+          "destination": "SHA",
+          "departure_date": "2023/12/25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 无效的出发日期: '2023/12/25'。必须是 YYYY-MM-DD 格式。"
+        },
+        "execution_time": 0.005128383636474609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Flight Search with Maximum Passenger Count",
+        "purpose": "测试最大乘客数量限制下的行为（边界值）",
+        "args": {
+          "origin": "PEK",
+          "destination": "SHA",
+          "departure_date": "2023-12-25",
+          "adults": 9,
+          "children": 9,
+          "infants": 9
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: "
+        },
+        "execution_time": 2.06833553314209,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Special Characters in Codes (Security)",
+        "purpose": "验证工具对特殊字符或非标准输入的处理以防止注入攻击",
+        "args": {
+          "origin": "P<E>K",
+          "destination": "S<H>A",
+          "departure_date": "2023-12-25"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 无效的出发地机场代码: 'P<E>K'。必须是三个大写字母 (例如, 'PEK')。"
+        },
+        "execution_time": 0.004145383834838867,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Retrieval",
+        "purpose": "验证使用有效offer_id能够成功获取报价详细信息的基本功能",
+        "args": {
+          "offer_id": "OFFER-20231225-PEK-SHA-CZ3104-ECONOMY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: "
+        },
+        "execution_time": 1.9827020168304443,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Offer ID Format Handling",
+        "purpose": "验证工具对格式错误的offer_id输入是否能正确抛出ValueError异常",
+        "args": {
+          "offer_id": "INVALID-OFFER-ID-FORMAT"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: 'INVALID-OFFER-ID-FORMAT'。必须符合指定格式。"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-existent Offer ID Handling",
+        "purpose": "验证当提供的offer_id不存在时，API是否能正确返回错误状态码并处理",
+        "args": {
+          "offer_id": "OFFER-NONEXISTENT-TEST"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: 'OFFER-NONEXISTENT-TEST'。必须符合指定格式。"
+        },
+        "execution_time": 0.004514932632446289,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Offer ID Handling",
+        "purpose": "验证包含特殊字符的offer_id是否被安全拒绝以防止注入攻击或非法访问",
+        "args": {
+          "offer_id": "OFFER-20231225-PEK-SHA-<CZ3104>-ECONOMY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: 'OFFER-20231225-PEK-SHA-<CZ3104>-ECONOMY'。必须符合指定格式。"
+        },
+        "execution_time": 0.003998994827270508,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Offer ID Input",
+        "purpose": "验证空字符串作为offer_id输入时能否被正确检测并抛出异常",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: ''。必须符合指定格式。"
+        },
+        "execution_time": 0.003513336181640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Length Offer ID Handling",
+        "purpose": "测试最大长度的offer_id是否能被正常处理（边界值测试）",
+        "args": {
+          "offer_id": "OFFER-20231225-PEK-SHA-CZ3104-ECONOMY-VERY-LONG-STRING-TO-TEST-MAX-LENGTH"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: 'OFFER-20231225-PEK-SHA-CZ3104-ECONOMY-VERY-LONG-STRING-TO-TEST-MAX-LENGTH'。必须符合指定格式。"
+        },
+        "execution_time": 0.0069882869720458984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Offer Details Retrieval with Unicode Characters",
+        "purpose": "验证包含Unicode字符的offer_id是否能被安全处理（国际化测试）",
+        "args": {
+          "offer_id": "OFFER-20231225-PEK-SHA-CZ3104-经济舱"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: 'OFFER-20231225-PEK-SHA-CZ3104-经济舱'。必须符合指定格式。"
+        },
+        "execution_time": 0.0040111541748046875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Offer ID",
+        "purpose": "验证工具是否能阻止包含路径穿越尝试的恶意offer_id输入",
+        "args": {
+          "offer_id": "OFFER-../../../../etc/passwd"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的报价ID: 'OFFER-../../../../etc/passwd'。必须符合指定格式。"
+        },
+        "execution_time": 0.0029981136322021484,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi-city Flight Search",
+        "purpose": "验证使用默认参数进行多城市航班查询的基本功能是否正常",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "PEK",
+              "destination": "SHA",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "SHA",
+              "destination": "CAN",
+              "departure_date": "2023-12-28"
+            },
+            {
+              "origin": "CAN",
+              "destination": "PEK",
+              "departure_date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: "
+        },
+        "execution_time": 2.025214195251465,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-city Flight Search with Custom Cabin Class",
+        "purpose": "验证指定舱位等级的多城市航班查询功能是否生效",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "PEK",
+              "destination": "SHA",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "SHA",
+              "destination": "CAN",
+              "departure_date": "2023-12-28"
+            }
+          ],
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: "
+        },
+        "execution_time": 2.0094680786132812,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-city Flight Search with Multiple Passengers",
+        "purpose": "验证包含成人、儿童和婴儿旅客数量的多城市航班查询是否正常",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "PEK",
+              "destination": "SHA",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "SHA",
+              "destination": "CAN",
+              "departure_date": "2023-12-28"
+            }
+          ],
+          "adults": 2,
+          "children": 1,
+          "infants": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: "
+        },
+        "execution_time": 2.0808024406433105,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Airport Code Handling in Route Segment",
+        "purpose": "验证工具对无效机场代码的错误处理机制",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "XYZ",
+              "destination": "ABC",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "DEF",
+              "destination": "GHI",
+              "departure_date": "2023-12-28"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: "
+        },
+        "execution_time": 2.0387611389160156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Incorrect Date Format Handling in Route Segment",
+        "purpose": "验证工具对非法日期格式的输入是否能正确抛出异常",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "PEK",
+              "destination": "SHA",
+              "departure_date": "2023/12/25"
+            },
+            {
+              "origin": "SHA",
+              "destination": "CAN",
+              "departure_date": "2023.12.28"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 第 1 个行程段的出发日期无效: '2023/12/25'。必须是 YYYY-MM-DD 格式。"
+        },
+        "execution_time": 0.008049488067626953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Airport Codes (Security)",
+        "purpose": "验证工具对特殊字符或非标准输入的处理以防止注入攻击",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "P<E>K",
+              "destination": "S<H>A",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "C@N",
+              "destination": "P#K",
+              "departure_date": "2023-12-28"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 第 1 个行程段的出发地机场代码无效: 'P<E>K'。必须是三个大写字母。"
+        },
+        "execution_time": 0.006999969482421875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Flight Search with Maximum Passenger Count",
+        "purpose": "测试最大乘客数量限制下的行为（边界值）",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "PEK",
+              "destination": "SHA",
+              "departure_date": "2023-12-25"
+            },
+            {
+              "origin": "SHA",
+              "destination": "CAN",
+              "departure_date": "2023-12-28"
+            }
+          ],
+          "adults": 9,
+          "children": 9,
+          "infants": 9
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: "
+        },
+        "execution_time": 2.06831431388855,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Zero Passengers",
+        "purpose": "验证零乘客数量时的行为，确保参数校验逻辑正确",
+        "args": {
+          "route_segments": [
+            {
+              "origin": "PEK",
+              "destination": "SHA",
+              "departure_date": "2023-12-25"
+            }
+          ],
+          "adults": 0,
+          "children": 0,
+          "infants": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 多城市查询至少需要两个行程段。"
+        },
+        "execution_time": 0.016031265258789062,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

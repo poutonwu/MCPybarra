@@ -1,0 +1,470 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_duffeld_flight_search",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_duffeld_flight_search/refined/server.py",
+  "timestamp": "2025-07-13T03:55:20.906887",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "Search for one-way or round-trip flights based on origin, destination, dates, and cabin class.\n\n    To perform a round-trip search, provide both `departure_date` and `return_date`.\n    If only `departure_date` is provided, a one-way search will be performed.\n\n    Args:\n        origin (str): The IATA code for the departure airport (e.g., \"LHR\").\n        destination (str): The IATA code for the destination airport (e.g., \"JFK\").\n        departure_date (str): The departure date in \"YYYY-MM-DD\" format.\n        cabin_class (str): The cabin class. Valid options are \"economy\", \"premium_economy\",\n                           \"business\", and \"first\". Defaults to \"economy\".\n        return_date (str, optional): The return date in \"YYYY-MM-DD\" format.\n                                     If provided, a round-trip search is executed.\n                                     If omitted, a one-way search is performed.\n\n    Returns:\n        str: A JSON string containing a list of flight offers. Each offer includes price,\n             flight times, airline, and a summary of the itinerary. Returns an empty\n             list if no flights are found.\n\n    Raises:\n        ValueError: If the input parameters are invalid (e.g., incorrect date format).\n        Exception: If the API call fails or another internal error occurs.\n    ",
+      "args_schema": {
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "departure_date": {
+            "title": "Departure Date",
+            "type": "string"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "return_date": {
+            "default": null,
+            "title": "Return Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure_date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "Retrieve the full details for a specific flight offer.\n\n    This includes passenger pricing, baggage allowance, cancellation policies,\n    and complete segment information.\n\n    Args:\n        offer_id (str): The unique identifier for a flight offer, returned by\n                        `search_flights` or `search_multi_city`.\n\n    Returns:\n        str: A JSON string containing the complete details for the specified\n             flight offer. An error is raised if the ID is invalid or expired.\n\n    Raises:\n        ValueError: If offer_id is not provided.\n        Exception: If the API call fails or the offer is not found.\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "Handle complex multi-city itinerary searches with multiple flight legs.\n\n    Args:\n        slices (list[dict]): A list of dictionaries, each describing a leg of the journey.\n                             Each dictionary must contain the keys: `origin` (departure\n                             airport IATA code), `destination` (destination airport IATA\n                             code), and `departure_date` (the departure date for that\n                             leg in \"YYYY-MM-DD\" format).\n        cabin_class (str): The cabin class to be applied to all legs. Valid options are\n                           \"economy\", \"premium_economy\", \"business\", and \"first\".\n                           Defaults to \"economy\".\n\n    Returns:\n        str: A JSON string containing a list of flight offers that match the entire\n             multi-city itinerary. Returns an empty list if the itinerary cannot\n             be fulfilled.\n\n    Raises:\n        ValueError: If the `slices` format is incorrect or the list is empty.\n        Exception: If the API call fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "slices": {
+            "items": {},
+            "title": "Slices",
+            "type": "array"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slices"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic One-Way Flight Search",
+        "purpose": "验证基本单程航班搜索功能是否正常工作，使用默认经济舱参数",
+        "args": {
+          "origin": "LHR",
+          "destination": "JFK",
+          "departure_date": "2024-12-25"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.005998373031616211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Round-Trip Flight Search with Business Class",
+        "purpose": "验证往返航班搜索功能是否正常，并指定商务舱等级",
+        "args": {
+          "origin": "AMS",
+          "destination": "SFO",
+          "departure_date": "2024-11-15",
+          "return_date": "2024-11-22",
+          "cabin_class": "business"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.005998373031616211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "One-Way Flight Search with Premium Economy",
+        "purpose": "测试使用高级经济舱的单程航班搜索功能",
+        "args": {
+          "origin": "FRA",
+          "destination": "HKG",
+          "departure_date": "2025-01-10",
+          "cabin_class": "premium_economy"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Invalid Date Format",
+        "purpose": "测试当提供错误格式的出发日期时，工具是否能正确抛出异常",
+        "args": {
+          "origin": "CDG",
+          "destination": "DXB",
+          "departure_date": "25/12/2024"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.00599980354309082,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Flight Search with Non-Existent Airport Codes",
+        "purpose": "验证系统在提供无效IATA代码时能否正确处理并返回空结果或错误",
+        "args": {
+          "origin": "AAA",
+          "destination": "BBB",
+          "departure_date": "2024-10-05"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in Origin Field",
+        "purpose": "测试是否对输入字段进行了安全过滤，防止注入攻击尝试",
+        "args": {
+          "origin": "'; DROP TABLE flights;--",
+          "destination": "JFK",
+          "departure_date": "2024-10-05"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: Invalid origin IATA code: ''; DROP TABLE flights;--'. Must be 3 uppercase letters (e.g., LHR).\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Departure Date on Minimum Supported Date",
+        "purpose": "测试最小支持日期是否能被正确处理",
+        "args": {
+          "origin": "LAX",
+          "destination": "SYD",
+          "departure_date": "1970-01-01"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.006999015808105469,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Cabin Class Parameter",
+        "purpose": "验证特殊字符在cabin_class参数中的处理行为",
+        "args": {
+          "origin": "LHR",
+          "destination": "PEK",
+          "departure_date": "2024-12-30",
+          "cabin_class": "economy!@#"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_flights: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Retrieval",
+        "purpose": "验证get_offer_details工具能够成功获取一个有效offer_id的完整航班详情，包括乘客定价、行李额度、取消政策和完整的航段信息。",
+        "args": {
+          "offer_id": "OFFER123456"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer 'OFFER123456'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 1.1996862888336182,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Offer Details with Missing Offer ID",
+        "purpose": "验证当未提供offer_id时，工具是否正确抛出ValueError异常。",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer ''. It might be invalid or expired. Error: Parameter 'offer_id' cannot be empty.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in Offer ID",
+        "purpose": "测试工具是否对输入的offer_id进行安全过滤，防止注入攻击尝试。",
+        "args": {
+          "offer_id": "'; DROP TABLE offers;--"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer ''; DROP TABLE offers;--'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.44658327102661133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Offer ID Format",
+        "purpose": "验证当提供的offer_id格式不合法（例如非字符串或无效ID）时，工具能否正确处理并返回错误。",
+        "args": {
+          "offer_id": "12345"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer '12345'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.44681239128112793,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Expired Offer ID",
+        "purpose": "测试工具在提供已过期的offer_id时是否能正确识别并抛出异常。",
+        "args": {
+          "offer_id": "EXPIRED789"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer 'EXPIRED789'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.4364907741546631,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Offer ID",
+        "purpose": "测试特殊字符在offer_id参数中的处理行为，确保系统不会因非法字符而崩溃或暴露漏洞。",
+        "args": {
+          "offer_id": "OFFER!@#$%^&*"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer 'OFFER!@#$%^&*'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.437838077545166,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Existent Offer ID",
+        "purpose": "验证当提供的offer_id不存在时，工具是否能优雅地处理这种情况并返回明确的错误信息。",
+        "args": {
+          "offer_id": "NONEXISTENT"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to get details for offer 'NONEXISTENT'. It might be invalid or expired. Error: invalid_request_error: Not found: The resource you are trying to access does not exist.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.43611955642700195,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi-City Search with Default Cabin Class",
+        "purpose": "验证基本的多城市航班搜索功能是否正常工作，使用默认经济舱参数",
+        "args": {
+          "slices": [
+            {
+              "origin": "LHR",
+              "destination": "JFK",
+              "departure_date": "2024-12-25"
+            },
+            {
+              "origin": "JFK",
+              "destination": "AMS",
+              "departure_date": "2024-12-28"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Business Class",
+        "purpose": "验证多城市航班搜索功能是否支持商务舱等级",
+        "args": {
+          "slices": [
+            {
+              "origin": "FRA",
+              "destination": "HKG",
+              "departure_date": "2025-01-10"
+            },
+            {
+              "origin": "HKG",
+              "destination": "SIN",
+              "departure_date": "2025-01-15"
+            }
+          ],
+          "cabin_class": "business"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.003002643585205078,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in Origin Field",
+        "purpose": "测试是否对输入字段进行了安全过滤，防止注入攻击尝试",
+        "args": {
+          "slices": [
+            {
+              "origin": "'; DROP TABLE flights;--",
+              "destination": "JFK",
+              "departure_date": "2024-12-25"
+            },
+            {
+              "origin": "JFK",
+              "destination": "AMS",
+              "departure_date": "2024-12-28"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: Invalid origin IATA code: ''; DROP TABLE flights;--' in slice 0. Must be 3 uppercase letters (e.g., LHR).\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.002998828887939453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid IATA Code",
+        "purpose": "验证系统在提供无效IATA代码时能否正确处理并返回错误",
+        "args": {
+          "slices": [
+            {
+              "origin": "AAA",
+              "destination": "BBB",
+              "departure_date": "2024-10-05"
+            },
+            {
+              "origin": "CCC",
+              "destination": "DDD",
+              "departure_date": "2024-10-08"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.0030031204223632812,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Missing Slices",
+        "purpose": "测试当未提供slices参数或为空列表时，工具是否能正确抛出ValueError异常",
+        "args": {
+          "slices": []
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: 'slices' must be a non-empty list of flight segments.\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.0060024261474609375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Departure Date on Minimum Supported Date",
+        "purpose": "测试最小支持日期是否能被正确处理",
+        "args": {
+          "slices": [
+            {
+              "origin": "LAX",
+              "destination": "SYD",
+              "departure_date": "1970-01-01"
+            },
+            {
+              "origin": "SYD",
+              "destination": "LAX",
+              "departure_date": "1970-01-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.003997087478637695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Cabin Class Parameter",
+        "purpose": "验证特殊字符在cabin_class参数中的处理行为",
+        "args": {
+          "slices": [
+            {
+              "origin": "LHR",
+              "destination": "PEK",
+              "departure_date": "2024-12-30"
+            },
+            {
+              "origin": "PEK",
+              "destination": "CDG",
+              "departure_date": "2025-01-03"
+            }
+          ],
+          "cabin_class": "premium_economy!@#"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.004002571105957031,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Date Format in One Slice",
+        "purpose": "测试当其中一个slice的出发日期格式不合法时，工具是否能正确识别并抛出异常",
+        "args": {
+          "slices": [
+            {
+              "origin": "CDG",
+              "destination": "DXB",
+              "departure_date": "25/12/2024"
+            },
+            {
+              "origin": "DXB",
+              "destination": "SFO",
+              "departure_date": "2024-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred in search_multi_city: {}\", \"status\": \"failed\"}"
+        },
+        "execution_time": 0.006002187728881836,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 23
+}

@@ -1,0 +1,392 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_zotero_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_zotero_manager/refined/server.py",
+  "timestamp": "2025-07-14T21:23:54.840683",
+  "tools": [
+    {
+      "name": "get_item_metadata",
+      "description": "\n    Fetches the detailed metadata of a specified Zotero item using its unique item key.\n\n    Args:\n        item_key: The unique identifier for the Zotero item whose metadata is to be fetched.\n\n    Returns:\n        A JSON string containing the detailed metadata of the specified Zotero item.\n\n    Raises:\n        ValueError: If the `item_key` is not provided or is invalid.\n        requests.exceptions.HTTPError: If the request to the Zotero API fails.\n\n    Example:\n        get_item_metadata(item_key=\"ABC123XYZ\")\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_metadataArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_item_fulltext",
+      "description": "\n    Extracts the full text content of a specified Zotero item using its unique item key.\n\n    Args:\n        item_key: The unique identifier for the Zotero item whose full text content is to be extracted.\n\n    Returns:\n        A JSON string containing the full text content of the specified Zotero item.\n\n    Raises:\n        ValueError: If the `item_key` is not provided or is invalid.\n        requests.exceptions.HTTPError: If the request to the Zotero API fails.\n\n    Example:\n        get_item_fulltext(item_key=\"ABC123XYZ\")\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_fulltextArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_items",
+      "description": "\n    Searches the Zotero library flexibly based on title, creator, year, or full text and returns a formatted list of search results.\n\n    Args:\n        query: The search query text.\n        search_by_title: Whether to include titles in the search. Defaults to True.\n        search_by_creator: Whether to include creators in the search. Defaults to True.\n        search_by_year: Whether to include publication years in the search. Defaults to False.\n        search_by_fulltext: Whether to include full text in the search. Defaults to False.\n\n    Returns:\n        A JSON string containing a list of dictionaries where each dictionary contains the metadata of an item that matches the search criteria.\n\n    Raises:\n        ValueError: If the `query` is not provided or is invalid.\n        requests.exceptions.HTTPError: If the request to the Zotero API fails.\n\n    Example:\n        search_items(query=\"Machine Learning\", search_by_title=True, search_by_creator=True, search_by_year=False, search_by_fulltext=False)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_by_title": {
+            "default": true,
+            "title": "Search By Title",
+            "type": "boolean"
+          },
+          "search_by_creator": {
+            "default": true,
+            "title": "Search By Creator",
+            "type": "boolean"
+          },
+          "search_by_year": {
+            "default": false,
+            "title": "Search By Year",
+            "type": "boolean"
+          },
+          "search_by_fulltext": {
+            "default": false,
+            "title": "Search By Fulltext",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_itemsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "get_item_metadata": [
+      {
+        "case_name": "Fetch Metadata with Valid Item Key",
+        "purpose": "验证使用有效的item_key是否能成功获取Zotero条目的详细元数据。",
+        "args": {
+          "item_key": "ABC123XYZ"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/ABC123XYZ"
+        },
+        "execution_time": 1.373619556427002,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Missing Item Key Raises ValueError",
+        "purpose": "验证当未提供item_key时是否抛出ValueError。",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: 'item_key' must be a non-empty string."
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Item Key Format Handling",
+        "purpose": "验证当提供的item_key格式不正确（如包含非法字符或长度不符）时工具的错误处理能力。",
+        "args": {
+          "item_key": "INVALID@KEY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/INVALID@KEY"
+        },
+        "execution_time": 1.3612430095672607,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Metadata for Nonexistent Item",
+        "purpose": "验证请求一个不存在的item_key时工具是否能优雅地处理HTTP错误。",
+        "args": {
+          "item_key": "NONEXISTENT123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/NONEXISTENT123"
+        },
+        "execution_time": 1.3574910163879395,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Item Key",
+        "purpose": "测试item_key中包含特殊字符时的处理情况，确保安全性和兼容性。",
+        "args": {
+          "item_key": "SPECIAL!@#$%^&*KEY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/SPECIAL!@#$%25%5E&*KEY"
+        },
+        "execution_time": 1.4068748950958252,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Minimum Length Item Key",
+        "purpose": "验证最小长度的item_key是否被正确接受和处理。",
+        "args": {
+          "item_key": "A1B2C3"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/A1B2C3"
+        },
+        "execution_time": 1.4075002670288086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Condition - Maximum Length Item Key",
+        "purpose": "验证最大长度的item_key是否被正确接受和处理。",
+        "args": {
+          "item_key": "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        },
+        "execution_time": 1.384190320968628,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in Item Key",
+        "purpose": "测试item_key参数是否对注入攻击有防护机制。",
+        "args": {
+          "item_key": "ABC123XYZ; DROP TABLE items;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/ABC123XYZ;%20DROP%20TABLE%20items;"
+        },
+        "execution_time": 1.3988420963287354,
+        "is_functional_test": false
+      }
+    ],
+    "get_item_fulltext": [
+      {
+        "case_name": "Fetch Full Text with Valid Item Key",
+        "purpose": "验证使用有效的item_key是否能成功获取Zotero条目的全文内容。",
+        "args": {
+          "item_key": "ABC123XYZ"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/ABC123XYZ/fulltext"
+        },
+        "execution_time": 1.3757703304290771,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Missing Item Key Raises ValueError",
+        "purpose": "验证当未提供item_key时是否抛出ValueError。",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: 'item_key' must be a non-empty string."
+        },
+        "execution_time": 0.005997419357299805,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Item Key Format Handling",
+        "purpose": "验证当提供的item_key格式不正确（如包含非法字符或长度不符）时工具的错误处理能力。",
+        "args": {
+          "item_key": "INVALID@KEY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/INVALID@KEY/fulltext"
+        },
+        "execution_time": 1.353403091430664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Full Text for Nonexistent Item",
+        "purpose": "验证请求一个不存在的item_key时工具是否能优雅地处理HTTP错误。",
+        "args": {
+          "item_key": "NONEXISTENT123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/NONEXISTENT123/fulltext"
+        },
+        "execution_time": 1.433953046798706,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Item Key",
+        "purpose": "测试item_key中包含特殊字符时的处理情况，确保安全性和兼容性。",
+        "args": {
+          "item_key": "SPECIAL!@#$%^&*KEY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/SPECIAL!@#$%25%5E&*KEY/fulltext"
+        },
+        "execution_time": 1.3948910236358643,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Minimum Length Item Key",
+        "purpose": "验证最小长度的item_key是否被正确接受和处理。",
+        "args": {
+          "item_key": "A1B2C3"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/A1B2C3/fulltext"
+        },
+        "execution_time": 1.6177241802215576,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Condition - Maximum Length Item Key",
+        "purpose": "验证最大长度的item_key是否被正确接受和处理。",
+        "args": {
+          "item_key": "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/fulltext"
+        },
+        "execution_time": 1.3748009204864502,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in Item Key",
+        "purpose": "测试item_key参数是否对注入攻击有防护机制。",
+        "args": {
+          "item_key": "ABC123XYZ; DROP TABLE items;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items/ABC123XYZ;%20DROP%20TABLE%20items;/fulltext"
+        },
+        "execution_time": 1.3423447608947754,
+        "is_functional_test": false
+      }
+    ],
+    "search_items": [
+      {
+        "case_name": "Basic Search by Title and Creator",
+        "purpose": "验证使用默认参数（搜索标题和作者）时是否能正确返回匹配结果。",
+        "args": {
+          "query": "Machine Learning"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=Machine+Learning&qmode=titleCreatorYear&include=data"
+        },
+        "execution_time": 1.3599920272827148,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Including Publication Year",
+        "purpose": "验证当启用search_by_year=True时，能否根据年份进行搜索。",
+        "args": {
+          "query": "2021",
+          "search_by_title": false,
+          "search_by_creator": false,
+          "search_by_year": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=2021&qmode=titleCreatorYear&include=data"
+        },
+        "execution_time": 1.3770544528961182,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Full Text Search Functionality",
+        "purpose": "验证当启用search_by_fulltext=True时，能否根据全文内容进行搜索。",
+        "args": {
+          "query": "neural networks",
+          "search_by_title": false,
+          "search_by_creator": false,
+          "search_by_year": false,
+          "search_by_fulltext": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=neural+networks&qmode=everything&include=data"
+        },
+        "execution_time": 1.4170002937316895,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Search Across All Fields",
+        "purpose": "验证同时在标题、作者、年份和全文中搜索的综合功能是否正常。",
+        "args": {
+          "query": "deep learning",
+          "search_by_title": true,
+          "search_by_creator": true,
+          "search_by_year": true,
+          "search_by_fulltext": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=deep+learning&qmode=everything&include=data"
+        },
+        "execution_time": 1.4060254096984863,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Raises ValueError",
+        "purpose": "验证未提供查询字符串时是否抛出ValueError。",
+        "args": {
+          "query": "",
+          "search_by_title": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: 'query' must be a non-empty string."
+        },
+        "execution_time": 0.00299835205078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Query Format Handling",
+        "purpose": "验证包含特殊字符或非法格式的查询是否被安全处理。",
+        "args": {
+          "query": "DROP TABLE; --",
+          "search_by_title": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=DROP+TABLE%3B+--&qmode=titleCreatorYear&include=data"
+        },
+        "execution_time": 1.3662927150726318,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zotero API Failure Handling",
+        "purpose": "验证当Zotero API请求失败时是否能优雅地处理HTTP错误。",
+        "args": {
+          "query": "error_simulated_query",
+          "search_by_title": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=error_simulated_query&qmode=titleCreatorYear&include=data"
+        },
+        "execution_time": 1.3756535053253174,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Minimum Length Query",
+        "purpose": "验证最小长度的查询字符串是否被正确接受和处理。",
+        "args": {
+          "query": "AI",
+          "search_by_title": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Request failed: 404 Client Error: Not Found for url: https://api.zotero.org/user/16026771/items?q=AI&qmode=titleCreatorYear&include=data"
+        },
+        "execution_time": 1.4239673614501953,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

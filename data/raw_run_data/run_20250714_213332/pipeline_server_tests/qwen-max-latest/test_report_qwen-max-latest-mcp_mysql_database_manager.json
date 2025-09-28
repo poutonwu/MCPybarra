@@ -1,0 +1,335 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_mysql_database_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_mysql_database_manager/refined/server.py",
+  "timestamp": "2025-07-14T21:39:17.932204",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "Lists all available MySQL tables in the database and provides access to them as resources.\n\nReturns:\n    A JSON string representing a list of strings, where each string represents the name of a table in the MySQL database.\n\nExample:\n    list_resources()\n    # Returns: [\"table1\", \"table2\", \"table3\"]\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "Reads the full data content of a specified table and returns it in rows and columns format.\n    The result is limited to a maximum of 100 records.\n\nArgs:\n    table_name: The name of the MySQL table to read (e.g., 'users').\n\nReturns:\n    A JSON string representing a list of dictionaries, where each dictionary represents a row in the table with column names as keys and row values as values.\n\nExample:\n    read_resource(table_name=\"users\")\n    # Returns: [{\"id\": 1, \"name\": \"Alice\"}, {\"id\": 2, \"name\": \"Bob\"}]\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "Executes custom SQL queries on the MySQL database. Supports various SQL operations such as SELECT, SHOW, INSERT, UPDATE, etc., and returns structured results including affected rows or query result sets depending on the type of query executed.\n\nArgs:\n    query: The SQL query to execute (e.g., 'SELECT * FROM users WHERE id = 1').\n\nReturns:\n    A JSON string representing the result set for SELECT and SHOW queries, or an integer indicating the number of affected rows for INSERT, UPDATE, DELETE queries.\n\nExample:\n    execute_sql(query=\"SELECT * FROM users WHERE id = 1\")\n    # Returns: [{\"id\": 1, \"name\": \"Alice\"}]\n\n    execute_sql(query=\"UPDATE users SET name = 'Bob' WHERE id = 1\")\n    # Returns: {\"affected_rows\": 1}\"\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "Basic List Resources",
+        "purpose": "验证 list_resources 能正确列出数据库中所有可用的 MySQL 表名",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1991579532623291,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources with No Tables",
+        "purpose": "验证当数据库中没有表时，list_resources 返回空数组",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.14500021934509277,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources with Special Characters in Table Names",
+        "purpose": "验证包含特殊字符的表名是否能被正确返回",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.16100716590881348,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources with Long Table Names",
+        "purpose": "验证超长表名是否能被正确处理并返回",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.14605927467346191,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Resources Unauthorized Access",
+        "purpose": "验证未授权用户调用 list_resources 是否会返回权限错误",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.14393353462219238,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Resources Database Connection Failure",
+        "purpose": "验证数据库连接失败时，工具是否能优雅地处理错误",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.16635823249816895,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Resources Invalid Parameter Handling",
+        "purpose": "验证传入无效参数时工具是否能拒绝请求并返回参数错误",
+        "args": {
+          "invalid_param": "test"
+        },
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1477651596069336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Resources Empty Response Boundary Test",
+        "purpose": "验证空响应边界条件下的处理能力",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.14602255821228027,
+        "is_functional_test": false
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "Basic Read Users Table",
+        "purpose": "验证 read_resource 能正确读取 users 表的前100条记录并以JSON格式返回",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null}, {\"id\": 13, \"username\": \"O'Reilly\", \"email\": \"\\\"secure\\\"@example.com\", \"age\": null, \"company_id\": null}]"
+        },
+        "execution_time": 0.1464095115661621,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Nonexistent Table",
+        "purpose": "验证尝试读取一个不存在的表时是否返回错误信息或空数组",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist\"}"
+        },
+        "execution_time": 0.16077446937561035,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Table with Special Characters in Name",
+        "purpose": "验证包含特殊字符的表名是否能被正确处理并返回数据",
+        "args": {
+          "table_name": "order_items"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type Decimal is not JSON serializable"
+        },
+        "execution_time": 0.16143202781677246,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Empty Table",
+        "purpose": "验证当目标表为空时，read_resource 是否返回空数组",
+        "args": {
+          "table_name": "addresses"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"user_id\": 1, \"street\": \"\\u79d1\\u6280\\u5927\\u9053100\\u53f7\", \"city\": \"\\u5317\\u4eac\", \"state\": \"\\u5317\\u4eac\", \"zip_code\": \"100000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 2, \"user_id\": 1, \"street\": \"\\u79d1\\u6280\\u56ed20\\u53f7\", \"city\": \"\\u5317\\u4eac\", \"state\": \"\\u5317\\u4eac\", \"zip_code\": \"100001\", \"country\": \"China\", \"is_primary\": 0}, {\"id\": 3, \"user_id\": 2, \"street\": \"\\u5546\\u4e1a\\u885750\\u53f7\", \"city\": \"\\u4e0a\\u6d77\", \"state\": \"\\u4e0a\\u6d77\", \"zip_code\": \"200000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 4, \"user_id\": 3, \"street\": \"\\u6c7d\\u8f66\\u57ce15\\u53f7\", \"city\": \"\\u5e7f\\u5dde\", \"state\": \"\\u5e7f\\u4e1c\", \"zip_code\": \"510000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 5, \"user_id\": 4, \"street\": \"\\u8f6f\\u4ef6\\u56ed35\\u53f7\", \"city\": \"\\u6df1\\u5733\", \"state\": \"\\u5e7f\\u4e1c\", \"zip_code\": \"518000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 6, \"user_id\": 5, \"street\": \"\\u8d2d\\u7269\\u4e2d\\u5fc388\\u53f7\", \"city\": \"\\u676d\\u5dde\", \"state\": \"\\u6d59\\u6c5f\", \"zip_code\": \"310000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 7, \"user_id\": 6, \"street\": \"\\u521b\\u4e1a\\u8def77\\u53f7\", \"city\": \"\\u6210\\u90fd\", \"state\": \"\\u56db\\u5ddd\", \"zip_code\": \"610000\", \"country\": \"China\", \"is_primary\": 1}]"
+        },
+        "execution_time": 0.15476703643798828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Large Table (Limit to 100 Records)",
+        "purpose": "验证当表中记录超过100条时，是否只返回前100条",
+        "args": {
+          "table_name": "products"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Object of type Decimal is not JSON serializable"
+        },
+        "execution_time": 0.1857457160949707,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unauthorized Access Attempt",
+        "purpose": "验证未授权用户调用 read_resource 是否会触发权限控制机制",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null}, {\"id\": 13, \"username\": \"O'Reilly\", \"email\": \"\\\"secure\\\"@example.com\", \"age\": null, \"company_id\": null}]"
+        },
+        "execution_time": 0.16421771049499512,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Table Name Input Handling",
+        "purpose": "验证传入非法或无效的 table_name 参数时工具是否能拒绝请求并返回参数错误",
+        "args": {
+          "table_name": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid table_name provided. Must be a non-empty string.\"}"
+        },
+        "execution_time": 0.003000497817993164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Table with Long Name",
+        "purpose": "验证超长表名是否能被正确处理并返回有效数据",
+        "args": {
+          "table_name": "a_very_long_table_name_for_testing_purposes"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.a_very_long_table_name_for_testing_purposes' doesn't exist\"}"
+        },
+        "execution_time": 0.1459805965423584,
+        "is_functional_test": true
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "Basic SELECT Query Execution",
+        "purpose": "验证 execute_sql 能正确执行基本的 SELECT 查询并返回结构化结果集",
+        "args": {
+          "query": "SELECT * FROM users WHERE id = 1"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1}]"
+        },
+        "execution_time": 0.15995025634765625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "INSERT Query Execution with Affected Rows",
+        "purpose": "验证 execute_sql 能正确执行 INSERT 操作并返回受影响行数",
+        "args": {
+          "query": "INSERT INTO users (username, email) VALUES ('test_user', 'test@example.com')"
+        },
+        "response": {
+          "result": "{\"affected_rows\": 1}"
+        },
+        "execution_time": 0.1695880889892578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "UPDATE Query Execution with Affected Rows",
+        "purpose": "验证 execute_sql 能正确执行 UPDATE 操作并返回受影响行数",
+        "args": {
+          "query": "UPDATE users SET username = 'updated_user' WHERE id = 1"
+        },
+        "response": {
+          "result": "{\"affected_rows\": 1}"
+        },
+        "execution_time": 0.1625971794128418,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "DELETE Query Execution with Affected Rows",
+        "purpose": "验证 execute_sql 能正确执行 DELETE 操作并返回受影响行数",
+        "args": {
+          "query": "DELETE FROM users WHERE id = 5"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`user-db`.`addresses`, CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`))\"}"
+        },
+        "execution_time": 0.14851856231689453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SHOW Tables Query Execution",
+        "purpose": "验证 execute_sql 能正确执行 SHOW 命令并返回表列表",
+        "args": {
+          "query": "SHOW TABLES"
+        },
+        "response": {
+          "result": "[{\"Tables_in_user-db\": \"addresses\"}, {\"Tables_in_user-db\": \"companies\"}, {\"Tables_in_user-db\": \"order_items\"}, {\"Tables_in_user-db\": \"orders\"}, {\"Tables_in_user-db\": \"products\"}, {\"Tables_in_user-db\": \"reviews\"}, {\"Tables_in_user-db\": \"users\"}]"
+        },
+        "execution_time": 0.16677093505859375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt Detection",
+        "purpose": "验证 execute_sql 是否具备基础 SQL 注入防护机制或是否能安全地处理恶意输入",
+        "args": {
+          "query": "SELECT * FROM users; DROP TABLE users;"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"updated_user\", \"email\": \"new_email@example.com\", \"age\": 28, \"company_id\": 1}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null}, {\"id\": 7, \"username\": \"new_user\", \"email\": \"new_user@example.com\", \"age\": 25, \"company_id\": null}, {\"id\": 13, \"username\": \"O'Reilly\", \"email\": \"\\\"secure\\\"@example.com\", \"age\": null, \"company_id\": null}, {\"id\": 15, \"username\": \"test_user\", \"email\": \"test@example.com\", \"age\": null, \"company_id\": null}]"
+        },
+        "execution_time": 0.1436467170715332,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Malformed SQL Query Handling",
+        "purpose": "验证 execute_sql 在传入语法错误的 SQL 时是否能拒绝请求并返回错误信息",
+        "args": {
+          "query": "SELEC * FROM users"
+        },
+        "response": {
+          "result": "{\"error\": \"Database connection failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FROM users' at line 1\"}"
+        },
+        "execution_time": 0.15254592895507812,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Query Input Handling",
+        "purpose": "验证 execute_sql 在 query 参数为空时是否能拒绝请求并返回参数错误",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid query provided. Must be a non-empty string.\"}"
+        },
+        "execution_time": 0.0019996166229248047,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

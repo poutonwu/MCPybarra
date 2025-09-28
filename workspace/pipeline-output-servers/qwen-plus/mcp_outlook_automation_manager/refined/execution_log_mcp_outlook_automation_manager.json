@@ -1,0 +1,209 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_folders",
+      "tool_name": "list_folders",
+      "parameters": {},
+      "description": "Happy path: List all available Outlook folders to verify basic functionality."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "[{\"name\": \"收件箱\", \"path\": \"\\\\收件箱\"}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_recent_emails_default",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": 7,
+        "folder_path": "\\Inbox"
+      },
+      "description": "Happy path: Retrieve recent emails from the default Inbox folder for the last 7 days."
+    },
+    "substituted_params": {
+      "days": 7,
+      "folder_path": "\\Inbox"
+    },
+    "result": {
+      "status": "success",
+      "result": "[]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_first_email_details",
+      "tool_name": "get_email_by_number",
+      "parameters": {
+        "email_index": 0
+      },
+      "description": "Dependent call: Get detailed information of the first email retrieved in the previous step."
+    },
+    "substituted_params": {
+      "email_index": 0
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool get_email_by_number: Error retrieving email details: No emails in cache. Please run list_recent_emails or search_emails first.\nSuggested action: Run 'list_recent_emails' with correct folder path parameter (e.g., '\\Inbox')"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_emails_by_date_contact_keyword",
+      "tool_name": "search_emails",
+      "parameters": {
+        "start_date": "2023-10-10",
+        "end_date": "2023-10-17",
+        "contact": "李四",
+        "keyword": "项目"
+      },
+      "description": "Happy path: Search emails by date range, contact, and keyword to test filtering logic."
+    },
+    "substituted_params": {
+      "start_date": "2023-10-10",
+      "end_date": "2023-10-17",
+      "contact": "李四",
+      "keyword": "项目"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_emails: Error searching emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '条件无效。', None, 0, -2147352567), None)"
+    }
+  },
+  {
+    "step": {
+      "step_id": "reply_to_searched_email",
+      "tool_name": "reply_to_email_by_number",
+      "parameters": {
+        "email_index": 0,
+        "reply_content": "这是测试回复内容。我已收到您的邮件并会尽快处理。"
+      },
+      "description": "Dependent call: Reply to the first email found in the search results."
+    },
+    "substituted_params": {
+      "email_index": 0,
+      "reply_content": "这是测试回复内容。我已收到您的邮件并会尽快处理。"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool reply_to_email_by_number: Error replying to email: No emails in cache. Please run list_recent_emails or search_emails first.\nSuggested action: Run 'list_recent_emails' with correct folder path parameter (e.g., '\\Inbox')"
+    }
+  },
+  {
+    "step": {
+      "step_id": "compose_new_email",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "测试邮件",
+        "body": "这是一封测试邮件的正文。",
+        "to": "test@example.com"
+      },
+      "description": "Happy path: Send a new email to verify compose_email tool works as expected."
+    },
+    "substituted_params": {
+      "subject": "测试邮件",
+      "body": "这是一封测试邮件的正文。",
+      "to": "test@example.com"
+    },
+    "result": {
+      "status": "success",
+      "result": "\"邮件已成功发送至 test@example.com。\""
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_days_list_recent_emails",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": -5,
+        "folder_path": "\\Inbox"
+      },
+      "description": "Edge case: Test list_recent_emails with invalid negative number of days."
+    },
+    "substituted_params": {
+      "days": -5,
+      "folder_path": "\\Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool list_recent_emails: Error retrieving recent emails: Days must be a positive number"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_folder_path",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": 7,
+        "folder_path": "\\InvalidFolderName"
+      },
+      "description": "Edge case: Test list_recent_emails with non-existent folder path."
+    },
+    "substituted_params": {
+      "days": 7,
+      "folder_path": "\\InvalidFolderName"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool list_recent_emails: Error retrieving recent emails: Root folder not found: InvalidFolderName"
+    }
+  },
+  {
+    "step": {
+      "step_id": "invalid_email_index_get_email",
+      "tool_name": "get_email_by_number",
+      "parameters": {
+        "email_index": 999
+      },
+      "description": "Edge case: Try to get an email using an out-of-range index."
+    },
+    "substituted_params": {
+      "email_index": 999
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool get_email_by_number: Error retrieving email details: No emails in cache. Please run list_recent_emails or search_emails first.\nSuggested action: Run 'list_recent_emails' with correct folder path parameter (e.g., '\\Inbox')"
+    }
+  },
+  {
+    "step": {
+      "step_id": "empty_reply_content",
+      "tool_name": "reply_to_email_by_number",
+      "parameters": {
+        "email_index": 0,
+        "reply_content": ""
+      },
+      "description": "Edge case: Attempt to reply with empty content to trigger validation error."
+    },
+    "substituted_params": {
+      "email_index": 0,
+      "reply_content": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool reply_to_email_by_number: Error replying to email: No emails in cache. Please run list_recent_emails or search_emails first.\nSuggested action: Run 'list_recent_emails' with correct folder path parameter (e.g., '\\Inbox')"
+    }
+  },
+  {
+    "step": {
+      "step_id": "missing_required_fields_compose_email",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "",
+        "body": "",
+        "to": ""
+      },
+      "description": "Edge case: Call compose_email with missing required fields to test validation."
+    },
+    "substituted_params": {
+      "subject": "",
+      "body": "",
+      "to": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool compose_email: Error sending email: Subject cannot be empty"
+    }
+  }
+]

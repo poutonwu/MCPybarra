@@ -1,0 +1,332 @@
+{
+  "server_name": "zotero_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-zotero_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\zotero_mcp_server.py",
+  "timestamp": "2025-07-13T23:10:54.699629",
+  "tools": [
+    {
+      "name": "get_item_metadata",
+      "description": "\n    获取指定 Zotero 条目的元数据。\n\n    Args:\n        item_key (str): 要查询的条目键值。\n\n    Returns:\n        str: 条目的元数据信息。\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_metadataArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_item_fulltext",
+      "description": "\n    提取指定 Zotero 条目的全文内容。\n\n    Args:\n        item_key (str): 要查询的条目键值。\n\n    Returns:\n        str: 条目的全文内容。\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_fulltextArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_items",
+      "description": "\n    在 Zotero 库中执行灵活搜索，支持按标题、创建者、年份或全文搜索。\n\n    Args:\n        query (str): 搜索关键词。\n        search_field (str): 搜索字段（title, creator, date, 或 fulltext）。\n\n    Returns:\n        str: 格式化的搜索结果列表。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_field": {
+            "default": "title",
+            "title": "Search Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_itemsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_items": [
+      {
+        "case_name": "搜索标题包含'paper'的条目",
+        "purpose": "验证基本搜索功能在默认字段（title）下能正确工作",
+        "args": {
+          "query": "paper"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Client error '404 Not Found' for url 'https://api.zotero.org/items?format=json&q=title:paper'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8465542793273926,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "按作者搜索包含'swe'的条目",
+        "purpose": "验证creator字段搜索功能正常",
+        "args": {
+          "query": "swe",
+          "search_field": "creator"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Client error '404 Not Found' for url 'https://api.zotero.org/items?format=json&q=creator:swe'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.45621657371521,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "按年份搜索2020",
+        "purpose": "验证date字段搜索功能正常",
+        "args": {
+          "query": "2020",
+          "search_field": "date"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Client error '404 Not Found' for url 'https://api.zotero.org/items?format=json&q=date:2020'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.825439691543579,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "全文搜索关键词'rule'",
+        "purpose": "验证fulltext字段搜索功能正常",
+        "args": {
+          "query": "rule",
+          "search_field": "fulltext"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Client error '404 Not Found' for url 'https://api.zotero.org/items?format=tei&style=apa&q=rule'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8231909275054932,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用空查询字符串进行搜索",
+        "purpose": "验证工具对无效输入的处理能力",
+        "args": {
+          "query": "",
+          "search_field": "title"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Client error '404 Not Found' for url 'https://api.zotero.org/items?format=json&q=title:'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.0037806034088135,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试注入恶意搜索内容",
+        "purpose": "测试工具是否对特殊字符或潜在注入攻击具有防御能力",
+        "args": {
+          "query": "'; DROP TABLE items;--",
+          "search_field": "title"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: Client error '404 Not Found' for url 'https://api.zotero.org/items?format=json&q=title:';%20DROP%20TABLE%20items;--'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.250781297683716,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用不存在的搜索字段进行查询",
+        "purpose": "验证工具是否能正确处理非法参数",
+        "args": {
+          "query": "test",
+          "search_field": "invalid_field"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_items: _ssl.c:993: The handshake operation timed out"
+        },
+        "execution_time": 5.448195695877075,
+        "is_functional_test": false
+      }
+    ],
+    "get_item_metadata": [
+      {
+        "case_name": "获取存在的条目元数据",
+        "purpose": "验证get_item_metadata工具能正确获取一个已知条目的元数据信息",
+        "args": {
+          "item_key": "paper1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Client error '404 Not Found' for url 'https://api.zotero.org/items/paper1?format=json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8884000778198242,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试获取不存在的条目元数据",
+        "purpose": "验证工具在请求不存在的item_key时是否能够优雅处理错误",
+        "args": {
+          "item_key": "nonexistent_key"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Client error '404 Not Found' for url 'https://api.zotero.org/items/nonexistent_key?format=json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.920191764831543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用空字符串作为item_key进行查询",
+        "purpose": "测试工具对无效输入参数的处理能力",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Client error '404 Not Found' for url 'https://api.zotero.org/items/?format=json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8841767311096191,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符作为item_key进行查询",
+        "purpose": "验证工具是否能安全地处理包含特殊字符的item_key",
+        "args": {
+          "item_key": "!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Client error '404 Not Found' for url 'https://api.zotero.org/items/!@#$%^&*()?format=json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8720555305480957,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "注入攻击测试",
+        "purpose": "测试工具是否对潜在的注入攻击具有防御能力",
+        "args": {
+          "item_key": "'; DROP TABLE items;--"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Client error '404 Not Found' for url 'https://api.zotero.org/items/';%20DROP%20TABLE%20items;--?format=json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.884265661239624,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用None作为item_key进行查询",
+        "purpose": "测试工具对null或缺失参数的处理能力",
+        "args": {
+          "item_key": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: 1 validation error for get_item_metadataArguments\nitem_key\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0029692649841308594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用数字键获取条目元数据",
+        "purpose": "验证工具是否接受非字母形式的item_key，如纯数字键",
+        "args": {
+          "item_key": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: Client error '404 Not Found' for url 'https://api.zotero.org/items/123456?format=json'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.6345231533050537,
+        "is_functional_test": true
+      }
+    ],
+    "get_item_fulltext": [
+      {
+        "case_name": "获取存在的条目全文内容",
+        "purpose": "验证get_item_fulltext工具能正确提取一个已知条目的全文内容",
+        "args": {
+          "item_key": "paper1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Client error '404 Not Found' for url 'https://api.zotero.org/items/paper1?format=tei&style=apa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.7877638339996338,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试获取不存在的条目全文内容",
+        "purpose": "验证工具在请求不存在的item_key时是否能够优雅处理错误",
+        "args": {
+          "item_key": "nonexistent_key"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Client error '404 Not Found' for url 'https://api.zotero.org/items/nonexistent_key?format=tei&style=apa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8763792514801025,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用空字符串作为item_key进行查询",
+        "purpose": "测试工具对无效输入参数的处理能力",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Client error '404 Not Found' for url 'https://api.zotero.org/items/?format=tei&style=apa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.0017802715301514,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符作为item_key进行查询",
+        "purpose": "验证工具是否能安全地处理包含特殊字符的item_key",
+        "args": {
+          "item_key": "!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Client error '404 Not Found' for url 'https://api.zotero.org/items/!@#$%^&*()?format=tei&style=apa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.678166389465332,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "注入攻击测试",
+        "purpose": "测试工具是否对潜在的注入攻击具有防御能力",
+        "args": {
+          "item_key": "'; DROP TABLE items;--"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Client error '404 Not Found' for url 'https://api.zotero.org/items/';%20DROP%20TABLE%20items;--?format=tei&style=apa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.00582218170166,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用None作为item_key进行查询",
+        "purpose": "测试工具对null或缺失参数的处理能力",
+        "args": {
+          "item_key": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: 1 validation error for get_item_fulltextArguments\nitem_key\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0030100345611572266,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用数字键获取条目全文内容",
+        "purpose": "验证工具是否接受非字母形式的item_key，如纯数字键",
+        "args": {
+          "item_key": "123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: Client error '404 Not Found' for url 'https://api.zotero.org/items/123456?format=tei&style=apa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.2034552097320557,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 21
+}

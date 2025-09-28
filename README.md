@@ -100,7 +100,7 @@ project_root/
 
 ```bash
 # Clone the repository
-git clone https://anonymous.4open.science/r/MCPybarra-06C8.git
+git clone https://github.com/poutonwu/MCPybarra
 cd MCPybarra
 
 # Install dependencies

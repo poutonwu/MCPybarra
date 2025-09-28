@@ -1,0 +1,204 @@
+[
+  {
+    "step": {
+      "step_id": "search_papers_happy_path",
+      "tool_name": "search_papers",
+      "parameters": {
+        "keywords": "machine learning",
+        "limit": 5
+      },
+      "description": "Happy path: Search for papers related to 'machine learning' with a limit of 5 results."
+    },
+    "substituted_params": {
+      "keywords": "machine learning",
+      "limit": 5
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"title\": \"Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms\", \"authors\": [], \"year\": null, \"doi\": null}, {\"title\": \"TensorFlow: A system for large-scale machine learning\", \"authors\": [], \"year\": null, \"doi\": null}, {\"title\": \"TensorFlow: Large-Scale Machine Learning on Heterogeneous Distributed Systems\", \"authors\": [], \"year\": null, \"doi\": null}, {\"title\": \"A Survey on Bias and Fairness in Machine Learning\", \"authors\": [], \"year\": null, \"doi\": null}, {\"title\": \"Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead\", \"authors\": [], \"year\": null, \"doi\": null}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_paper_details_from_search",
+      "tool_name": "fetch_paper_details",
+      "parameters": {
+        "paper_id": "$outputs.search_papers_happy_path[0].doi",
+        "source": "Semantic Scholar"
+      },
+      "description": "Dependent call: Fetch detailed information about the first paper from search results using its DOI from Semantic Scholar."
+    },
+    "substituted_params": {
+      "paper_id": null,
+      "source": "Semantic Scholar"
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_papers_happy_path[0].doi'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_by_topic_with_year_range",
+      "tool_name": "search_by_topic",
+      "parameters": {
+        "topic": "artificial intelligence",
+        "year_range": [
+          2015,
+          2020
+        ],
+        "limit": 3
+      },
+      "description": "Happy path with filtering: Search for AI-related papers between 2015 and 2020, limited to 3 results."
+    },
+    "substituted_params": {
+      "topic": "artificial intelligence",
+      "year_range": [
+        2015,
+        2020
+      ],
+      "limit": 3
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=artificial%20intelligence&limit=3&year_start=2015&year_end=2020'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_paper_details_crossref",
+      "tool_name": "fetch_paper_details",
+      "parameters": {
+        "paper_id": "$outputs.search_by_topic_with_year_range[0].doi",
+        "source": "Crossref"
+      },
+      "description": "Dependent call: Fetch detailed information about the first paper from search_by_topic using Crossref as the source."
+    },
+    "substituted_params": {
+      "paper_id": null,
+      "source": "Crossref"
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_by_topic_with_year_range[0].doi'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_papers_empty_keywords",
+      "tool_name": "search_papers",
+      "parameters": {
+        "keywords": "",
+        "limit": 5
+      },
+      "description": "Edge case: Test server behavior when keywords are empty."
+    },
+    "substituted_params": {
+      "keywords": "",
+      "limit": 5
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Keywords cannot be empty\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_papers_invalid_limit",
+      "tool_name": "search_papers",
+      "parameters": {
+        "keywords": "deep learning",
+        "limit": -2
+      },
+      "description": "Edge case: Test server behavior when limit is non-positive."
+    },
+    "substituted_params": {
+      "keywords": "deep learning",
+      "limit": -2
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Limit must be a positive integer\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_by_topic_no_topic",
+      "tool_name": "search_by_topic",
+      "parameters": {
+        "topic": ""
+      },
+      "description": "Edge case: Test server behavior when topic is empty."
+    },
+    "substituted_params": {
+      "topic": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Topic cannot be empty\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_by_topic_invalid_year_range",
+      "tool_name": "search_by_topic",
+      "parameters": {
+        "topic": "neural networks",
+        "year_range": [
+          2025,
+          2020
+        ]
+      },
+      "description": "Edge case: Test server behavior when year range is invalid (start > end)."
+    },
+    "substituted_params": {
+      "topic": "neural networks",
+      "year_range": [
+        2025,
+        2020
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Invalid year range format. Use (start_year, end_year)\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_paper_details_invalid_source",
+      "tool_name": "fetch_paper_details",
+      "parameters": {
+        "paper_id": "10.1145/3368089.3417052",
+        "source": "Invalid Source"
+      },
+      "description": "Edge case: Test server behavior when an unsupported source is specified."
+    },
+    "substituted_params": {
+      "paper_id": "10.1145/3368089.3417052",
+      "source": "Invalid Source"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Invalid source specified. Use 'Semantic Scholar' or 'Crossref'.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_paper_details_nonexistent_doi",
+      "tool_name": "fetch_paper_details",
+      "parameters": {
+        "paper_id": "10.1145/nonexistent.doi",
+        "source": "Semantic Scholar"
+      },
+      "description": "Edge case: Test server behavior when a non-existent DOI is used."
+    },
+    "substituted_params": {
+      "paper_id": "10.1145/nonexistent.doi",
+      "source": "Semantic Scholar"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Client error '404 Not Found' for url 'https://api.semanticscholar.org/graph/v1/paper/10.1145/nonexistent.doi'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"}"
+    }
+  }
+]

@@ -1,0 +1,221 @@
+[
+  {
+    "step": {
+      "step_id": "list_default_database_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List tables from the default connected database."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "{\n  \"table_name\": \"addresses\"\n}, {\n  \"table_name\": \"companies\"\n}, {\n  \"table_name\": \"order_items\"\n}, {\n  \"table_name\": \"orders\"\n}, {\n  \"table_name\": \"products\"\n}, {\n  \"table_name\": \"reviews\"\n}, {\n  \"table_name\": \"users\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_nonexistent_database_tables",
+      "tool_name": "list_resources",
+      "parameters": {
+        "database_name": "nonexistent_db"
+      },
+      "description": "Edge case: Attempt to list tables from a non-existent database to test error handling."
+    },
+    "substituted_params": {
+      "database_name": "nonexistent_db"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool list_resources: Database error: 1049 (42000): Unknown database 'nonexistent_db'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table_data",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_default_database_tables[0].table_name"
+      },
+      "description": "Dependent call: Read data from the first table obtained from the default database listing."
+    },
+    "substituted_params": {
+      "table_name": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.list_default_database_tables[0].table_name'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_invalid_table_data",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "invalid_table_name"
+      },
+      "description": "Edge case: Attempt to read data from a non-existent table to test error handling."
+    },
+    "substituted_params": {
+      "table_name": "invalid_table_name"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_resource: Database error: 1146 (42S02): Table 'user-db.invalid_table_name' doesn't exist"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_table_with_custom_limit",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_default_database_tables[0].table_name",
+        "limit": 10
+      },
+      "description": "Happy path: Read limited rows (e.g., 10) from the first table."
+    },
+    "substituted_params": {
+      "table_name": null,
+      "limit": 10
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.list_default_database_tables[0].table_name'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_show_databases",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SHOW DATABASES"
+      },
+      "description": "Happy path: Use custom SQL query to show databases and verify SELECT-like queries."
+    },
+    "substituted_params": {
+      "query": "SHOW DATABASES"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"columns\": [\n    \"Database\"\n  ],\n  \"rows\": [\n    [\n      \"information_schema\"\n    ],\n    [\n      \"mysql\"\n    ],\n    [\n      \"performance_schema\"\n    ],\n    [\n      \"sys\"\n    ],\n    [\n      \"user-db\"\n    ]\n  ]\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_create_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+      },
+      "description": "Happy path: Execute CREATE TABLE via custom SQL query to verify DDL support."
+    },
+    "substituted_params": {
+      "query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_insert_into_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "INSERT INTO test_table (id, name) VALUES (1, 'Test')"
+      },
+      "description": "Happy path: Insert data into the created test table using INSERT query."
+    },
+    "substituted_params": {
+      "query": "INSERT INTO test_table (id, name) VALUES (1, 'Test')"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 1\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_from_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM test_table"
+      },
+      "description": "Dependent call: Select inserted data to confirm successful insert operation."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"columns\": [\n    \"id\",\n    \"name\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"Test\"\n    ]\n  ]\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_update_on_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "UPDATE test_table SET name = 'Updated' WHERE id = 1"
+      },
+      "description": "Happy path: Update previously inserted record in test_table."
+    },
+    "substituted_params": {
+      "query": "UPDATE test_table SET name = 'Updated' WHERE id = 1"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 1\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_delete_from_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DELETE FROM test_table WHERE id = 1"
+      },
+      "description": "Happy path: Delete updated record from test_table to clean up after testing."
+    },
+    "substituted_params": {
+      "query": "DELETE FROM test_table WHERE id = 1"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 1\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_drop_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DROP TABLE IF EXISTS test_table"
+      },
+      "description": "Happy path: Drop the test_table after operations are complete."
+    },
+    "substituted_params": {
+      "query": "DROP TABLE IF EXISTS test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_empty_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Test empty query input to ensure validation works correctly."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: query cannot be empty"
+    }
+  }
+]

@@ -1,0 +1,267 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_duckduckgo_search_and_cont",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_duckduckgo_search_and_cont/refined/server.py",
+  "timestamp": "2025-07-12T20:44:38.420771",
+  "tools": [
+    {
+      "name": "duck_duck_go_search",
+      "description": "\n    在 DuckDuckGo 搜索引擎上根据查询内容自动检索相关信息，并将搜索结果以结构化格式返回\n\n    Args:\n        query: 要搜索的关键词或短语 (必填)\n        max_results: 返回的最大结果数量，默认为5，范围1-10 (可选)\n\n    Returns:\n        包含搜索结果的字典列表，每个字典包含：\n        - title: 搜索结果标题 (string)\n        - link: 结果链接 (string)\n        - snippet: 结果摘要文本 (string)\n        - source: 来源网站域名 (string)\n\n    Raises:\n        ValueError: 如果查询为空或max_results超出范围\n        RuntimeError: 如果搜索失败\n\n    示例:\n        duck_duck_go_search(query=\"Python编程\", max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "duck_duck_go_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    根据提供的网页 URL 抓取并解析该网页的主要文本内容，去除无关元素后返回\n\n    Args:\n        url: 要抓取内容的网页 URL (必填)\n        remove_ads: 是否尝试移除广告内容，默认为 True (可选)\n        timeout: 请求超时时间（秒），默认为 10 (可选)\n\n    Returns:\n        包含网页内容的字典：\n        - title: 网页标题 (string)\n        - content: 清理后的正文内容 (string)\n        - domain: 网站域名 (string)\n        - status_code: HTTP 响应状态码 (int)\n        - word_count: 内容字数统计 (int)\n\n    Raises:\n        ValueError: 如果URL无效\n        httpx.HTTPStatusError: 如果HTTP请求失败\n\n    示例:\n        fetch_content(url=\"https://example.com\", remove_ads=True, timeout=10)\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "remove_ads": {
+            "default": true,
+            "title": "Remove Ads",
+            "type": "boolean"
+          },
+          "timeout": {
+            "default": 10,
+            "title": "Timeout",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "duck_duck_go_search": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证工具在正常输入下能否返回有效的搜索结果",
+        "args": {
+          "query": "Python编程",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+        },
+        "execution_time": 26.769516229629517,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用默认max_results参数的搜索",
+        "purpose": "验证工具在未指定max_results时是否使用默认值5",
+        "args": {
+          "query": "人工智能"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+        },
+        "execution_time": 30.56990957260132,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "搜索包含特殊字符的关键词",
+        "purpose": "验证工具是否能处理包含特殊字符的搜索词",
+        "args": {
+          "query": "C++开发",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://html.duckduckgo.com/html 202 Ratelimit"
+        },
+        "execution_time": 23.782389402389526,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最小结果数量测试",
+        "purpose": "验证工具是否能正确处理最小值1的请求",
+        "args": {
+          "query": "量子计算",
+          "max_results": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+        },
+        "execution_time": 19.539650678634644,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大允许结果数量测试",
+        "purpose": "验证工具是否能正确处理最大值10的请求",
+        "args": {
+          "query": "机器学习",
+          "max_results": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://html.duckduckgo.com/html 202 Ratelimit"
+        },
+        "execution_time": 32.636313676834106,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询输入测试",
+        "purpose": "验证工具是否能正确处理空查询参数",
+        "args": {
+          "query": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: 'query' 参数不能为空。"
+        },
+        "execution_time": 0.004506111145019531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超出范围的max_results测试",
+        "purpose": "验证工具是否能正确处理超过允许范围的max_results值",
+        "args": {
+          "query": "区块链",
+          "max_results": 15
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: max_results 必须在1到10之间"
+        },
+        "execution_time": 0.012002706527709961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "跨站脚本攻击模拟测试",
+        "purpose": "验证工具是否能安全处理包含潜在XSS攻击的查询内容",
+        "args": {
+          "query": "<script>alert('xss')</script>",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://html.duckduckgo.com/html 202 Ratelimit"
+        },
+        "execution_time": 16.910407066345215,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "基本抓取功能测试",
+        "purpose": "验证工具在正常输入下能否正确抓取并解析网页内容",
+        "args": {
+          "url": "https://example.com"
+        },
+        "response": {
+          "result": "{\"title\": \"Example Domain\", \"content\": \"\\n\\nExample Domain\\n\\n\\n\\n\\n\\n\\n\\nExample Domain\\nThis domain is for use in illustrative examples in documents. You may use this\\n    domain in literature without prior coordination or asking for permission.\\nMore information...\\n\\n\\n\\n\", \"domain\": \"example.com\", \"status_code\": 200, \"word_count\": 30}"
+        },
+        "execution_time": 1.807234764099121,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "禁用广告移除功能测试",
+        "purpose": "验证工具在remove_ads参数为False时是否保留广告内容",
+        "args": {
+          "url": "https://example.com",
+          "remove_ads": false
+        },
+        "response": {
+          "result": "{\"title\": \"Example Domain\", \"content\": \"\\n\\nExample Domain\\n\\n\\n\\n\\n\\n\\n\\nExample Domain\\nThis domain is for use in illustrative examples in documents. You may use this\\n    domain in literature without prior coordination or asking for permission.\\nMore information...\\n\\n\\n\\n\", \"domain\": \"example.com\", \"status_code\": 200, \"word_count\": 30}"
+        },
+        "execution_time": 1.7720520496368408,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "自定义超时时间测试",
+        "purpose": "验证工具在指定不同timeout值时能正确处理请求超时",
+        "args": {
+          "url": "https://example.com",
+          "timeout": 5
+        },
+        "response": {
+          "result": "{\"title\": \"Example Domain\", \"content\": \"\\n\\nExample Domain\\n\\n\\n\\n\\n\\n\\n\\nExample Domain\\nThis domain is for use in illustrative examples in documents. You may use this\\n    domain in literature without prior coordination or asking for permission.\\nMore information...\\n\\n\\n\\n\", \"domain\": \"example.com\", \"status_code\": 200, \"word_count\": 30}"
+        },
+        "execution_time": 2.3668079376220703,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效URL格式测试",
+        "purpose": "验证工具是否能正确识别并拒绝非法URL格式",
+        "args": {
+          "url": "htp:/invalid-url-format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: URL 必须以 http:// 或 https:// 开头"
+        },
+        "execution_time": 0.003001689910888672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "目标服务器返回404错误测试",
+        "purpose": "验证当目标网页返回404状态码时工具的异常处理能力",
+        "args": {
+          "url": "https://example.com/nonexistent-page-12345"
+        },
+        "response": {
+          "result": "{\"title\": \"\", \"content\": \"HTTP请求失败: Client error '404 Not Found' for url 'https://example.com/nonexistent-page-12345'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\", \"domain\": \"\", \"status_code\": 404, \"word_count\": 0}"
+        },
+        "execution_time": 2.0236051082611084,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "包含特殊字符的URL测试",
+        "purpose": "验证工具是否能安全处理包含特殊字符的URL输入",
+        "args": {
+          "url": "https://example.com/path?query=value@#&"
+        },
+        "response": {
+          "result": "{\"title\": \"\", \"content\": \"HTTP请求失败: Client error '404 Not Found' for url 'https://example.com/path?query=value@#&'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\", \"domain\": \"\", \"status_code\": 404, \"word_count\": 0}"
+        },
+        "execution_time": 4.6324310302734375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS攻击模拟测试",
+        "purpose": "验证工具是否能安全处理潜在的跨站脚本攻击输入",
+        "args": {
+          "url": "https://example.com/<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\"title\": \"\", \"content\": \"HTTP请求失败: Client error '404 Not Found' for url 'https://example.com/%3Cscript%3Ealert('xss')%3C/script%3E'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\", \"domain\": \"\", \"status_code\": 404, \"word_count\": 0}"
+        },
+        "execution_time": 2.5402019023895264,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "最小超时时间测试",
+        "purpose": "验证工具在最小合法timeout值（1秒）下的行为",
+        "args": {
+          "url": "https://example.com",
+          "timeout": 1
+        },
+        "response": {
+          "result": "{\"title\": \"Example Domain\", \"content\": \"\\n\\nExample Domain\\n\\n\\n\\n\\n\\n\\n\\nExample Domain\\nThis domain is for use in illustrative examples in documents. You may use this\\n    domain in literature without prior coordination or asking for permission.\\nMore information...\\n\\n\\n\\n\", \"domain\": \"example.com\", \"status_code\": 200, \"word_count\": 30}"
+        },
+        "execution_time": 1.723609447479248,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 16
+}

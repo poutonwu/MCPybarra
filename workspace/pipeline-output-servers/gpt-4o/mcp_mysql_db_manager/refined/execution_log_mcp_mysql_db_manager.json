@@ -1,0 +1,185 @@
+[
+  {
+    "step": {
+      "step_id": "list_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all tables in the connected database. This assumes a successful connection and existing tables."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to list tables: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_tables[0]"
+      },
+      "description": "Dependent call (list access): Read data from the first table returned by list_tables. Uses `[0]` to get the first table name."
+    },
+    "substituted_params": {
+      "table_name": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.list_tables[0]'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `$outputs.read_first_table.table_name` LIMIT 1"
+      },
+      "description": "Dependent call (key access): Execute a SELECT query on the same table as read_first_table, fetching one row."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `$outputs.read_first_table.table_name` LIMIT 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_show_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SHOW TABLES"
+      },
+      "description": "Happy path: Execute a SHOW TABLES query directly using execute_sql tool."
+    },
+    "substituted_params": {
+      "query": "SHOW TABLES"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM non_existent_table"
+      },
+      "description": "Edge case: Test execution of an invalid SQL query that references a non-existent table."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM non_existent_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_empty_table_name",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": ""
+      },
+      "description": "Edge case: Attempt to read a resource with an empty table name, expecting a ValueError."
+    },
+    "substituted_params": {
+      "table_name": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_resource: Invalid table_name. It must be a non-empty string."
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_non_string_table_name",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": 123
+      },
+      "description": "Edge case: Attempt to read a resource with a numeric table name, expecting a ValueError."
+    },
+    "substituted_params": {
+      "table_name": 123
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to read table 123: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_empty_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Attempt to execute an empty SQL query, expecting a ValueError."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: Invalid query. It must be a non-empty string."
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_insert_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "CREATE TEMPORARY TABLE test_table (id INT PRIMARY KEY, name VARCHAR(100)); INSERT INTO test_table VALUES (1, 'Test')"
+      },
+      "description": "Happy path: Create a temporary table and insert a record using execute_sql tool."
+    },
+    "substituted_params": {
+      "query": "CREATE TEMPORARY TABLE test_table (id INT PRIMARY KEY, name VARCHAR(100)); INSERT INTO test_table VALUES (1, 'Test')"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_delete_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DELETE FROM test_table WHERE id = 1"
+      },
+      "description": "Dependent call: Delete the previously inserted test record from the temporary table."
+    },
+    "substituted_params": {
+      "query": "DELETE FROM test_table WHERE id = 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_drop_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DROP TABLE test_table"
+      },
+      "description": "Dependent call: Drop the temporary table created earlier."
+    },
+    "substituted_params": {
+      "query": "DROP TABLE test_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\n  \"error\": \"Failed to execute query: Error connecting to MySQL after 3 attempts: 2003 (HY000): Can't connect to MySQL server on 'localhost:3306' (10061)\"\n}"
+    }
+  }
+]

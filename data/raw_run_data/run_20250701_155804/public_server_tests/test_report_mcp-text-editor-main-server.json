@@ -1,0 +1,1562 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp-text-editor-main",
+  "report_name": "mcp-text-editor-main-server",
+  "server_path": "workspace\\public-mcp-servers\\mcp-text-editor-main\\server.py",
+  "timestamp": "2025-07-01T16:00:12.185050",
+  "tools": [
+    {
+      "name": "get_text_file_contents",
+      "description": "Read text file contents from multiple files and line ranges. Returns file contents with hashes for concurrency control and line numbers for reference. The hashes are used to detect conflicts when editing the files. File paths must be absolute.",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "description": "List of files and their line ranges to read",
+            "items": {
+              "type": "object",
+              "properties": {
+                "file_path": {
+                  "type": "string",
+                  "description": "Path to the text file. File path must be absolute."
+                },
+                "ranges": {
+                  "type": "array",
+                  "description": "List of line ranges to read from the file",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "integer",
+                        "description": "Starting line number (1-based)"
+                      },
+                      "end": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "description": "Ending line number (null for end of file)"
+                      }
+                    },
+                    "required": [
+                      "start"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "file_path",
+                "ranges"
+              ]
+            }
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding (default: 'utf-8')",
+            "default": "utf-8"
+          }
+        },
+        "required": [
+          "files"
+        ]
+      }
+    },
+    {
+      "name": "create_text_file",
+      "description": "Create a new text file with given content. The file must not exist already.",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the text file. File path must be absolute."
+          },
+          "contents": {
+            "type": "string",
+            "description": "Content to write to the file"
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding (default: 'utf-8')",
+            "default": "utf-8"
+          }
+        },
+        "required": [
+          "file_path",
+          "contents"
+        ]
+      }
+    },
+    {
+      "name": "append_text_file_contents",
+      "description": "Append content to an existing text file. The file must exist.",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the text file. File path must be absolute."
+          },
+          "contents": {
+            "type": "string",
+            "description": "Content to append to the file"
+          },
+          "file_hash": {
+            "type": "string",
+            "description": "Hash of the file contents for concurrency control. it should be matched with the file_hash when get_text_file_contents is called."
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding (default: 'utf-8')",
+            "default": "utf-8"
+          }
+        },
+        "required": [
+          "file_path",
+          "contents",
+          "file_hash"
+        ]
+      }
+    },
+    {
+      "name": "delete_text_file_contents",
+      "description": "Delete specified content ranges from a text file. The file must exist. File paths must be absolute. You need to provide the file_hash comes from get_text_file_contents.",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the text file. File path must be absolute."
+          },
+          "file_hash": {
+            "type": "string",
+            "description": "Hash of the file contents for concurrency control. it should be matched with the file_hash when get_text_file_contents is called."
+          },
+          "ranges": {
+            "type": "array",
+            "description": "List of line ranges to delete",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "integer",
+                  "description": "Starting line number (1-based)"
+                },
+                "end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Ending line number (null for end of file)"
+                },
+                "range_hash": {
+                  "type": "string",
+                  "description": "Hash of the content being deleted. it should be matched with the range_hash when get_text_file_contents is called with the same range."
+                }
+              },
+              "required": [
+                "start",
+                "range_hash"
+              ]
+            }
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding (default: 'utf-8')",
+            "default": "utf-8"
+          }
+        },
+        "required": [
+          "file_path",
+          "file_hash",
+          "ranges"
+        ]
+      }
+    },
+    {
+      "name": "insert_text_file_contents",
+      "description": "Insert content before or after a specific line in a text file. Uses hash-based validation for concurrency control. You need to provide the file_hash comes from get_text_file_contents.",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the text file. File path must be absolute."
+          },
+          "file_hash": {
+            "type": "string",
+            "description": "Hash of the file contents for concurrency control. it should be matched with the file_hash when get_text_file_contents is called."
+          },
+          "contents": {
+            "type": "string",
+            "description": "Content to insert"
+          },
+          "before": {
+            "type": "integer",
+            "description": "Line number before which to insert content (mutually exclusive with 'after')"
+          },
+          "after": {
+            "type": "integer",
+            "description": "Line number after which to insert content (mutually exclusive with 'before')"
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding (default: 'utf-8')",
+            "default": "utf-8"
+          }
+        },
+        "required": [
+          "file_path",
+          "file_hash",
+          "contents"
+        ]
+      }
+    },
+    {
+      "name": "patch_text_file_contents",
+      "description": "Apply patches to text files with hash-based validation for concurrency control.you need to use get_text_file_contents tool to get the file hash and range hash every time before using this tool. you can use append_text_file_contents tool to append text contents to the file without range hash, start and end. you can use insert_text_file_contents tool to insert text contents to the file without range hash, start and end.",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to the text file. File path must be absolute."
+          },
+          "file_hash": {
+            "type": "string",
+            "description": "Hash of the file contents for concurrency control."
+          },
+          "patches": {
+            "type": "array",
+            "description": "List of patches to apply",
+            "items": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "integer",
+                  "description": "Starting line number (1-based).it should match the range hash."
+                },
+                "end": {
+                  "type": "integer",
+                  "description": "Ending line number (null for end of file).it should match the range hash."
+                },
+                "contents": {
+                  "type": "string",
+                  "description": "New content to replace the range with"
+                },
+                "range_hash": {
+                  "type": "string",
+                  "description": "Hash of the content being replaced. it should get from get_text_file_contents tool with the same start and end."
+                }
+              },
+              "required": [
+                "start",
+                "end",
+                "contents",
+                "range_hash"
+              ]
+            }
+          },
+          "encoding": {
+            "type": "string",
+            "description": "Text encoding (default: 'utf-8')",
+            "default": "utf-8"
+          }
+        },
+        "required": [
+          "file_path",
+          "file_hash",
+          "patches"
+        ]
+      }
+    }
+  ],
+  "test_results": {
+    "create_text_file": [
+      {
+        "case_name": "Basic Text File Creation",
+        "purpose": "验证工具能够使用默认编码创建一个新文本文件并写入内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "contents": "This is a test file content."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Text File Creation with UTF-8 Encoding",
+        "purpose": "验证使用显式指定的UTF-8编码创建文本文件的功能",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt",
+          "contents": "UTF-8 encoded content.",
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.00400543212890625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Text File Creation with Non-Default Encoding",
+        "purpose": "验证使用非默认编码（如latin-1）创建文本文件的功能",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+          "contents": "Content in latin-1 encoding.",
+          "encoding": "latin-1"
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.007143974304199219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Create File with Chinese Characters",
+        "purpose": "验证工具支持在文件路径中使用中文字符",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt",
+          "contents": "This file has a Chinese filename."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.004502296447753906,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to Create File That Already Exists",
+        "purpose": "验证工具拒绝覆盖已存在的文件",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_document.docx",
+          "contents": "This should not overwrite the existing file."
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File already exists: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_document.docx"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Create File in Restricted Directory",
+        "purpose": "验证工具无法在系统受保护目录中创建文件，确保安全性",
+        "args": {
+          "file_path": "C:\\Windows\\test_restricted_write.txt",
+          "contents": "Attempting to write to a restricted system directory."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"error\",\n  \"reason\": \"Error editing file: [Errno 13] Permission denied: 'C:\\\\\\\\Windows\\\\\\\\test_restricted_write.txt'\",\n  \"file_hash\": null,\n  \"suggestion\": \"patch\",\n  \"hint\": \"Please check file permissions and try again\"\n}"
+        },
+        "execution_time": 0.003533601760864258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Create File with Empty Content",
+        "purpose": "验证工具能正确处理空内容参数",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt",
+          "contents": ""
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"\",\n  \"hint\": \"For content deletion, please consider using delete_text_file_contents instead of patch with empty content\",\n  \"suggestion\": \"delete\"\n}"
+        },
+        "execution_time": 0.003004789352416992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Create File with Long Path",
+        "purpose": "验证工具处理超长文件路径的能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt",
+          "contents": "Testing long file path handling."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.0029993057250976562,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Create File with Special Characters in Name",
+        "purpose": "验证工具处理特殊字符文件名的能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+          "contents": "File name contains special characters and spaces."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.005999088287353516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Create File Without Write Permissions",
+        "purpose": "验证工具在目标目录无写权限时的行为",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\unwritable_file.txt",
+          "contents": "Trying to create a file in a read-only directory."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"7af4c0af90457c63f0e63e46866b74dc147693419d720d69e0a3963062858909\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.004021406173706055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Create File with Invalid Encoding",
+        "purpose": "验证工具对无效编码参数的处理",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_encoding_file.txt",
+          "contents": "Testing invalid text encoding.",
+          "encoding": "invalid-encoding"
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"ea13b40efede236c73cd0698064ab3412a6fa211c8fb4d606feca7251ef41654\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.00600123405456543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Create File in Nested Subdirectory",
+        "purpose": "验证工具在嵌套子目录中创建文件的能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nested\\dir\\structure\\deeply_nested_file.txt",
+          "contents": "Creating file in deeply nested directory structure."
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For new or empty files, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.004087686538696289,
+        "is_functional_test": true
+      }
+    ],
+    "get_text_file_contents": [
+      {
+        "case_name": "Read Single File with Default Encoding",
+        "purpose": "验证工具使用默认编码读取单个文件的全部内容",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ]
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"This is a test file content.\\n\",\n        \"start\": 1,\n        \"end\": 1,\n        \"range_hash\": \"5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6\",\n        \"total_lines\": 1,\n        \"content_size\": 29\n      }\n    ],\n    \"file_hash\": \"5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6\"\n  }\n}"
+        },
+        "execution_time": 0.010504961013793945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Multiple Files with Line Ranges",
+        "purpose": "验证工具能同时读取多个文件的部分行内容",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt",
+              "ranges": [
+                {
+                  "start": 1,
+                  "end": 2
+                }
+              ]
+            },
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+              "ranges": [
+                {
+                  "start": 2
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\utf8_encoded_file.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"UTF-8 encoded content.\\n\",\n        \"start\": 1,\n        \"end\": 1,\n        \"range_hash\": \"722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a\",\n        \"total_lines\": 1,\n        \"content_size\": 23\n      }\n    ],\n    \"file_hash\": \"722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a\"\n  },\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\latin1_encoded_file.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"\",\n        \"start\": 2,\n        \"end\": 2,\n        \"range_hash\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n        \"total_lines\": 1,\n        \"content_size\": 0\n      }\n    ],\n    \"file_hash\":...[截断]，共计873字符，剩余73字符"
+        },
+        "execution_time": 0.014521121978759766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File with Null End Range",
+        "purpose": "验证工具能正确处理 end 参数为 null 的情况，即从指定起始行读取到文件末尾",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+              "ranges": [
+                {
+                  "start": 3,
+                  "end": null
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_\\u6587\\u4ef6#1@2025.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"\",\n        \"start\": 3,\n        \"end\": 3,\n        \"range_hash\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n        \"total_lines\": 1,\n        \"content_size\": 0\n      }\n    ],\n    \"file_hash\": \"3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1\"\n  }\n}"
+        },
+        "execution_time": 0.008519887924194336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File with Non-Default Encoding",
+        "purpose": "验证工具能使用非默认编码（如 latin-1）读取文件内容",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "latin-1"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\latin1_encoded_file.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"Content in latin-1 encoding.\\n\",\n        \"start\": 1,\n        \"end\": 1,\n        \"range_hash\": \"39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce\",\n        \"total_lines\": 1,\n        \"content_size\": 29\n      }\n    ],\n    \"file_hash\": \"39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce\"\n  }\n}"
+        },
+        "execution_time": 0.011532068252563477,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File from Restricted Directory",
+        "purpose": "验证工具无法读取系统受保护目录中的文件以确保安全性",
+        "args": {
+          "files": [
+            {
+              "file_path": "C:\\Windows\\system32\\drivers\\etc\\hosts",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"C:\\\\Windows\\\\system32\\\\drivers\\\\etc\\\\hosts\": {\n    \"ranges\": [\n      {\n        \"content\": \"\\ufeff# Copyright (c) 1993-2009 Microsoft Corp.\\n#\\n# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.\\n#\\n# This file contains the mappings of IP addresses to host names. Each\\n# entry should be kept on an individual line. The IP address should\\n# be placed in the first column followed by the corresponding host name.\\n# The IP address and the host name should be separated by at least one\\n# space.\\n#\\n# Additionally, comments (such as these) may be inserted on individual\\n# lines or following the machine name denoted by a '#' symbol.\\n#\\n# For example:\\n#\\n#      102.54.94.97     rhino.acme.com          # source server\\n#       38.25.63.10     x.acme.com              # x client...[截断]，共计1449字符，剩余649字符"
+        },
+        "execution_time": 0.013501882553100586,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Attempt to Read Binary File",
+        "purpose": "验证工具在尝试读取二进制文件时的行为是否安全且有适当错误提示",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\mas.png",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: 'utf-8' codec can't decode byte 0x89 in position 0: Failed to decode file 'D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\mas.png' with utf-8 encoding"
+        },
+        "execution_time": 0.00950765609741211,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Nonexistent File",
+        "purpose": "验证工具在尝试读取不存在的文件时的错误处理能力",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt"
+        },
+        "execution_time": 0.010029077529907227,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read File with Invalid Encoding",
+        "purpose": "验证工具对无效或不支持的编码参数的处理",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "invalid-encoding"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: unknown encoding: invalid-encoding"
+        },
+        "execution_time": 0.014542341232299805,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read File with Empty Ranges",
+        "purpose": "验证工具在 ranges 数组为空时的行为",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+              "ranges": []
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\": {\n    \"ranges\": [],\n    \"file_hash\": \"5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6\"\n  }\n}"
+        },
+        "execution_time": 0.0060002803802490234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read File with Start Line Beyond EOF",
+        "purpose": "验证工具在 start 行号超过文件总行数时的处理",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+              "ranges": [
+                {
+                  "start": 1000
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"\",\n        \"start\": 1000,\n        \"end\": 1000,\n        \"range_hash\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n        \"total_lines\": 1,\n        \"content_size\": 0\n      }\n    ],\n    \"file_hash\": \"5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6\"\n  }\n}"
+        },
+        "execution_time": 0.010509490966796875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File with Special Characters in Name",
+        "purpose": "验证工具能正确读取包含特殊字符和空格的文件名",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_\\u6587\\u4ef6#1@2025.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"File name contains special characters and spaces.\\n\",\n        \"start\": 1,\n        \"end\": 1,\n        \"range_hash\": \"3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1\",\n        \"total_lines\": 1,\n        \"content_size\": 50\n      }\n    ],\n    \"file_hash\": \"3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1\"\n  }\n}"
+        },
+        "execution_time": 0.009045600891113281,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File with Chinese Path",
+        "purpose": "验证工具支持中文路径的文件读取",
+        "args": {
+          "files": [
+            {
+              "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt",
+              "ranges": [
+                {
+                  "start": 1
+                }
+              ]
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\\\u4e2d\\u6587\\u6587\\u4ef6\\u540d.txt\": {\n    \"ranges\": [\n      {\n        \"content\": \"This file has a Chinese filename.\\n\",\n        \"start\": 1,\n        \"end\": 1,\n        \"range_hash\": \"427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e\",\n        \"total_lines\": 1,\n        \"content_size\": 34\n      }\n    ],\n    \"file_hash\": \"427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e\"\n  }\n}"
+        },
+        "execution_time": 0.015074491500854492,
+        "is_functional_test": true
+      }
+    ],
+    "append_text_file_contents": [
+      {
+        "case_name": "Basic Append Operation",
+        "purpose": "验证工具能够向现有文本文件追加内容并更新hash值",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "contents": "\nAdditional content to append.",
+          "file_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.013681888580322266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append with UTF-8 Encoding",
+        "purpose": "验证使用显式指定的UTF-8编码向文件追加内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt",
+          "contents": "\nMore UTF-8 content.",
+          "file_hash": "722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a",
+          "encoding": "utf-8"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt"
+        },
+        "execution_time": 0.01451563835144043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append with Non-Default Encoding",
+        "purpose": "验证使用非默认编码（如latin-1）向文件追加内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+          "contents": "\nAppending in latin-1 encoding.",
+          "file_hash": "39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce",
+          "encoding": "latin-1"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt"
+        },
+        "execution_time": 0.010022401809692383,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append File with Chinese Characters in Path",
+        "purpose": "验证工具支持在文件路径中包含中文字符时进行追加操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt",
+          "contents": "\nAppended content to file with Chinese path.",
+          "file_hash": "427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt"
+        },
+        "execution_time": 0.010523080825805664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to File with Special Characters in Name",
+        "purpose": "验证工具处理特殊字符文件名时正确追加内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+          "contents": "\nNew content appended to special filename.",
+          "file_hash": "3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt"
+        },
+        "execution_time": 0.009519100189208984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to Nested Subdirectory File",
+        "purpose": "验证工具能正确向嵌套子目录中的文件追加内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nested\\dir\\structure\\deeply_nested_file.txt",
+          "contents": "\nAppending to a deeply nested file.",
+          "file_hash": "37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5"
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"19cd8ad4d146bb18b206cf201eead4301965732323ff6e505206e5445a40fce5\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For adding content at the end of file, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to Read-Only Directory File",
+        "purpose": "验证工具在目标文件所在目录无写权限时的行为",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\unwritable_file.txt",
+          "contents": "\nTrying to append to a file in read-only directory.",
+          "file_hash": "7af4c0af90457c63f0e63e46866b74dc147693419d720d69e0a3963062858909"
+        },
+        "response": {
+          "result": "{\n  \"result\": \"ok\",\n  \"file_hash\": \"084e59f8a3248e12cdeb20ee1d482682a49d3950528a99a5038b289fe298179c\",\n  \"reason\": null,\n  \"suggestion\": \"append\",\n  \"hint\": \"For adding content at the end of file, please consider using append_text_file_contents instead\"\n}"
+        },
+        "execution_time": 0.0055234432220458984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Append to Restricted System File",
+        "purpose": "验证工具无法修改系统受保护目录中的文件以确保安全性",
+        "args": {
+          "file_path": "C:\\Windows\\system32\\drivers\\etc\\hosts",
+          "contents": "\nMalicious attempt to append to hosts file.",
+          "file_hash": "some_existing_hash"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File hash mismatch - file may have been modified"
+        },
+        "execution_time": 0.006503582000732422,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Append with Invalid File Hash",
+        "purpose": "验证工具拒绝追加操作当提供的文件哈希与当前文件不匹配",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "contents": "\nContent should not be appended due to hash mismatch.",
+          "file_hash": "invalid_hash_value"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.00500178337097168,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Append to Nonexistent File",
+        "purpose": "验证工具拒绝向不存在的文件追加内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "contents": "\nThis file does not exist and should not be created.",
+          "file_hash": "some_hash"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt"
+        },
+        "execution_time": 0.008514642715454102,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Append Empty Content",
+        "purpose": "验证工具能正确处理空内容追加",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt",
+          "contents": "",
+          "file_hash": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt"
+        },
+        "execution_time": 0.004012346267700195,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append with Long File Path",
+        "purpose": "验证工具处理超长文件路径时的追加操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt",
+          "contents": "\nAppending more content to long path file.",
+          "file_hash": "225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt"
+        },
+        "execution_time": 0.0050029754638671875,
+        "is_functional_test": true
+      }
+    ],
+    "insert_text_file_contents": [
+      {
+        "case_name": "Insert Text Before Specific Line",
+        "purpose": "验证工具能够在指定行号之前插入文本内容并正确更新文件哈希值",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6",
+          "contents": "Inserted content before line 1.",
+          "before": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.005997896194458008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Text After Specific Line",
+        "purpose": "验证工具能够在指定行号之后插入文本内容并正确更新文件哈希值",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt",
+          "file_hash": "722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a",
+          "contents": "Inserted content after line 1.",
+          "after": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\utf8_encoded_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\utf8_encoded_file.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.0075206756591796875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert With Default Encoding UTF-8",
+        "purpose": "验证使用默认编码（UTF-8）时能否成功插入内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+          "file_hash": "39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce",
+          "contents": "Default encoding insertion test."
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: Exactly one of 'before' or 'after' must be specified"
+        },
+        "execution_time": 0.010972976684570312,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert With Chinese File Path",
+        "purpose": "验证工具支持中文路径的插入操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt",
+          "file_hash": "427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e",
+          "contents": "Inserted text into a file with Chinese path.",
+          "before": 2
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\\\u4e2d\\u6587\\u6587\\u4ef6\\u540d.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\\\u4e2d\\u6587\\u6587\\u4ef6\\u540d.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.012968778610229492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert With Special Characters in Filename",
+        "purpose": "验证工具能处理特殊字符文件名的插入操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+          "file_hash": "3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1",
+          "contents": "New content inserted to special filename.",
+          "after": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_\\u6587\\u4ef6#1@2025.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_\\u6587\\u4ef6#1@2025.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.014751434326171875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Into Nested Subdirectory File",
+        "purpose": "验证工具能正确向嵌套子目录中的文件插入内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nested\\dir\\structure\\deeply_nested_file.txt",
+          "file_hash": "37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5",
+          "contents": "\nInserting into a deeply nested file.",
+          "before": 2
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nested\\\\dir\\\\structure\\\\deeply_nested_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File hash mismatch - Please use get_text_file_contents tool to get current content and hash\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.013316869735717773,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Into Read-Only Directory File",
+        "purpose": "验证工具在目标文件所在目录无写权限时的行为",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\unwritable_file.txt",
+          "file_hash": "7af4c0af90457c63f0e63e46866b74dc147693419d720d69e0a3963062858909",
+          "contents": "\nTrying to insert into a file in read-only directory.",
+          "after": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\\\\unwritable_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File hash mismatch - Please use get_text_file_contents tool to get current content and hash\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.012532949447631836,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Into Restricted System File",
+        "purpose": "验证工具无法修改系统受保护目录中的文件以确保安全性",
+        "args": {
+          "file_path": "C:\\Windows\\system32\\drivers\\etc\\hosts",
+          "file_hash": "some_existing_hash",
+          "contents": "\nMalicious attempt to insert into hosts file.",
+          "before": 2
+        },
+        "response": {
+          "result": "{\n  \"C:\\\\Windows\\\\system32\\\\drivers\\\\etc\\\\hosts\": {\n    \"result\": \"error\",\n    \"reason\": \"File hash mismatch - Please use get_text_file_contents tool to get current content and hash\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.010507345199584961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert With Invalid File Hash",
+        "purpose": "验证工具拒绝插入操作当提供的文件哈希与当前文件不匹配",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "invalid_hash_value",
+          "contents": "\nContent should not be inserted due to hash mismatch.",
+          "after": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_text_file.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.013035058975219727,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert To Nonexistent File",
+        "purpose": "验证工具拒绝向不存在的文件插入内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "file_hash": "some_hash",
+          "contents": "\nThis file does not exist and should not be modified.",
+          "before": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.013521671295166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Empty Content",
+        "purpose": "验证工具能正确处理空内容插入",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt",
+          "file_hash": "",
+          "contents": "",
+          "after": 1
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_file.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.008361101150512695,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert With Long File Path",
+        "purpose": "验证工具处理超长文件路径时的插入操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt",
+          "file_hash": "225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05",
+          "contents": "\nInserting more content to long path file.",
+          "before": 2
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\\\longpath_test.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\\\longpath_test.txt\",\n    \"hash\": null\n  }\n}"
+        },
+        "execution_time": 0.00652003288269043,
+        "is_functional_test": true
+      }
+    ],
+    "delete_text_file_contents": [
+      {
+        "case_name": "Basic Text File Content Deletion",
+        "purpose": "验证工具能够使用默认编码删除文本文件中指定的行范围内容并更新哈希值",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6",
+          "ranges": [
+            {
+              "start": 1,
+              "end": 1,
+              "range_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.011543989181518555,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Multiple Line Ranges with UTF-8 Encoding",
+        "purpose": "验证工具能使用UTF-8编码删除多个指定行范围的内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt",
+          "file_hash": "722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a",
+          "ranges": [
+            {
+              "start": 1,
+              "end": 2,
+              "range_hash": "722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a"
+            },
+            {
+              "start": 3,
+              "range_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ],
+          "encoding": "utf-8"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt"
+        },
+        "execution_time": 0.013033151626586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Entire File Content Using Null End Range",
+        "purpose": "验证工具能通过设置 end 为 null 删除从指定起始行到文件末尾的所有内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+          "file_hash": "39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce",
+          "ranges": [
+            {
+              "start": 1,
+              "end": null,
+              "range_hash": "39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce"
+            }
+          ],
+          "encoding": "latin-1"
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt"
+        },
+        "execution_time": 0.011504411697387695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete File Content with Chinese Characters in Path",
+        "purpose": "验证工具支持中文路径的文件内容删除操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt",
+          "file_hash": "427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt"
+        },
+        "execution_time": 0.007509708404541016,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to Delete from Nonexistent File",
+        "purpose": "验证工具在尝试删除不存在的文件内容时的错误处理能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "file_hash": "invalid_hash_value",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "invalid_range_hash"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt"
+        },
+        "execution_time": 0.012166738510131836,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete File Content in Restricted System Directory",
+        "purpose": "验证工具无法修改系统受保护目录中的文件以确保安全性",
+        "args": {
+          "file_path": "C:\\Windows\\system32\\drivers\\etc\\hosts",
+          "file_hash": "some_existing_hash",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "some_range_hash"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\n  \"C:\\\\Windows\\\\system32\\\\drivers\\\\etc\\\\hosts\": {\n    \"result\": \"error\",\n    \"reason\": \"Content hash mismatch\"\n  }\n}"
+        },
+        "execution_time": 0.013038873672485352,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete with Invalid File Hash",
+        "purpose": "验证工具拒绝删除操作当提供的文件哈希与当前文件不匹配",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "invalid_hash_value",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "invalid_range_hash"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.015035390853881836,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete File with Special Characters in Name",
+        "purpose": "验证工具能正确处理特殊字符文件名的内容删除",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+          "file_hash": "3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt"
+        },
+        "execution_time": 0.01151418685913086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Empty Content Range",
+        "purpose": "验证工具能正确处理空内容范围的删除请求",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt",
+          "file_hash": "",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt"
+        },
+        "execution_time": 0.009517669677734375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Delete with Long File Path",
+        "purpose": "验证工具处理超长文件路径时的内容删除操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt",
+          "file_hash": "225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt"
+        },
+        "execution_time": 0.014063835144042969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete File in Nested Subdirectory",
+        "purpose": "验证工具能正确删除嵌套子目录中的文件内容",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nested\\dir\\structure\\deeply_nested_file.txt",
+          "file_hash": "37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5",
+          "ranges": [
+            {
+              "start": 1,
+              "range_hash": "37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\n  \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nested\\\\dir\\\\structure\\\\deeply_nested_file.txt\": {\n    \"result\": \"error\",\n    \"reason\": \"Content hash mismatch\"\n  }\n}"
+        },
+        "execution_time": 0.015028953552246094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete File with Start Line Beyond EOF",
+        "purpose": "验证工具在 start 行号超过文件总行数时的处理",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6",
+          "ranges": [
+            {
+              "start": 1000,
+              "range_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.009523153305053711,
+        "is_functional_test": true
+      }
+    ],
+    "patch_text_file_contents": [
+      {
+        "case_name": "Apply Single Patch to Text File",
+        "purpose": "验证工具能够应用单个补丁到文本文件并正确更新哈希值",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "This is the updated content.",
+              "range_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.009018898010253906,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Multiple Patches to Text File",
+        "purpose": "验证工具能够应用多个补丁到同一个文本文件",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt",
+          "file_hash": "722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "First patch content.",
+              "range_hash": "722b7cfbb20d16c3ed27e675dec4b726873b3a1af6733054a6d144fc8b5fc64a"
+            },
+            {
+              "start": 2,
+              "end": null,
+              "contents": "Second patch appending new line.",
+              "range_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\utf8_encoded_file.txt"
+        },
+        "execution_time": 0.008524417877197266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch with Default Encoding",
+        "purpose": "验证工具使用默认编码（UTF-8）应用补丁",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt",
+          "file_hash": "39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Default encoding patch content.",
+              "range_hash": "39a7903697d41a5cc39fb5683a28d94330782530a200282c0cabfc2f45f156ce"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\latin1_encoded_file.txt"
+        },
+        "execution_time": 0.011039018630981445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch to File with Chinese Path",
+        "purpose": "验证工具能处理中文路径的补丁应用",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt",
+          "file_hash": "427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Chinese path file patched content.",
+              "range_hash": "427f8576cd7735bdd19d8cd8590f4a83a5cc7f9ed18e7a33eaaa87976da5d94e"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.txt"
+        },
+        "execution_time": 0.009506940841674805,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch to File in Nested Subdirectory",
+        "purpose": "验证工具能正确向嵌套子目录中的文件应用补丁",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nested\\dir\\structure\\deeply_nested_file.txt",
+          "file_hash": "37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Nested directory file patch content.",
+              "range_hash": "37a1cfd30ddf547de669b6bf72c205a104246a14f5e61b7e7b773328bf9130c5"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\n  \"result\": \"error\",\n  \"reason\": \"FileHash mismatch - Please use get_text_file_contents tool to get current content and hashes, then retry with the updated hashes.\",\n  \"file_hash\": null,\n  \"suggestion\": \"patch\",\n  \"hint\": \"Please use get_text_file_contents tool to get the current content and hash\"\n}"
+        },
+        "execution_time": 0.007524251937866211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch to Read-Only Directory File",
+        "purpose": "验证工具在目标文件所在目录无写权限时的行为",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\unwritable_file.txt",
+          "file_hash": "7af4c0af90457c63f0e63e46866b74dc147693419d720d69e0a3963062858909",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Trying to patch a file in read-only directory.",
+              "range_hash": "7af4c0af90457c63f0e63e46866b74dc147693419d720d69e0a3963062858909"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\n  \"result\": \"error\",\n  \"reason\": \"Error editing file: 'utf-8' codec can't decode byte 0xff in position 0: Failed to decode file 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\\\\unwritable_file.txt' with utf-8 encoding\",\n  \"file_hash\": null,\n  \"suggestion\": \"patch\",\n  \"hint\": \"Please check file permissions and try again\"\n}"
+        },
+        "execution_time": 0.014027118682861328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Apply Patch to Restricted System File",
+        "purpose": "验证工具无法修改系统受保护目录中的文件以确保安全性",
+        "args": {
+          "file_path": "C:\\Windows\\system32\\drivers\\etc\\hosts",
+          "file_hash": "some_existing_hash",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Malicious attempt to patch hosts file.",
+              "range_hash": "some_range_hash"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\n  \"result\": \"error\",\n  \"reason\": \"FileHash mismatch - Please use get_text_file_contents tool to get current content and hashes, then retry with the updated hashes.\",\n  \"file_hash\": null,\n  \"suggestion\": \"patch\",\n  \"hint\": \"Please use get_text_file_contents tool to get the current content and hash\"\n}"
+        },
+        "execution_time": 0.010518074035644531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Apply Patch With Invalid File Hash",
+        "purpose": "验证工具拒绝补丁操作当提供的文件哈希与当前文件不匹配",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "invalid_hash_value",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Content should not be patched due to hash mismatch.",
+              "range_hash": "invalid_range_hash"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.013679742813110352,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Apply Empty Patch Content",
+        "purpose": "验证工具能正确处理空内容补丁",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt",
+          "file_hash": "",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "",
+              "range_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_file.txt"
+        },
+        "execution_time": 0.0060272216796875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch With Long File Path",
+        "purpose": "验证工具处理超长文件路径时的补丁操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt",
+          "file_hash": "225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "Long path file patch content.",
+              "range_hash": "225bf10cc55e9606c0817f1365744438107cfad489fa885a5695aa8050cbfe05"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\longpath_test.txt"
+        },
+        "execution_time": 0.009135007858276367,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch with Special Characters in Name",
+        "purpose": "验证工具能正确处理特殊字符文件名的补丁操作",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt",
+          "file_hash": "3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1",
+          "patches": [
+            {
+              "start": 1,
+              "end": 1,
+              "contents": "New patch content for special filename.",
+              "range_hash": "3362d93ec49e76907e494241b9ef2f1a72ac24e16abc5e63ff8ae696f76523c1"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_文件#1@2025.txt"
+        },
+        "execution_time": 0.011207342147827148,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Apply Patch to File with Start Line Beyond EOF",
+        "purpose": "验证工具在 start 行号超过文件总行数时的处理",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt",
+          "file_hash": "5bd50ae1b3b73c78a04de3911fabc244ce523219fca71f105117f51b751e3ad6",
+          "patches": [
+            {
+              "start": 1000,
+              "end": 1000,
+              "contents": "Patch content beyond EOF.",
+              "range_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing command: Error processing request: File does not exist: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_text_file.txt"
+        },
+        "execution_time": 0.015039443969726562,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 72
+}

@@ -1,0 +1,902 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp-pdf-tools",
+  "report_name": "mcp-pdf-tools-server",
+  "server_path": "workspace\\public-mcp-servers\\mcp-pdf-tools\\server.py",
+  "timestamp": "2025-07-01T15:58:08.262671",
+  "tools": [
+    {
+      "name": "merge-pdfs",
+      "description": "Merge multiple PDF files into a single PDF",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "input_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of input PDF file paths"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Output path for merged PDF"
+          }
+        },
+        "required": [
+          "input_paths",
+          "output_path"
+        ]
+      }
+    },
+    {
+      "name": "extract-pages",
+      "description": "Extract specific pages from a PDF file",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "input_path": {
+            "type": "string",
+            "description": "Input PDF file path"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Output path for new PDF"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "List of page numbers to extract (1-based indexing)"
+          }
+        },
+        "required": [
+          "input_path",
+          "output_path",
+          "pages"
+        ]
+      }
+    },
+    {
+      "name": "search-pdfs",
+      "description": "Search for PDF files in a directory with optional pattern matching",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "base_path": {
+            "type": "string",
+            "description": "Base directory to search in"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Pattern to match against filenames (e.g., 'report*.pdf')"
+          },
+          "recursive": {
+            "type": "boolean",
+            "description": "Whether to search in subdirectories",
+            "default": true
+          }
+        },
+        "required": [
+          "base_path"
+        ]
+      }
+    },
+    {
+      "name": "merge-pdfs-ordered",
+      "description": "Merge PDFs in a specific order based on patterns or exact names",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "base_path": {
+            "type": "string",
+            "description": "Base directory containing PDFs"
+          },
+          "patterns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of patterns or names in desired order"
+          },
+          "output_path": {
+            "type": "string",
+            "description": "Output path for merged PDF"
+          },
+          "fuzzy_matching": {
+            "type": "boolean",
+            "description": "Use fuzzy matching for filenames",
+            "default": true
+          }
+        },
+        "required": [
+          "base_path",
+          "patterns",
+          "output_path"
+        ]
+      }
+    },
+    {
+      "name": "find-related-pdfs",
+      "description": "Find a PDF and then search for related PDFs based on its content, including common substring patterns",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "base_path": {
+            "type": "string",
+            "description": "Base directory to search in"
+          },
+          "target_filename": {
+            "type": "string",
+            "description": "Name of the initial PDF to analyze"
+          },
+          "pattern_matching_only": {
+            "type": "boolean",
+            "description": "Only search for repeating substring patterns",
+            "default": false
+          },
+          "min_pattern_occurrences": {
+            "type": "integer",
+            "description": "Minimum times a pattern must appear to be considered significant",
+            "default": 2
+          }
+        },
+        "required": [
+          "base_path",
+          "target_filename"
+        ]
+      }
+    }
+  ],
+  "test_results": {
+    "search-pdfs": [
+      {
+        "case_name": "Basic PDF Search with Default Recursive",
+        "purpose": "验证工具在默认递归模式下能否正确搜索指定目录中的所有PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.0045125484466552734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "PDF Search with Specific Pattern Matching",
+        "purpose": "验证工具能否根据指定的文件名模式（如'城市道路管理条例.pdf'）匹配并返回结果",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "城市道路管理条例.pdf"
+        },
+        "response": {
+          "result": "Found 1 PDF files:\n- D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Pattern Match for Wildcard Expression",
+        "purpose": "验证工具是否支持通配符模式匹配，例如'report*.pdf'",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "report*.pdf"
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.0041539669036865234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-Recursive PDF Search",
+        "purpose": "验证非递归搜索时是否仅在当前目录中查找PDF文件而不进入子目录",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "recursive": false
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.005033969879150391,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search in Subdirectory with Recursive Enabled",
+        "purpose": "验证递归搜索是否包括子目录，并能识别子目录中的PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_repo",
+          "recursive": true
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.005606889724731445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt",
+        "purpose": "测试工具是否阻止路径穿越攻击尝试，如使用'../../'访问上级目录",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\",
+          "recursive": false
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.002562284469604492,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Base Path",
+        "purpose": "验证当提供无效或不存在的base_path时工具是否能优雅处理错误",
+        "args": {
+          "base_path": "D:\\invalid\\path\\to\\directory"
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.0025043487548828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-Readable Directory",
+        "purpose": "模拟无法读取的目录权限情况，验证工具是否能处理此类错误",
+        "args": {
+          "base_path": "D:\\restricted\\access\\dir"
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.005009174346923828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Empty Pattern",
+        "purpose": "验证空模式字符串是否被正确处理，并返回所有PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": ""
+        },
+        "response": {
+          "result": "Found 2 PDF files:\n- D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf\n- D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Pattern",
+        "purpose": "验证包含特殊字符的模式是否被正确解析和匹配",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*_副本.pdf"
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.004149198532104492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Maximum Depth Directory",
+        "purpose": "测试工具在嵌套多层目录结构中搜索PDF的能力",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\deep\\nested\\structure\\level5",
+          "recursive": true
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.008208990097045898,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Functional Test - No PDF Files Match Pattern",
+        "purpose": "验证无匹配结果时工具是否返回空数组而不是报错",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "nonexistent*.pdf"
+        },
+        "response": {
+          "result": "Found 0 PDF files:\n"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": true
+      }
+    ],
+    "merge-pdfs": [
+      {
+        "case_name": "Basic PDF Merge with Valid Inputs",
+        "purpose": "验证工具在提供多个有效PDF文件路径时是否能正确合并成一个PDF",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_basic.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: EOF marker not found"
+        },
+        "execution_time": 0.02853226661682129,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Single PDF File Merge",
+        "purpose": "验证仅提供一个输入PDF文件时是否仍能正常生成输出文件",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_single.pdf"
+        },
+        "response": {
+          "result": "Successfully merged 1 PDFs into D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_single.pdf"
+        },
+        "execution_time": 0.06859135627746582,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge PDFs with Empty Input List",
+        "purpose": "验证当输入的PDF文件列表为空时，工具是否能优雅处理并返回错误信息而不是崩溃",
+        "args": {
+          "input_paths": [],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_empty_input.pdf"
+        },
+        "response": {
+          "error": "ToolException: Missing required arguments"
+        },
+        "execution_time": 0.0020008087158203125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Input Paths",
+        "purpose": "测试工具是否阻止路径穿越攻击尝试，如使用'../../'访问上级目录中的文件",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\secret.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_path_traversal.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\secret.pdf'"
+        },
+        "execution_time": 0.0019996166229248047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Input File Path",
+        "purpose": "验证当提供的输入文件路径不存在或无效时，工具是否能正确处理错误",
+        "args": {
+          "input_paths": [
+            "D:\\invalid\\path\\to\\file.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_invalid_path.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: [Errno 2] No such file or directory: 'D:\\\\invalid\\\\path\\\\to\\\\file.pdf'"
+        },
+        "execution_time": 0.0010004043579101562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-Readable PDF File",
+        "purpose": "模拟无法读取的PDF文件情况，验证工具是否能处理此类错误",
+        "args": {
+          "input_paths": [
+            "D:\\restricted\\access\\file.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_non_readable.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: [Errno 2] No such file or directory: 'D:\\\\restricted\\\\access\\\\file.pdf'"
+        },
+        "execution_time": 0.0020046234130859375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Large Number of Input Files",
+        "purpose": "验证工具在处理大量输入PDF文件时的表现和稳定性",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_large_input.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: EOF marker not found"
+        },
+        "execution_time": 0.031565189361572266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Long File Paths",
+        "purpose": "验证工具在处理包含长路径名的PDF文件时是否正常",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\long_file_name.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\merged_output_long_path.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_long_directory_name_1234567890_abcdefghijklmnopqrstuvwxyz\\\\long_file_name.pdf'"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in File Names",
+        "purpose": "验证工具能否正确处理包含特殊字符的PDF文件名",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_repo\\中文文件名.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_output_special_chars.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_repo\\\\中文文件名.pdf'"
+        },
+        "execution_time": 0.003008127212524414,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge PDFs with Output Directory Not Exist",
+        "purpose": "验证输出路径所在的目录不存在时，工具是否能自动创建目录或报错提示",
+        "args": {
+          "input_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+          ],
+          "output_path": "D:\\nonexistent\\directory\\merged_output.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: [Errno 2] No such file or directory: 'D:\\\\nonexistent\\\\directory\\\\merged_output.pdf'"
+        },
+        "execution_time": 0.02658224105834961,
+        "is_functional_test": false
+      }
+    ],
+    "extract-pages": [
+      {
+        "case_name": "Basic Page Extraction with Valid Input",
+        "purpose": "验证工具在提供有效输入路径、输出路径和页码列表时能否正确提取指定页面",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_page_1.pdf",
+          "pages": [
+            1
+          ]
+        },
+        "response": {
+          "result": "Successfully extracted 1 pages to D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_page_1.pdf"
+        },
+        "execution_time": 0.02805352210998535,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Extract Multiple Pages from PDF",
+        "purpose": "验证工具是否能正确提取多个指定的页面并生成包含这些页面的新PDF文件",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_pages_2_4.pdf",
+          "pages": [
+            2,
+            4
+          ]
+        },
+        "response": {
+          "result": "Error extracting pages: EOF marker not found"
+        },
+        "execution_time": 0.007313966751098633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Input Path",
+        "purpose": "测试工具是否阻止路径穿越攻击尝试，如使用'../../'访问上级目录中的文件",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\secret.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_path_traversal.pdf",
+          "pages": [
+            1
+          ]
+        },
+        "response": {
+          "result": "Error extracting pages: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\secret.pdf'"
+        },
+        "execution_time": 0.0035076141357421875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Input File Path",
+        "purpose": "验证当提供的输入文件路径不存在或无效时，工具是否能正确处理错误",
+        "args": {
+          "input_path": "D:\\invalid\\path\\to\\file.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_invalid_input.pdf",
+          "pages": [
+            1
+          ]
+        },
+        "response": {
+          "result": "Error extracting pages: [Errno 2] No such file or directory: 'D:\\\\invalid\\\\path\\\\to\\\\file.pdf'"
+        },
+        "execution_time": 0.0042629241943359375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-Readable PDF File",
+        "purpose": "模拟无法读取的PDF文件情况，验证工具是否能处理此类错误",
+        "args": {
+          "input_path": "D:\\restricted\\access\\file.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_non_readable.pdf",
+          "pages": [
+            1
+          ]
+        },
+        "response": {
+          "result": "Error extracting pages: [Errno 2] No such file or directory: 'D:\\\\restricted\\\\access\\\\file.pdf'"
+        },
+        "execution_time": 0.0041234493255615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Extract First and Last Page",
+        "purpose": "验证工具是否能正确提取文档的第一页和最后一页（边界值）",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\first_and_last_page.pdf",
+          "pages": [
+            1,
+            5
+          ]
+        },
+        "response": {
+          "result": "Successfully extracted 2 pages to D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\first_and_last_page.pdf"
+        },
+        "execution_time": 0.027576208114624023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Output File Name",
+        "purpose": "验证工具能否正确处理包含特殊字符的输出文件名",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_@#中文$.pdf",
+          "pages": [
+            1
+          ]
+        },
+        "response": {
+          "result": "Error extracting pages: EOF marker not found"
+        },
+        "execution_time": 0.00650787353515625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Error Handling - Empty Pages Array",
+        "purpose": "验证当提供的页码数组为空时，工具是否能优雅地处理错误而不是崩溃",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_pages_extraction.pdf",
+          "pages": []
+        },
+        "response": {
+          "error": "ToolException: Missing required arguments"
+        },
+        "execution_time": 0.00368499755859375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Duplicate Page Numbers",
+        "purpose": "验证当提供的页码数组中包含重复页码时，工具是否能正确处理",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\duplicate_pages_extraction.pdf",
+          "pages": [
+            2,
+            2,
+            3
+          ]
+        },
+        "response": {
+          "result": "Error extracting pages: EOF marker not found"
+        },
+        "execution_time": 0.00797414779663086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Page Number Out of Range",
+        "purpose": "验证当请求的页码超出PDF实际页数时，工具是否能处理此边界条件",
+        "args": {
+          "input_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\page_out_of_range.pdf",
+          "pages": [
+            100
+          ]
+        },
+        "response": {
+          "result": "Error: Page number 100 is out of range"
+        },
+        "execution_time": 0.006520748138427734,
+        "is_functional_test": true
+      }
+    ],
+    "merge-pdfs-ordered": [
+      {
+        "case_name": "Basic PDF Merge with Ordered Patterns",
+        "purpose": "验证工具能否根据指定的模式顺序正确合并PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "patterns": [
+            "2023.nlposs-1.24.pdf",
+            "城市道路管理条例.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_ordered_basic.pdf"
+        },
+        "response": {
+          "result": "Error merging PDFs: EOF marker not found"
+        },
+        "execution_time": 0.046369314193725586,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge PDFs Using Fuzzy Matching Enabled",
+        "purpose": "验证启用模糊匹配时，工具能否基于部分匹配名正确排序并合并PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "patterns": [
+            "条例",
+            "nlposs"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_fuzzy_match.pdf",
+          "fuzzy_matching": true
+        },
+        "response": {
+          "result": "Error merging PDFs: EOF marker not found"
+        },
+        "execution_time": 0.015031576156616211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Merge PDFs Using Fuzzy Matching Disabled",
+        "purpose": "验证禁用模糊匹配时，工具是否仅严格匹配完整文件名",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "patterns": [
+            "条例",
+            "nlposs"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\merged_strict_match.pdf",
+          "fuzzy_matching": false
+        },
+        "response": {
+          "result": "Error merging PDFs: EOF marker not found"
+        },
+        "execution_time": 0.01550912857055664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal in Base Path",
+        "purpose": "测试工具是否阻止路径穿越攻击尝试（如使用'../../'访问上级目录）",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..",
+          "patterns": [
+            "*.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\malicious_merge_output.pdf",
+          "fuzzy_matching": true
+        },
+        "response": {
+          "result": "Error merging PDFs: "
+        },
+        "execution_time": 0.08111119270324707,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Base Path",
+        "purpose": "验证当提供的基础路径不存在或无效时，工具是否能优雅处理错误",
+        "args": {
+          "base_path": "D:\\invalid\\path\\to\\directory",
+          "patterns": [
+            "report*.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_base_merge_output.pdf"
+        },
+        "response": {
+          "result": "Warning: No matches found for pattern 'report*.pdf'"
+        },
+        "execution_time": 0.014528512954711914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-Readable Directory",
+        "purpose": "模拟无法读取的基础目录权限情况，验证工具是否能处理此类错误",
+        "args": {
+          "base_path": "D:\\restricted\\access\\dir",
+          "patterns": [
+            "*.pdf"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\non_readable_dir_merge_output.pdf"
+        },
+        "response": {
+          "result": "Warning: No matches found for pattern '*.pdf'"
+        },
+        "execution_time": 0.008510351181030273,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Empty Pattern List",
+        "purpose": "验证空模式列表是否被正确处理，并按默认顺序合并所有PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "patterns": [],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_pattern_merge_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Missing required arguments"
+        },
+        "execution_time": 0.016546249389648438,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Patterns",
+        "purpose": "验证包含特殊字符的模式是否能被正确解析和匹配",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "patterns": [
+            "*_副本.pdf",
+            "*.docx"
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special_char_merge_output.pdf"
+        },
+        "response": {
+          "result": "Warning: No matches found for pattern '*_副本.pdf'"
+        },
+        "execution_time": 0.019025802612304688,
+        "is_functional_test": true
+      }
+    ],
+    "find-related-pdfs": [
+      {
+        "case_name": "Basic PDF Search with Default Recursive",
+        "purpose": "验证工具在默认递归模式下能否正确搜索指定目录中的所有PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Missing required arguments"
+        },
+        "execution_time": 0.004997730255126953,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Find Related PDFs Based on Target File Content",
+        "purpose": "验证工具能否基于目标PDF内容查找相关PDF文件",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "execution_time": 0.006289482116699219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Pattern Matching Only Mode Test",
+        "purpose": "验证仅启用重复子串模式匹配时，工具是否能正确识别相关PDF",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "pattern_matching_only": true,
+          "min_pattern_occurrences": 2
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "execution_time": 0.004998683929443359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Minimum Pattern Occurrence Threshold Test",
+        "purpose": "验证最小模式出现次数阈值设置是否影响结果过滤",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf",
+          "pattern_matching_only": true,
+          "min_pattern_occurrences": 3
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "execution_time": 0.004011869430541992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Path Traversal Attempt in Base Path",
+        "purpose": "测试工具是否阻止路径穿越攻击尝试，如使用'../../'访问上级目录",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "execution_time": 0.06876516342163086,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Base Path",
+        "purpose": "验证当提供无效或不存在的base_path时工具是否能优雅处理错误",
+        "args": {
+          "base_path": "D:\\invalid\\path\\to\\directory",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-Readable Directory",
+        "purpose": "模拟无法读取的目录权限情况，验证工具是否能处理此类错误",
+        "args": {
+          "base_path": "D:\\restricted\\access\\dir",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\城市道路管理条例.pdf"
+        },
+        "execution_time": 0.0025098323822021484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Empty Target Filename",
+        "purpose": "验证空目标文件名参数是否被正确拒绝",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "target_filename": ""
+        },
+        "response": {
+          "error": "ToolException: Missing required arguments"
+        },
+        "execution_time": 0.0020008087158203125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Target Filename",
+        "purpose": "验证包含特殊字符的目标文件名是否能被正确处理",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.pdf"
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文文件名.pdf"
+        },
+        "execution_time": 0.003997325897216797,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Edge Case - Minimal Pattern Occurrences Set to 1",
+        "purpose": "验证最小模式出现次数设为1时是否返回更多匹配结果",
+        "args": {
+          "base_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "target_filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf",
+          "pattern_matching_only": true,
+          "min_pattern_occurrences": 1
+        },
+        "response": {
+          "result": "Could not find target PDF: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\2023.nlposs-1.24.pdf"
+        },
+        "execution_time": 0.007434844970703125,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 50
+}

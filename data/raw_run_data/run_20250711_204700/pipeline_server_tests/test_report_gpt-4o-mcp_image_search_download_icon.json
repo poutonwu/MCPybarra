@@ -1,0 +1,492 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_image_search_download_icon",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_image_search_download_icon/refined/server.py",
+  "timestamp": "2025-07-11T21:04:11.109648",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    Search for images based on user-provided keywords using APIs from Unsplash, Pexels, or Pixabay.\n\n    Args:\n        keyword (str): The search term used to find relevant images. Example: \"sunset\"\n        source (str): The image source to query ('unsplash', 'pexels', or 'pixabay'). Example: \"unsplash\"\n\n    Returns:\n        str: A JSON string representing a list of dictionaries, where each dictionary contains:\n            image_url (str): URL of the image.\n            author (str): Name of the image creator.\n            metadata (dict): Additional metadata, such as image dimensions and license information.\n\n    Example:\n        search_images(keyword=\"beach\", source=\"unsplash\")\n    ",
+      "args_schema": {
+        "properties": {
+          "keyword": {
+            "title": "Keyword",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyword",
+          "source"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    Download an image from a given URL and save it to a specified file path with a custom filename.\n\n    Args:\n        image_url (str): The URL of the image to be downloaded. Example: \"https://example.com/image.jpg\"\n        file_name (str): The desired name for the saved image file, including the extension. Example: \"image.jpg\"\n        directory (str): The directory path where the image will be saved. Example: \"./images\"\n\n    Returns:\n        str: A JSON string containing:\n            status (str): The result of the operation ('success' or 'failure').\n            file_path (str): The full path to the saved image file.\n\n    Example:\n        download_image(image_url=\"https://example.com/image.jpg\", file_name=\"image.jpg\", directory=\"./images\")\n    ",
+      "args_schema": {
+        "properties": {
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "type": "string"
+          },
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_url",
+          "file_name",
+          "directory"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    Generate an icon based on a textual description. If a cloud-based generation service is unavailable, \n    it uses a local sample image for simulation.\n\n    Args:\n        description (str): A textual description of the desired icon. Example: \"sun and clouds\"\n        size (tuple[int, int]): Dimensions of the icon (width, height). Example: (128, 128)\n        directory (str): The directory path where the icon will be saved. Example: \"./icons\"\n\n    Returns:\n        str: A JSON string containing:\n            status (str): The result of the operation ('success' or 'failure').\n            file_path (str): The full path to the generated icon file.\n\n    Example:\n        generate_icon(description=\"sun and clouds\", size=(128, 128), directory=\"./icons\")\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Size",
+            "type": "array"
+          },
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "size",
+          "directory"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search on Unsplash",
+        "purpose": "验证工具能否使用默认参数在Unsplash上搜索图片",
+        "args": {
+          "keyword": "nature",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.00600743293762207,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic Image Search on Pexels",
+        "purpose": "验证工具能否在Pexels上搜索图片",
+        "args": {
+          "keyword": "sunset",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No images found for 'sunset' on pexels. Try different search terms or check API connectivity.\"\n}"
+        },
+        "execution_time": 2.7099804878234863,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic Image Search on Pixabay",
+        "purpose": "验证工具能否在Pixabay上搜索图片",
+        "args": {
+          "keyword": "beach",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '400 Bad Request' for url 'https://pixabay.com/api/?query=beach&per_page=10'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\"\n}"
+        },
+        "execution_time": 2.1831936836242676,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Chinese Keyword",
+        "purpose": "验证工具是否支持中文关键词搜索",
+        "args": {
+          "keyword": "雪景",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.006510019302368164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keyword Test",
+        "purpose": "测试空关键词是否被正确处理",
+        "args": {
+          "keyword": "",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '400 Bad Request' for url 'https://api.pexels.com/v1/search?query=&per_page=10'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\"\n}"
+        },
+        "execution_time": 3.0017378330230713,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Test",
+        "purpose": "测试无效的图像来源是否被拒绝",
+        "args": {
+          "keyword": "mountain",
+          "source": "invalid_source"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Invalid source 'invalid_source'. Must be one of: unsplash, pexels, pixabay\"\n}"
+        },
+        "execution_time": 0.005407571792602539,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Keyword",
+        "purpose": "测试包含特殊字符的关键词是否被正确处理",
+        "args": {
+          "keyword": "city@night!#",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '400 Bad Request' for url 'https://pixabay.com/api/?query=city%40night%21%23&per_page=10'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\"\n}"
+        },
+        "execution_time": 1.7073793411254883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Keyword Search",
+        "purpose": "测试长关键词是否能正常工作",
+        "args": {
+          "keyword": "a very long keyword phrase that might be used to search for specific images",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.004514455795288086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "No Results Found",
+        "purpose": "测试当没有匹配结果时工具的行为",
+        "args": {
+          "keyword": "this_keyword_should_not_return_any_images",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No images found for 'this_keyword_should_not_return_any_images' on pexels. Try different search terms or check API connectivity.\"\n}"
+        },
+        "execution_time": 2.273359775543213,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt",
+        "purpose": "测试工具对SQL注入尝试的处理能力",
+        "args": {
+          "keyword": "test'; DROP TABLE users;--",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '403 Forbidden' for url 'https://pixabay.com/api/?query=test%27%3B+DROP+TABLE+users%3B--&per_page=10'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403\"\n}"
+        },
+        "execution_time": 1.9349393844604492,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt",
+        "purpose": "测试工具对XSS攻击尝试的处理能力",
+        "args": {
+          "keyword": "<script>alert('xss')</script>",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Network Failure Simulation",
+        "purpose": "模拟网络故障情况下的错误处理",
+        "args": {
+          "keyword": "internet_failure_test",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No images found for 'internet_failure_test' on pexels. Try different search terms or check API connectivity.\"\n}"
+        },
+        "execution_time": 2.004434823989868,
+        "is_functional_test": false
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Invalid Image URL Format",
+        "purpose": "测试无效的图像URL格式是否被正确处理",
+        "args": {
+          "image_url": "invalid_url",
+          "file_name": "image.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Request URL is missing an 'http://' or 'https://' protocol.\"\n}"
+        },
+        "execution_time": 0.4683256149291992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Length Image URL",
+        "purpose": "测试空字符串作为image_url参数是否被正确拒绝",
+        "args": {
+          "image_url": "",
+          "file_name": "image.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Invalid image URL provided. This likely means the previous search step failed to find any images.\"\n}"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation with Default Size",
+        "purpose": "验证工具能否使用默认尺寸生成图标",
+        "args": {
+          "description": "settings gear",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_settings_gear.png\"\n}"
+        },
+        "execution_time": 0.015511035919189453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Size",
+        "purpose": "验证工具能否使用自定义尺寸生成图标",
+        "args": {
+          "description": "lightbulb idea",
+          "size": [
+            64,
+            64
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_lightbulb_idea.png\"\n}"
+        },
+        "execution_time": 0.007468223571777344,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation in Nested Directory",
+        "purpose": "验证工具能否在深层嵌套目录中生成图标",
+        "args": {
+          "description": "folder document",
+          "size": [
+            32,
+            32
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\deep\\nested\\path\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\deep\\\\nested\\\\path\\\\icons\\\\icon_folder_document.png\"\n}"
+        },
+        "execution_time": 0.0030012130737304688,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Chinese Description",
+        "purpose": "验证工具是否支持中文描述生成图标",
+        "args": {
+          "description": "月亮与星星",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_月亮与星星.png\"\n}"
+        },
+        "execution_time": 0.004945516586303711,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Special Characters",
+        "purpose": "验证包含特殊字符的描述是否能被正确处理",
+        "args": {
+          "description": "user@domain!#",
+          "size": [
+            64,
+            64
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_user@domain!#.png\"\n}"
+        },
+        "execution_time": 0.008536338806152344,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Empty Description",
+        "purpose": "测试空描述是否被正确拒绝",
+        "args": {
+          "description": "",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_.png\"\n}"
+        },
+        "execution_time": 0.00500035285949707,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Icon Generation with Invalid Size",
+        "purpose": "测试无效尺寸参数是否被拒绝",
+        "args": {
+          "description": "cloud upload",
+          "size": [
+            0,
+            0
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Width and height must be positive numbers\"\n}"
+        },
+        "execution_time": 0.004517555236816406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Icon Generation with Negative Size",
+        "purpose": "测试负数尺寸是否被正确处理",
+        "args": {
+          "description": "warning triangle",
+          "size": [
+            -32,
+            -32
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Width and height must be positive numbers\"\n}"
+        },
+        "execution_time": 0.006000518798828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Icon Generation with Non-Existent Directory",
+        "purpose": "测试不存在的目录路径是否被正确处理",
+        "args": {
+          "description": "database storage",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_icons\\\\icon_database_storage.png\"\n}"
+        },
+        "execution_time": 0.004996538162231445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt in Description",
+        "purpose": "测试工具对描述字段中的SQL注入尝试的处理能力",
+        "args": {
+          "description": "test'; DROP TABLE icons;--",
+          "size": [
+            64,
+            64
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_test';_DROP_TABLE_icons;--.png\"\n}"
+        },
+        "execution_time": 0.007520437240600586,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - XSS Attempt in Description",
+        "purpose": "测试工具对描述字段中的XSS攻击尝试的处理能力",
+        "args": {
+          "description": "<script>alert('xss')</script>",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"[Errno 22] Invalid argument: \\\"D:\\\\\\\\devWorkspace\\\\\\\\MCPServer-Generator\\\\\\\\testSystem\\\\\\\\testFiles\\\\\\\\icons\\\\\\\\icon_<script>alert('xss')<\\\\\\\\script>.png\\\"\"\n}"
+        },
+        "execution_time": 0.0049970149993896484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Description Test",
+        "purpose": "测试长描述是否能正常工作",
+        "args": {
+          "description": "a very long description phrase that might be used to generate specific icon images",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons\\\\icon_a_very_long_description_phrase_that_might_be_used_to_generate_specific_icon_images.png\"\n}"
+        },
+        "execution_time": 0.005389213562011719,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 26
+}

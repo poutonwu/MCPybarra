@@ -1,0 +1,281 @@
+[
+  {
+    "step": {
+      "step_id": "create_test_file",
+      "tool_name": "create_text_file",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "content": "这是文件的第一行\n这是文件的第二行\n这是文件的第三行"
+      },
+      "description": "Happy path: 创建一个测试文件并写入初始内容"
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "content": "这是文件的第一行\n这是文件的第二行\n这是文件的第三行"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"success\": true, \"message\": \"文件 test_output.txt 创建成功\", \"hash\": \"3520c731ccabefc0bbd05c20013088c11231de882efb20cd319e82c2c8812659\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_created_file",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: 读取刚刚创建的测试文件的内容，验证是否正确写入"
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"这是文件的第一行\\n\", \"这是文件的第二行\\n\", \"这是文件的第三行\"]}, \"hashes\": {\"test_output.txt\": \"3520c731ccabefc0bbd05c20013088c11231de882efb20cd319e82c2c8812659\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "append_to_file",
+      "tool_name": "append_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "content": "\n这是追加的新内容"
+      },
+      "description": "Happy path: 向测试文件追加新内容"
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "content": "\n这是追加的新内容"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"success\": true, \"message\": \"成功向文件 test_output.txt 追加内容\", \"new_hash\": \"acafc7ec2d16fab357809153a14e746718ea65974d22a5670d16036bd6b56ed2\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_append",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: 验证追加内容是否成功写入文件"
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"这是文件的第一行\\n\", \"这是文件的第二行\\n\", \"这是文件的第三行\\n\", \"这是追加的新内容\"]}, \"hashes\": {\"test_output.txt\": \"acafc7ec2d16fab357809153a14e746718ea65974d22a5670d16036bd6b56ed2\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_file",
+      "tool_name": "insert_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "insert_line": 2,
+        "content": "这是插入的新行1\n这是插入的新行2",
+        "expected_hash": "$outputs.read_after_append.hashes.test_output.txt"
+      },
+      "description": "Happy path + concurrency control: 在指定位置插入内容，并使用哈希值确保文件未被修改"
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "insert_line": 2,
+      "content": "这是插入的新行1\n这是插入的新行2",
+      "expected_hash": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.read_after_append.hashes.test_output.txt'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_insert",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: 验证插入操作是否成功完成"
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"这是文件的第一行\\n\", \"这是文件的第二行\\n\", \"这是文件的第三行\\n\", \"这是追加的新内容\"]}, \"hashes\": {\"test_output.txt\": \"acafc7ec2d16fab357809153a14e746718ea65974d22a5670d16036bd6b56ed2\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "patch_file_line",
+      "tool_name": "patch_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "line_number": 3,
+        "old_content": "这是文件的第三行",
+        "new_content": "这是更新后的第三行",
+        "expected_hash": "$outputs.read_after_insert.hashes.test_output.txt"
+      },
+      "description": "Happy path + content validation: 精确替换某一行内容，并验证旧内容是否匹配"
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "line_number": 3,
+      "old_content": "这是文件的第三行",
+      "new_content": "这是更新后的第三行",
+      "expected_hash": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.read_after_insert.hashes.test_output.txt'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_patch",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: 验证内容替换是否成功"
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"这是文件的第一行\\n\", \"这是文件的第二行\\n\", \"这是文件的第三行\\n\", \"这是追加的新内容\"]}, \"hashes\": {\"test_output.txt\": \"acafc7ec2d16fab357809153a14e746718ea65974d22a5670d16036bd6b56ed2\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_content_range",
+      "tool_name": "delete_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "start_line": 1,
+        "end_line": 3,
+        "expected_hash": "$outputs.read_after_patch.hashes.test_output.txt"
+      },
+      "description": "Happy path + concurrency control: 删除文件中特定范围的内容"
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "start_line": 1,
+      "end_line": 3,
+      "expected_hash": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.read_after_patch.hashes.test_output.txt'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_after_delete",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "test_output.txt"
+        ]
+      },
+      "description": "Dependent call: 验证删除操作是否成功完成"
+    },
+    "substituted_params": {
+      "file_paths": [
+        "test_output.txt"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"contents\": {\"test_output.txt\": [\"这是文件的第一行\\n\", \"这是文件的第二行\\n\", \"这是文件的第三行\\n\", \"这是追加的新内容\"]}, \"hashes\": {\"test_output.txt\": \"acafc7ec2d16fab357809153a14e746718ea65974d22a5670d16036bd6b56ed2\"}}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_read_nonexistent_file",
+      "tool_name": "get_text_file_contents",
+      "parameters": {
+        "file_paths": [
+          "non_existent_file.txt"
+        ]
+      },
+      "description": "Edge case: 尝试读取一个不存在的文件，期望返回错误"
+    },
+    "substituted_params": {
+      "file_paths": [
+        "non_existent_file.txt"
+      ]
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"文件未找到: non_existent_file.txt\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_create_invalid_path",
+      "tool_name": "create_text_file",
+      "parameters": {
+        "file_path": "../invalid_dir/test_output.txt",
+        "content": "这是一个非法路径测试"
+      },
+      "description": "Edge case: 测试非法文件路径（路径穿越），期望返回错误"
+    },
+    "substituted_params": {
+      "file_path": "../invalid_dir/test_output.txt",
+      "content": "这是一个非法路径测试"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"success\": false, \"message\": \"创建文件失败: 非法的文件路径: ../invalid_dir/test_output.txt. 文件路径必须位于当前工作目录内.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "try_patch_conflicting_change",
+      "tool_name": "patch_text_file_contents",
+      "parameters": {
+        "file_path": "test_output.txt",
+        "line_number": 0,
+        "old_content": "这是文件的第一行",
+        "new_content": "冲突修改尝试",
+        "expected_hash": "fake_hash_value_that_does_not_match"
+      },
+      "description": "Concurrency edge case: 模拟并发冲突，提供错误的哈希值，期望拒绝修改"
+    },
+    "substituted_params": {
+      "file_path": "test_output.txt",
+      "line_number": 0,
+      "old_content": "这是文件的第一行",
+      "new_content": "冲突修改尝试",
+      "expected_hash": "fake_hash_value_that_does_not_match"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"success\": false, \"message\": \"应用修改失败: 文件已被其他进程修改，请刷新后再试\"}"
+    }
+  }
+]

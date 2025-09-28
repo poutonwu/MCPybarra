@@ -1,0 +1,524 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_zotero",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_zotero/refined/server.py",
+  "timestamp": "2025-07-11T21:22:21.048733",
+  "tools": [
+    {
+      "name": "get_item_metadata",
+      "description": "\n    获取指定 Zotero 条目的详细元数据。\n\n    Args:\n        item_key: 要获取元数据的 Zotero 条目键值，必须是字符串类型且非空。\n\n    Returns:\n        返回包含条目详细元数据的 JSON 字典，包括标题、作者、出版年份等信息。\n\n    Raises:\n        ValueError: 如果 item_key 无效或格式不正确。\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_metadataArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_item_fulltext",
+      "description": "\n    提取指定 Zotero 条目的全文内容。\n\n    Args:\n        item_key: 要提取全文的 Zotero 条目键值，必须是字符串类型且非空。\n\n    Returns:\n        返回包含条目全文内容的字典，如果条目没有全文内容则返回空字符串。\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_fulltextArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_items",
+      "description": "\n    在 Zotero 库中执行灵活搜索，支持按标题、创建者、年份或全文搜索。\n\n    Args:\n        query: 搜索查询字符串，必须是字符串类型且非空。\n        search_type: 搜索类型，可选值为 \"title\", \"creator\", \"year\", \"fulltext\"，默认为 \"title\"。\n        page: 当前页码，必须是正整数，默认为1。\n        items_per_page: 每页结果数量，必须是正整数，默认为20。\n\n    Returns:\n        返回格式化的搜索结果列表，每个结果包含条目键值、标题和匹配度评分。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_type": {
+            "default": "title",
+            "title": "Search Type",
+            "type": "string"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "items_per_page": {
+            "default": 20,
+            "title": "Items Per Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_itemsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_items": [
+      {
+        "case_name": "基本标题搜索",
+        "purpose": "验证默认参数下按标题搜索的基本功能是否正常",
+        "args": {
+          "query": "test"
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"item_key\": \"TCAVDPC4\",\n      \"title\": \"AgentCoder: Multi-Agent-based Code Generation with Iterative Testing and Optimisation\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"ASHWF68J\",\n      \"title\": \"Software Testing with Large Language Models: Survey, Landscape, and Vision\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"JJS8VNMI\",\n      \"title\": \"Software Testing With Large Language Models: Survey, Landscape, and Vision\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"Q78PQR25\",\n      \"title\": \"Automated Unit Test Improvement using Large Language Models at Meta\",\n      \"score\": 0\n    }\n  ],\n  \"total\": 4,\n  \"search_type\": \"title\",\n  \"query\": \"test\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 2.7730746269226074,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "按创建者搜索",
+        "purpose": "验证使用指定search_type为creator的搜索功能",
+        "args": {
+          "query": "John Doe",
+          "search_type": "creator"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"creator\",\n  \"query\": \"John Doe\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4698653221130371,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "按年份搜索",
+        "purpose": "验证使用search_type为year的搜索功能",
+        "args": {
+          "query": "2023",
+          "search_type": "year"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"year\",\n  \"query\": \"2023\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4431893825531006,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "全文本搜索",
+        "purpose": "验证使用search_type为fulltext的搜索功能",
+        "args": {
+          "query": "experimental results",
+          "search_type": "fulltext"
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"item_key\": \"RW5W5JN2\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"NZ26PJJX\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"K78DMKPD\",\n      \"title\": \"CODESIM: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"KRR7MFVP\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"LMA2MAZI\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"2VCDLWBG\",\n      \"title\": \"Self-Organized Agents: A LLM Multi-Agent Framework toward Ultra Large-Scale Code Generation and Optimization\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"X6PB95S9\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"6AAK9P4J\",\n      \"title\": \"SWE-bench: Can Language Models Resolve Real-World GitHub Issues?\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"SNUTTAER\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"PMJIF2UH\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"ZMFZ6DR6\",\n      \"title\": \"CodeAgent: Autonomous Communicative Agents for Code Review\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"TL6DJ74R\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"RA65N57L\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"38UUWRKZ\",\n      \"title\": \"SOTOPIA: Interactive Evaluation for Social Intelligence in Language Agents\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"YCAJD2S3\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"PJ3696LV\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"JJEJX7WH\",\n      \"title\": \"MetaGPT: Meta Programming for A Multi-Agent Collaborative Framework\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"I8JVWYCX\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"2H3GEYDA\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"I42DDMRJ\",\n      \"title\": \"Agent Laboratory: Using LLM Agents as Research Assistants\",\n      \"score\": 0\n    }\n  ],\n  \"total\": 20,\n  \"search_type\": \"fulltext\",\n  \"query\": \"experimental results\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 1.6164600849151611,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "自定义分页搜索",
+        "purpose": "验证非默认page和items_per_page参数下的搜索结果分页功能",
+        "args": {
+          "query": "report",
+          "page": 2,
+          "items_per_page": 10
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"report\",\n  \"page\": 2,\n  \"items_per_page\": 10,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4420766830444336,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符查询搜索",
+        "purpose": "验证工具对特殊字符查询的处理能力",
+        "args": {
+          "query": "@#%&()"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"@#%&()\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4489099979400635,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "中文搜索测试",
+        "purpose": "验证工具对中文查询的支持情况",
+        "args": {
+          "query": "测试文档"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"测试文档\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.9488046169281006,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询输入测试",
+        "purpose": "验证工具对空查询字符串的错误处理",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid input\",\n  \"message\": \"query 必须是非空字符串\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.013033390045166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效搜索类型测试",
+        "purpose": "验证工具对非法search_type值的处理",
+        "args": {
+          "query": "error test",
+          "search_type": "invalid_type"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid parameter\",\n  \"message\": \"search_type 必须是以下之一：title, creator, year, fulltext\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.004999637603759766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "负数页码测试",
+        "purpose": "验证工具对无效页码（负数）的处理",
+        "args": {
+          "query": "negative page",
+          "page": -1
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid parameter\",\n  \"message\": \"page 必须是大于等于1的正整数\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.004162788391113281,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超大每页数量测试",
+        "purpose": "验证工具在高items_per_page值下的行为",
+        "args": {
+          "query": "large limit",
+          "items_per_page": 1000
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"large limit\",\n  \"page\": 1,\n  \"items_per_page\": 1000,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 1.8586583137512207,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入模拟测试",
+        "purpose": "验证工具对潜在SQL注入攻击的防护能力",
+        "args": {
+          "query": "DROP TABLE items; SELECT * FROM zotero WHERE title LIKE '%test%'"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"DROP TABLE items; SELECT * FROM zotero WHERE title LIKE '%test%'\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4487185478210449,
+        "is_functional_test": false
+      }
+    ],
+    "get_item_metadata": [
+      {
+        "case_name": "获取有效条目元数据",
+        "purpose": "验证工具能够正确获取指定 Zotero 条目的详细元数据",
+        "args": {
+          "item_key": "TCAVDPC4"
+        },
+        "response": {
+          "result": "{\n  \"metadata\": {\n    \"title\": \"AgentCoder: Multi-Agent-based Code Generation with Iterative Testing and Optimisation\",\n    \"creators\": [\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      }\n    ],\n    \"year\": \"2024-05-24\",\n    \"item_type\": \"preprint\",\n    \"tags\": [\n      {\n        \"tag\": \"Computer Science - Computation and Language\",\n        \"type\": 1\n      }\n    ],\n    \"collections\": [\n      \"AUICFZZ4\"\n    ],\n    \"abstract\": \"The advancement of natural language processing (NLP) has been significantly boosted by the development of transformer-based large language models (LLMs). These models have revolutionized NLP tasks, particularly in code generation, aiding developers in creating software with enhanced efficiency. Despite their advancements, challenges in balancing code snippet generation with effective test case generation and execution persist. To address these issues, this paper introduces Multi-Agent Assistant Code Generation (AgentCoder), a novel solution comprising a multi-agent framework with specialized agents: the programmer agent, the test designer agent, and the test executor agent. During the coding procedure, the programmer agent will focus on the code generation and refinement based on the test executor agent's feedback. The test designer agent will generate test cases for the generated code, and the test executor agent will run the code with the test cases and write the feedback to the programmer. This collaborative system ensures robust code generation, surpassing the limitations of single-agent models and traditional methodologies. Our extensive experiments on 9 code generation models and 12 enhancement approaches showcase AgentCoder's superior performance over existing code generation models and prompt engineering techniques across various benchmarks. For example, AgentCoder (GPT-4) achieves 96.3\\\\% and 91.8\\\\% pass@1 in HumanEval and MBPP datasets with an overall token overhead of 56.9K and 66.3K, while state-of-the-art obtains only 90.2\\\\% and 78.9\\\\% pass@1 with an overall token overhead of 138.2K and 206.5K.\",\n    \"publication_title\": \"\",\n    \"volume\": \"\",\n    \"issue\": \"\",\n    \"pages\": \"\",\n    \"doi\": \"10.48550/arXiv.2312.13010\",\n    \"isbn\": \"\"\n  },\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 4.396650075912476,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "获取另一个有效条目元数据",
+        "purpose": "验证工具能够成功处理另一个有效的 Zotero 条目键值",
+        "args": {
+          "item_key": "ASHWF68J"
+        },
+        "response": {
+          "result": "{\n  \"metadata\": {\n    \"title\": \"Software Testing with Large Language Models: Survey, Landscape, and Vision\",\n    \"creators\": [\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      },\n      {\n        \"name\": \"无创作者\"\n      }\n    ],\n    \"year\": \"2024-03-04\",\n    \"item_type\": \"preprint\",\n    \"tags\": [\n      {\n        \"tag\": \"Computer Science - Software Engineering\",\n        \"type\": 1\n      }\n    ],\n    \"collections\": [\n      \"CPL7QWDB\"\n    ],\n    \"abstract\": \"Pre-trained large language models (LLMs) have recently emerged as a breakthrough technology in natural language processing and artificial intelligence, with the ability to handle large-scale datasets and exhibit remarkable performance across a wide range of tasks. Meanwhile, software testing is a crucial undertaking that serves as a cornerstone for ensuring the quality and reliability of software products. As the scope and complexity of software systems continue to grow, the need for more effective software testing techniques becomes increasingly urgent, making it an area ripe for innovative approaches such as the use of LLMs. This paper provides a comprehensive review of the utilization of LLMs in software testing. It analyzes 102 relevant studies that have used LLMs for software testing, from both the software testing and LLMs perspectives. The paper presents a detailed discussion of the software testing tasks for which LLMs are commonly used, among which test case preparation and program repair are the most representative. It also analyzes the commonly used LLMs, the types of prompt engineering that are employed, as well as the accompanied techniques with these LLMs. It also summarizes the key challenges and potential opportunities in this direction. This work can serve as a roadmap for future research in this area, highlighting potential avenues for exploration, and identifying gaps in our current understanding of the use of LLMs in software testing.\",\n    \"publication_title\": \"\",\n    \"volume\": \"\",\n    \"issue\": \"\",\n    \"pages\": \"\",\n    \"doi\": \"10.48550/arXiv.2307.07221\",\n    \"isbn\": \"\"\n  },\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.6279816627502441,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空 item_key 输入测试",
+        "purpose": "验证工具对空字符串作为 item_key 的错误处理",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid input\",\n  \"message\": \"item_key 必须是非空字符串\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.005000114440917969,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非字符串类型 item_key 测试",
+        "purpose": "验证工具是否拒绝非字符串类型的 item_key 输入（例如数字）",
+        "args": {
+          "item_key": 123456
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: 1 validation error for get_item_metadataArguments\nitem_key\n  Input should be a valid string [type=string_type, input_value=123456, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.012035369873046875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效格式 item_key 测试",
+        "purpose": "验证工具对不符合 Zotero 格式的 item_key 的处理",
+        "args": {
+          "item_key": "invalid_key_format"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'invalid_key_format' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.41741466522216797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入式 item_key 测试",
+        "purpose": "验证工具对潜在 SQL 注入攻击的防护能力",
+        "args": {
+          "item_key": "DROP TABLE items; SELECT * FROM zotero WHERE item_key='TCAVDPC4'"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'DROP TABLE items; SELECT * FROM zotero WHERE item_key='TCAVDPC4'' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.41575098037719727,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符 item_key 测试",
+        "purpose": "验证工具对包含特殊字符的 item_key 的处理",
+        "args": {
+          "item_key": "KEY@#%&()"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'KEY@#%&()' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.4238243103027344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长 item_key 测试",
+        "purpose": "验证工具对超出预期长度的 item_key 的处理",
+        "args": {
+          "item_key": "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.4312326908111572,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "中文 item_key 测试",
+        "purpose": "验证工具对中文字符作为 item_key 的处理",
+        "args": {
+          "item_key": "条目键测试"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 '条目键测试' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.4509918689727783,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "null 类型 item_key 测试",
+        "purpose": "验证工具对 null 值作为 item_key 的处理",
+        "args": {
+          "item_key": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_metadata: 1 validation error for get_item_metadataArguments\nitem_key\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取不存在条目的元数据",
+        "purpose": "验证工具在提供有效格式但不存在的 item_key 时的响应",
+        "args": {
+          "item_key": "NONEXISTENT"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'NONEXISTENT' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.41679811477661133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件 - 最短合法 item_key",
+        "purpose": "验证工具对最短合法 Zotero item_key 的处理（6位字母数字组合）",
+        "args": {
+          "item_key": "ABC123"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'ABC123' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.6766097545623779,
+        "is_functional_test": false
+      }
+    ],
+    "get_item_fulltext": [
+      {
+        "case_name": "提取有效条目的全文内容",
+        "purpose": "验证工具能够正确提取指定 Zotero 条目的全文内容",
+        "args": {
+          "item_key": "TCAVDPC4"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 3.4832284450531006,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "提取另一个有效条目的全文内容",
+        "purpose": "验证工具能够成功处理另一个有效的 Zotero 条目键值并返回全文内容",
+        "args": {
+          "item_key": "ASHWF68J"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 1.1320006847381592,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "提取无全文内容的条目",
+        "purpose": "验证工具在指定 Zotero 条目没有全文内容时返回空字符串",
+        "args": {
+          "item_key": "NONEXISTENT"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4406609535217285,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空 item_key 输入测试",
+        "purpose": "验证工具对空字符串作为 item_key 的错误处理",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid input\",\n  \"message\": \"item_key 必须是非空字符串\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.015566110610961914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非字符串类型 item_key 测试",
+        "purpose": "验证工具是否拒绝非字符串类型的 item_key 输入（例如数字）",
+        "args": {
+          "item_key": 123456
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: 1 validation error for get_item_fulltextArguments\nitem_key\n  Input should be a valid string [type=string_type, input_value=123456, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.005510807037353516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效格式 item_key 测试",
+        "purpose": "验证工具对不符合 Zotero 格式的 item_key 的处理",
+        "args": {
+          "item_key": "invalid_key_format"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Server internal error\",\n  \"message\": \"服务器内部错误：可能是无效的附件路径或服务器问题导致无法获取全文。请确认条目是否包含附件，并稍后重试。\",\n  \"code\": 500\n}"
+        },
+        "execution_time": 0.47590041160583496,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入式 item_key 测试",
+        "purpose": "验证工具对潜在 SQL 注入攻击的防护能力",
+        "args": {
+          "item_key": "DROP TABLE items; SELECT * FROM zotero WHERE item_key='TCAVDPC4'"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.44954490661621094,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符 item_key 测试",
+        "purpose": "验证工具对包含特殊字符的 item_key 的处理",
+        "args": {
+          "item_key": "KEY@#%&()"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 2.49135422706604,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长 item_key 测试",
+        "purpose": "验证工具对超出预期长度的 item_key 的处理",
+        "args": {
+          "item_key": "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4519665241241455,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "中文 item_key 测试",
+        "purpose": "验证工具对中文字符作为 item_key 的处理",
+        "args": {
+          "item_key": "条目键测试"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Server internal error\",\n  \"message\": \"服务器内部错误：可能是无效的附件路径或服务器问题导致无法获取全文。请确认条目是否包含附件，并稍后重试。\",\n  \"code\": 500\n}"
+        },
+        "execution_time": 0.5120797157287598,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "null 类型 item_key 测试",
+        "purpose": "验证工具对 null 值作为 item_key 的处理",
+        "args": {
+          "item_key": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_item_fulltext: 1 validation error for get_item_fulltextArguments\nitem_key\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0029985904693603516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "获取不存在条目的全文内容",
+        "purpose": "验证工具在提供有效格式但不存在的 item_key 时的响应",
+        "args": {
+          "item_key": "NONEXISTENT"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.43140697479248047,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 36
+}

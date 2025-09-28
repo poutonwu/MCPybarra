@@ -1,0 +1,818 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_outlook_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_outlook_manager/refined/server.py",
+  "timestamp": "2025-07-14T20:32:46.247098",
+  "tools": [
+    {
+      "name": "list_folders",
+      "description": "\n    Lists all available Outlook mail folders.\n\n    Returns:\n        A JSON-formatted string containing a list of folder names.\n\n    Example:\n        list_folders()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_foldersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_recent_emails",
+      "description": "\n    Retrieves a list of email subject lines from a specified folder within a given number of days.\n\n    Args:\n        days: Number of days to look back for recent emails (must be non-negative).\n        folder: Name of the folder to search in (optional; defaults to the inbox).\n\n    Returns:\n        A JSON-formatted string containing a list of email subject lines.\n\n    Example:\n        list_recent_emails(days=7, folder=\"Inbox\")\n    ",
+      "args_schema": {
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "folder": {
+            "default": null,
+            "title": "Folder",
+            "type": "string"
+          }
+        },
+        "required": [
+          "days"
+        ],
+        "title": "list_recent_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_emails",
+      "description": "\n    Searches for emails based on keywords or contact names within a specified time range and folder.\n\n    Args:\n        keyword: Keyword to search for in the email body or subject.\n        contact: Contact name or email address to filter results.\n        start_date: Start date for the search range (format: `YYYY-MM-DD`).\n        end_date: End date for the search range (format: `YYYY-MM-DD`).\n        folder: Name of the folder to search in (optional; defaults to the inbox).\n\n    Returns:\n        A JSON-formatted string containing a list of matching email subject lines.\n\n    Example:\n        search_emails(keyword=\"urgent\", contact=\"john.doe@example.com\", start_date=\"2023-01-01\", end_date=\"2023-01-31\", folder=\"Inbox\")\n    ",
+      "args_schema": {
+        "properties": {
+          "keyword": {
+            "default": null,
+            "title": "Keyword",
+            "type": "string"
+          },
+          "contact": {
+            "default": null,
+            "title": "Contact",
+            "type": "string"
+          },
+          "start_date": {
+            "default": null,
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "default": null,
+            "title": "End Date",
+            "type": "string"
+          },
+          "folder": {
+            "default": null,
+            "title": "Folder",
+            "type": "string"
+          }
+        },
+        "title": "search_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_email_by_number",
+      "description": "\n    Retrieves detailed information (body and attachments) for a specific email from the last listed set of emails.\n\n    Args:\n        email_number: Index of the email in the last listed set of emails.\n\n    Returns:\n        A JSON-formatted string containing the email's body, subject, and attachment details.\n\n    Example:\n        get_email_by_number(email_number=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "email_number": {
+            "title": "Email Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email_number"
+        ],
+        "title": "get_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "reply_to_email_by_number",
+      "description": "\n    Sends a reply to a specific email from the last listed set of emails.\n\n    Args:\n        email_number: Index of the email in the last listed set of emails.\n        reply_content: Content of the reply message.\n\n    Returns:\n        A string indicating success or failure of the operation.\n\n    Example:\n        reply_to_email_by_number(email_number=5, reply_content=\"Thank you for your email. I will review it shortly.\")\n    ",
+      "args_schema": {
+        "properties": {
+          "email_number": {
+            "title": "Email Number",
+            "type": "integer"
+          },
+          "reply_content": {
+            "title": "Reply Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email_number",
+          "reply_content"
+        ],
+        "title": "reply_to_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "compose_email",
+      "description": "\n    Creates and sends a new email with specified recipients, subject, body, and optional attachments.\n\n    Args:\n        to: Comma-separated list of recipient email addresses.\n        cc: Comma-separated list of CC recipient email addresses (optional).\n        subject: Subject of the email.\n        body: Body content of the email.\n        attachments: List of file paths to attach (optional).\n\n    Returns:\n        A string indicating success or failure of the operation.\n\n    Example:\n        compose_email(\n            to=\"recipient@example.com\",\n            cc=\"cc_recipient@example.com\",\n            subject=\"Meeting Reminder\",\n            body=\"Please remember to attend the meeting tomorrow at 10 AM.\",\n            attachments=[\"path/to/file1.pdf\", \"path/to/file2.docx\"]\n        )\n    ",
+      "args_schema": {
+        "properties": {
+          "to": {
+            "title": "To",
+            "type": "string"
+          },
+          "cc": {
+            "default": null,
+            "title": "Cc",
+            "type": "string"
+          },
+          "subject": {
+            "default": null,
+            "title": "Subject",
+            "type": "string"
+          },
+          "body": {
+            "default": null,
+            "title": "Body",
+            "type": "string"
+          },
+          "attachments": {
+            "default": null,
+            "items": {},
+            "title": "Attachments",
+            "type": "array"
+          }
+        },
+        "required": [
+          "to"
+        ],
+        "title": "compose_emailArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_folders": [
+      {
+        "case_name": "Basic Folder Listing",
+        "purpose": "验证 list_folders 工具能够成功列出所有可用的 Outlook 邮件文件夹（基本功能）。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.10892248153686523,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Folder Listing",
+        "purpose": "验证当没有可用的 Outlook 文件夹时，工具是否能返回空结果而不报错。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.10109496116638184,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Folder Listing with Special Characters",
+        "purpose": "验证工具是否能正确处理包含特殊字符的文件夹名称。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.10259604454040527,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Folder Listing Security Check",
+        "purpose": "验证工具不会泄露敏感信息或执行非预期操作。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.09099841117858887,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Folder Listing When Outlook Not Running",
+        "purpose": "验证当Outlook未运行时，工具是否能优雅地处理错误。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.09326362609863281,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Folder Listing With No Permissions",
+        "purpose": "验证当用户没有访问Outlook文件夹权限时，工具是否能返回适当的错误信息。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.09388470649719238,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Folder Count Boundary Test",
+        "purpose": "验证工具在Outlook中存在大量文件夹时的行为是否正常。",
+        "args": {},
+        "response": {
+          "result": "[\"Deleted Items\", \"Inbox\", \"Outbox\", \"Sent Items\", \"Tasks\", \"Calendar\", \"Files\", \"Archive\", \"Yammer Root\", \"Contacts\", \"Conversation History\", \"ExternalContacts\", \"Junk Email\", \"Notes\", \"Drafts\", \"Journal\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"RSS \\u6e90\", \"\\u5bf9\\u8bdd\\u64cd\\u4f5c\\u8bbe\\u7f6e\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"\\u63d0\\u9192\", \"\\u5df2\\u5220\\u9664\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\", \"\\u540c\\u6b65\\u95ee\\u9898 (\\u4ec5\\u9650\\u4e8e\\u6b64\\u8ba1\\u7b97\\u673a)\", \"\\u75c5\\u6bd2\\u90ae\\u4ef6\", \"\\u8349\\u7a3f\\u7bb1\", \"\\u5e7f\\u544a\\u90ae\\u4ef6\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5df2\\u5220\\u9664\\u90ae\\u4ef6\", \"\\u6536\\u4ef6\\u7bb1\", \"\\u53d1\\u4ef6\\u7bb1\", \"\\u5df2\\u53d1\\u9001\\u90ae\\u4ef6\", \"\\u5b58\\u6863\", \"\\u65e5\\u5386\", \"\\u8054\\u7cfb\\u4eba\", \"\\u6587\\u4ef6\", \"\\u6ce8\\u91ca\", \"\\u65e5\\u8bb0\", \"\\u5783\\u573e\\u90ae\\u4ef6\", \"\\u5bf9\\u8bdd\\u5386\\u53f2\\u8bb0\\u5f55\", \"Conversation Action Settings\", \"ExternalContacts\", \"Yammer \\u6839\\u76ee\\u5f55\", \"\\u4efb\\u52a1\", \"\\u8349\\u7a3f\", \"\\u540c\\u6b65\\u95ee\\u9898\", \"\\u5feb\\u901f\\u6b65\\u9aa4\\u8bbe\\u7f6e\", \"RSS \\u6e90\", \"\\u63d0\\u9192\"]"
+        },
+        "execution_time": 0.08500409126281738,
+        "is_functional_test": false
+      }
+    ],
+    "list_recent_emails": [
+      {
+        "case_name": "Basic Recent Emails Retrieval",
+        "purpose": "验证 list_recent_emails 工具能够成功检索最近7天收件箱中的邮件主题（基本功能）。",
+        "args": {
+          "days": 7,
+          "folder": "Inbox"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.024002552032470703,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Default Folder Usage",
+        "purpose": "验证当未指定 folder 参数时，工具是否默认使用 'Inbox' 文件夹。",
+        "args": {
+          "days": 30
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.014002323150634766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Days Range",
+        "purpose": "验证当 days=0 时，工具是否返回当天收到的邮件主题。",
+        "args": {
+          "days": 0,
+          "folder": "Sent Items"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.009000539779663086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Nonexistent Folder",
+        "purpose": "验证当指定的文件夹不存在时，工具是否能优雅地处理错误而不崩溃。",
+        "args": {
+          "days": 14,
+          "folder": "NonExistentFolder"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.009998559951782227,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Days Input",
+        "purpose": "验证当提供负数作为 days 参数时，工具是否拒绝输入并返回错误信息。",
+        "args": {
+          "days": -5,
+          "folder": "Inbox"
+        },
+        "response": {
+          "result": "{\"error\": \"Days value must be non-negative\"}"
+        },
+        "execution_time": 0.005002260208129883,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Folder Name",
+        "purpose": "验证工具是否能正确处理包含特殊字符或非ASCII字符的文件夹名称。",
+        "args": {
+          "days": 5,
+          "folder": "\\u5df2\\u5220\\u9664 (Deleted)"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.009996414184570312,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check with Restricted Folder",
+        "purpose": "验证工具是否无法访问受限制或敏感文件夹（如系统内部文件夹）以防止安全漏洞。",
+        "args": {
+          "days": 7,
+          "folder": "Tasks"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.011012792587280273,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Days Boundary Test",
+        "purpose": "验证当设置非常大的 days 值（如1000天）时，工具是否仍能正常运行并返回合理结果。",
+        "args": {
+          "days": 1000,
+          "folder": "Archive"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to retrieve recent emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.006988048553466797,
+        "is_functional_test": true
+      }
+    ],
+    "search_emails": [
+      {
+        "case_name": "Basic Email Search by Keyword",
+        "purpose": "验证使用关键词在默认收件箱中搜索邮件的基本功能是否正常。",
+        "args": {
+          "keyword": "urgent"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.013999462127685547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails by Contact Name",
+        "purpose": "验证通过联系人名称过滤邮件的功能是否正常工作。",
+        "args": {
+          "contact": "john.doe@example.com"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.013194799423217773,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails Within Date Range",
+        "purpose": "验证在指定日期范围内搜索邮件的功能是否正常。",
+        "args": {
+          "start_date": "2023-01-01",
+          "end_date": "2023-01-31"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.015000343322753906,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails in Custom Folder",
+        "purpose": "验证在自定义文件夹（非默认）中搜索邮件的功能是否正常。",
+        "args": {
+          "folder": "Sent Items"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.017007112503051758,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Search with All Parameters",
+        "purpose": "验证同时使用关键词、联系人、日期范围和文件夹参数进行搜索的完整性。",
+        "args": {
+          "keyword": "urgent",
+          "contact": "john.doe@example.com",
+          "start_date": "2023-01-01",
+          "end_date": "2023-01-31",
+          "folder": "Inbox"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.010001659393310547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check - Restricted Folder Access",
+        "purpose": "验证工具无法访问受限制或敏感文件夹以防止安全漏洞。",
+        "args": {
+          "folder": "Tasks"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.010991573333740234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Date Format Handling",
+        "purpose": "验证工具是否能优雅处理非法日期格式输入并返回错误信息。",
+        "args": {
+          "start_date": "2023/01/01",
+          "end_date": "2023/01/31"
+        },
+        "response": {
+          "result": "{\"error\": \"Date format error: time data '2023/01/01' does not match format '%Y-%m-%d'\"}"
+        },
+        "execution_time": 0.010998964309692383,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Folder Handling",
+        "purpose": "验证当指定的文件夹不存在时，工具是否能正确处理错误而不崩溃。",
+        "args": {
+          "folder": "NonExistentFolder"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.011010408401489258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Search Criteria",
+        "purpose": "验证当未提供任何搜索条件时，工具是否能返回空结果而不是报错。",
+        "args": {},
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.01151132583618164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Folder Name",
+        "purpose": "验证工具是否能正确处理包含特殊字符或非ASCII字符的文件夹名称。",
+        "args": {
+          "folder": "\\u5df2\\u5220\\u9664 (Deleted)"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: (-2147352567, '\\u53d1\\u751f\\u610f\\u5916\\u3002', (4096, 'Microsoft Outlook', '\\u5c1d\\u8bd5\\u7684\\u64cd\\u4f5c\\u5931\\u8d25\\u3002\\u627e\\u4e0d\\u5230\\u67d0\\u4e2a\\u5bf9\\u8c61\\u3002', None, 0, -2147221233), None)\"}"
+        },
+        "execution_time": 0.008998394012451172,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Future End Date Boundary Test",
+        "purpose": "验证工具是否能处理未来日期作为 end_date 的边界情况。",
+        "args": {
+          "start_date": "2023-01-01",
+          "end_date": "2030-12-31"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.012000083923339844,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Start Date Handling",
+        "purpose": "验证工具是否能处理 start_date 和 end_date 相同的情况。",
+        "args": {
+          "start_date": "2023-01-01",
+          "end_date": "2023-01-01"
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to search emails: <unknown>.ReceivedTime\"}"
+        },
+        "execution_time": 0.011004209518432617,
+        "is_functional_test": true
+      }
+    ],
+    "get_email_by_number": [
+      {
+        "case_name": "Basic Email Retrieval by Number",
+        "purpose": "验证 get_email_by_number 工具能够成功检索指定索引的邮件内容（基本功能）。",
+        "args": {
+          "email_number": 1
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Retrieve First Email in List",
+        "purpose": "验证工具能否正确获取列表中第一个邮件的详细信息。",
+        "args": {
+          "email_number": 0
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.008001327514648438,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Retrieve Last Email in List",
+        "purpose": "验证工具能否正确获取列表中最后一个邮件的详细信息。",
+        "args": {
+          "email_number": 9
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Negative Email Number Input",
+        "purpose": "验证当提供负数作为 email_number 参数时，工具是否拒绝输入并返回错误信息。",
+        "args": {
+          "email_number": -1
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Email Number Out of Bounds",
+        "purpose": "验证当提供的 email_number 超出已列出邮件数量范围时，工具是否能优雅处理错误。",
+        "args": {
+          "email_number": 20
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.008002042770385742,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Integer Email Number",
+        "purpose": "验证当提供非整数作为 email_number 参数时，工具是否进行类型校验并返回错误。",
+        "args": {
+          "email_number": "five"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 1 validation error for get_email_by_numberArguments\nemail_number\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='five', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.007475137710571289,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Check with Invalid Access",
+        "purpose": "验证在没有访问权限的情况下尝试获取邮件详情时，工具是否会安全地拒绝请求。",
+        "args": {
+          "email_number": 3
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.008334875106811523,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test with Maximum Index",
+        "purpose": "验证当 email_number 设置为系统允许的最大值时，工具是否仍能正常运行。",
+        "args": {
+          "email_number": 2147483647
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.00611424446105957,
+        "is_functional_test": false
+      }
+    ],
+    "reply_to_email_by_number": [
+      {
+        "case_name": "Basic Reply to Email",
+        "purpose": "验证 reply_to_email_by_number 工具能够成功向指定索引的邮件发送回复（基本功能）。",
+        "args": {
+          "email_number": 5,
+          "reply_content": "Thank you for your email. I will review it shortly."
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.005003929138183594,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply to First Email",
+        "purpose": "验证工具是否能正确处理最小有效索引值（第一个邮件）进行回复。",
+        "args": {
+          "email_number": 0,
+          "reply_content": "This is a response to the first email in the list."
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.008002042770385742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply with Empty Content",
+        "purpose": "验证工具是否允许空内容的回复，并确认其行为是否符合预期。",
+        "args": {
+          "email_number": 3,
+          "reply_content": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.003998517990112305,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Reply to Invalid Index",
+        "purpose": "验证当提供的 email_number 超出当前邮件列表范围时，工具是否能优雅地处理错误。",
+        "args": {
+          "email_number": 999,
+          "reply_content": "This email does not exist."
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Email Number",
+        "purpose": "验证当提供负数作为 email_number 参数时，工具是否拒绝输入并返回错误信息。",
+        "args": {
+          "email_number": -1,
+          "reply_content": "Negative index should not be allowed."
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Reply Content",
+        "purpose": "验证工具是否能正确处理包含特殊字符或非ASCII字符的回复内容。",
+        "args": {
+          "email_number": 2,
+          "reply_content": "感谢您的邮件！这是一条带有特殊字符的回复：@#￥%……&*"
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.004992246627807617,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check - Sensitive Folder",
+        "purpose": "验证工具是否无法对敏感系统文件夹中的邮件进行操作以防止安全漏洞。",
+        "args": {
+          "email_number": 1,
+          "reply_content": "Attempt to reply from restricted folder."
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.003000020980834961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Maximum Email Number Boundary Test",
+        "purpose": "验证当 email_number 设置为最大可能值时，工具是否仍能正常运行。",
+        "args": {
+          "email_number": 2147483647,
+          "reply_content": "Testing maximum integer value for email number."
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid email number.\"}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      }
+    ],
+    "compose_email": [
+      {
+        "case_name": "Basic Email Composition with Required Fields",
+        "purpose": "验证 compose_email 工具在提供必要收件人参数时能否成功创建并发送邮件（基本功能）。",
+        "args": {
+          "to": "recipient@example.com",
+          "subject": "Test Subject",
+          "body": "This is a test email body."
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.03799867630004883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Composition with CC and Attachment",
+        "purpose": "验证 compose_email 能够正确处理包含抄送和附件的邮件创建请求。",
+        "args": {
+          "to": "recipient@example.com",
+          "cc": "cc_recipient@example.com",
+          "subject": "Meeting Reminder",
+          "body": "Please remember to attend the meeting tomorrow at 10 AM.",
+          "attachments": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.010997533798217773,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple Recipients in To Field",
+        "purpose": "验证工具是否支持在 'to' 字段中使用逗号分隔多个收件人地址。",
+        "args": {
+          "to": "user1@example.com,user2@example.com",
+          "subject": "Group Notification",
+          "body": "This is a message for multiple recipients."
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Body with Attachment",
+        "purpose": "验证工具是否允许空邮件正文但附带文件的情况。",
+        "args": {
+          "to": "recipient@example.com",
+          "subject": "Empty Body Email",
+          "body": "",
+          "attachments": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.015010595321655273,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Subject Line",
+        "purpose": "验证工具是否能正确处理包含特殊字符的邮件主题。",
+        "args": {
+          "to": "recipient@example.com",
+          "subject": "测试邮件主题!@#$%^&*()_+{}[]|\"';<>?,./`~",
+          "body": "This email contains special characters in subject line."
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.009528875350952148,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attachment with Special File Name",
+        "purpose": "验证工具是否能正确附加具有特殊字符的文件名的文件。",
+        "args": {
+          "to": "recipient@example.com",
+          "subject": "File with Special Name",
+          "body": "Attached file has special characters in its name.",
+          "attachments": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\file@with#special$filter.jpg"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.004995584487915039,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Nonexistent File Attachment",
+        "purpose": "验证当尝试附加不存在的文件时，工具是否返回错误信息而不是崩溃。",
+        "args": {
+          "to": "recipient@example.com",
+          "subject": "Invalid Attachment Test",
+          "body": "Trying to attach a non-existent file.",
+          "attachments": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.txt"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.006999015808105469,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Check - Attempting Dangerous File Types",
+        "purpose": "验证工具是否会阻止可能危害系统的附件类型（如可执行文件）。",
+        "args": {
+          "to": "recipient@example.com",
+          "subject": "Dangerous File Attempt",
+          "body": "Attempting to send an executable file.",
+          "attachments": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\inspector.zip"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Failed to send email: GetNamespace.CreateItem\"}"
+        },
+        "execution_time": 0.008995532989501953,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 51
+}

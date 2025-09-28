@@ -1,0 +1,218 @@
+[
+  {
+    "step": {
+      "step_id": "search_happy_path",
+      "tool_name": "duck_duck_go_search",
+      "parameters": {
+        "query": "AI technology trends"
+      },
+      "description": "Happy path: Perform a basic search with default max_results=5."
+    },
+    "substituted_params": {
+      "query": "AI technology trends"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_with_custom_max_results",
+      "tool_name": "duck_duck_go_search",
+      "parameters": {
+        "query": "climate change news",
+        "max_results": 8
+      },
+      "description": "Valid case: Search with custom max_results within allowed range (1-10)."
+    },
+    "substituted_params": {
+      "query": "climate change news",
+      "max_results": 8
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool duck_duck_go_search: DuckDuckGo搜索失败: https://html.duckduckgo.com/html 202 Ratelimit"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_from_first_result",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": "$outputs.search_happy_path[0].link"
+      },
+      "description": "Dependent call: Fetch content from the first link returned by duck_duck_go_search."
+    },
+    "substituted_params": {
+      "url": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_happy_path[0].link'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_with_removed_ads",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": "$outputs.search_happy_path[1].link",
+        "remove_ads": true
+      },
+      "description": "Dependent call: Fetch content with ad removal enabled to test cleanup functionality."
+    },
+    "substituted_params": {
+      "url": null,
+      "remove_ads": true
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_happy_path[1].link'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_with_timeout",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": "$outputs.search_happy_path[2].link",
+        "timeout": 5
+      },
+      "description": "Dependent call: Fetch content with a custom timeout to test performance handling."
+    },
+    "substituted_params": {
+      "url": null,
+      "timeout": 5
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_happy_path[2].link'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_invalid_query_empty",
+      "tool_name": "duck_duck_go_search",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Test server's handling of an empty query input."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool duck_duck_go_search: 'query' 参数不能为空。"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_invalid_max_results_too_high",
+      "tool_name": "duck_duck_go_search",
+      "parameters": {
+        "query": "valid query",
+        "max_results": 11
+      },
+      "description": "Edge case: Test server's handling of max_results exceeding maximum allowed value."
+    },
+    "substituted_params": {
+      "query": "valid query",
+      "max_results": 11
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool duck_duck_go_search: max_results 必须在1到10之间"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_invalid_max_results_too_low",
+      "tool_name": "duck_duck_go_search",
+      "parameters": {
+        "query": "valid query",
+        "max_results": 0
+      },
+      "description": "Edge case: Test server's handling of max_results below minimum allowed value."
+    },
+    "substituted_params": {
+      "query": "valid query",
+      "max_results": 0
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool duck_duck_go_search: max_results 必须在1到10之间"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_invalid_url_empty",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": ""
+      },
+      "description": "Edge case: Test server's handling of an empty URL input."
+    },
+    "substituted_params": {
+      "url": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool fetch_content: 'url' 参数不能为空"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_invalid_url_format",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": "invalid-url-format"
+      },
+      "description": "Edge case: Test server's handling of a malformed URL without http:// or https://."
+    },
+    "substituted_params": {
+      "url": "invalid-url-format"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool fetch_content: URL 必须以 http:// 或 https:// 开头"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_nonexistent_page",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": "https://example.com/nonexistent-page-for-testing"
+      },
+      "description": "Edge case: Test server's handling of a valid but non-existent URL that returns HTTP 4xx/5xx."
+    },
+    "substituted_params": {
+      "url": "https://example.com/nonexistent-page-for-testing"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"title\": \"\", \"content\": \"HTTP请求失败: Client error '404 Not Found' for url 'https://example.com/nonexistent-page-for-testing'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\", \"domain\": \"\", \"status_code\": 404, \"word_count\": 0}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_content_long_timeout",
+      "tool_name": "fetch_content",
+      "parameters": {
+        "url": "https://example.com/slow-loading-page",
+        "timeout": 30
+      },
+      "description": "Test case: Validate server behavior when fetching slow-loading pages with extended timeout."
+    },
+    "substituted_params": {
+      "url": "https://example.com/slow-loading-page",
+      "timeout": 30
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"title\": \"\", \"content\": \"HTTP请求失败: Client error '404 Not Found' for url 'https://example.com/slow-loading-page'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\", \"domain\": \"\", \"status_code\": 404, \"word_count\": 0}"
+    }
+  }
+]

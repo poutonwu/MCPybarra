@@ -1,0 +1,522 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_flight_info_processor",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_flight_info_processor/refined/server.py",
+  "timestamp": "2025-07-13T04:07:43.268975",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    根据出发地、目的地、日期、舱位等参数查询航班信息，支持单程、往返和多程航班查询。\n\n    Args:\n        origin: 出发地机场代码 (IATA格式，3个字母)。\n        destination: 目的地机场代码 (IATA格式，3个字母)。\n        departure_date: 出发日期 (格式: YYYY-MM-DD)。\n        return_date: 返回日期 (格式: YYYY-MM-DD)，仅往返航班需要。\n        cabin_class: 航位等级 ('economy', 'premium_economy', 'business', 'first')。\n        trip_type: 航班类型 ('one_way', 'round_trip', 'multi_city')。\n        max_results: 最大返回结果数 (默认: 5, 最大: 20)。\n\n    Returns:\n        JSON 格式字符串，包含以下字段的航班信息列表：\n        - flight_number: 航班号\n        - airline: 航空公司名称\n        - departure_time: 出发时间 (ISO 8601 格式)\n        - arrival_time: 到达时间 (ISO 8601 格式)\n        - duration: 航班时长 (分钟)\n        - price: 价格 (货币单位根据出发地自动确定)\n        - stops: 经停次数\n        - cabin_class: 航位等级\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "departure_date": {
+            "title": "Departure Date",
+            "type": "string"
+          },
+          "return_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Return Date"
+          },
+          "cabin_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cabin Class"
+          },
+          "trip_type": {
+            "default": "one_way",
+            "title": "Trip Type",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure_date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    获取特定航班报价的详细信息。\n\n    Args:\n        offer_id: 航班报价唯一标识符 (从 search_flights 结果中获取)。\n\n    Returns:\n        JSON 格式字符串，包含以下字段的详细信息：\n        - offer_id: 报价ID\n        - flight_number: 航班号\n        - airline: 航空公司信息 (名称、IATA代码)\n        - segments: 航段详细信息 (出发地、目的地、出发时间、到达时间)\n        - price_breakdown: 价格明细 (基础票价、税费、手续费等)\n        - baggage_allowance: 行李额度 (手提行李和托运行李限制)\n        - booking_conditions: 预订条件 (改签政策、退票政策)\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    处理多城市航班查询，支持复杂的行程规划。\n\n    Args:\n        itinerary: 包含多个行程段的列表，每个行程段为一个字典，包含：\n                   - origin: 出发地机场代码 (IATA格式)\n                   - destination: 目的地机场代码 (IATA格式)\n                   - date: 出发日期 (格式: YYYY-MM-DD)\n        cabin_class: 航班舱位等级。\n        max_results: 最大返回结果数 (默认: 5, 最大: 20)。\n\n    Returns:\n        JSON 格式字符串，包含以下字段的航班信息列表：\n        - journey_id: 行程唯一标识\n        - total_price: 总价格\n        - segments: 各航段详细信息 (航班号、航空公司、出发时间、到达时间)\n        - travel_duration: 总旅行时间 (分钟)\n        - layover_info: 中转停留信息 (各中转地停留时间)\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "itinerary": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Itinerary",
+            "type": "array"
+          },
+          "cabin_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cabin Class"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "itinerary"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "基本单程航班查询",
+        "purpose": "验证使用默认参数的单程航班查询功能是否正常",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2024-12-15"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ2fzydgvUdjUGYbHB\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 1.076948642730713,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "往返航班查询",
+        "purpose": "测试往返航班查询是否返回正确结构数据",
+        "args": {
+          "origin": "LHR",
+          "destination": "CDG",
+          "departure_date": "2024-11-10",
+          "return_date": "2024-11-17",
+          "trip_type": "round_trip"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ2hcfO1XHdnQFd5nD\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.44602108001708984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定舱位等级的多程航班查询",
+        "purpose": "验证多程航班查询并指定舱位等级的功能",
+        "args": {
+          "origin": "SIN",
+          "destination": "BKK",
+          "departure_date": "2025-01-05",
+          "cabin_class": "business",
+          "trip_type": "multi_city"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ2jG_Q2uXe0YGYbXB\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.43700695037841797,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大结果数边界测试",
+        "purpose": "测试最大返回结果数为上限值（20）时的行为",
+        "args": {
+          "origin": "HKG",
+          "destination": "SYD",
+          "departure_date": "2024-10-20",
+          "max_results": 20
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ2kvOHbnNem8GYbiB\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.43668246269226074,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效机场代码测试",
+        "purpose": "验证工具对非法IATA机场代码的处理",
+        "args": {
+          "origin": "XYZ",
+          "destination": "ABC",
+          "departure_date": "2024-09-30"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ2mut9C5gTo0CfL4I\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.5323383808135986,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未来日期验证失败测试",
+        "purpose": "测试过去日期是否被拒绝",
+        "args": {
+          "origin": "ORD",
+          "destination": "MIA",
+          "departure_date": "2020-01-01"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ2oUNG-7AiocFd6ED\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4269745349884033,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "测试是否存在对恶意输入的防护机制",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2024-12-15 OR 1=1"
+        },
+        "response": {
+          "result": "{\"error\": \"搜索航班时发生错误: 无效的出发日期: '2024-12-15 OR 1=1'。必须是格式为YYYY-MM-DD的有效日期。\"}"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符机场代码测试",
+        "purpose": "测试包含特殊字符的机场代码是否被正确拒绝",
+        "args": {
+          "origin": "J@K",
+          "destination": "L!X",
+          "departure_date": "2024-12-15"
+        },
+        "response": {
+          "result": "{\"error\": \"搜索航班时发生错误: 无效的出发地机场代码: 'J@K'。必须是3个字母的大写IATA代码。\"}"
+        },
+        "execution_time": 0.0030012130737304688,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "基本报价详情获取",
+        "purpose": "验证使用有效offer_id能够成功获取航班报价详细信息",
+        "args": {
+          "offer_id": "OFFER123456"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offers/OFFER123456'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ3wZLQTF0llkCfNyI\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 1.082068681716919,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效Offer ID测试",
+        "purpose": "验证工具对无效offer_id的处理",
+        "args": {
+          "offer_id": "INVALID_ID"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offers/INVALID_ID'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ3x-PiifBxb8Fd-hD\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4263012409210205,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空Offer ID输入测试",
+        "purpose": "验证工具对空offer_id参数的处理",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"获取报价详细信息时发生错误: 无效的报价ID。报价ID不能为空或仅包含空白字符。\"}"
+        },
+        "execution_time": 0.006001472473144531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符Offer ID测试",
+        "purpose": "验证工具对包含特殊字符的offer_id的处理",
+        "args": {
+          "offer_id": "OFFER#123"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offers/OFFER'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ3zmRErGX3WMGYgwB\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.42503976821899414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "测试是否存在对恶意输入的防护机制",
+        "args": {
+          "offer_id": "OFFER123; DROP TABLE offers"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offers/OFFER123;%20DROP%20TABLE%20offers'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ31LbGNWSSK8F5O6C\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.42229604721069336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer ID缺失测试",
+        "purpose": "验证当不提供offer_id参数时的错误处理",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\noffer_id\n  Field required [type=missing, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "已过期Offer ID测试",
+        "purpose": "验证工具对已过期或失效的offer_id的处理",
+        "args": {
+          "offer_id": "EXPIRED_OFFER789"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offers/EXPIRED_OFFER789'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ32xCCZj0-YMDKvBH\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.42490482330322266,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "基本多城市航班查询",
+        "purpose": "验证使用默认参数的多城市航班查询功能是否正常工作",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "date": "2024-12-15"
+            },
+            {
+              "origin": "LAX",
+              "destination": "ORD",
+              "date": "2024-12-18"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ6ME9Ip0o1MQFZxtD\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 1.0385286808013916,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定舱位等级的多城市航班查询",
+        "purpose": "测试在多城市行程中指定舱位等级的查询是否正常",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "SIN",
+              "destination": "BKK",
+              "date": "2025-01-05"
+            },
+            {
+              "origin": "BKK",
+              "destination": "HKG",
+              "date": "2025-01-08"
+            }
+          ],
+          "cabin_class": "business"
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ6Nu978gWjZQF43-C\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4437735080718994,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大结果数边界测试",
+        "purpose": "测试最大返回结果数为上限值（20）时的行为",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "HKG",
+              "destination": "SYD",
+              "date": "2024-10-20"
+            },
+            {
+              "origin": "SYD",
+              "destination": "AKL",
+              "date": "2024-10-23"
+            }
+          ],
+          "max_results": 20
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ6PWj6cuzonwF44AC\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4346144199371338,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最小结果数边界测试",
+        "purpose": "测试最大返回结果数为下限值（1）时的行为",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "LHR",
+              "destination": "CDG",
+              "date": "2024-11-10"
+            },
+            {
+              "origin": "CDG",
+              "destination": "AMS",
+              "date": "2024-11-13"
+            }
+          ],
+          "max_results": 1
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ6Q-1lgRuQLMGaHfB\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4376070499420166,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效机场代码测试",
+        "purpose": "验证工具对非法IATA机场代码的处理",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "XYZ",
+              "destination": "ABC",
+              "date": "2024-09-30"
+            },
+            {
+              "origin": "DEF",
+              "destination": "GHI",
+              "date": "2024-10-03"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ6SozmKbYrIgF44TC\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4438443183898926,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "过去日期验证失败测试",
+        "purpose": "测试过去日期是否被拒绝",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "ORD",
+              "destination": "MIA",
+              "date": "2020-01-01"
+            },
+            {
+              "origin": "MIA",
+              "destination": "ATL",
+              "date": "2020-01-04"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Duffel API请求失败: Client error '400 Bad Request' for url 'https://api.duffel.com/air/offer_requests'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\\n状态码: 400\\n响应内容: {\\\"errors\\\":[{\\\"documentation_url\\\":\\\"https://duffel.com/docs/api/overview/response-handling\\\",\\\"title\\\":\\\"Unsupported version\\\",\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.\\\",\\\"code\\\":\\\"unsupported_version\\\"}],\\\"meta\\\":{\\\"request_id\\\":\\\"GFGZ6UU3L0y0DjcEZvZF\\\",\\\"status\\\":400}}\"}"
+        },
+        "execution_time": 0.4512951374053955,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "测试是否存在对恶意输入的防护机制",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "date": "2024-12-15 OR 1=1"
+            },
+            {
+              "origin": "LAX",
+              "destination": "SFO",
+              "date": "2024-12-18 OR 1=1"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"搜索多城市行程时发生错误: 无效的出发日期: '2024-12-15 OR 1=1'（第1个行程段）。必须是格式为YYYY-MM-DD的有效日期。\"}"
+        },
+        "execution_time": 0.0040051937103271484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符机场代码测试",
+        "purpose": "测试包含特殊字符的机场代码是否被正确拒绝",
+        "args": {
+          "itinerary": [
+            {
+              "origin": "J@K",
+              "destination": "L!X",
+              "date": "2024-12-15"
+            },
+            {
+              "origin": "S#F",
+              "destination": "O%L",
+              "date": "2024-12-18"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"搜索多城市行程时发生错误: 无效的出发地机场代码: 'J@K'（第1个行程段）。必须是3个字母的大写IATA代码。\"}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 23
+}

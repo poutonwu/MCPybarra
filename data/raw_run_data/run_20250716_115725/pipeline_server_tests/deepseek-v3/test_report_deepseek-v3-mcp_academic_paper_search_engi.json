@@ -1,0 +1,183 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_academic_paper_search_engi",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_academic_paper_search_engi/refined/server.py",
+  "timestamp": "2025-07-16T11:57:27.888824",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Search for academic papers based on keywords and a result limit.\n\n    Args:\n        keywords: The search query for academic papers.\n        limit: Maximum number of results to return. Defaults to 10.\n\n    Returns:\n        A JSON string containing a list of papers with title, authors, year, and DOI.\n\n    Raises:\n        ValueError: If keywords are empty or limit is not a positive integer.\n        httpx.HTTPStatusError: If API requests fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    Fetch detailed information for a paper using its ID and source.\n\n    Args:\n        paper_id: The paper's DOI or Semantic Scholar ID.\n        source: The source to fetch from ('semantic_scholar' or 'crossref').\n\n    Returns:\n        A JSON string containing detailed paper information.\n\n    Raises:\n        ValueError: If source is invalid or paper_id is empty.\n        httpx.HTTPStatusError: If API requests fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    Search for papers by topic keywords, optionally filtered by year range.\n\n    Args:\n        topic: Topic keywords for the search.\n        year_range: Inclusive year range as (start_year, end_year). Defaults to None.\n        limit: Maximum number of results to return. Defaults to 10.\n\n    Returns:\n        A JSON string containing a list of papers matching the topic and year range.\n\n    Raises:\n        ValueError: If topic is empty or year_range is invalid.\n        httpx.HTTPStatusError: If API requests fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "year_range": {
+            "default": null,
+            "items": {},
+            "title": "Year Range",
+            "type": "array"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证使用默认 limit 值进行论文搜索的基本功能是否正常工作",
+        "args": {
+          "keywords": "machine learning"
+        },
+        "response": {
+          "error": "Tool execution timed out after 50.0 seconds."
+        },
+        "execution_time": 50.0,
+        "is_functional_test": true
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证使用默认 limit 值进行论文搜索的基本功能是否正常工作",
+        "args": {
+          "topic": "machine learning"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Failed to search by topic: "
+        },
+        "execution_time": 5.464445352554321,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Topic and Year Range",
+        "purpose": "验证使用自定义主题和年份范围的论文搜索功能是否正常过滤结果",
+        "args": {
+          "topic": "deep learning",
+          "year_range": [
+            2015,
+            2020
+          ],
+          "limit": 5
+        },
+        "response": {
+          "error": "Tool execution timed out after 50.0 seconds."
+        },
+        "execution_time": 50.0,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Maximum Limit Allowed",
+        "purpose": "验证工具在最大限制值下的性能表现",
+        "args": {
+          "topic": "neural networks",
+          "limit": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Failed to search by topic: "
+        },
+        "execution_time": 44.13314461708069,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Topic Input",
+        "purpose": "验证工具能否正确处理空主题输入并抛出异常",
+        "args": {
+          "topic": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Topic cannot be empty."
+        },
+        "execution_time": 0.005337238311767578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Year Range Order",
+        "purpose": "验证工具能否识别起始年大于结束年的无效年份范围",
+        "args": {
+          "topic": "computer vision",
+          "year_range": [
+            2025,
+            2020
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: Year range must be a tuple of (start_year, end_year)."
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Topic",
+        "purpose": "验证工具能否正确处理包含特殊字符的主题关键词",
+        "args": {
+          "topic": "AI & robotics"
+        },
+        "response": {
+          "error": "Tool execution timed out after 50.0 seconds."
+        },
+        "execution_time": 50.0,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 7,
+  "abnormal_termination": "Consecutive tool timeouts indicate a server issue."
+}

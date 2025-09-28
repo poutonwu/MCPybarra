@@ -1,0 +1,364 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp-server-data-exploration-main",
+  "report_name": "mcp-server-data-exploration-main-server",
+  "server_path": "workspace\\public-mcp-servers\\mcp-server-data-exploration-main\\server.py",
+  "timestamp": "2025-07-01T18:19:18.394394",
+  "tools": [
+    {
+      "name": "load_csv",
+      "description": "\nLoad CSV File Tool\n\nPurpose:\nLoad a local CSV file into a DataFrame.\n\nUsage Notes:\n\t•\tIf a df_name is not provided, the tool will automatically assign names sequentially as df_1, df_2, and so on.\n",
+      "args_schema": {
+        "properties": {
+          "csv_path": {
+            "title": "Csv Path",
+            "type": "string"
+          },
+          "df_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Df Name"
+          }
+        },
+        "required": [
+          "csv_path"
+        ],
+        "title": "LoadCsv",
+        "type": "object"
+      }
+    },
+    {
+      "name": "run_script",
+      "description": "\nPython Script Execution Tool\n\nPurpose:\nExecute Python scripts for specific data analytics tasks.\n\nAllowed Actions\n\t1.\tPrint Results: Output will be displayed as the script's stdout.\n\t2.\t[Optional] Save DataFrames: Store DataFrames in memory for future use by specifying a save_to_memory name.\n\nProhibited Actions\n\t1.\tOverwriting Original DataFrames: Do not modify existing DataFrames to preserve their integrity for future tasks.\n\t2.\tCreating Charts: Chart generation is not permitted.\n",
+      "args_schema": {
+        "properties": {
+          "script": {
+            "title": "Script",
+            "type": "string"
+          },
+          "save_to_memory": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Save To Memory"
+          }
+        },
+        "required": [
+          "script"
+        ],
+        "title": "RunScript",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_csv": [
+      {
+        "case_name": "Load CSV with valid path and default name",
+        "purpose": "验证使用默认名称加载本地有效CSV文件的基本功能",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv"
+        },
+        "response": {
+          "result": "Successfully loaded CSV into dataframe 'df_1'"
+        },
+        "execution_time": 0.0075070858001708984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with valid path and custom name",
+        "purpose": "验证使用自定义DataFrame名称加载CSV文件的功能",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "df_name": "custom_df"
+        },
+        "response": {
+          "result": "Successfully loaded CSV into dataframe 'custom_df'"
+        },
+        "execution_time": 0.009514808654785156,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load non-existent CSV file",
+        "purpose": "验证工具在指定路径不存在CSV文件时的错误处理",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv"
+        },
+        "response": {
+          "error": "ToolException: Error loading CSV: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv'"
+        },
+        "execution_time": 0.0020008087158203125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with invalid file extension",
+        "purpose": "验证工具拒绝非CSV文件扩展名输入的能力",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\app.ico"
+        },
+        "response": {
+          "error": "ToolException: Error loading CSV: 'utf-8' codec can't decode byte 0xab in position 11: invalid start byte"
+        },
+        "execution_time": 0.0030248165130615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with empty df_name parameter",
+        "purpose": "验证当提供空字符串作为df_name参数时，是否自动分配默认名称",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "df_name": ""
+        },
+        "response": {
+          "result": "Successfully loaded CSV into dataframe 'df_5'"
+        },
+        "execution_time": 0.0069997310638427734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with special characters in df_name",
+        "purpose": "验证DataFrame名称中包含特殊字符时的处理能力",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "df_name": "df@#_测试123"
+        },
+        "response": {
+          "result": "Successfully loaded CSV into dataframe 'df@#_测试123'"
+        },
+        "execution_time": 0.009374618530273438,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV from restricted access directory",
+        "purpose": "验证尝试从无权限目录加载CSV文件时的安全性处理",
+        "args": {
+          "csv_path": "C:\\Windows\\system32\\drivers\\etc\\hosts"
+        },
+        "response": {
+          "error": "ToolException: Error loading CSV: Error tokenizing data. C error: Expected 1 fields in line 11, saw 2\n"
+        },
+        "execution_time": 0.004004478454589844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with null df_name parameter",
+        "purpose": "验证当df_name参数为null时，是否按预期自动命名",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\机械设备精简.csv",
+          "df_name": null
+        },
+        "response": {
+          "result": "Successfully loaded CSV into dataframe 'df_8'"
+        },
+        "execution_time": 0.009196996688842773,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load very large CSV file",
+        "purpose": "验证工具处理大尺寸CSV文件的能力",
+        "args": {
+          "csv_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\large_data.csv"
+        },
+        "response": {
+          "error": "ToolException: Error loading CSV: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\large_data.csv'"
+        },
+        "execution_time": 0.002000093460083008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with missing csv_path parameter",
+        "purpose": "验证未提供csv_path参数时的错误处理",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error loading CSV: Invalid file path or buffer object type: <class 'NoneType'>"
+        },
+        "execution_time": 0.0035071372985839844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with empty csv_path string",
+        "purpose": "验证提供空字符串作为csv_path参数时的错误处理",
+        "args": {
+          "csv_path": ""
+        },
+        "response": {
+          "error": "ToolException: Error loading CSV: [Errno 2] No such file or directory: ''"
+        },
+        "execution_time": 0.006005525588989258,
+        "is_functional_test": false
+      }
+    ],
+    "run_script": [
+      {
+        "case_name": "Execute basic script with print",
+        "purpose": "验证运行基础Python脚本并打印结果的基本功能",
+        "args": {
+          "script": "print('Hello, MCP Server')"
+        },
+        "response": {
+          "result": "print out result: Hello, MCP Server\n"
+        },
+        "execution_time": 0.00511479377746582,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute script with DataFrame transformation and save",
+        "purpose": "验证使用已加载的DataFrame进行数据转换，并保存新DataFrame到内存",
+        "args": {
+          "script": "import pandas as pd\nnew_df = df_1[['名称', '价格']].copy()\nnew_df['价格'] *= 1.1",
+          "save_to_memory": [
+            "new_df"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error running script: \"['价格'] not in index\""
+        },
+        "execution_time": 0.0040128231048583984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to overwrite existing DataFrame",
+        "purpose": "验证工具是否禁止覆盖现有DataFrame",
+        "args": {
+          "script": "df_1 = df_1.sort_values(by='价格')"
+        },
+        "response": {
+          "error": "ToolException: Error running script: '价格'"
+        },
+        "execution_time": 0.001999378204345703,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute script with invalid syntax",
+        "purpose": "验证工具对包含语法错误的脚本的错误处理能力",
+        "args": {
+          "script": "prnt('Invalid Script')"
+        },
+        "response": {
+          "error": "ToolException: Error running script: name 'prnt' is not defined"
+        },
+        "execution_time": 0.003011941909790039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute script attempting to create chart",
+        "purpose": "验证工具阻止图表生成的能力",
+        "args": {
+          "script": "import matplotlib.pyplot as plt\nplt.plot([1,2,3], [5,7,4])\nplt.show()"
+        },
+        "response": {
+          "result": "print out result: No output"
+        },
+        "execution_time": 8.79366397857666,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute script with large data processing",
+        "purpose": "验证工具处理大规模数据计算的能力",
+        "args": {
+          "script": "import numpy as np\nlarge_data = np.random.rand(1000000)"
+        },
+        "response": {
+          "result": "print out result: No output"
+        },
+        "execution_time": 0.010078191757202148,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute script with special characters in variable names",
+        "purpose": "验证脚本中使用含特殊字符变量名时的处理能力",
+        "args": {
+          "script": "测试变量 = 'Special Char Test'\nprint(测试变量)",
+          "save_to_memory": [
+            "测试变量"
+          ]
+        },
+        "response": {
+          "result": "print out result: Special Char Test\n"
+        },
+        "execution_time": 0.004514455795288086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute script using external libraries not allowed",
+        "purpose": "验证工具阻止非法外部库调用的安全性",
+        "args": {
+          "script": "import os\nos.system('dir')"
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.008007049560546875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute script accessing restricted system resources",
+        "purpose": "验证工具阻止脚本访问系统资源的安全机制",
+        "args": {
+          "script": "import subprocess\nsubprocess.call(['notepad.exe'])"
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.002481698989868164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute empty script",
+        "purpose": "验证空脚本输入时的错误处理",
+        "args": {
+          "script": ""
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.00299835205078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Execute script without saving to memory when expected",
+        "purpose": "验证未指定保存至内存时不存储中间结果的行为",
+        "args": {
+          "script": "temp_var = 'This should not be saved'"
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.0020058155059814453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple script executions with shared memory",
+        "purpose": "验证多个脚本执行间共享内存中的DataFrame",
+        "args": {
+          "script": "new_df['discounted_price'] = new_df['价格'] * 0.9",
+          "save_to_memory": [
+            "new_df"
+          ]
+        },
+        "response": {
+          "error": "Tool call 'run_script' was cancelled."
+        },
+        "execution_time": 0.002507448196411133,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 23
+}

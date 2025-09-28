@@ -1,0 +1,288 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp-everything-search-main",
+  "report_name": "mcp-everything-search-main-server",
+  "server_path": "workspace\\public-mcp-servers\\mcp-everything-search-main\\server.py",
+  "timestamp": "2025-06-30T21:47:45.397296",
+  "tools": [
+    {
+      "name": "search",
+      "description": "Universal file search tool for Windows\n\nCurrent Implementation:\nUsing Everything SDK with full search capabilities\n\nSearch Syntax Guide:\nSearch for files and folders using Everything SDK.\n                \nFeatures:\n- Fast file and folder search across all indexed drives\n- Support for wildcards and boolean operators\n- Multiple sort options (name, path, size, dates)\n- Case-sensitive and whole word matching\n- Regular expression support\n- Path matching\nSearch Syntax Guide:\n1. Basic Operators:\n   - space: AND operator\n   - |: OR operator\n   - !: NOT operator\n   - < >: Grouping\n   - \" \": Search for an exact phrase\n2. Wildcards:\n   - *: Matches zero or more characters\n   - ?: Matches exactly one character\n   Note: Wildcards match the whole filename by default. Disable Match whole filename to match wildcards anywhere.\n3. Functions:\n   Size and Count:\n   - size:<size>[kb|mb|gb]: Search by file size\n   - count:<max>: Limit number of results\n   - childcount:<count>: Folders with specific number of children\n   - childfilecount:<count>: Folders with specific number of files\n   - childfoldercount:<count>: Folders with specific number of subfolders\n   - len:<length>: Match filename length\n   Dates:\n   - datemodified:<date>, dm:<date>: Modified date\n   - dateaccessed:<date>, da:<date>: Access date\n   - datecreated:<date>, dc:<date>: Creation date\n   - daterun:<date>, dr:<date>: Last run date\n   - recentchange:<date>, rc:<date>: Recently changed date\n   \n   Date formats: YYYY[-MM[-DD[Thh[:mm[:ss[.sss]]]]]] or today, yesterday, lastweek, etc.\n   \n   File Attributes and Types:\n   - attrib:<attributes>, attributes:<attributes>: Search by file attributes (A:Archive, H:Hidden, S:System, etc.)\n   - type:<type>: Search by file type\n   - ext:<list>: Search by semicolon-separated extensions\n   \n   Path and Name:\n   - path:<path>: Search in specific path\n   - parent:<path>, infolder:<path>, nosubfolders:<path>: Search in path excluding subfolders\n   - startwith:<text>: Files starting with text\n   - endwith:<text>: Files ending with text\n   - child:<filename>: Folders containing specific child\n   - depth:<count>, parents:<count>: Files at specific folder depth\n   - root: Files with no parent folder\n   - shell:<name>: Search in known shell folders\n   Duplicates and Lists:\n   - dupe, namepartdupe, attribdupe, dadupe, dcdupe, dmdupe, sizedupe: Find duplicates\n   - filelist:<list>: Search pipe-separated (|) file list\n   - filelistfilename:<filename>: Search files from list file\n   - frn:<frnlist>: Search by File Reference Numbers\n   - fsi:<index>: Search by file system index\n   - empty: Find empty folders\n4. Function Syntax:\n   - function:value: Equal to value\n   - function:<=value: Less than or equal\n   - function:<value: Less than\n   - function:=value: Equal to\n   - function:>value: Greater than\n   - function:>=value: Greater than or equal\n   - function:start..end: Range of values\n   - function:start-end: Range of values\n5. Modifiers:\n   - case:, nocase:: Enable/disable case sensitivity\n   - file:, folder:: Match only files or folders\n   - path:, nopath:: Match full path or filename only\n   - regex:, noregex:: Enable/disable regex\n   - wfn:, nowfn:: Match whole filename or anywhere\n   - wholeword:, ww:: Match whole words only\n   - wildcards:, nowildcards:: Enable/disable wildcards\nExamples:\n1. Find Python files modified today:\n   ext:py datemodified:today\n2. Find large video files:\n   ext:mp4|mkv|avi size:>1gb\n3. Find files in specific folder:\n   path:C:\\Projects *.js\n\n",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "description": "Base search parameters common to all platforms.",
+            "properties": {
+              "query": {
+                "description": "Search query string. See platform-specific documentation for syntax details.",
+                "title": "Query",
+                "type": "string"
+              },
+              "max_results": {
+                "default": 100,
+                "description": "Maximum number of results to return (1-1000)",
+                "maximum": 1000,
+                "minimum": 1,
+                "title": "Max Results",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "title": "BaseSearchQuery",
+            "type": "object"
+          },
+          "windows_params": {
+            "$defs": {
+              "WindowsSortOption": {
+                "description": "Sort options for Windows Everything search.",
+                "enum": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  11,
+                  12,
+                  13,
+                  14
+                ],
+                "title": "WindowsSortOption",
+                "type": "integer"
+              }
+            },
+            "description": "Windows-specific search parameters for Everything SDK.",
+            "properties": {
+              "match_path": {
+                "default": false,
+                "description": "Match against full path instead of filename only",
+                "title": "Match Path",
+                "type": "boolean"
+              },
+              "match_case": {
+                "default": false,
+                "description": "Enable case-sensitive search",
+                "title": "Match Case",
+                "type": "boolean"
+              },
+              "match_whole_word": {
+                "default": false,
+                "description": "Match whole words only",
+                "title": "Match Whole Word",
+                "type": "boolean"
+              },
+              "match_regex": {
+                "default": false,
+                "description": "Enable regex search",
+                "title": "Match Regex",
+                "type": "boolean"
+              },
+              "sort_by": {
+                "$ref": "#/$defs/WindowsSortOption",
+                "default": 1,
+                "description": "Sort order for results"
+              }
+            },
+            "title": "WindowsSpecificParams",
+            "type": "object"
+          }
+        },
+        "required": [
+          "base"
+        ]
+      }
+    }
+  ],
+  "test_results": {
+    "search": [
+      {
+        "case_name": "Basic File Search by Extension",
+        "purpose": "验证基本文件扩展名搜索功能是否正常，例如查找所有PDF文件。",
+        "args": {
+          "base": {
+            "query": "ext:pdf"
+          }
+        },
+        "response": {
+          "result": "Path: C:\\Users\\PS\\Downloads\\ 服务生态系统设计.pdf\nFilename:  服务生态系统设计.pdf (pdf)\nSize: 6,997,133 bytes\nCreated: 2025-04-24T16:03:28.541040\nModified: 2025-04-24T16:03:32.285749\nAccessed: 2025-05-22T04:45:56.459544\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$I0458TK.pdf\nFilename: $I0458TK.pdf (pdf)\nSize: 212 bytes\nCreated: 2025-06-30T20:14:09.257856\nModified: 2025-06-30T20:14:09.257856\nAccessed: 2025-06-30T20:14:09.257856\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$I07YFRI.pdf\nFilename: $I07YFRI.pdf (pdf)\nSize: 188 bytes\nCreated: 2025-06-19T14:32:08.453730\nModified: 2025-06-19T14:32:08.453730\nAccessed: 2025-06-19T14:32:08.453730\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$I0LPVHB.pdf\nFilename: $I0LPVHB.pdf (pdf)\nSize: 18...[截断]，共计23764字符，剩余22964字符"
+        },
+        "execution_time": 0.032610416412353516,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search with Boolean Operators and Wildcards",
+        "purpose": "测试布尔运算符和通配符组合的搜索功能，例如查找以 'code' 开头且扩展名为 .html 或 .zip 的文件。",
+        "args": {
+          "base": {
+            "query": "startwith:code *.html|*.zip"
+          }
+        },
+        "response": {
+          "result": "Path: D:\\backup-mcp-gen\\MCPServer-Generator\\testSystem\\testFiles\\code (1).html\nFilename: code (1).html (html)\nSize: 17,654 bytes\nCreated: 2025-06-20T23:23:45.981506\nModified: 2025-06-19T17:58:43.545299\nAccessed: 2025-06-20T23:23:45.981506\n\nPath: D:\\chromeDownload\\code (1).html\nFilename: code (1).html (html)\nSize: 17,654 bytes\nCreated: 2025-06-19T17:58:42.678294\nModified: 2025-06-19T17:58:43.545299\nAccessed: 2025-06-19T17:58:43.545299\n\nPath: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\code (1).html\nFilename: code (1).html (html)\nSize: 86 bytes\nCreated: 2025-06-20T15:18:55.382584\nModified: 2025-06-30T20:33:37.052926\nAccessed: 2025-06-30T20:33:37.052926\n\nPath: D:\\tmp\\MCPServer-Generator-6-23-18\\testSystem\\testFiles\\code (1).html\nFilename: code (1).html (html)\nSize: 17,654 bytes\nC...[截断]，共计3162字符，剩余2362字符"
+        },
+        "execution_time": 0.0326993465423584,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search in Specific Path with Case Sensitivity",
+        "purpose": "在特定路径中启用大小写敏感搜索，例如在指定目录下查找大小写敏感的文件名。",
+        "args": {
+          "base": {
+            "query": "path:D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles app.ico"
+          },
+          "windows_params": {
+            "match_case": true
+          }
+        },
+        "response": {
+          "result": "Path: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\app.ico\nFilename: app.ico (ico)\nSize: 39,306 bytes\nCreated: 2025-06-28T15:51:25.450294\nModified: 2025-06-28T21:26:08.779776\nAccessed: 2025-06-30T19:54:03.492997\n"
+        },
+        "execution_time": 0.13607001304626465,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search for Empty Folder",
+        "purpose": "测试能否正确识别空文件夹（假设存在一个空文件夹）。",
+        "args": {
+          "base": {
+            "query": "empty:"
+          }
+        },
+        "response": {
+          "result": "Path: C:\\Windows\\WinSxS\\Temp\\InFlight\\18234daf90cadb01450400009840b461\\amd64_microsoft-windows-a..etedfeaturedatabase_31bf3856ad364e35_10.0.22621.4541_none_c8cf64f6cc5a9ab7\\$(build.nttree)\nFilename: $(build.nttree)\nSize: 0 bytes\nCreated: 2024-12-11T11:31:40.203912\nModified: 2025-05-22T04:41:29.959694\nAccessed: 2025-05-23T02:58:29.867616\n\nPath: C:\\Windows\\WinSxS\\Temp\\InFlight\\18234daf90cadb01450400009840b461\\amd64_microsoft-windows-a..etedfeaturedatabase_31bf3856ad364e35_10.0.22621.4541_none_c8cf64f6cc5a9ab7\\n\\$(build.nttree)\nFilename: $(build.nttree)\nSize: 0 bytes\nCreated: 2024-12-11T11:31:40.198280\nModified: 2025-05-22T04:41:29.959694\nAccessed: 2025-05-23T02:58:29.867616\n\nPath: C:\\Windows\\WinSxS\\Temp\\InFlight\\90b2b162995ddb01210400008c14201d\\amd64_microsoft-windows-a..etedfeaturedatabase_...[截断]，共计23766字符，剩余22966字符"
+        },
+        "execution_time": 0.07854700088500977,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Maximum Results Limit Test",
+        "purpose": "验证最大结果数限制参数是否生效，例如最多返回3个结果。",
+        "args": {
+          "base": {
+            "query": "*.*",
+            "max_results": 3
+          }
+        },
+        "response": {
+          "result": "Path: C:\\Users\\PS\\AppData\\Local\\Packages\\Clipchamp.Clipchamp_yxz26nhyzhsrt\\AC\\#!sb.odm\nFilename: #!sb.odm\nSize: 0 bytes\nCreated: 2025-05-09T16:02:49.038046\nModified: 2025-05-09T16:02:49.319605\nAccessed: 2025-05-30T13:13:40.918354\n\nPath: C:\\Users\\PS\\AppData\\Local\\Packages\\MicrosoftWindows.Client.WebExperience_cw5n1h2txyewy\\AC\\#!sb.odm\nFilename: #!sb.odm\nSize: 0 bytes\nCreated: 2025-05-08T09:28:00.354850\nModified: 2025-05-30T13:13:50.742222\nAccessed: 2025-05-30T13:13:50.742222\n\nPath: C:\\Windows\\WinSxS\\amd64_microsoft-windows-a..etedfeaturedatabase_31bf3856ad364e35_10.0.22621.4830_none_c8ae0bb0cc73bb92\\$(build.nttree)\nFilename: $(build.nttree)\nSize: 0 bytes\nCreated: 2025-04-07T15:11:34.222730\nModified: 2025-04-07T15:11:34.222730\nAccessed: 2025-04-07T15:11:34.222730\n"
+        },
+        "execution_time": 0.05154705047607422,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Invalid Query Handling",
+        "purpose": "测试无效查询输入时工具是否能妥善处理错误，例如使用不合法的语法。",
+        "args": {
+          "base": {
+            "query": "[invalid_regex"
+          },
+          "windows_params": {
+            "match_regex": true
+          }
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.01147913932800293,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search Using Regular Expression",
+        "purpose": "验证正则表达式搜索功能是否正常，例如查找包含“output”并以.jpg结尾的文件。",
+        "args": {
+          "base": {
+            "query": "output.*\\.jpg"
+          },
+          "windows_params": {
+            "match_regex": true
+          }
+        },
+        "response": {
+          "result": "Path: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\contours_jpg_output.jpg\nFilename: contours_jpg_output.jpg (jpg)\nSize: 10,087 bytes\nCreated: 2025-06-30T20:39:23.405304\nModified: 2025-06-30T20:39:23.406304\nAccessed: 2025-06-30T20:39:23.406304\n\nPath: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\contours_output.jpg\nFilename: contours_output.jpg (jpg)\nSize: 255,746 bytes\nCreated: 2025-06-30T20:39:23.390749\nModified: 2025-06-30T20:39:23.392798\nAccessed: 2025-06-30T20:39:23.392798\n\nPath: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\contours_tiny_output.jpg\nFilename: contours_tiny_output.jpg (jpg)\nSize: 22,543 bytes\nCreated: 2025-06-30T20:39:23.415309\nModified: 2025-06-30T20:39:23.416307\nAccessed: 2025-06-30T20:39:23.416307\n\nPath: D:\\devWorkspace\\MCPServer-Ge...[截断]，共计1843字符，剩余1043字符"
+        },
+        "execution_time": 0.12836599349975586,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search Files Modified Today",
+        "purpose": "测试按修改日期搜索的功能，例如查找今天修改过的文件。",
+        "args": {
+          "base": {
+            "query": "datemodified:today"
+          }
+        },
+        "response": {
+          "result": "Path: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R1FZ4LF\nFilename: $R1FZ4LF\nSize: 0 bytes\nCreated: 2025-06-30T00:07:16.921128\nModified: 2025-06-30T00:07:16.925139\nAccessed: 2025-06-30T00:28:39.892854\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R43XADI\nFilename: $R43XADI\nSize: 0 bytes\nCreated: 2025-06-30T01:01:23.491899\nModified: 2025-06-30T01:01:28.686870\nAccessed: 2025-06-30T01:01:40.931842\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R4E0RU9\nFilename: $R4E0RU9\nSize: 0 bytes\nCreated: 2025-06-17T16:15:09.569405\nModified: 2025-06-30T19:06:55.261778\nAccessed: 2025-06-30T19:14:23.080640\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R4FJU6K\nFilename: $R4FJU6K\nSize: 0 bytes\nCreated: 2025-06-30T00:...[截断]，共计21881字符，剩余21081字符"
+        },
+        "execution_time": 0.022797584533691406,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search for Duplicate Files",
+        "purpose": "测试查找重复文件的功能，例如基于文件名、大小、修改时间等。",
+        "args": {
+          "base": {
+            "query": "sizedupe"
+          }
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.049691200256347656,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search for Large Files",
+        "purpose": "测试根据文件大小筛选大文件的功能，例如大于10MB的文件。",
+        "args": {
+          "base": {
+            "query": "size:>10mb"
+          }
+        },
+        "response": {
+          "result": "Path: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R0DK8DO.NEF\nFilename: $R0DK8DO.NEF (NEF)\nSize: 24,578,148 bytes\nCreated: 2024-12-07T18:42:17.702829\nModified: 2024-12-07T13:28:05.930000\nAccessed: 2024-12-07T18:53:48.669597\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R0E6R8R.tar\nFilename: $R0E6R8R.tar (tar)\nSize: 5,690,895,872 bytes\nCreated: 2025-01-09T15:14:00.375880\nModified: 2025-01-09T15:14:35.600291\nAccessed: 2025-01-09T15:14:35.600291\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R14BY8N.zip\nFilename: $R14BY8N.zip (zip)\nSize: 176,257,744 bytes\nCreated: 2025-05-30T11:36:51.239154\nModified: 2025-05-30T11:37:18.537158\nAccessed: 2025-05-30T11:39:33.351403\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-23026416...[截断]，共计26517字符，剩余25717字符"
+        },
+        "execution_time": 0.042962074279785156,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Case Sensitive Whole Word Match",
+        "purpose": "验证大小写敏感且全词匹配的搜索功能，例如精确匹配 'app' 且区分大小写。",
+        "args": {
+          "base": {
+            "query": "app"
+          },
+          "windows_params": {
+            "match_case": true,
+            "match_whole_word": true
+          }
+        },
+        "response": {
+          "result": "Path: C:\\Windows\\WinSxS\\Temp\\InFlight\\b59b90e75d44db0170040000f82f083e\\amd64_microsoft-windows-web-app-host-api_31bf3856ad364e35_10.0.22621.2506_none_44796b33c7f6d9cf\nFilename: amd64_microsoft-windows-web-app-host-api_31bf3856ad364e35_10.0.22621.2506_none_44796b33c7f6d9cf\nSize: 0 bytes\nCreated: 2024-03-03T13:42:20.600199\nModified: 2024-12-02T10:00:28.099917\nAccessed: 2025-05-23T02:58:32.703261\n\nPath: C:\\Windows\\WinSxS\\Temp\\InFlight\\db3bf2376380db0191020000001e2451\\amd64_microsoft-windows-web-app-host-api_31bf3856ad364e35_10.0.22621.3527_none_447b56e5c7f52345\nFilename: amd64_microsoft-windows-web-app-host-api_31bf3856ad364e35_10.0.22621.3527_none_447b56e5c7f52345\nSize: 0 bytes\nCreated: 2024-10-18T14:10:17.050434\nModified: 2025-02-16T19:09:55.760768\nAccessed: 2025-05-23T02:58:33.514997\n\nPath...[截断]，共计29864字符，剩余29064字符"
+        },
+        "execution_time": 0.09789896011352539,
+        "is_security_test": false
+      },
+      {
+        "case_name": "Search by File Name Length",
+        "purpose": "测试根据文件名长度进行搜索的功能，例如文件名长度为8个字符。",
+        "args": {
+          "base": {
+            "query": "len:8"
+          }
+        },
+        "response": {
+          "result": "Path: C:\\Users\\PS\\AppData\\Local\\Packages\\Clipchamp.Clipchamp_yxz26nhyzhsrt\\AC\\#!sb.odm\nFilename: #!sb.odm\nSize: 0 bytes\nCreated: 2025-05-09T16:02:49.038046\nModified: 2025-05-09T16:02:49.319605\nAccessed: 2025-05-30T13:13:40.918354\n\nPath: C:\\Users\\PS\\AppData\\Local\\Packages\\MicrosoftWindows.Client.WebExperience_cw5n1h2txyewy\\AC\\#!sb.odm\nFilename: #!sb.odm\nSize: 0 bytes\nCreated: 2025-05-08T09:28:00.354850\nModified: 2025-05-30T13:13:50.742222\nAccessed: 2025-05-30T13:13:50.742222\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R027J13\nFilename: $R027J13\nSize: 0 bytes\nCreated: 2025-05-23T12:14:24.584120\nModified: 2025-05-23T12:51:09.643847\nAccessed: 2025-06-25T22:50:30.935970\n\nPath: D:\\$RECYCLE.BIN\\S-1-5-21-3980691320-1577971525-2302641607-1001\\$R02YNQ0\nFilename: $R02YNQ0\nS...[截断]，共计22228字符，剩余21428字符"
+        },
+        "execution_time": 0.039914608001708984,
+        "is_security_test": false
+      }
+    ]
+  },
+  "total_cases": 12
+}

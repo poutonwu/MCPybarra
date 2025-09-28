@@ -1,0 +1,653 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_duffeld_flight_info",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_duffeld_flight_info/refined/server.py",
+  "timestamp": "2025-07-11T20:47:10.215571",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    Queries flight information based on departure, destination, date, cabin class, and trip type.\n\n    Args:\n        departure (str): The airport code or city for departure (e.g., \"JFK\").\n        destination (str): The airport code or city for arrival (e.g., \"LAX\").\n        date (str): Travel date in \"YYYY-MM-DD\" format.\n        cabin_class (str): Cabin class (e.g., \"economy\", \"business\", \"first\").\n        trip_type (str): Type of trip (\"one-way\", \"round-trip\", \"multi-city\").\n\n    Returns:\n        str: JSON string containing flight details.\n\n    Example:\n        search_flights(departure=\"JFK\", destination=\"LAX\", date=\"2023-12-25\", cabin_class=\"economy\", trip_type=\"one-way\")\n    ",
+      "args_schema": {
+        "properties": {
+          "departure": {
+            "title": "Departure",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "cabin_class": {
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "trip_type": {
+            "title": "Trip Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "departure",
+          "destination",
+          "date",
+          "cabin_class",
+          "trip_type"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    Retrieves detailed information about a specific flight offer.\n\n    Args:\n        offer_id (str): Unique identifier for the flight offer.\n\n    Returns:\n        str: JSON string with detailed flight information.\n\n    Example:\n        get_offer_details(offer_id=\"12345\")\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    Handles searches for multi-city flight itineraries.\n\n    Args:\n        segments (list): A list of trip segments where each segment is a dictionary containing:\n            - departure (str): Departure airport or city.\n            - destination (str): Destination airport or city.\n            - date (str): Travel date in \"YYYY-MM-DD\" format.\n\n    Returns:\n        str: JSON string containing multi-city flight options.\n\n    Example:\n        search_multi_city(segments=[\n            {\"departure\": \"JFK\", \"destination\": \"LAX\", \"date\": \"2023-12-25\"},\n            {\"departure\": \"LAX\", \"destination\": \"SFO\", \"date\": \"2023-12-30\"}\n        ])\n    ",
+      "args_schema": {
+        "properties": {
+          "segments": {
+            "items": {},
+            "title": "Segments",
+            "type": "array"
+          }
+        },
+        "required": [
+          "segments"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic Flight Search",
+        "purpose": "验证基本航班搜索功能是否正常工作，使用有效参数查询航班信息",
+        "args": {
+          "departure": "JFK",
+          "destination": "LAX",
+          "date": "2023-12-25",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.4791698455810547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Business Class",
+        "purpose": "测试不同舱位等级（商务舱）的航班查询功能",
+        "args": {
+          "departure": "ORD",
+          "destination": "SFO",
+          "date": "2024-01-10",
+          "cabin_class": "business",
+          "trip_type": "round-trip"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-city Trip Search",
+        "purpose": "验证多城市行程类型的航班查询功能",
+        "args": {
+          "departure": "LHR",
+          "destination": "DXB",
+          "date": "2024-02-01",
+          "cabin_class": "first",
+          "trip_type": "multi-city"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.006009340286254883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Departure Code",
+        "purpose": "测试无效出发地代码时工具是否能正确处理错误",
+        "args": {
+          "departure": "XYZ",
+          "destination": "LAX",
+          "date": "2023-12-25",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.008526325225830078,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Future Date Search",
+        "purpose": "验证未来日期的航班查询是否返回结果",
+        "args": {
+          "departure": "JFK",
+          "destination": "LAX",
+          "date": "2024-12-25",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.007536172866821289,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Past Date Search",
+        "purpose": "验证过去日期的航班查询是否返回无结果或错误",
+        "args": {
+          "departure": "JFK",
+          "destination": "LAX",
+          "date": "2022-12-25",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Departure Field",
+        "purpose": "测试出发地字段是否存在SQL注入漏洞",
+        "args": {
+          "departure": "JFK'; DROP TABLE flights;--",
+          "destination": "LAX",
+          "date": "2023-12-25",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid departure code: JFK'; DROP TABLE flights;--\"}"
+        },
+        "execution_time": 0.0040090084075927734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Destination Field",
+        "purpose": "测试目的地字段是否对XSS攻击进行转义处理",
+        "args": {
+          "departure": "JFK",
+          "destination": "<script>alert('xss')</script>",
+          "date": "2023-12-25",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid destination code: <script>alert('xss')</script>\"}"
+        },
+        "execution_time": 0.0065059661865234375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Parameters",
+        "purpose": "测试缺少必填参数时工具是否能正确处理错误",
+        "args": {
+          "departure": "",
+          "destination": "",
+          "date": "",
+          "cabin_class": "",
+          "trip_type": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid departure code: \"}"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in City Names",
+        "purpose": "测试包含特殊字符的城市名是否被正确处理",
+        "args": {
+          "departure": "München",
+          "destination": "Montréal",
+          "date": "2023-12-25",
+          "cabin_class": "economy",
+          "trip_type": "round-trip"
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid departure code: M\\u00fcnchen\"}"
+        },
+        "execution_time": 0.0045087337493896484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Invalid Date Format",
+        "purpose": "测试不符合格式要求的日期输入是否被正确处理",
+        "args": {
+          "departure": "JFK",
+          "destination": "LAX",
+          "date": "25/12/2023",
+          "cabin_class": "economy",
+          "trip_type": "one-way"
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid date format: 25/12/2023\"}"
+        },
+        "execution_time": 0.0070018768310546875,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Retrieval",
+        "purpose": "验证使用有效的offer_id能够成功获取航班报价详细信息",
+        "args": {
+          "offer_id": "12345"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.01600813865661621,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Offer ID",
+        "purpose": "测试提供空的offer_id时工具是否能正确处理错误",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Offer ID cannot be empty.\"}"
+        },
+        "execution_time": 0.006993293762207031,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Offer ID Format",
+        "purpose": "测试提供格式错误的offer_id（如特殊字符）时工具的响应",
+        "args": {
+          "offer_id": "!@#$%^&*"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.004510402679443359,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-existent Offer ID",
+        "purpose": "测试查询一个不存在的offer_id是否返回适当错误或空结果",
+        "args": {
+          "offer_id": "99999"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.007519721984863281,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Offer ID",
+        "purpose": "测试offer_id字段是否存在SQL注入漏洞",
+        "args": {
+          "offer_id": "12345'; DROP TABLE offers;--"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Offer ID",
+        "purpose": "测试offer_id字段是否对XSS攻击进行转义处理",
+        "args": {
+          "offer_id": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.0055081844329833984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer ID with Special Characters",
+        "purpose": "测试包含特殊字符的offer_id是否被正确处理",
+        "args": {
+          "offer_id": "FL_2023-12-25#TEST"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.008539438247680664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Missing Required Offer ID",
+        "purpose": "测试未提供offer_id参数时工具是否能正确处理错误",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\noffer_id\n  Field required [type=missing, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004002094268798828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer Details for Multi-city Trip",
+        "purpose": "验证多城市行程对应的offer_id是否能正确返回详细信息",
+        "args": {
+          "offer_id": "multi_city_offer_67890"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.009005308151245117,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Offer Details with Invalid Server Connection",
+        "purpose": "模拟服务器连接失败时获取offer详情的行为",
+        "args": {
+          "offer_id": "12345"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.0055141448974609375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer Details with Unicode Characters",
+        "purpose": "测试包含Unicode字符的offer_id是否被正确处理",
+        "args": {
+          "offer_id": "München_2024"
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.00751042366027832,
+        "is_functional_test": true
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi-City Flight Search",
+        "purpose": "验证多城市航班搜索工具在提供有效参数时是否能正常工作",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "LAX",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.02604508399963379,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Empty Segments",
+        "purpose": "测试当 segments 参数为空数组时工具是否能正确处理错误",
+        "args": {
+          "segments": []
+        },
+        "response": {
+          "result": "{\"error\": \"Segments must be a non-empty list.\"}"
+        },
+        "execution_time": 0.006101846694946289,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Missing Segments",
+        "purpose": "测试缺少 segments 参数时工具是否能正确处理错误",
+        "args": {},
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 1 validation error for search_multi_cityArguments\nsegments\n  Field required [type=missing, input_value={}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Invalid Departure Code",
+        "purpose": "测试无效出发地代码（如非机场代码）时工具是否能正确响应",
+        "args": {
+          "segments": [
+            {
+              "departure": "XYZ",
+              "destination": "LAX",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.005116701126098633,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Invalid Destination Code",
+        "purpose": "测试无效目的地代码（如非机场代码）时工具是否能正确响应",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "ABC",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "ABC",
+              "destination": "SFO",
+              "date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.005095481872558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Past Dates",
+        "purpose": "验证使用过去日期进行多城市航班查询时是否返回无结果或适当错误",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "LAX",
+              "date": "2022-01-01"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2022-01-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.006989240646362305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Future Dates",
+        "purpose": "验证未来日期的多城市航班查询功能是否正常工作",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "LAX",
+              "date": "2024-12-25"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2024-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.005510807037353516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Special Characters in City Names",
+        "purpose": "测试包含特殊字符的城市名是否被正确处理",
+        "args": {
+          "segments": [
+            {
+              "departure": "München",
+              "destination": "Montréal",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "Montréal",
+              "destination": "São Paulo",
+              "date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid departure code in segment: {'departure': 'M\\u00fcnchen', 'destination': 'Montr\\u00e9al', 'date': '2023-12-25'}\"}"
+        },
+        "execution_time": 0.006655693054199219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with SQL Injection Attempt",
+        "purpose": "测试 segments 中是否存在 SQL 注入漏洞",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK'; DROP TABLE flights;--",
+              "destination": "LAX",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid departure code in segment: {'departure': \\\"JFK'; DROP TABLE flights;--\\\", 'destination': 'LAX', 'date': '2023-12-25'}\"}"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with XSS Attempt",
+        "purpose": "测试 segments 中是否对 XSS 攻击进行转义处理",
+        "args": {
+          "segments": [
+            {
+              "departure": "<script>alert('xss')</script>",
+              "destination": "LAX",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2023-12-30"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid departure code in segment: {'departure': \\\"<script>alert('xss')</script>\\\", 'destination': 'LAX', 'date': '2023-12-25'}\"}"
+        },
+        "execution_time": 0.00450587272644043,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Single Segment",
+        "purpose": "验证仅有一个行程段时是否仍可正常执行多城市搜索（边界情况）",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "LAX",
+              "date": "2023-12-25"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.005010843276977539,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Search with Maximum Allowed Segments",
+        "purpose": "测试最多允许的行程段数时工具是否能正常处理",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "LAX",
+              "date": "2023-12-25"
+            },
+            {
+              "departure": "LAX",
+              "destination": "SFO",
+              "date": "2023-12-30"
+            },
+            {
+              "departure": "SFO",
+              "destination": "ORD",
+              "date": "2024-01-05"
+            },
+            {
+              "departure": "ORD",
+              "destination": "JFK",
+              "date": "2024-01-10"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Request error: [Errno 11001] getaddrinfo failed (ConnectError)\"}"
+        },
+        "execution_time": 0.009525299072265625,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 34
+}

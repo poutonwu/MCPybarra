@@ -1,0 +1,393 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_academic_paper_search_quer",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_academic_paper_search_quer/refined/server.py",
+  "timestamp": "2025-07-13T04:06:10.222001",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Search academic papers based on keywords from Semantic Scholar and Crossref APIs.\n\n    Args:\n        keywords (str): Keywords used for searching papers (required).\n        limit (int): Maximum number of results to return, default is 5 (optional).\n\n    Returns:\n        str: A JSON array containing paper information including title, authors, year, and DOI.\n\n    Raises:\n        ValueError: If input validation fails.\n        httpx.HTTPStatusError: If API request fails.\n        RuntimeError: If both Semantic Scholar and Crossref APIs fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    Fetch detailed information about a specific paper based on its ID and source.\n\n    Args:\n        paper_id (str): Unique identifier of the paper (DOI or Semantic Scholar ID) (required).\n        source (str): Data source (\"Semantic Scholar\" or \"Crossref\") (required).\n\n    Returns:\n        str: A JSON object containing detailed paper information including title, authors, abstract, and publication venue.\n\n    Raises:\n        ValueError: If input validation fails or invalid source is provided.\n        httpx.HTTPStatusError: If API request fails.\n        RuntimeError: If paper details cannot be retrieved.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    Search papers by topic with optional year range filtering.\n\n    Args:\n        topic (str): Topic keywords for paper search (required).\n        year_range (str): Year range in format \"YYYY-YYYY\" (optional).\n        limit (int): Maximum number of results to return, default is 5 (optional).\n\n    Returns:\n        str: A JSON array containing paper information including title, authors, year, and DOI.\n\n    Raises:\n        ValueError: If input validation fails.\n        httpx.HTTPStatusError: If API request fails.\n        RuntimeError: If both search methods fail.\n    ",
+      "args_schema": {
+        "properties": {
+          "topic": {
+            "title": "Topic",
+            "type": "string"
+          },
+          "year_range": {
+            "default": null,
+            "title": "Year Range",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证使用默认限制值搜索学术论文的基本功能是否正常工作",
+        "args": {
+          "keywords": "machine learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"Machine learning with sklearn\", \"authors\": [\"Thomas P. Trappenberg\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198828044.003.0003\", \"source\": \"Crossref\"}, {\"title\": \"Optimization and Machine Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781119902881\", \"source\": \"Crossref\"}, {\"title\": \"Why Use Automated Machine Learning?\", \"authors\": [\"Kai R. Larsen\", \"Daniel S. Becker\"], \"year\": 0, \"doi\": \"10.1093/oso/9780190941659.003.0001\", \"source\": \"Crossref\"}, {\"title\": \"Machine learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/cbo9780511804779.017\", \"source\": \"Crossref\"}, {\"title\": \"Machine Learning and Qualitative Reasoning\", \"authors\": [\"Ivan Bratko\"], \"year\": 0, \"doi\": \"10.1023/a:1022661713654\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 4.058239698410034,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证工具在指定非默认 limit 参数时是否能正确返回指定数量的结果",
+        "args": {
+          "keywords": "quantum computing",
+          "limit": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Quantum Computing I\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198854227.003.0015\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing II\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198854227.003.0016\", \"source\": \"Crossref\"}, {\"title\": \"Application: Quantum Computing\", \"authors\": [\"Michael G. Raymer\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190250720.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Distributed Quantum Computing\\u2009\\u2013\\u2009Classical and Quantum\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781394185542.ch3\", \"source\": \"Crossref\"}, {\"title\": \"Quantum computing for network medicine-based epistatic disease mechanism mining - Ready for quantum computing?\", \"authors\": [\"Jan Baumbach\"], \"year\": 0, \"doi\": \"10.58647/rexpo.25000079.v1\", \"source\": \"Crossref\"}, {\"title\": \"Distributed Quantum Computing \\u2013 Distributed Control of Quantum Gates\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781394185542.ch4\", \"source\": \"Crossref\"}, {\"title\": \"Quantum computing\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/cbo9780511979309.011\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing with Quantum Dots\", \"authors\": [], \"year\": 0, \"doi\": \"10.1201/9781420012293-23\", \"source\": \"Crossref\"}, {\"title\": \"Mathematics Behind Quantum Computing\", \"authors\": [\"Bhagvan Kommadi\"], \"year\": 0, \"doi\": \"10.1007/978-1-4842-6516-1_2\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing Fundamentals\", \"authors\": [], \"year\": 0, \"doi\": \"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1550字符，剩余50字符"
+        },
+        "execution_time": 3.438791513442993,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Special Characters in Keywords",
+        "purpose": "验证工具能否处理包含特殊字符的关键词输入",
+        "args": {
+          "keywords": "AI & deep learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"AI, Machine Learning &amp; Deep Learning Risk Management &amp; Controls: Beyond Deep Learning and Generative Adversarial Networks: Model Risk Management in AI, Machine Learning &amp; Deep Learning\", \"authors\": [\"Yogesh Malhotra\"], \"year\": 0, \"doi\": \"10.2139/ssrn.3193693\", \"source\": \"Crossref\"}, {\"title\": \"N/A\", \"authors\": [], \"year\": 0, \"doi\": \"10.1117/12.3011374.61c8834a-a454-ee11-a99c-00505691c5e1\", \"source\": \"Crossref\"}, {\"title\": \"Explainable Deep Learning AI\", \"authors\": [], \"year\": 0, \"doi\": \"10.1016/c2021-0-01538-8\", \"source\": \"Crossref\"}, {\"title\": \"AI vs. Machine Learning vs. Deep Learning\", \"authors\": [\"R. Lalitha\"], \"year\": 0, \"doi\": \"10.1201/9781003005629-3\", \"source\": \"Crossref\"}, {\"title\": \"Defenses Against Deep Learning Attacks\", \"authors\": [\"Linsheng He\", \"Fei Hu\"], \"year\": 0, \"doi\": \"10.1201/9781003187158-11\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 4.217389345169067,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Input",
+        "purpose": "验证当关键词为空时是否抛出适当的 ValueError 异常",
+        "args": {
+          "keywords": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: keywords parameter cannot be empty string"
+        },
+        "execution_time": 0.005009889602661133,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value Handling",
+        "purpose": "验证当 limit 参数为负数时是否能正确进行参数校验并抛出异常",
+        "args": {
+          "keywords": "blockchain",
+          "limit": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: limit must be a positive integer"
+        },
+        "execution_time": 0.006148099899291992,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Large Limit Value Boundary Test",
+        "purpose": "验证工具对极大 limit 值的边界处理能力（最大合理值）",
+        "args": {
+          "keywords": "cybersecurity",
+          "limit": 100
+        },
+        "response": {
+          "result": "[{\"title\": \"Cybersecurity and cybersecurity culture\", \"authors\": [\"Gulsebnem Bishop\"], \"year\": 0, \"doi\": \"10.1201/9781003368496-1\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity for the Future\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11656.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity and sovereignty\", \"authors\": [], \"year\": 0, \"doi\": \"10.51174/ajdss.0302/vjiq5734\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity Origins\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11656.003.0003\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity in Layers\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11656.003.0006\", \"source\": \"Crossref\"}, {\"title\": \"CYBERSECURITY MANAGEMENT OF IT PRODUCTS\", \"authors\": [\"Ihor Frolov\", \"Yanina Kolodinska\"], \"year\": 0, \"doi\": \"10.28925/2663-4023.2024.23.310317\", \"source\": \"Crossref\"}, {\"title\": \"E-administration, cybersecurity and municipalities \\u2013 the challenges of cybersecurity issues for the \\nmunicipalities in Hungary\", \"authors\": [\"Istv\\u00e1n Hoffman\", \"Krist\\u00f3f Cseh\"], \"year\": 0, \"doi\": \"10.35467/cal/133999\", \"source\": \"Crossref\"}, {\"title\": \"Road Vehicles - Cybersecurity Engineering\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.4271/iso/sae21434\", \"source\": \"Crossref\"}, {\"title\": \"Corporate Cybersecurity\", \"authors\": [\"Greg Austin\"], \"year\": 0, \"doi\": \"10.1007/978-3-319-68436-9_4\", \"source\": \"Crossref\"}, {\"title\": \"Road Vehicles - Cybersecurity Engineering\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.4271/iso/sae...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计14814字符，剩余13314字符"
+        },
+        "execution_time": 4.244954824447632,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Keywords",
+        "purpose": "验证工具是否对潜在的跨站脚本攻击输入进行了适当处理",
+        "args": {
+          "keywords": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "[{\"title\": \"Script S1: RatePartitions script\", \"authors\": [], \"year\": 0, \"doi\": \"10.7717/peerj.5498/supp-1\", \"source\": \"Crossref\"}, {\"title\": \"Jurnal Script\", \"authors\": [], \"year\": 0, \"doi\": \"10.34151/script\", \"source\": \"Crossref\"}, {\"title\": \"SCRIPT-ed\", \"authors\": [], \"year\": 0, \"doi\": \"10.2966/scrip\", \"source\": \"Crossref\"}, {\"title\": \"THE SCRIPT: 2 Body of script Size of script\", \"authors\": [], \"year\": 0, \"doi\": \"10.4324/9780080503059-14\", \"source\": \"Crossref\"}, {\"title\": \"Script to Screen\", \"authors\": [], \"year\": 0, \"doi\": \"10.5040/9781350923812\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 3.9402501583099365,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "API Failure Fallback Mechanism",
+        "purpose": "验证当两个 API 都失败时是否抛出 RuntimeError",
+        "args": {
+          "keywords": "failure test",
+          "limit": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Brittle Failure of Reformer Tube During Pressure Test\", \"authors\": [], \"year\": 0, \"doi\": \"10.31399/asm.fach.modes.c9001475\", \"source\": \"Crossref\"}, {\"title\": \"Table 2. Predicted capacities and test loads. test failure\", \"authors\": [], \"year\": 0, \"doi\": \"10.1201/9781482271355-197\", \"source\": \"Crossref\"}, {\"title\": \"MCM compute node thermal failure-design or test problem?\", \"authors\": [\"E.P. Sayre\"], \"year\": 0, \"doi\": \"10.1109/test.1996.557144\", \"source\": \"Crossref\"}, {\"title\": \"Panel 7 : cost of test - taking control [failure mechanism]\", \"authors\": [\"N. Mukherjee\"], \"year\": 0, \"doi\": \"10.1109/test.2004.1387439\", \"source\": \"Crossref\"}, {\"title\": \"Highly Accelerated Failure Test (HAFT) for Automotive Lamps with LED Assembly\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.4271/j3014_201303\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 4.003622055053711,
+        "is_functional_test": false
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Paper Search with Default Limit",
+        "purpose": "验证使用默认限制值搜索学术论文的基本功能是否正常工作",
+        "args": {
+          "topic": "machine learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"Machine learning with sklearn\", \"authors\": [\"Thomas P. Trappenberg\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198828044.003.0003\", \"source\": \"Crossref\"}, {\"title\": \"Optimization and Machine Learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781119902881\", \"source\": \"Crossref\"}, {\"title\": \"Why Use Automated Machine Learning?\", \"authors\": [\"Kai R. Larsen\", \"Daniel S. Becker\"], \"year\": 0, \"doi\": \"10.1093/oso/9780190941659.003.0001\", \"source\": \"Crossref\"}, {\"title\": \"Machine learning\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/cbo9780511804779.017\", \"source\": \"Crossref\"}, {\"title\": \"Machine Learning and Qualitative Reasoning\", \"authors\": [\"Ivan Bratko\"], \"year\": 0, \"doi\": \"10.1023/a:1022661713654\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 6.037463903427124,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Custom Limit",
+        "purpose": "验证工具在指定非默认 limit 参数时是否能正确返回指定数量的结果",
+        "args": {
+          "topic": "quantum computing",
+          "limit": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Quantum Computing II\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198854227.003.0016\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing I\", \"authors\": [\"M. Suhail Zubairy\"], \"year\": 0, \"doi\": \"10.1093/oso/9780198854227.003.0015\", \"source\": \"Crossref\"}, {\"title\": \"Application: Quantum Computing\", \"authors\": [\"Michael G. Raymer\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190250720.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Distributed Quantum Computing\\u2009\\u2013\\u2009Classical and Quantum\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781394185542.ch3\", \"source\": \"Crossref\"}, {\"title\": \"Quantum computing for network medicine-based epistatic disease mechanism mining - Ready for quantum computing?\", \"authors\": [\"Jan Baumbach\"], \"year\": 0, \"doi\": \"10.58647/rexpo.25000079.v1\", \"source\": \"Crossref\"}, {\"title\": \"Distributed Quantum Computing \\u2013 Distributed Control of Quantum Gates\", \"authors\": [], \"year\": 0, \"doi\": \"10.1002/9781394185542.ch4\", \"source\": \"Crossref\"}, {\"title\": \"Quantum computing\", \"authors\": [], \"year\": 0, \"doi\": \"10.1017/cbo9780511979309.011\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing with Quantum Dots\", \"authors\": [], \"year\": 0, \"doi\": \"10.1201/9781420012293-23\", \"source\": \"Crossref\"}, {\"title\": \"Mathematics Behind Quantum Computing\", \"authors\": [\"Bhagvan Kommadi\"], \"year\": 0, \"doi\": \"10.1007/978-1-4842-6516-1_2\", \"source\": \"Crossref\"}, {\"title\": \"Quantum Computing Fundamentals\", \"authors\": [], \"year\": 0, \"doi\": \"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1550字符，剩余50字符"
+        },
+        "execution_time": 5.642575263977051,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Year Range Filtering",
+        "purpose": "验证工具是否支持按年份范围过滤搜索结果",
+        "args": {
+          "topic": "artificial intelligence",
+          "year_range": "2010-2020"
+        },
+        "response": {
+          "result": "[{\"title\": \"Defining Artificial Intelligence\", \"authors\": [\"Jerry Kaplan\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190602383.003.0001\", \"source\": \"Crossref\"}, {\"title\": \"Philosophy of Artificial Intelligence\", \"authors\": [\"Jerry Kaplan\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190602383.003.0004\", \"source\": \"Crossref\"}, {\"title\": \"Frontiers of Artificial Intelligence\", \"authors\": [\"Jerry Kaplan\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190602383.003.0003\", \"source\": \"Crossref\"}, {\"title\": \"Artificial Intelligence and the Law\", \"authors\": [\"Jerry Kaplan\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190602383.003.0005\", \"source\": \"Crossref\"}, {\"title\": \"Possible Future Impacts of Artificial Intelligence\", \"authors\": [\"Jerry Kaplan\"], \"year\": 0, \"doi\": \"10.1093/wentk/9780190602383.003.0008\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 5.004623174667358,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Input",
+        "purpose": "验证当关键词为空时是否抛出适当的 ValueError 异常",
+        "args": {
+          "topic": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: topic parameter cannot be empty string"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Limit Value Handling",
+        "purpose": "验证当 limit 参数为负数时是否能正确进行参数校验并抛出异常",
+        "args": {
+          "topic": "blockchain",
+          "limit": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: limit must be a positive integer"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Large Limit Value Boundary Test",
+        "purpose": "验证工具对极大 limit 值的边界处理能力（最大合理值）",
+        "args": {
+          "topic": "cybersecurity",
+          "limit": 100
+        },
+        "response": {
+          "result": "[{\"title\": \"Cybersecurity and cybersecurity culture\", \"authors\": [\"Gulsebnem Bishop\"], \"year\": 0, \"doi\": \"10.1201/9781003368496-1\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity for the Future\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11656.003.0010\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity and sovereignty\", \"authors\": [], \"year\": 0, \"doi\": \"10.51174/ajdss.0302/vjiq5734\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity Origins\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11656.003.0003\", \"source\": \"Crossref\"}, {\"title\": \"Cybersecurity in Layers\", \"authors\": [], \"year\": 0, \"doi\": \"10.7551/mitpress/11656.003.0006\", \"source\": \"Crossref\"}, {\"title\": \"CYBERSECURITY MANAGEMENT OF IT PRODUCTS\", \"authors\": [\"Ihor Frolov\", \"Yanina Kolodinska\"], \"year\": 0, \"doi\": \"10.28925/2663-4023.2024.23.310317\", \"source\": \"Crossref\"}, {\"title\": \"E-administration, cybersecurity and municipalities \\u2013 the challenges of cybersecurity issues for the \\nmunicipalities in Hungary\", \"authors\": [\"Istv\\u00e1n Hoffman\", \"Krist\\u00f3f Cseh\"], \"year\": 0, \"doi\": \"10.35467/cal/133999\", \"source\": \"Crossref\"}, {\"title\": \"Road Vehicles - Cybersecurity Engineering\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.4271/iso/sae21434\", \"source\": \"Crossref\"}, {\"title\": \"Corporate Cybersecurity\", \"authors\": [\"Greg Austin\"], \"year\": 0, \"doi\": \"10.1007/978-3-319-68436-9_4\", \"source\": \"Crossref\"}, {\"title\": \"Road Vehicles - Cybersecurity Engineering\", \"authors\": [\"\"], \"year\": 0, \"doi\": \"10.4271/iso/sae...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计14866字符，剩余13366字符"
+        },
+        "execution_time": 5.713683128356934,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Special Characters in Keywords",
+        "purpose": "验证工具能否处理包含特殊字符的关键词输入",
+        "args": {
+          "topic": "AI & deep learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"AI, Machine Learning &amp; Deep Learning Risk Management &amp; Controls: Beyond Deep Learning and Generative Adversarial Networks: Model Risk Management in AI, Machine Learning &amp; Deep Learning\", \"authors\": [\"Yogesh Malhotra\"], \"year\": 0, \"doi\": \"10.2139/ssrn.3193693\", \"source\": \"Crossref\"}, {\"title\": \"N/A\", \"authors\": [], \"year\": 0, \"doi\": \"10.1117/12.3011374.61c8834a-a454-ee11-a99c-00505691c5e1\", \"source\": \"Crossref\"}, {\"title\": \"Explainable Deep Learning AI\", \"authors\": [], \"year\": 0, \"doi\": \"10.1016/c2021-0-01538-8\", \"source\": \"Crossref\"}, {\"title\": \"AI vs. Machine Learning vs. Deep Learning\", \"authors\": [\"R. Lalitha\"], \"year\": 0, \"doi\": \"10.1201/9781003005629-3\", \"source\": \"Crossref\"}, {\"title\": \"Defenses Against Deep Learning Attacks\", \"authors\": [\"Linsheng He\", \"Fei Hu\"], \"year\": 0, \"doi\": \"10.1201/9781003187158-11\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 6.212935924530029,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Keywords",
+        "purpose": "验证工具是否对潜在的跨站脚本攻击输入进行了适当处理",
+        "args": {
+          "topic": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "[{\"title\": \"Script S1: RatePartitions script\", \"authors\": [], \"year\": 0, \"doi\": \"10.7717/peerj.5498/supp-1\", \"source\": \"Crossref\"}, {\"title\": \"Jurnal Script\", \"authors\": [], \"year\": 0, \"doi\": \"10.34151/script\", \"source\": \"Crossref\"}, {\"title\": \"SCRIPT-ed\", \"authors\": [], \"year\": 0, \"doi\": \"10.2966/scrip\", \"source\": \"Crossref\"}, {\"title\": \"THE SCRIPT: 2 Body of script Size of script\", \"authors\": [], \"year\": 0, \"doi\": \"10.4324/9780080503059-14\", \"source\": \"Crossref\"}, {\"title\": \"Script to Screen\", \"authors\": [], \"year\": 0, \"doi\": \"10.5040/9781350923812\", \"source\": \"Crossref\"}]"
+        },
+        "execution_time": 7.664974927902222,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "Basic Paper Details Fetch with DOI",
+        "purpose": "验证使用有效的DOI从Crossref获取论文详细信息的基本功能是否正常工作",
+        "args": {
+          "paper_id": "10.1093/oso/9780198828044.003.0003",
+          "source": "Crossref"
+        },
+        "response": {
+          "result": "{\"title\": \"Machine learning with sklearn\", \"authors\": [\"Thomas P. Trappenberg\"], \"abstract\": \"<p>This chapter\\u2019s goal is to show how to apply machine learning algorithms in a general setting using some classic methods. In particular, it demonstrates how to apply three important machine learning algorithms, a support vector classifier (SVC), a random forest classifier (RFC), and a multilayer perceptron (MLP). While many of the methods studied later go beyond these now classic methods, this does not mean that these methods are obsolete. Also, the algorithms discussed here provide some form of baseline to discuss advanced methods like probabilistic reasoning and deep learning. The aim here is to demonstrate that applying machine learning methods based on machine learning libraries is not very difficult. It offers an opportunity to discuss evaluation techniques that are very important in practice.</p>\", \"publication_venue\": \"Fundamentals of Machine Learning\"}"
+        },
+        "execution_time": 2.2668073177337646,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper Details from Semantic Scholar by ID",
+        "purpose": "验证使用有效的Semantic Scholar ID从Semantic Scholar获取论文详细信息的功能",
+        "args": {
+          "paper_id": "abcd1234efgh5678ijklmnopqrstuvwx90yzab",
+          "source": "Semantic Scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Semantic Scholar: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/abcd1234efgh5678ijklmnopqrstuvwx90yzab?fields=title%2Cauthors%2Cabstract%2Cvenue'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.6562750339508057,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Source Handling",
+        "purpose": "验证当提供无效的数据源时工具是否抛出ValueError异常",
+        "args": {
+          "paper_id": "10.1093/oso/9780198828044.003.0003",
+          "source": "InvalidSource"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Invalid source: InvalidSource. Must be 'Semantic Scholar' or 'Crossref'"
+        },
+        "execution_time": 0.012244224548339844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Paper ID Validation",
+        "purpose": "验证当paper_id为空字符串时是否抛出ValueError异常",
+        "args": {
+          "paper_id": "",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: paper_id parameter cannot be empty string"
+        },
+        "execution_time": 0.010953664779663086,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Paper ID",
+        "purpose": "验证工具是否能安全处理包含潜在跨站脚本攻击的paper_id输入",
+        "args": {
+          "paper_id": "<script>alert('xss')</script>",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/%3Cscript%3Ealert('xss')%3C/script%3E'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.2887563705444336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Paper ID",
+        "purpose": "验证工具是否能安全处理包含潜在SQL注入的paper_id输入",
+        "args": {
+          "paper_id": "'; DROP TABLE papers;--",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/';%20DROP%20TABLE%20papers;--'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.2781572341918945,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-existent Paper ID Test",
+        "purpose": "验证当提供一个不存在的paper_id时工具是否抛出RuntimeError",
+        "args": {
+          "paper_id": "10.1234/nonexistentpaper1234567890",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/10.1234/nonexistentpaper1234567890'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.2515079975128174,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Paper ID",
+        "purpose": "验证工具能否正确处理包含特殊字符的paper_id输入",
+        "args": {
+          "paper_id": "10.1109!test.2020.12345678",
+          "source": "Crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: Unexpected error in fetch_paper_details: Failed to fetch details from Crossref: Client error '404 Not Found' for url 'https://api.crossref.org/works/10.1109!test.2020.12345678'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.1906259059906006,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

@@ -1,0 +1,471 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_flight_info_query",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_flight_info_query/refined/server.py",
+  "timestamp": "2025-07-16T11:57:27.921061",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    Queries flight information based on departure, destination, date, cabin class, and trip type.\n\n    Args:\n        departure: IATA code or name of the departure city/airport.\n        destination: IATA code or name of the destination city/airport.\n        date: Departure date in YYYY-MM-DD format.\n        cabin_class: Cabin class (e.g., \"economy\", \"business\", \"first\"). Defaults to \"economy\".\n        trip_type: Type of trip (\"one-way\", \"round-trip\", \"multi-city\").\n        return_date: Return date for round-trip flights in YYYY-MM-DD format. Required if trip_type is \"round-trip\".\n\n    Returns:\n        JSON array of flight objects.\n\n    Raises:\n        ValueError: If parameters are invalid.\n        httpx.HTTPStatusError: If API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "departure": {
+            "title": "Departure",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "trip_type": {
+            "default": "one-way",
+            "title": "Trip Type",
+            "type": "string"
+          },
+          "return_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Return Date"
+          }
+        },
+        "required": [
+          "departure",
+          "destination",
+          "date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    Retrieves detailed information for a specific flight offer.\n\n    Args:\n        offer_id: Unique identifier for the flight offer.\n\n    Returns:\n        JSON object containing detailed offer information.\n\n    Raises:\n        ValueError: If offer_id is invalid.\n        httpx.HTTPStatusError: If API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    Handles complex multi-city flight queries.\n\n    Args:\n        segments: List of flight segments, each with departure, destination, and date.\n        cabin_class: Cabin class (e.g., \"economy\", \"business\", \"first\"). Defaults to \"economy\".\n\n    Returns:\n        JSON array of flight combinations.\n\n    Raises:\n        ValueError: If segments are invalid.\n        httpx.HTTPStatusError: If API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "segments": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "segments"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic One-Way Flight Search",
+        "purpose": "验证使用默认参数（经济舱）进行单程航班搜索的基本功能是否正常工作。",
+        "args": {
+          "departure": "New York",
+          "destination": "Los Angeles",
+          "date": "2025-06-10"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 1.8265185356140137,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Round-Trip Flight Search with Return Date",
+        "purpose": "测试往返航班查询功能，包括提供返回日期。",
+        "args": {
+          "departure": "Chicago",
+          "destination": "Miami",
+          "date": "2025-07-15",
+          "trip_type": "round-trip",
+          "return_date": "2025-07-22"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 1.3765342235565186,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Business Class Flight Search",
+        "purpose": "验证商务舱的航班搜索功能是否正常。",
+        "args": {
+          "departure": "San Francisco",
+          "destination": "Seattle",
+          "date": "2025-08-01",
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 5.024592876434326,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Flight Search",
+        "purpose": "测试多城市行程的航班搜索功能是否支持，虽然当前工具未实现该逻辑，但应正确处理参数。",
+        "args": {
+          "departure": "Boston",
+          "destination": "Denver",
+          "date": "2025-09-05",
+          "trip_type": "multi-city"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 1.7366423606872559,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with IATA Codes",
+        "purpose": "验证使用IATA代码进行航班搜索是否有效。",
+        "args": {
+          "departure": "JFK",
+          "destination": "LAX",
+          "date": "2025-10-12"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 5.012242078781128,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Departure City",
+        "purpose": "测试无效出发城市的错误处理机制。",
+        "args": {
+          "departure": "InvalidCityName",
+          "destination": "Los Angeles",
+          "date": "2025-06-10"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 0.9161787033081055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Parameters",
+        "purpose": "测试缺少必填参数时是否抛出ValueError。",
+        "args": {
+          "departure": "",
+          "destination": "",
+          "date": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 5.01054835319519,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Future Date Boundary Test",
+        "purpose": "测试未来极限日期下的边界行为。",
+        "args": {
+          "departure": "New York",
+          "destination": "London",
+          "date": "2030-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: Failed to search flights: "
+        },
+        "execution_time": 5.016451358795166,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Retrieval",
+        "purpose": "验证使用有效offer_id能够成功获取航班报价的详细信息。",
+        "args": {
+          "offer_id": "OFFER123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Failed to get offer details: "
+        },
+        "execution_time": 2.5460431575775146,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Offer ID Format",
+        "purpose": "测试提供格式错误的offer_id（如空字符串）是否会抛出ValueError。",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Invalid offer_id provided"
+        },
+        "execution_time": 0.004042863845825195,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Existent Offer ID",
+        "purpose": "测试提供不存在的offer_id是否能正确返回API定义的错误信息。",
+        "args": {
+          "offer_id": "INVALID_OFFER_999"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Failed to get offer details: "
+        },
+        "execution_time": 2.811779022216797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Offer Details with Special Characters in ID",
+        "purpose": "验证工具能否处理包含特殊字符的offer_id请求。",
+        "args": {
+          "offer_id": "OFFER#123@FLY"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Failed to get offer details: "
+        },
+        "execution_time": 5.023388147354126,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Offer ID",
+        "purpose": "安全性测试：验证系统是否对offer_id进行输入过滤，防止SQL注入攻击。",
+        "args": {
+          "offer_id": "12345 OR 1=1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Failed to get offer details: "
+        },
+        "execution_time": 5.017714738845825,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt via Offer ID",
+        "purpose": "安全性测试：验证系统是否对offer_id中的脚本内容进行转义或拒绝处理。",
+        "args": {
+          "offer_id": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Failed to get offer details: "
+        },
+        "execution_time": 5.006527423858643,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "API Failure Handling for Offer Details",
+        "purpose": "测试当API服务不可用时，工具是否能正确捕获并处理httpx.HTTPStatusError异常。",
+        "args": {
+          "offer_id": "OFFER_FAILURE_TEST"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: Failed to get offer details: "
+        },
+        "execution_time": 5.011676073074341,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi-City Flight Search",
+        "purpose": "验证使用默认参数（经济舱）进行最基础的多城市航班搜索功能是否正常工作。",
+        "args": {
+          "segments": [
+            {
+              "departure": "New York",
+              "destination": "Los Angeles",
+              "date": "2025-06-10"
+            },
+            {
+              "departure": "Los Angeles",
+              "destination": "Chicago",
+              "date": "2025-06-15"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 5.015890836715698,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Flight Search with Business Class",
+        "purpose": "测试多城市行程中指定商务舱的航班搜索功能是否正常。",
+        "args": {
+          "segments": [
+            {
+              "departure": "San Francisco",
+              "destination": "Seattle",
+              "date": "2025-08-01"
+            },
+            {
+              "departure": "Seattle",
+              "destination": "Boston",
+              "date": "2025-08-05"
+            }
+          ],
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 1.453460454940796,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Flight Search with IATA Codes",
+        "purpose": "验证使用IATA代码进行多城市航班搜索是否有效。",
+        "args": {
+          "segments": [
+            {
+              "departure": "JFK",
+              "destination": "LAX",
+              "date": "2025-10-12"
+            },
+            {
+              "departure": "LAX",
+              "destination": "ORD",
+              "date": "2025-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 1.53078031539917,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Single Segment Multi-City Search (Fallback to One-Way)",
+        "purpose": "测试仅包含一个航段的多城市查询是否能正确回退为单程航班搜索。",
+        "args": {
+          "segments": [
+            {
+              "departure": "Miami",
+              "destination": "Denver",
+              "date": "2025-07-20"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 5.01105809211731,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in City Name",
+        "purpose": "安全性测试：验证系统是否对出发地/目的地中的SQL注入尝试进行过滤。",
+        "args": {
+          "segments": [
+            {
+              "departure": "SELECT * FROM cities",
+              "destination": "UNION ALL SELECT 1",
+              "date": "2025-01-01"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 5.014063119888306,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt via City Name",
+        "purpose": "安全性测试：验证系统是否对出发地/目的地中的脚本内容进行转义或拒绝处理。",
+        "args": {
+          "segments": [
+            {
+              "departure": "<script>alert('xss')</script>",
+              "destination": "HTML_CITY",
+              "date": "2025-01-01"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 1.4358956813812256,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Departure or Destination",
+        "purpose": "测试无效出发地或目的地时是否抛出ValueError。",
+        "args": {
+          "segments": [
+            {
+              "departure": "InvalidCityName",
+              "destination": "Los Angeles",
+              "date": "2025-06-10"
+            },
+            {
+              "departure": "New York",
+              "destination": "NoSuchCity",
+              "date": "2025-06-12"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: "
+        },
+        "execution_time": 1.3361835479736328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Segments",
+        "purpose": "测试缺少必填字段'segments'或其子字段时是否抛出ValueError。",
+        "args": {
+          "segments": []
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: Failed to search multi-city flights: At least one segment is required"
+        },
+        "execution_time": 0.003540515899658203,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 23
+}

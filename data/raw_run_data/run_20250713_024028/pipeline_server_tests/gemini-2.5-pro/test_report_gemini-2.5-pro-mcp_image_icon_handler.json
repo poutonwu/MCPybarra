@@ -1,0 +1,453 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_image_icon_handler",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_image_icon_handler/refined/server.py",
+  "timestamp": "2025-07-13T02:53:06.642261",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    Searches for images based on a keyword from multiple online sources.\n\n    This tool queries APIs from Unsplash, Pexels, and Pixabay to find\n    images matching the given query. It requires API keys for these\n    services to be configured as environment variables:\n    - UNSPLASH_API_KEY\n    - PEXELS_API_KEY\n    - PIXABAY_API_KEY\n\n    Args:\n        query (str): The search keyword for images (e.g., \"cats\", \"sunset\"). Must not be empty.\n        sources (Optional[List[str]]): A list of sources to search from.\n            Valid options are 'unsplash', 'pexels', 'pixabay'.\n            If None, it defaults to searching all three sources.\n        per_page (int): The number of results to request from each source.\n            Defaults to 10.\n\n    Returns:\n        str: A JSON string containing a list of image results. Each result is a\n             dictionary with details like source, id, url, photographer, and\n             description. Returns an empty list if no results are found or if\n             API keys are missing.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "sources": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sources"
+          },
+          "per_page": {
+            "default": 10,
+            "title": "Per Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    Downloads an image from a given URL and saves it to a local directory.\n\n    This function performs security checks to validate the URL scheme (HTTP/HTTPS)\n    and to prevent path traversal attacks in the filename.\n\n    Args:\n        image_url (str): The direct URL of the image to download OR a local file path.\n        filename (str): The name for the saved file, including the extension\n                        (e.g., 'my_image.jpg').\n        save_dir (str): The local directory where the image will be saved.\n                        It will be created if it doesn't exist.\n                        Defaults to './downloads'.\n\n    Returns:\n        str: A JSON string indicating the outcome. On success, it includes the\n             status, the absolute path to the saved file, and a confirmation\n             message. On failure, it provides an error status and message.\n    ",
+      "args_schema": {
+        "properties": {
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "save_dir": {
+            "default": "./downloads",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_url",
+          "filename"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    Generates a simple placeholder icon with a solid color background and text.\n\n    This is useful for creating quick, programmatic visual assets. It creates\n    an image, draws the provided text in the center, and saves it as a PNG file.\n    A default font is used if 'arial.ttf' is not available.\n\n    Args:\n        description (str): The text to display on the icon (e.g., \"App\").\n        size (Tuple[int, int]): The dimensions (width, height) of the icon in\n                                pixels. Defaults to (128, 128).\n        filename (Optional[str]): The desired filename for the icon (e.g.,\n                                  'app_icon.png'). If None, a filename is\n                                  auto-generated from the description.\n        save_dir (str): The directory where the generated icon will be saved.\n                        It will be created if it doesn't exist.\n                        Defaults to './icons'.\n\n    Returns:\n        str: A JSON string indicating the outcome. On success, it includes the\n             status, the absolute path to the saved file, and a confirmation\n             message. On failure, it provides an error status and message.\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "default": [
+              128,
+              128
+            ],
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Size",
+            "type": "array"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filename"
+          },
+          "save_dir": {
+            "default": "./icons",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search with Default Sources",
+        "purpose": "验证使用默认参数搜索图像的基本功能是否正常工作。",
+        "args": {
+          "query": "sunset"
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"-IMlv9Jlb24\", \"url\": \"https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxzdW5zZXR8ZW58MHx8fHwxNzUyMzI0MDcyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Sebastien Gabriel\", \"description\": \"Beautiful evening sunset\"}, {\"source\": \"unsplash\", \"id\": \"ESEnXckWlLY\", \"url\": \"https://images.unsplash.com/photo-1512641406448-6574e777bec6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxzdW5zZXR8ZW58MHx8fHwxNzUyMzI0MDcyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Dewang Gupta\", \"description\": \"photo of cumulus clouds during golden hour\"}, {\"source\": \"unsplash\", \"id\": \"qkfxBc2NQ18\", \"url\": \"https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxzdW5zZXR8ZW58MHx8fHwxNzUyMzI0MDcyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Johannes Plenio\", \"description\": \"brown boat near dock\"}, {\"source\": \"unsplash\", \"id\": \"tNDvFkxkBHo\", \"url\": \"https://images.unsplash.com/photo-1422493757035-1e5e03968f95?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxzdW5zZXR8ZW58MHx8fHwxNzUyMzI0MDcyfDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Igor Kasalovic\", \"description\": \"Sunset over an Australian Beach\"}, {\"source\": \"unsplash\", \"id\": \"JE01L3hB0GQ\", \"url\": \"https://images.unsplash.com/photo-1481988535861-271139e06469?crop=entropy&cs=tin...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计10394字符，剩余8894字符"
+        },
+        "execution_time": 1.3646667003631592,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search from Specific Source",
+        "purpose": "验证工具能够从指定来源（如Unsplash）正确搜索图像。",
+        "args": {
+          "query": "cats",
+          "sources": [
+            "unsplash"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"7GX5aICb5i4\", \"url\": \"https://images.unsplash.com/photo-1543852786-1cf6624b9987?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxjYXRzfGVufDB8fHx8MTc1MjMzODgzNXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Jae Park\", \"description\": \"bean the cat\"}, {\"source\": \"unsplash\", \"id\": \"13ky5Ycf0ts\", \"url\": \"https://images.unsplash.com/photo-1536590158209-e9d615d525e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxjYXRzfGVufDB8fHx8MTc1MjMzODgzNXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Zo\\u00eb Gayah Jonker\", \"description\": \"Olly\"}, {\"source\": \"unsplash\", \"id\": \"G7kUPmzi80E\", \"url\": \"https://images.unsplash.com/photo-1536589961747-e239b2abbec2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxjYXRzfGVufDB8fHx8MTc1MjMzODgzNXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Zo\\u00eb Gayah Jonker\", \"description\": \"Tibi the cat from my neighbors\"}, {\"source\": \"unsplash\", \"id\": \"ZCHj_2lJP00\", \"url\": \"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxjYXRzfGVufDB8fHx8MTc1MjMzODgzNXww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Alvan Nee\", \"description\": \"white and brown long fur cat\"}, {\"source\": \"unsplash\", \"id\": \"AHgpNYkX9dc\", \"url\": \"https://images.unsplash.com/photo-1516280030429-27679b3dc9cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHx...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计3336字符，剩余1836字符"
+        },
+        "execution_time": 0.17367219924926758,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Custom Per Page Result Count",
+        "purpose": "验证工具能根据指定的每页数量返回结果。",
+        "args": {
+          "query": "nature",
+          "per_page": 5
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"IicyiaPYGGI\", \"url\": \"https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxuYXR1cmV8ZW58MHx8fHwxNzUyMzQ2NDA4fDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Henry Be\", \"description\": \"orange flowers\"}, {\"source\": \"unsplash\", \"id\": \"EwKXn5CapA4\", \"url\": \"https://images.unsplash.com/photo-1518495973542-4542c06a5843?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxuYXR1cmV8ZW58MHx8fHwxNzUyMzQ2NDA4fDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Jeremy Bishop\", \"description\": \"Finding my roots\"}, {\"source\": \"unsplash\", \"id\": \"UCd78vfC8vU\", \"url\": \"https://images.unsplash.com/photo-1472396961693-142e6e269027?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxuYXR1cmV8ZW58MHx8fHwxNzUyMzQ2NDA4fDA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Johannes Andersson\", \"description\": \"Two deer in front of Half Dome in Yosemite Valley during sunset.\\n\\nI spent the evening in Yosemite Valley watching the sun go down on Half Dome when a couple of deer walked toward me. I took the opportunity to take this picture of them before moving out of their way so they could walk away undisturbed. It was a very beautiful experience and one of the best sunsets I've ever witnessed.\"}, {\"source\": \"unsplash\", \"id\": \"1Z2niiBPg5A\", \"url\": \"https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?crop=entropy&cs=tinysrgb&fit=max...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计5497字符，剩余3997字符"
+        },
+        "execution_time": 0.967015266418457,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple Sources Image Search",
+        "purpose": "验证工具可以从多个指定来源同时搜索图像。",
+        "args": {
+          "query": "mountains",
+          "sources": [
+            "pexels",
+            "pixabay"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"pexels\", \"id\": \"9754\", \"url\": \"https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg\", \"photographer\": \"Creative Vix\", \"description\": \"A scenic view of misty mountains and dense forest, perfect for nature lovers.\"}, {\"source\": \"pexels\", \"id\": \"618833\", \"url\": \"https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg\", \"photographer\": \"Sagui Andrea\", \"description\": \"Stunning sunrise casting rays over the Italian Alps in Alleghe, Veneto, with lush greenery and rocky terrain.\"}, {\"source\": \"pexels\", \"id\": \"933054\", \"url\": \"https://images.pexels.com/photos/933054/pexels-photo-933054.jpeg\", \"photographer\": \"Joyston Judah\", \"description\": \"Breathtaking sunset view of snow-capped mountains in Nepal, perfect for scenic backgrounds.\"}, {\"source\": \"pexels\", \"id\": \"210243\", \"url\": \"https://images.pexels.com/photos/210243/pexels-photo-210243.jpeg\", \"photographer\": \"Pixabay\", \"description\": \"Breathtaking autumn landscape of Grand Teton with snow-capped peaks and colorful trees.\"}, {\"source\": \"pexels\", \"id\": \"1666012\", \"url\": \"https://images.pexels.com/photos/1666012/pexels-photo-1666012.jpeg\", \"photographer\": \"Philip Ackermann\", \"description\": \"Scenic view of dramatic mountain peaks shrouded in clouds.\"}, {\"source\": \"pexels\", \"id\": \"772803\", \"url\": \"https://images.pexels.com/photos/772803/pexels-photo-772803.jpeg\", \"photographer\": \"Tyler Lastovich\", \"description\": \"Breathtaking view of snow-capped mountain peaks under a cloudy sky.\"}, {\"sou...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计6931字符，剩余5431字符"
+        },
+        "execution_time": 1.2592365741729736,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "验证工具是否正确处理空查询输入并返回错误或无结果。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Query cannot be empty or whitespace only. Please provide a valid search term.\", \"results\": []}"
+        },
+        "execution_time": 0.003000020980834961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Name",
+        "purpose": "验证工具是否拒绝无效的源名称并仅接受合法来源。",
+        "args": {
+          "query": "flowers",
+          "sources": [
+            "invalidsource"
+          ]
+        },
+        "response": {
+          "result": "{\"results\": []}"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero Per Page Value",
+        "purpose": "验证当 per_page 设置为 0 时的行为是否符合预期。",
+        "args": {
+          "query": "ocean",
+          "per_page": 0
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"6ArTTluciuA\", \"url\": \"https://images.unsplash.com/photo-1518837695005-2083093ee35b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHxvY2VhbnxlbnwwfHx8fDE3NTIzNDY0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Matt Hardy\", \"description\": \"Ocean Ripple\"}, {\"source\": \"unsplash\", \"id\": \"K785Da4A_JA\", \"url\": \"https://images.unsplash.com/photo-1559825481-12a05cc00344?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHxvY2VhbnxlbnwwfHx8fDE3NTIzNDY0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Silas Baisch\", \"description\": \"blue and clear body of water\"}, {\"source\": \"unsplash\", \"id\": \"sLAk1guBG90\", \"url\": \"https://images.unsplash.com/photo-1505142468610-359e7d316be0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHxvY2VhbnxlbnwwfHx8fDE3NTIzNDY0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Shifaaz shamoon\", \"description\": \"Maldives\"}, {\"source\": \"unsplash\", \"id\": \"8Ogfqvw15Rg\", \"url\": \"https://images.unsplash.com/photo-1513553404607-988bf2703777?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHxvY2VhbnxlbnwwfHx8fDE3NTIzNDY0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Joel Vodell\", \"description\": \"Ocean\"}, {\"source\": \"unsplash\", \"id\": \"KMn4VEeEPR8\", \"url\": \"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw1fHxvY2VhbnxlbnwwfHx8fDE3NTI...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计3582字符，剩余2082字符"
+        },
+        "execution_time": 1.1771094799041748,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能正确处理包含特殊字符的搜索查询。",
+        "args": {
+          "query": "@#$_sunset!?"
+        },
+        "response": {
+          "result": "{\"results\": [{\"source\": \"unsplash\", \"id\": \"6W96T-_s_E0\", \"url\": \"https://images.unsplash.com/photo-1562104325-330a4f786a99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwxfHwlNDAlMjMlMjRfc3Vuc2V0JTIxJTNGfGVufDB8fHx8MTc1MjM0NjQxMnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Irina Iriser\", \"description\": \"silhouette of mountain under orange and yellow skies\"}, {\"source\": \"unsplash\", \"id\": \"0fPbRZ4P7Bk\", \"url\": \"https://images.unsplash.com/photo-1625790199940-5353de0ed650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwyfHwlNDAlMjMlMjRfc3Vuc2V0JTIxJTNGfGVufDB8fHx8MTc1MjM0NjQxMnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Jonathan Chng\", \"description\": \"silhouette of buildings during sunset\"}, {\"source\": \"unsplash\", \"id\": \"YS4wjGY5bac\", \"url\": \"https://images.unsplash.com/photo-1677735759234-6c57b8d2f0a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHwzfHwlNDAlMjMlMjRfc3Vuc2V0JTIxJTNGfGVufDB8fHx8MTc1MjM0NjQxMnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Ahmed Saalim Hussain\", \"description\": \"Sunset from Hulhumale' Beach.\"}, {\"source\": \"unsplash\", \"id\": \"Xshwobko3Gk\", \"url\": \"https://images.unsplash.com/photo-1709548581259-7c5b56e28010?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NjQwNzV8MHwxfHNlYXJjaHw0fHwlNDAlMjMlMjRfc3Vuc2V0JTIxJTNGfGVufDB8fHx8MTc1MjM0NjQxMnww&ixlib=rb-4.1.0&q=80&w=1080\", \"photographer\": \"Didier VEILLON\", \"description\": \"the sun is setting on the horizon of a body of water\"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计3730字符，剩余2230字符"
+        },
+        "execution_time": 1.134484052658081,
+        "is_functional_test": true
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download from URL",
+        "purpose": "验证工具能够从给定的URL下载图像并保存到默认目录。",
+        "args": {
+          "image_url": "https://images.unsplash.com/photo-1503803548695-c5dd448f1f2745e68fe149c10dcfa3e2f024c4",
+          "filename": "downloaded_image.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Client error '404 Not Found' for url 'https://images.unsplash.com/photo-1503803548695-c5dd448f1f2745e68fe149c10dcfa3e2f024c4'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"}"
+        },
+        "execution_time": 1.7809052467346191,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Download with Custom Save Directory",
+        "purpose": "验证工具可以将图像下载到指定的自定义目录中。",
+        "args": {
+          "image_url": "https://images.unsplash.com/photo-1512641406448-6574e777bec6",
+          "filename": "custom_dir_image.png",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloads_custom"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\downloads_custom\\\\custom_dir_image.png\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\downloads_custom\\\\custom_dir_image.png\"}"
+        },
+        "execution_time": 2.0011789798736572,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Image Using Local File Path",
+        "purpose": "验证工具支持使用本地文件路径作为 image_url 参数进行处理。",
+        "args": {
+          "image_url": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "filename": "copied_local_image.jpg",
+          "save_dir": "./downloads"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\copied_local_image.jpg\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\copied_local_image.jpg\"}"
+        },
+        "execution_time": 0.004999399185180664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid URL Scheme Rejection",
+        "purpose": "验证工具拒绝非HTTP/HTTPS协议的URL以防止安全漏洞。",
+        "args": {
+          "image_url": "ftp://invalid-scheme-image.jpg",
+          "filename": "invalid_scheme.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid URL scheme. Only HTTP, HTTPS, and local file paths are allowed.\"}"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Path Traversal Attempt Detection",
+        "purpose": "验证工具是否能正确检测并阻止路径穿越攻击尝试。",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "../../../malicious_file.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid filename. It cannot contain path traversal elements.\"}"
+        },
+        "execution_time": 0.006005287170410156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Filename Handling",
+        "purpose": "验证工具在未提供 filename 参数时能否优雅地处理错误。",
+        "args": {
+          "image_url": "https://example.com/image.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: 1 validation error for download_imageArguments\nfilename\n  Field required [type=missing, input_value={'image_url': 'https://example.com/image.jpg'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.005998134613037109,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Image URL Handling",
+        "purpose": "验证工具在未提供 image_url 参数时能否优雅地处理错误。",
+        "args": {
+          "filename": "missing_url_image.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: 1 validation error for download_imageArguments\nimage_url\n  Field required [type=missing, input_value={'filename': 'missing_url_image.jpg'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.00699925422668457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filename",
+        "purpose": "验证工具是否能正确处理包含特殊字符的文件名。",
+        "args": {
+          "image_url": "https://images.unsplash.com/photo-1505142468610-359e7d316be0",
+          "filename": "special@#$_chars_image.png"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\special@#$_chars_image.png\", \"message\": \"Image saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\downloads\\\\special@#$_chars_image.png\"}"
+        },
+        "execution_time": 1.97703218460083,
+        "is_functional_test": true
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation with Default Parameters",
+        "purpose": "验证使用默认参数生成图标的最基本功能是否正常工作。",
+        "args": {
+          "description": "App"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\app_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\app_icon.png\"}"
+        },
+        "execution_time": 0.017036914825439453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Size",
+        "purpose": "验证工具能够使用自定义尺寸生成图标。",
+        "args": {
+          "description": "Logo",
+          "size": [
+            256,
+            256
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\logo_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\logo_icon.png\"}"
+        },
+        "execution_time": 0.008986234664916992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Filename",
+        "purpose": "验证工具可以使用指定文件名保存生成的图标。",
+        "args": {
+          "description": "Settings",
+          "filename": "settings_icon.png"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\settings_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\settings_icon.png\"}"
+        },
+        "execution_time": 0.009547710418701172,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Save Directory",
+        "purpose": "验证工具能将图标保存到指定目录，该目录可能需要创建。",
+        "args": {
+          "description": "Profile",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icons_custom"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons_custom\\\\profile_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icons_custom\\\\profile_icon.png\"}"
+        },
+        "execution_time": 0.008004188537597656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Path Traversal Attempt in Filename Rejection",
+        "purpose": "验证工具拒绝包含路径穿越尝试的文件名以防止安全漏洞。",
+        "args": {
+          "description": "SecurityTest",
+          "filename": "../../../malicious_icon.png"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Invalid filename. It cannot contain path traversal elements.\"}"
+        },
+        "execution_time": 0.006512880325317383,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Description Handling",
+        "purpose": "验证工具是否正确处理空描述输入并返回错误信息。",
+        "args": {
+          "description": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\_icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\_icon.png\"}"
+        },
+        "execution_time": 0.006416797637939453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Description",
+        "purpose": "验证工具是否能正确处理包含特殊字符的描述文本。",
+        "args": {
+          "description": "@#$_Icon!"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\_icon__icon.png\", \"message\": \"Icon saved to D:\\\\devWorkspace\\\\MCPServer-Generator\\\\workspace\\\\pipeline-output-servers\\\\gemini-2.5-pro\\\\mcp_image_icon_handler\\\\refined\\\\icons\\\\_icon__icon.png\"}"
+        },
+        "execution_time": 0.006930828094482422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Size Value Handling",
+        "purpose": "验证工具是否能正确处理零或负数尺寸值的情况。",
+        "args": {
+          "description": "SmallIcon",
+          "size": [
+            0,
+            0
+          ]
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"file_path\": null, \"message\": \"Icon dimensions must be positive integers\"}"
+        },
+        "execution_time": 0.006536006927490234,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

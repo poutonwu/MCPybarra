@@ -1,0 +1,177 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_duckduckgo_search_and_fetc",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_duckduckgo_search_and_fetc/refined/server.py",
+  "timestamp": "2025-07-16T10:32:11.318584",
+  "tools": [
+    {
+      "name": "duckduckgo_search",
+      "description": "\n    Perform a search on DuckDuckGo and return structured results.\n\n    Args:\n        query: The search term or phrase to query on DuckDuckGo (required).\n        max_results: Maximum number of search results to return (default: 5).\n\n    Returns:\n        A dictionary containing search results with 'title', 'url', and 'snippet' under 'results' key.\n\n    Raises:\n        ValueError: If the query is empty or max_results is invalid.\n        httpx.HTTPStatusError: If the API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "duckduckgo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetch and parse the main text content of a webpage.\n\n    Args:\n        url: The URL of the webpage to scrape (required).\n\n    Returns:\n        A string containing the cleaned, main text content of the webpage.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.HTTPStatusError: If the request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "duckduckgo_search": [
+      {
+        "case_name": "Basic DuckDuckGo Search with Default Results",
+        "purpose": "验证使用默认参数进行基本搜索是否正常工作",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Artificial intelligence Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence\\\">Artificial intelligence</a> Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\"\n    },\n    {\n      \"title\": \"A.I. Artificial Intelligence A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\",\n      \"url\": \"https://duckduckgo.com/A.I._Artificial_Intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/A.I._Artificial_Intelligence\\\">A.I. Artificial Intelligence</a> A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\"\n    },\n    {\n      \"title\": \"Artificial intelligence in video games In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence_in_video_games\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence_in_video_games\\\">Artificial intelligence in video games</a>In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\"\n    }\n  ]\n}"
+        },
+        "execution_time": 10.658592939376831,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Max Results Set to 3",
+        "purpose": "验证指定返回最大结果数为3时的搜索功能",
+        "args": {
+          "query": "machine learning",
+          "max_results": 3
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Machine learning Category\",\n      \"url\": \"https://duckduckgo.com/c/Machine_learning\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Machine_learning\\\">Machine learning Category</a>\"\n    },\n    {\n      \"title\": \"Deep learning — branch of ML concerned with artificial neural network s.\",\n      \"url\": \"https://duckduckgo.com/Deep_learning\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Deep_learning\\\">Deep learning</a> — branch of ML concerned with <a href=\\\"https://duckduckgo.com/?q=Artificial%20neural%20network\\\">artificial neural network</a>s.\"\n    },\n    {\n      \"title\": \"M-theory (learning framework) - In machine learning and computer vision, M-theory is a learning framework inspired by feed-forward processing in the ventral stream of visual cortex and originally developed for recognition and classification of objects in visual scenes.\",\n      \"url\": \"https://duckduckgo.com/M-theory_(learning_framework)\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/M-theory_(learning_framework)\\\">M-theory (learning framework)</a> - In machine learning and computer vision, M-theory is a learning framework inspired by feed-forward processing in the ventral stream of visual cortex and originally developed for recognition and classification of objects in visual scenes.\"\n    }\n  ]\n}"
+        },
+        "execution_time": 10.727927207946777,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Validation",
+        "purpose": "验证当查询为空时是否抛出ValueError",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Query cannot be empty."
+        },
+        "execution_time": 0.005654096603393555,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "验证当max_results小于1或非整数时是否抛出异常",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.004516124725341797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证包含特殊字符的搜索词是否能被正确处理",
+        "args": {
+          "query": "!@#$%^&*()_+{}[]|\"';<>?,./:"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 5.4539618492126465,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Query Handling",
+        "purpose": "验证工具是否可以处理较长的搜索词",
+        "args": {
+          "query": "This is a very long search query that tests the maximum length of input that can be handled by the duckduckgo_search tool"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 4.375948190689087,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Existing File Name",
+        "purpose": "验证工具能否正确搜索测试文件名中的关键词（如pdf文件）",
+        "args": {
+          "query": "sample1.pdf"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 1.6999568939208984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "验证工具对潜在跨站脚本攻击输入的处理能力",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 1.3412623405456543,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Empty URL Validation",
+        "purpose": "验证当URL为空时是否抛出ValueError",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: URL cannot be empty."
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "验证当提供非法格式的URL时是否抛出异常",
+        "args": {
+          "url": "htp:/invalid-url-format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 0.4047122001647949,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 10
+}

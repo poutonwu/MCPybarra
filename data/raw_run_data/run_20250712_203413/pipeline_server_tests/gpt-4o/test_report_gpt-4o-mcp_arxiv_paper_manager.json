@@ -1,0 +1,497 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_arxiv_paper_manager",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_arxiv_paper_manager/refined/server.py",
+  "timestamp": "2025-07-12T20:34:17.986662",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Searches arXiv for academic papers based on user-provided query parameters.\n\n    Args:\n        query (str): Search query string (e.g., \"quantum computing\").\n        max_results (int): Maximum number of results to retrieve (default: 10).\n        sort_by (str): Sorting criteria (e.g., \"relevance\", \"lastUpdatedDate\").\n        sort_order (str): Sort order, either \"ascending\" or \"descending\" (default: \"descending\").\n\n    Returns:\n        str: JSON string containing a list of dictionaries, each with metadata about a paper.\n\n    Example:\n        search_papers(query=\"quantum computing\", max_results=5, sort_by=\"relevance\", sort_order=\"descending\")\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          },
+          "sort_by": {
+            "default": "relevance",
+            "title": "Sort By",
+            "type": "string"
+          },
+          "sort_order": {
+            "default": "descending",
+            "title": "Sort Order",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    Downloads the PDF of a specified arXiv paper and stores it locally.\n\n    Args:\n        paper_id (str): The unique identifier of the paper (e.g., \"arXiv:1234.56789\").\n\n    Returns:\n        str: JSON string containing the download status and file path.\n\n    Example:\n        download_paper(paper_id=\"arXiv:1234.56789\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    Lists all locally stored papers, with options to filter or sort them.\n\n    Args:\n        filter_by (str): Optional filter criteria (e.g., \"author:John Doe\").\n        sort_by (str): Sorting criteria (e.g., \"title\", \"download_date\").\n\n    Returns:\n        str: JSON string containing a list of dictionaries describing the locally stored papers.\n\n    Example:\n        list_papers(filter_by=\"author:John Doe\", sort_by=\"title\")\n    ",
+      "args_schema": {
+        "properties": {
+          "filter_by": {
+            "default": null,
+            "title": "Filter By",
+            "type": "string"
+          },
+          "sort_by": {
+            "default": null,
+            "title": "Sort By",
+            "type": "string"
+          }
+        },
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    Extracts and returns the text content of a specified PDF file.\n\n    Args:\n        file_path (str): Path to the locally stored PDF file.\n\n    Returns:\n        str: JSON string containing the text content of the PDF.\n\n    Example:\n        read_paper(file_path=\"./downloaded_papers/Paper_Title.pdf\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search with Default Parameters",
+        "purpose": "验证使用默认参数进行基本搜索的功能是否正常工作。",
+        "args": {
+          "query": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"id\": \"http://arxiv.org/abs/2208.00733v1\", \"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"summary\": \"This article highlights quantum Internet computing as referring to\\ndistributed quantum computing over the quantum Internet, analogous to\\n(classical) Internet computing involving (classical) distributed computing over\\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\\nof study such as quantum protocols for distributed nodes using quantum\\ninformation for computations, quantum cloud computing, delegated verifiable\\nblind or private computing, non-local gates, and distributed quantum\\napplications, over Internet-scale distances.\", \"published\": \"2022-08-01\", \"pdf_url\": \"http://arxiv.org/pdf/2208.00733v1\"}, {\"id\": \"http://arxiv.org/abs/quant-ph/0003151v1\", \"title\": \"Unconventional Quantum Computing Devices\", \"authors\": [\"Seth Lloyd\"], \"summary\": \"This paper investigates a variety of unconventional quantum computation\\ndevices, including fermionic quantum computers and computers that exploit\\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\\ndevices can in principle compute some quantities more rapidly than\\n`conventional' quantum computers.\", \"published\": \"2000-03-31\", \"pdf_url\": \"http://arxiv.org/pdf/quant-ph/0003151v1\"}, {\"id\": \"http://arxiv.org/abs/1311.4939v1\", \"title\": \"Geometrical perspective on quantum states and quantum computation\", \"authors\": [\"Zeqian Chen\"], \"summary\": \"We ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计9964字符，剩余8464字符"
+        },
+        "execution_time": 1.9213054180145264,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Max Results",
+        "purpose": "验证工具在指定非默认max_results参数时是否能正确返回指定数量的结果。",
+        "args": {
+          "query": "machine learning",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[{\"id\": \"http://arxiv.org/abs/1909.03550v1\", \"title\": \"Lecture Notes: Optimization for Machine Learning\", \"authors\": [\"Elad Hazan\"], \"summary\": \"Lecture notes on optimization for machine learning, derived from a course at\\nPrinceton University and tutorials given in MLSS, Buenos Aires, as well as\\nSimons Foundation, Berkeley.\", \"published\": \"2019-09-08\", \"pdf_url\": \"http://arxiv.org/pdf/1909.03550v1\"}, {\"id\": \"http://arxiv.org/abs/1811.04422v1\", \"title\": \"An Optimal Control View of Adversarial Machine Learning\", \"authors\": [\"Xiaojin Zhu\"], \"summary\": \"I describe an optimal control view of adversarial machine learning, where the\\ndynamical system is the machine learner, the input are adversarial actions, and\\nthe control costs are defined by the adversary's goals to do harm and be hard\\nto detect. This view encompasses many types of adversarial machine learning,\\nincluding test-item attacks, training-data poisoning, and adversarial reward\\nshaping. The view encourages adversarial machine learning researcher to utilize\\nadvances in control theory and reinforcement learning.\", \"published\": \"2018-11-11\", \"pdf_url\": \"http://arxiv.org/pdf/1811.04422v1\"}, {\"id\": \"http://arxiv.org/abs/1707.04849v1\", \"title\": \"Minimax deviation strategies for machine learning and recognition with short learning samples\", \"authors\": [\"Michail Schlesinger\", \"Evgeniy Vodolazskiy\"], \"summary\": \"The article is devoted to the problem of small learning samples in machine\\nlearning. The flaws of maximum likel...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计4346字符，剩余2846字符"
+        },
+        "execution_time": 2.378155469894409,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search and Sort by Relevance Descending",
+        "purpose": "验证按相关性降序排序功能是否有效。",
+        "args": {
+          "query": "neural networks",
+          "sort_by": "relevance",
+          "sort_order": "descending"
+        },
+        "response": {
+          "result": "[{\"id\": \"http://arxiv.org/abs/2304.05133v2\", \"title\": \"Lecture Notes: Neural Network Architectures\", \"authors\": [\"Evelyn Herberg\"], \"summary\": \"These lecture notes provide an overview of Neural Network architectures from\\na mathematical point of view. Especially, Machine Learning with Neural Networks\\nis seen as an optimization problem. Covered are an introduction to Neural\\nNetworks and the following architectures: Feedforward Neural Network,\\nConvolutional Neural Network, ResNet, and Recurrent Neural Network.\", \"published\": \"2023-04-11\", \"pdf_url\": \"http://arxiv.org/pdf/2304.05133v2\"}, {\"id\": \"http://arxiv.org/abs/cs/0504056v1\", \"title\": \"Self-Organizing Multilayered Neural Networks of Optimal Complexity\", \"authors\": [\"V. Schetinin\"], \"summary\": \"The principles of self-organizing the neural networks of optimal complexity\\nis considered under the unrepresentative learning set. The method of\\nself-organizing the multi-layered neural networks is offered and used to train\\nthe logical neural networks which were applied to the medical diagnostics.\", \"published\": \"2005-04-13\", \"pdf_url\": \"http://arxiv.org/pdf/cs/0504056v1\"}, {\"id\": \"http://arxiv.org/abs/1911.05640v2\", \"title\": \"Neural Network Processing Neural Networks: An efficient way to learn higher order functions\", \"authors\": [\"Firat Tuna\"], \"summary\": \"Functions are rich in meaning and can be interpreted in a variety of ways.\\nNeural networks were proven to be capable of approximating a large class of\\nfunctions[1]. In this...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计11182字符，剩余9682字符"
+        },
+        "execution_time": 2.1482298374176025,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search and Sort by Last Updated Date Ascending",
+        "purpose": "验证按最后更新时间升序排序功能是否有效。",
+        "args": {
+          "query": "blockchain",
+          "sort_by": "lastUpdatedDate",
+          "sort_order": "ascending"
+        },
+        "response": {
+          "result": "[{\"id\": \"http://arxiv.org/abs/1311.0243v5\", \"title\": \"Majority is not Enough: Bitcoin Mining is Vulnerable\", \"authors\": [\"Ittay Eyal\", \"Emin Gun Sirer\"], \"summary\": \"The Bitcoin cryptocurrency records its transactions in a public log called\\nthe blockchain. Its security rests critically on the distributed protocol that\\nmaintains the blockchain, run by participants called miners. Conventional\\nwisdom asserts that the protocol is incentive-compatible and secure against\\ncolluding minority groups, i.e., it incentivizes miners to follow the protocol\\nas prescribed.\\n  We show that the Bitcoin protocol is not incentive-compatible. We present an\\nattack with which colluding miners obtain a revenue larger than their fair\\nshare. This attack can have significant consequences for Bitcoin: Rational\\nminers will prefer to join the selfish miners, and the colluding group will\\nincrease in size until it becomes a majority. At this point, the Bitcoin system\\nceases to be a decentralized currency.\\n  Selfish mining is feasible for any group size of colluding miners. We propose\\na practical modification to the Bitcoin protocol that protects against selfish\\nmining pools that command less than 1/4 of the resources. This threshold is\\nlower than the wrongly assumed 1/2 bound, but better than the current reality\\nwhere a group of any size can compromise the system.\", \"published\": \"2013-11-01\", \"pdf_url\": \"http://arxiv.org/pdf/1311.0243v5\"}, {\"id\": \"http://arxiv.org/abs/1402.2009v1\", \"title\": \"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计11409字符，剩余9909字符"
+        },
+        "execution_time": 2.513030529022217,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "验证当查询字符串为空时，工具是否能够优雅地处理错误情况。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.120561122894287,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "验证当提供负数作为max_results参数时，工具是否能正确拒绝请求。",
+        "args": {
+          "query": "AI ethics",
+          "max_results": -5
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0041277408599853516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否支持包含特殊字符的查询字符串。",
+        "args": {
+          "query": "自然语言处理 & 深度学习"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.389552116394043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Sort Criteria",
+        "purpose": "验证当提供无效的排序字段时，工具是否能够正确拒绝请求。",
+        "args": {
+          "query": "robotics",
+          "sort_by": "invalidField",
+          "sort_order": "descending"
+        },
+        "response": {
+          "result": "[{\"id\": \"http://arxiv.org/abs/2506.01933v3\", \"title\": \"E3D-Bench: A Benchmark for End-to-End 3D Geometric Foundation Models\", \"authors\": [\"Wenyan Cong\", \"Yiqing Liang\", \"Yancheng Zhang\", \"Ziyi Yang\", \"Yan Wang\", \"Boris Ivanovic\", \"Marco Pavone\", \"Chen Chen\", \"Zhangyang Wang\", \"Zhiwen Fan\"], \"summary\": \"Spatial intelligence, encompassing 3D reconstruction, perception, and\\nreasoning, is fundamental to applications such as robotics, aerial imaging, and\\nextended reality. A key enabler is the real-time, accurate estimation of core\\n3D attributes (camera parameters, point clouds, depth maps, and 3D point\\ntracks) from unstructured or streaming imagery. Inspired by the success of\\nlarge foundation models in language and 2D vision, a new class of end-to-end 3D\\ngeometric foundation models (GFMs) has emerged, directly predicting dense 3D\\nrepresentations in a single feed-forward pass, eliminating the need for slow or\\nunavailable precomputed camera parameters. Since late 2023, the field has\\nexploded with diverse variants, but systematic evaluation is lacking. In this\\nwork, we present the first comprehensive benchmark for 3D GFMs, covering five\\ncore tasks: sparse-view depth estimation, video depth estimation, 3D\\nreconstruction, multi-view pose estimation, novel view synthesis, and spanning\\nboth standard and challenging out-of-distribution datasets. Our standardized\\ntoolkit automates dataset handling, evaluation protocols, and metric\\ncomputation to ensure fair, reproducible com...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计16540字符，剩余15040字符"
+        },
+        "execution_time": 2.4635655879974365,
+        "is_functional_test": false
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic PDF Download",
+        "purpose": "验证工具能够使用有效的arXiv paper_id下载对应的PDF文件。",
+        "args": {
+          "paper_id": "arXiv:2208.00733v1"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=arXiv%3A2208.00733v1&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 28.92881202697754,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download with Invalid Paper ID Format",
+        "purpose": "验证当提供的paper_id格式不正确时，工具是否能优雅地处理错误。",
+        "args": {
+          "paper_id": "invalid_paper_id"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=invalid_paper_id&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 13.417699575424194,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Non-Existent Paper",
+        "purpose": "验证当提供的paper_id在arXiv中不存在时，工具是否能返回适当的错误信息。",
+        "args": {
+          "paper_id": "arXiv:9999.99999"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=arXiv%3A9999.99999&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 15.605525732040405,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Paper with Special Characters in ID",
+        "purpose": "验证工具是否能处理包含特殊字符的paper_id。",
+        "args": {
+          "paper_id": "arXiv:quant-ph/0003151v1"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=arXiv%3Aquant-ph%2F0003151v1&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 12.552208662033081,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Paper ID Input",
+        "purpose": "验证当paper_id为空字符串时，工具是否能正确拒绝请求。",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"\"}"
+        },
+        "execution_time": 1.472581386566162,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID with Maximum Length",
+        "purpose": "验证工具是否能处理最大长度的paper_id输入。",
+        "args": {
+          "paper_id": "arXiv:1234567890123456789012345678901234567890"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=arXiv%3A1234567890123456789012345678901234567890&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 12.248432874679565,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download to Read-Only Directory (Security Test)",
+        "purpose": "验证工具是否能安全地处理无法写入目标路径的情况。",
+        "args": {
+          "paper_id": "arXiv:1909.03550v1"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=arXiv%3A1909.03550v1&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 13.995090246200562,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID Injection Attempt (Security Test)",
+        "purpose": "验证工具是否能防止通过paper_id参数注入恶意内容。",
+        "args": {
+          "paper_id": "arXiv:../../etc/passwd"
+        },
+        "response": {
+          "result": "{\"error\": \"Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=arXiv%3A..%2F..%2Fetc%2Fpasswd&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 12.415011405944824,
+        "is_functional_test": false
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "Basic List with Default Parameters",
+        "purpose": "验证使用默认参数（无过滤和排序）时是否能正确列出所有本地存储的论文。",
+        "args": {},
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.005001544952392578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers Filtered by Author",
+        "purpose": "验证通过作者名称过滤论文的功能是否正常工作。",
+        "args": {
+          "filter_by": "author:John Doe"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.009001016616821289,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers Sorted by Title",
+        "purpose": "验证按论文标题排序功能是否有效。",
+        "args": {
+          "sort_by": "title"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.003996849060058594,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers Sorted by Download Date",
+        "purpose": "验证按下载日期排序功能是否有效。",
+        "args": {
+          "sort_by": "download_date"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers Using Both Filter and Sort",
+        "purpose": "验证同时使用过滤和排序功能时是否能正确返回结果。",
+        "args": {
+          "filter_by": "author:Jane Smith",
+          "sort_by": "title"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.007999420166015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Filter Format",
+        "purpose": "验证当提供格式错误的filter_by参数时，工具是否能优雅地处理错误。",
+        "args": {
+          "filter_by": "invalid_filter"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Sort Criteria",
+        "purpose": "验证当提供无效的排序字段时，工具是否能正确拒绝请求。",
+        "args": {
+          "sort_by": "invalid_field"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.00299835205078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Filter",
+        "purpose": "验证工具是否支持包含特殊字符的filter_by参数。",
+        "args": {
+          "filter_by": "author:J@n$ D0e"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.008001327514648438,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic PDF Text Extraction",
+        "purpose": "验证工具能够使用默认参数正确提取一个有效PDF文件的文本内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "{\"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023) , pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT1has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache2is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much faster.\\nFor instance, integrating GPTCache with the\\nGPT service offered by OpenAI can increase\\nresponse speed 2-10 times when the cache is\\nhit. Moreover, network fluctuations will...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计30197字符，剩余28697字符"
+        },
+        "execution_time": 0.12561631202697754,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "PDF with Single Page Extraction",
+        "purpose": "验证工具能否正确提取仅包含单页内容的PDF文件中的文本。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_single_page.pdf"
+        },
+        "response": {
+          "result": "{\"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023) , pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT1has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache2is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much faster.\\nFor instance, integrating GPTCache with the\\nGPT service offered by OpenAI can increase\\nresponse speed 2-10 times when the cache is\\nhit. Moreover, network fluctuations will...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计4172字符，剩余2672字符"
+        },
+        "execution_time": 0.026519775390625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-page PDF Text Extraction",
+        "purpose": "验证工具是否能成功从多页PDF中提取所有页面的文本内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_multi_continuous_pages.pdf"
+        },
+        "response": {
+          "result": "{\"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023) , pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT1has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache2is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much faster.\\nFor instance, integrating GPTCache with the\\nGPT service offered by OpenAI can increase\\nresponse speed 2-10 times when the cache is\\nhit. Moreover, network fluctuations will...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计12227字符，剩余10727字符"
+        },
+        "execution_time": 0.08378243446350098,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-Continuous Pages PDF Extraction",
+        "purpose": "验证工具是否能处理非连续页面组成的PDF文件并提取其文本内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_non_continuous_pages.pdf"
+        },
+        "response": {
+          "result": "{\"content\": \"\\u767b\\u5f55\\u4e2a\\u4eba\\n\\u7e41\\u4f53|\\u7b80\\n\\u60a8\\u73b0\\u5728\\u7684\\u4f4d\\u7f6e\\uff1a \\u9996\\u9875 > \\u653f\\u52a1\\u516c\\u5f00  > \\u653f\\u7b56\\u6cd5\\u89c4  > \\u516c\\u5b89\\u90e8\\u89c4\\u7ae0\\n\\u9053\\u8def\\u4ea4\\u901a\\u5b89\\u5168\\u8fdd\\u6cd5\\u884c\\u4e3a\\u5904\\u7406\\u7a0b\\u5e8f\\u89c4\\u5b9a\\n\\u65f6\\u95f4\\uff1a2020\\u5e7404\\u670830\\u65e5\\u3000 \\u5b57\\u53f7\\uff1a [ \\u5927   \\u4e2d   \\u5c0f ] \\n\\u6253\\u5370\\n\\u3000\\u3000\\u76ee \\u5f55\\n\\u3000\\u3000\\u7b2c\\u4e00\\u7ae0 \\u603b\\u5219\\n\\u3000\\u3000\\u7b2c\\u4e8c\\u7ae0 \\u7ba1\\u8f96\\u3000\\n\\u3000\\u3000\\u7b2c\\u4e09\\u7ae0 \\u8c03\\u67e5\\u53d6\\u8bc1\\n\\u3000\\u3000\\u7b2c\\u4e00\\u8282 \\u4e00\\u822c\\u89c4\\u5b9a\\n\\u3000\\u3000\\u3000\\u7b2c\\u4e8c\\u8282 \\u4ea4\\u901a\\u6280\\u672f\\u76d1\\u63a7\\n\\u3000\\u3000\\u7b2c\\u56db\\u7ae0 \\u884c\\u653f\\u5f3a\\u5236\\u63aa\\u65bd\\u9002\\u7528\\n\\u3000\\u3000\\u7b2c\\u4e94\\u7ae0 \\u884c\\u653f\\u5904\\u7f5a\\n\\u3000\\u3000\\u3000\\u7b2c\\u4e00\\u8282 \\u884c\\u653f\\u5904\\u7f5a\\u7684\\u51b3\\u5b9a\\n\\u3000\\u3000\\u3000\\u7b2c\\u4e8c\\u8282 \\u884c\\u653f\\u5904\\u7f5a\\u7684\\u6267\\u884c\\n\\u3000\\u3000\\u7b2c\\u516d\\u7ae0 \\u6267\\u6cd5\\u76d1\\u7763\\n\\u3000\\u3000\\u7b2c\\u4e03\\u7ae0 \\u5176\\u4ed6\\u89c4\\u5b9a\\n\\u3000\\u3000\\u7b2c\\u516b\\u7ae0 \\u9644\\u5219\\n\\u3000\\u3000\\u7b2c\\u4e00\\u7ae0 \\u603b \\u5219\\n\\u3000\\u3000\\u7b2c\\u4e00\\u6761 \\u4e3a\\u4e86\\u89c4\\u8303\\u9053\\u8def\\u4ea4\\u901a\\u5b89\\u5168\\u8fdd\\u6cd5\\u884c\\u4e3a\\u5904\\u7406\\u7a0b\\u5e8f\\uff0c\\u4fdd\\u969c\\u516c\\u5b89\\u673a\\u5173\\u4ea4\\u901a\\u7ba1\\u7406\\u90e8\\u95e8\\u6b63\\u786e\\u5c65\\u884c\\u804c\\u8d23\\uff0c\\u4fd...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计20038字符，剩余18538字符"
+        },
+        "execution_time": 0.09305405616760254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty PDF File Handling",
+        "purpose": "验证当提供的PDF文件为空时，工具是否能优雅地返回空内容或适当错误信息。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_file.txt"
+        },
+        "response": {
+          "result": "{\"error\": \"EOF marker not found\"}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid File Path Input",
+        "purpose": "验证当提供无效或不存在的文件路径时，工具是否能正确拒绝请求。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\non_existent_file.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\non_existent_file.pdf\"}"
+        },
+        "execution_time": 0.002999544143676758,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "File Path Injection Attempt (Security Test)",
+        "purpose": "验证工具是否能防止通过file_path参数注入恶意路径（如访问系统敏感目录）。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\..\\etc\\passwd"
+        },
+        "response": {
+          "result": "{\"error\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\..\\\\etc\\\\passwd\"}"
+        },
+        "execution_time": 0.005519866943359375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long File Path Handling",
+        "purpose": "验证工具是否能安全处理超长文件路径输入，避免缓冲区溢出或路径截断问题。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\very_long_filename_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\very_long_filename_that_tests_the_maximum_allowed_length_of_a_file_path_in_windows.pdf\"}"
+        },
+        "execution_time": 0.004997730255126953,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 32
+}

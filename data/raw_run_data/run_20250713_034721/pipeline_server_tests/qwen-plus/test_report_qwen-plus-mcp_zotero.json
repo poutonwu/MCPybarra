@@ -1,0 +1,382 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_zotero",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_zotero/refined/server.py",
+  "timestamp": "2025-07-13T04:18:32.949474",
+  "tools": [
+    {
+      "name": "get_item_metadata",
+      "description": "\n    获取指定 Zotero 条目的详细元数据。\n\n    Args:\n        item_key: 要获取元数据的 Zotero 条目键值，必须是字符串类型且非空。\n\n    Returns:\n        返回包含条目详细元数据的 JSON 字典，包括标题、作者、出版年份等信息。\n\n    Raises:\n        ValueError: 如果 item_key 无效或格式不正确。\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_metadataArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_item_fulltext",
+      "description": "\n    提取指定 Zotero 条目的全文内容。\n\n    Args:\n        item_key: 要提取全文的 Zotero 条目键值，必须是字符串类型且非空。\n\n    Returns:\n        返回包含条目全文内容的字典，如果条目没有全文内容则返回空字符串。\n    ",
+      "args_schema": {
+        "properties": {
+          "item_key": {
+            "title": "Item Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_key"
+        ],
+        "title": "get_item_fulltextArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_items",
+      "description": "\n    在 Zotero 库中执行灵活搜索，支持按标题、创建者、年份或全文搜索。\n\n    Args:\n        query: 搜索查询字符串，必须是字符串类型且非空。\n        search_type: 搜索类型，可选值为 \"title\", \"creator\", \"year\", \"fulltext\"，默认为 \"title\"。\n        page: 当前页码，必须是正整数，默认为1。\n        items_per_page: 每页结果数量，必须是正整数，默认为20。\n\n    Returns:\n        返回格式化的搜索结果列表，每个结果包含条目键值、标题和匹配度评分。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_type": {
+            "default": "title",
+            "title": "Search Type",
+            "type": "string"
+          },
+          "page": {
+            "default": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "items_per_page": {
+            "default": 20,
+            "title": "Items Per Page",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_itemsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "get_item_metadata": [
+      {
+        "case_name": "获取有效条目的元数据",
+        "purpose": "验证工具可以正确获取一个有效的Zotero条目的详细元数据。",
+        "args": {
+          "item_key": "ABC123"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'ABC123' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 1.486623764038086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效的item_key格式",
+        "purpose": "测试当提供非字符串或空字符串作为item_key时，工具是否抛出ValueError。",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid input\",\n  \"message\": \"item_key 必须是非空字符串\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.003997802734375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符的item_key",
+        "purpose": "测试包含特殊字符的item_key是否被正确处理或返回预期错误。",
+        "args": {
+          "item_key": "ITEM@#KEY!"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'ITEM@#KEY!' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.39968228340148926,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长item_key边界测试",
+        "purpose": "测试非常长的item_key输入是否会引发异常或被正确处理。",
+        "args": {
+          "item_key": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.40177202224731445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的item_key",
+        "purpose": "验证当提供的item_key不存在于Zotero数据库中时，工具是否能优雅地处理并返回错误信息。",
+        "args": {
+          "item_key": "XYZ999"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'XYZ999' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.4010734558105469,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "安全测试 - 注入攻击模拟",
+        "purpose": "测试恶意构造的item_key参数（如SQL注入、命令注入）是否被安全过滤或拒绝。",
+        "args": {
+          "item_key": "'; DROP TABLE zotero;"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 ''; DROP TABLE zotero;' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.39938879013061523,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "安全测试 - 跨站请求伪造尝试",
+        "purpose": "测试是否存在潜在的CSRF风险，通过伪造来源调用该接口。",
+        "args": {
+          "item_key": "CSRF_TEST_KEY"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'CSRF_TEST_KEY' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.39894938468933105,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zotero服务不可用情况下的错误处理",
+        "purpose": "模拟Zotero服务宕机或无法访问的情况，确保工具不会崩溃，并返回清晰的错误信息。",
+        "args": {
+          "item_key": "TEST123"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Item not found\",\n  \"message\": \"未找到 item_key 为 'TEST123' 的 Zotero 条目\",\n  \"code\": 404\n}"
+        },
+        "execution_time": 0.4002244472503662,
+        "is_functional_test": false
+      }
+    ],
+    "get_item_fulltext": [
+      {
+        "case_name": "获取有效条目的全文内容",
+        "purpose": "验证工具可以正确提取一个有效的Zotero条目的全文内容。",
+        "args": {
+          "item_key": "VALID123"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 1.4585881233215332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效的item_key格式",
+        "purpose": "测试当提供非字符串或空字符串作为item_key时，工具是否抛出参数验证错误。",
+        "args": {
+          "item_key": ""
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid input\",\n  \"message\": \"item_key 必须是非空字符串\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.005283832550048828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符的item_key",
+        "purpose": "测试包含特殊字符的item_key是否被正确处理或返回预期错误。",
+        "args": {
+          "item_key": "ITEM@#KEY!"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.40976786613464355,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的item_key",
+        "purpose": "验证当提供的item_key不存在于Zotero数据库中时，工具是否能优雅地处理并返回空字符串。",
+        "args": {
+          "item_key": "XYZ999"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Server internal error\",\n  \"message\": \"服务器内部错误：可能是无效的附件路径或服务器问题导致无法获取全文。请确认条目是否包含附件，并稍后重试。\",\n  \"code\": 500\n}"
+        },
+        "execution_time": 0.4636538028717041,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "安全测试 - 注入攻击模拟",
+        "purpose": "测试恶意构造的item_key参数（如SQL注入、命令注入）是否被安全过滤或拒绝。",
+        "args": {
+          "item_key": "'; DROP TABLE zotero;"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Server internal error\",\n  \"message\": \"服务器内部错误：可能是无效的附件路径或服务器问题导致无法获取全文。请确认条目是否包含附件，并稍后重试。\",\n  \"code\": 500\n}"
+        },
+        "execution_time": 0.46326112747192383,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界测试 - 超长item_key",
+        "purpose": "测试非常长的item_key输入是否会引发异常或被正确处理。",
+        "args": {
+          "item_key": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0O1P2Q3R4S5T6U7V8W9X0Y1Z2"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4074828624725342,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "性能测试 - 快速连续调用",
+        "purpose": "测试工具在短时间内多次调用时的响应时间和稳定性。",
+        "args": {
+          "item_key": "PERF_TEST_KEY"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Server internal error\",\n  \"message\": \"服务器内部错误：可能是无效的附件路径或服务器问题导致无法获取全文。请确认条目是否包含附件，并稍后重试。\",\n  \"code\": 500\n}"
+        },
+        "execution_time": 0.466780424118042,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无全文内容的条目测试",
+        "purpose": "验证当指定的Zotero条目没有全文内容时，工具是否返回空字符串。",
+        "args": {
+          "item_key": "NO_FULLTEXT_456"
+        },
+        "response": {
+          "result": "{\n  \"fulltext\": \"\",\n  \"message\": \"该条目没有可用的全文内容\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4103713035583496,
+        "is_functional_test": true
+      }
+    ],
+    "search_items": [
+      {
+        "case_name": "基本功能测试 - 按标题搜索默认参数",
+        "purpose": "验证使用默认参数（search_type=title）时，工具能正确执行标题搜索并返回结果。",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"item_key\": \"Z77YLWKR\",\n      \"title\": \"Paper2Code: Automating Code Generation from Scientific Papers in Machine Learning\",\n      \"score\": 0\n    }\n  ],\n  \"total\": 1,\n  \"search_type\": \"title\",\n  \"query\": \"machine learning\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 1.676356315612793,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能测试 - 按作者搜索并指定页码",
+        "purpose": "验证按创建者搜索且非首页的请求是否能正确处理。",
+        "args": {
+          "query": "John Smith",
+          "search_type": "creator",
+          "page": 2,
+          "items_per_page": 10
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"creator\",\n  \"query\": \"John Smith\",\n  \"page\": 2,\n  \"items_per_page\": 10,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.42972850799560547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能测试 - 按年份搜索并调整每页条目数",
+        "purpose": "验证按年份搜索，并自定义每页显示数量的功能是否正常。",
+        "args": {
+          "query": "2021",
+          "search_type": "year",
+          "items_per_page": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"year\",\n  \"query\": \"2021\",\n  \"page\": 1,\n  \"items_per_page\": 5,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.4256711006164551,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能测试 - 全文搜索多关键词",
+        "purpose": "验证全文搜索类型下多关键词查询是否能正确匹配相关条目。",
+        "args": {
+          "query": "neural networks deep learning",
+          "search_type": "fulltext"
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"item_key\": \"RW5W5JN2\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"NZ26PJJX\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"K78DMKPD\",\n      \"title\": \"CODESIM: Multi-Agent Code Generation and Problem Solving through Simulation-Driven Planning and Debugging\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"KRR7MFVP\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"LMA2MAZI\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"2VCDLWBG\",\n      \"title\": \"Self-Organized Agents: A LLM Multi-Agent Framework toward Ultra Large-Scale Code Generation and Optimization\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"X6PB95S9\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"6AAK9P4J\",\n      \"title\": \"SWE-bench: Can Language Models Resolve Real-World GitHub Issues?\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"SNUTTAER\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"PMJIF2UH\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"ZMFZ6DR6\",\n      \"title\": \"CodeAgent: Autonomous Communicative Agents for Code Review\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"TL6DJ74R\",\n      \"title\": \"Preprint PDF\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"RA65N57L\",\n      \"title\": \"Snapshot\",\n      \"score\": 0\n    },\n    {\n      \"item_key\": \"38UU...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2429字符，剩余929字符"
+        },
+        "execution_time": 1.1646287441253662,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - SQL注入尝试",
+        "purpose": "测试恶意构造的查询字符串是否被安全过滤或拒绝。",
+        "args": {
+          "query": "'; DROP TABLE zotero;",
+          "search_type": "title"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"'; DROP TABLE zotero;\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.42438507080078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "安全性测试 - 跨站脚本攻击尝试",
+        "purpose": "测试包含XSS内容的查询是否被正确转义或拒绝。",
+        "args": {
+          "query": "<script>alert('xss')</script>",
+          "search_type": "title"
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"total\": 0,\n  \"search_type\": \"title\",\n  \"query\": \"<script>alert('xss')</script>\",\n  \"page\": 1,\n  \"items_per_page\": 20,\n  \"status\": \"success\",\n  \"code\": 200\n}"
+        },
+        "execution_time": 0.43125152587890625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 空查询字符串",
+        "purpose": "验证当提供空字符串作为查询参数时，工具是否抛出参数验证错误。",
+        "args": {
+          "query": "",
+          "search_type": "title"
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid input\",\n  \"message\": \"query 必须是非空字符串\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.003996610641479492,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 无效的页码参数",
+        "purpose": "测试负值或零作为页码输入时，工具是否能正确处理错误。",
+        "args": {
+          "query": "quantum computing",
+          "page": 0
+        },
+        "response": {
+          "result": "{\n  \"error\": \"Invalid parameter\",\n  \"message\": \"page 必须是大于等于1的正整数\",\n  \"code\": 400\n}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

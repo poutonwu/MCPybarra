@@ -1,0 +1,200 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_folders",
+      "tool_name": "list_folders",
+      "parameters": {},
+      "description": "Happy path: List all available Outlook folders to verify basic connectivity and access."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "1291980381@qq.com, zhihutangjiang@126.com, outformcptest@outlook.com"
+    }
+  },
+  {
+    "step": {
+      "step_id": "fetch_recent_emails",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": 7,
+        "folder_name": "Inbox"
+      },
+      "description": "Happy path: Retrieve emails from the last 7 days in the Inbox folder. Caches email metadata for further use."
+    },
+    "substituted_params": {
+      "days": 7,
+      "folder_name": "Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool list_recent_emails: Failed to list recent emails: <unknown>.ReceivedTime"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_emails_by_query",
+      "tool_name": "search_emails",
+      "parameters": {
+        "query": "meeting",
+        "start_date": "2025-01-01",
+        "end_date": "2025-12-31",
+        "folder_name": "Inbox"
+      },
+      "description": "Dependent call (context): Search for emails containing 'meeting' within a full year range, simulating a common user search pattern."
+    },
+    "substituted_params": {
+      "query": "meeting",
+      "start_date": "2025-01-01",
+      "end_date": "2025-12-31",
+      "folder_name": "Inbox"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_emails: Failed to search emails: <unknown>.ReceivedTime"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_specific_email_details",
+      "tool_name": "get_email_by_number",
+      "parameters": {
+        "email_number": 0
+      },
+      "description": "Dependent call (after list_recent_emails): Retrieve full details of the first email in the cached list."
+    },
+    "substituted_params": {
+      "email_number": 0
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+    }
+  },
+  {
+    "step": {
+      "step_id": "reply_to_email",
+      "tool_name": "reply_to_email_by_number",
+      "parameters": {
+        "email_number": 0,
+        "reply_text": "Thank you for the update. I'll get back to you shortly."
+      },
+      "description": "Dependent call (after get_email_by_number): Reply to the same email used in the previous step. This tests sending functionality with minimal impact."
+    },
+    "substituted_params": {
+      "email_number": 0,
+      "reply_text": "Thank you for the update. I'll get back to you shortly."
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+    }
+  },
+  {
+    "step": {
+      "step_id": "compose_new_email",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "Test Email from MCP",
+        "body": "This is a test email sent via the Model-driven Co-routine Protocol server.",
+        "recipients": [
+          "test@example.com"
+        ],
+        "cc": [
+          "cc_test@example.com"
+        ]
+      },
+      "description": "Happy path: Send a new email to validate outgoing capabilities. Only one such action is performed to avoid spamming."
+    },
+    "substituted_params": {
+      "subject": "Test Email from MCP",
+      "body": "This is a test email sent via the Model-driven Co-routine Protocol server.",
+      "recipients": [
+        "test@example.com"
+      ],
+      "cc": [
+        "cc_test@example.com"
+      ]
+    },
+    "result": {
+      "status": "success",
+      "result": "Email sent successfully"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_recent_emails_invalid_folder",
+      "tool_name": "list_recent_emails",
+      "parameters": {
+        "days": 5,
+        "folder_name": "InvalidFolderName"
+      },
+      "description": "Edge case: Test behavior when an invalid folder name is provided."
+    },
+    "substituted_params": {
+      "days": 5,
+      "folder_name": "InvalidFolderName"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool list_recent_emails: Failed to list recent emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_emails_empty_query",
+      "tool_name": "search_emails",
+      "parameters": {
+        "query": "",
+        "start_date": "2025-01-01"
+      },
+      "description": "Edge case: Test how the system handles an empty query string with a valid start date."
+    },
+    "substituted_params": {
+      "query": "",
+      "start_date": "2025-01-01"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_emails: Failed to search emails: <unknown>.ReceivedTime"
+    }
+  },
+  {
+    "step": {
+      "step_id": "get_email_with_invalid_index",
+      "tool_name": "get_email_by_number",
+      "parameters": {
+        "email_number": -1
+      },
+      "description": "Edge case: Attempt to retrieve an email with a negative index to test error handling."
+    },
+    "substituted_params": {
+      "email_number": -1
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+    }
+  },
+  {
+    "step": {
+      "step_id": "compose_email_missing_recipient",
+      "tool_name": "compose_email",
+      "parameters": {
+        "subject": "Incomplete Email Test",
+        "body": "This email should fail due to missing recipient.",
+        "recipients": []
+      },
+      "description": "Edge case: Attempt to send an email with an empty recipients list to test validation logic."
+    },
+    "substituted_params": {
+      "subject": "Incomplete Email Test",
+      "body": "This email should fail due to missing recipient.",
+      "recipients": []
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool compose_email: Failed to compose email: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '我们需要知道此内容的收件人。请确保至少输入一个名称。', None, 0, -2147467259), None)"
+    }
+  }
+]

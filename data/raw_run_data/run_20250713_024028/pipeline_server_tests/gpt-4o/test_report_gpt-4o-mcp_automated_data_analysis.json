@@ -1,0 +1,383 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_automated_data_analysis",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_automated_data_analysis/refined/server.py",
+  "timestamp": "2025-07-13T02:41:57.211395",
+  "tools": [
+    {
+      "name": "load_csv",
+      "description": "\n    Load a CSV file into memory and store it with a user-defined dataset name.\n\n    Args:\n        file_path (str): The path to the CSV file to be loaded.\n        dataset_name (str): A unique name to associate with the dataset.\n\n    Returns:\n        str: JSON-formatted string indicating success or error.\n\n    Example:\n        load_csv(\"data/sales.csv\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "dataset_name"
+        ],
+        "title": "load_csvArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "run_script",
+      "description": "\n    Execute a Python script dynamically using a dataset loaded in memory.\n\n    Args:\n        script_code (str): The Python code to execute as a string.\n        dataset_name (str): The name of the dataset to pass to the script.\n\n    Returns:\n        str: JSON-formatted string indicating success or error with execution output.\n\n    Example:\n        run_script(\"print(dataset.head())\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "script_code": {
+            "title": "Script Code",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "script_code",
+          "dataset_name"
+        ],
+        "title": "run_scriptArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "explore_data",
+      "description": "\n    Generate an automated profile report for a dataset in memory.\n\n    Args:\n        dataset_name (str): The name of the dataset to explore.\n\n    Returns:\n        str: JSON-formatted string with summary insights and the path to the generated report.\n\n    Example:\n        explore_data(\"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "explore_dataArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_csv": [
+      {
+        "case_name": "Load CSV with valid file and dataset name",
+        "purpose": "验证工具能够成功加载一个有效的CSV文件并使用指定的数据集名称存储在内存中",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\spreadsheet.csv",
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'sales_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 0.006487607955932617,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with empty dataset name",
+        "purpose": "测试当提供的数据集名称为空时，工具是否能正确返回错误信息",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\spreadsheet.csv",
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset '' loaded successfully.\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 0.00603175163269043,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Attempt to load non-CSV file",
+        "purpose": "验证工具是否拒绝加载非CSV格式的文件",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "dataset_name": "invalid_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Only .csv or .zip files are supported.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.007792949676513672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with special characters in dataset name",
+        "purpose": "测试工具是否可以处理包含特殊字符的数据集名称",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\spreadsheet.csv",
+          "dataset_name": "data@#$_test"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'data@#$_test' loaded successfully.\", \"outputs\": {\"dataset_name\": \"data@#$_test\"}}"
+        },
+        "execution_time": 0.007023811340332031,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with missing file",
+        "purpose": "测试当指定的文件不存在时工具是否能优雅地处理错误",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv",
+          "dataset_name": "missing_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004518032073974609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with very long dataset name",
+        "purpose": "测试工具对超长数据集名称的边界处理能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\spreadsheet.csv",
+          "dataset_name": "a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly' loaded successfully.\", \"outputs\": {\"dataset_name\": \"a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly\"}}"
+        },
+        "execution_time": 0.00867605209350586,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple loads with same dataset name",
+        "purpose": "验证重复使用相同数据集名称加载不同文件是否会覆盖或冲突",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\spreadsheet.csv",
+          "dataset_name": "duplicate_dataset"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'duplicate_dataset' loaded successfully.\", \"outputs\": {\"dataset_name\": \"duplicate_dataset\"}}"
+        },
+        "execution_time": 0.004962444305419922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with null parameters",
+        "purpose": "测试工具在传入空值参数时的安全性和错误处理能力",
+        "args": {
+          "file_path": null,
+          "dataset_name": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool load_csv: 2 validation errors for load_csvArguments\nfile_path\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type\ndataset_name\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.004517555236816406,
+        "is_functional_test": false
+      }
+    ],
+    "explore_data": [
+      {
+        "case_name": "Explore dataset with valid name",
+        "purpose": "验证工具能够成功对已加载的合法数据集生成概要分析报告",
+        "args": {
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at sales_data_profile_report.html\", \"report_path\": \"sales_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 1.890714168548584,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to explore non-existent dataset",
+        "purpose": "测试当指定的数据集不存在时，工具是否能返回明确的错误信息",
+        "args": {
+          "dataset_name": "nonexistent_dataset"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_dataset' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004169464111328125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with empty name",
+        "purpose": "验证工具在空数据集名称输入时能否正确拒绝并报错",
+        "args": {
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at _profile_report.html\", \"report_path\": \"_profile_report.html\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 1.7177836894989014,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore dataset with special characters in name",
+        "purpose": "测试工具是否支持包含特殊字符的数据集名称进行探索分析",
+        "args": {
+          "dataset_name": "data@#$_test"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at data@#$_test_profile_report.html\", \"report_path\": \"data@#$_test_profile_report.html\", \"outputs\": {\"dataset_name\": \"data@#$_test\"}}"
+        },
+        "execution_time": 1.5281882286071777,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore dataset with very long name",
+        "purpose": "测试工具对超长数据集名称的边界处理能力",
+        "args": {
+          "dataset_name": "a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly_profile_report.html\", \"report_path\": \"a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly_profile_report.html\", \"outputs\": {\"dataset_name\": \"a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly\"}}"
+        },
+        "execution_time": 1.5624701976776123,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multiple explores on same dataset",
+        "purpose": "验证多次调用探索工具是否会对同一数据集产生异常行为或副作用",
+        "args": {
+          "dataset_name": "duplicate_dataset"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at duplicate_dataset_profile_report.html\", \"report_path\": \"duplicate_dataset_profile_report.html\", \"outputs\": {\"dataset_name\": \"duplicate_dataset\"}}"
+        },
+        "execution_time": 1.5322990417480469,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore dataset with null parameter",
+        "purpose": "测试工具在传入空值参数时的安全性和错误处理能力",
+        "args": {
+          "dataset_name": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool explore_data: 1 validation error for explore_dataArguments\ndataset_name\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.006014823913574219,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore previously explored dataset",
+        "purpose": "验证工具是否可以重复对同一个数据集执行探索操作而不引发状态冲突",
+        "args": {
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at sales_data_profile_report.html\", \"report_path\": \"sales_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 1.696155071258545,
+        "is_functional_test": true
+      }
+    ],
+    "run_script": [
+      {
+        "case_name": "Run valid script on loaded dataset",
+        "purpose": "验证工具能够成功执行一个对已加载数据集进行操作的有效Python脚本",
+        "args": {
+          "script_code": "print(dataset.head())",
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 0.008519649505615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute empty script",
+        "purpose": "测试当提供的脚本代码为空字符串时，工具是否能正确返回错误信息",
+        "args": {
+          "script_code": "",
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 0.0055162906646728516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Attempt to run script on non-existent dataset",
+        "purpose": "验证当指定的数据集不存在时，工具能否正确拒绝执行并报错",
+        "args": {
+          "script_code": "print(dataset.shape)",
+          "dataset_name": "nonexistent_dataset"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_dataset' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script with special characters in dataset name",
+        "purpose": "测试工具是否支持对包含特殊字符的数据集名称执行Python脚本",
+        "args": {
+          "script_code": "print(dataset.columns.tolist())",
+          "dataset_name": "data@#$_test"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"data@#$_test\"}}"
+        },
+        "execution_time": 0.007709026336669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Run script that modifies dataset",
+        "purpose": "验证工具是否允许脚本修改原始数据集内容且不影响后续使用",
+        "args": {
+          "script_code": "dataset['new_column'] = 'test'",
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 0.008514404296875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Run malicious code attempt",
+        "purpose": "测试工具是否安全地限制潜在危险的系统级操作（如文件删除）",
+        "args": {
+          "script_code": "import os; os.remove('D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\spreadsheet.csv')",
+          "dataset_name": "sales_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"sales_data\"}}"
+        },
+        "execution_time": 0.0029990673065185547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Run script with very long dataset name",
+        "purpose": "测试工具对超长数据集名称的边界处理能力",
+        "args": {
+          "script_code": "print(len(dataset))",
+          "dataset_name": "a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"a_very_very_long_dataset_name_that_exceeds_reasonable_length_and_may_cause_issues_if_not_handled_properly\"}}"
+        },
+        "execution_time": 0.004108905792236328,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Pass null parameters to run_script",
+        "purpose": "测试工具在传入空值参数时的安全性和错误处理能力",
+        "args": {
+          "script_code": null,
+          "dataset_name": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool run_script: 2 validation errors for run_scriptArguments\nscript_code\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type\ndataset_name\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0065114498138427734,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

@@ -1,0 +1,398 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_automated_data_analysis",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_automated_data_analysis/refined/server.py",
+  "timestamp": "2025-07-16T10:34:30.802299",
+  "tools": [
+    {
+      "name": "load_csv",
+      "description": "\n    Load a CSV file into memory for data analysis.\n\n    Args:\n        file_path (str): Path to the CSV file to be loaded.\n        dataset_name (str, optional): Unique identifier for the dataset in memory. Defaults to the filename.\n\n    Returns:\n        dict: A status message indicating success or failure, along with the dataset name.\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "dataset_name": {
+            "default": null,
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "load_csvArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "run_script",
+      "description": "\n    Execute a Python script for data analysis.\n\n    Args:\n        script (str): The Python script to execute.\n        input_datasets (list): Names of the datasets in memory to be used as input.\n        output_dataset (str, optional): Name to assign to the output dataset in memory.\n\n    Returns:\n        dict: The result of the script execution, including any computed metrics or processed data.\n    ",
+      "args_schema": {
+        "properties": {
+          "script": {
+            "title": "Script",
+            "type": "string"
+          },
+          "input_datasets": {
+            "items": {},
+            "title": "Input Datasets",
+            "type": "array"
+          },
+          "output_dataset": {
+            "default": null,
+            "title": "Output Dataset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "script",
+          "input_datasets"
+        ],
+        "title": "run_scriptArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "explore_data",
+      "description": "\n    Analyze the structure of a dataset and generate insights.\n\n    Args:\n        dataset_name (str): Name of the dataset in memory to explore.\n        visualization_type (str, optional): Type of visualization to generate. Defaults to \"auto\".\n\n    Returns:\n        dict: A summary of data insights, including statistics and visualizations.\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          },
+          "visualization_type": {
+            "default": "auto",
+            "title": "Visualization Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "explore_dataArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_csv": [
+      {
+        "case_name": "Load Valid CSV File with Default Dataset Name",
+        "purpose": "验证工具能够成功加载一个有效的CSV文件并使用默认数据集名称（即文件名）",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\spreadsheet.csv"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"dataset_name\": \"spreadsheet\"\n}"
+        },
+        "execution_time": 0.00600433349609375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load Valid CSV File with Custom Dataset Name",
+        "purpose": "验证工具可以使用用户指定的dataset_name参数加载CSV文件",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\tmp.csv",
+          "dataset_name": "TemporaryData"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"dataset_name\": \"TemporaryData\"\n}"
+        },
+        "execution_time": 0.005090236663818359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fail to Load Non-CSV File",
+        "purpose": "验证工具不能加载非CSV格式的文件，并返回错误信息",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'utf-8' codec can't decode byte 0x89 in position 0: invalid start byte\"\n}"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fail to Load Nonexistent File",
+        "purpose": "验证工具在尝试加载不存在的文件时能正确处理错误",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv\"\n}"
+        },
+        "execution_time": 0.0030901432037353516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load Empty CSV File",
+        "purpose": "验证工具能够处理空CSV文件的情况",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\includeempty.csv"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"dataset_name\": \"includeempty\"\n}"
+        },
+        "execution_time": 0.005074739456176758,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Load System File",
+        "purpose": "验证工具是否能安全地拒绝访问系统敏感文件",
+        "args": {
+          "file_path": "C:\\Windows\\system32\\drivers\\etc\\hosts"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"Error tokenizing data. C error: Expected 1 fields in line 11, saw 2\\n\"\n}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with Special Characters in Dataset Name",
+        "purpose": "验证工具支持特殊字符作为dataset_name参数",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+          "dataset_name": "data_set@123#"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"dataset_name\": \"data_set@123#\"\n}"
+        },
+        "execution_time": 0.005635738372802734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with Long Dataset Name",
+        "purpose": "验证工具对超长字符串作为dataset_name的处理能力",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.csv",
+          "dataset_name": "VeryLongDatasetNameThatExceedsTypicalLengthLimitsForTestingPurposesOnly"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"dataset_name\": \"VeryLongDatasetNameThatExceedsTypicalLengthLimitsForTestingPurposesOnly\"\n}"
+        },
+        "execution_time": 0.007012844085693359,
+        "is_functional_test": true
+      }
+    ],
+    "explore_data": [
+      {
+        "case_name": "Explore Dataset with Default Visualization",
+        "purpose": "验证工具能够成功分析已加载的数据集并使用默认的可视化类型生成数据洞察",
+        "args": {
+          "dataset_name": "spreadsheet"
+        },
+        "response": {
+          "result": "{\n  \"stats\": {\n    \"columns\": [\n      \"A\",\n      \"B\",\n      \"C\"\n    ],\n    \"shape\": [\n      2,\n      3\n    ],\n    \"describe\": {\n      \"A\": {\n        \"count\": 2.0,\n        \"mean\": 2.5,\n        \"std\": 2.1213203435596424,\n        \"min\": 1.0,\n        \"25%\": 1.75,\n        \"50%\": 2.5,\n        \"75%\": 3.25,\n        \"max\": 4.0\n      },\n      \"B\": {\n        \"count\": 2.0,\n        \"mean\": 3.5,\n        \"std\": 2.1213203435596424,\n        \"min\": 2.0,\n        \"25%\": 2.75,\n        \"50%\": 3.5,\n        \"75%\": 4.25,\n        \"max\": 5.0\n      },\n      \"C\": {\n        \"count\": 2.0,\n        \"mean\": 4.5,\n        \"std\": 2.1213203435596424,\n        \"min\": 3.0,\n        \"25%\": 3.75,\n        \"50%\": 4.5,\n        \"75%\": 5.25,\n        \"max\": 6.0\n      }\n    },\n    \"null_values\": {\n      \"A\": 0,\n      \"B\": 0,\n      \"C\": 0\n    },\n    \"dtypes\": {\n      \"A\": \"int64\",\n      \"B\": \"int64\",\n      \"C\": \"int64\"\n    }\n  },\n  \"visualizations\": [\n    {\n      \"A\": \"iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA10dzkAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjkuMiwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy8hTgPZAAAACXBIWXMAAA9hAAAPYQGoP6dpAAAtiUlEQVR4nO3de1xVdb7/8fcGBXQU1DFBjcRbeEvxkg7WpBZK6bF8zOlkVoqMWjnijW6aKZodsUaReYw05gVtStNq0tM5XhFFT0mjopQ6XjI1faiAZLKVFBXW749+7tMWMCzYS/f39Xw89mPaa6+192evx5rpNWvtzXZYlmUJAAAAxvCxewAAAAB4FgEIAABgGAIQAADAMAQgAACAYQhAAAAAwxCAAAAAhiEAAQAADEMAAgAAGIYABAAAMAwBCAAAYBgCEAAAwDAEIAAAgGEIQAAAAMMQgAAAAIYhAAEAAAxD...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计47867字符，剩余46467字符"
+        },
+        "execution_time": 0.2528078556060791,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore Dataset with Custom Visualization Type",
+        "purpose": "验证工具支持指定自定义可视化类型（如histogram）来生成数据洞察",
+        "args": {
+          "dataset_name": "TemporaryData",
+          "visualization_type": "histogram"
+        },
+        "response": {
+          "result": "{\n  \"stats\": {\n    \"columns\": [\n      \"This should overwrite the previous content.This should be appended at the end.\"\n    ],\n    \"shape\": [\n      0,\n      1\n    ],\n    \"describe\": {\n      \"This should overwrite the previous content.This should be appended at the end.\": {\n        \"count\": 0,\n        \"unique\": 0,\n        \"top\": NaN,\n        \"freq\": NaN\n      }\n    },\n    \"null_values\": {\n      \"This should overwrite the previous content.This should be appended at the end.\": 0\n    },\n    \"dtypes\": {\n      \"This should overwrite the previous content.This should be appended at the end.\": \"object\"\n    }\n  },\n  \"visualizations\": []\n}"
+        },
+        "execution_time": 0.006013631820678711,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fail to Explore Nonexistent Dataset",
+        "purpose": "验证工具在尝试探索不存在的数据集时能正确处理错误",
+        "args": {
+          "dataset_name": "NonExistentDataset"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'Dataset not found: NonExistentDataset'\"\n}"
+        },
+        "execution_time": 0.003998279571533203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore Empty Dataset",
+        "purpose": "验证工具能够处理空数据集的情况并生成适当的结果",
+        "args": {
+          "dataset_name": "includeempty"
+        },
+        "response": {
+          "result": "{\n  \"stats\": {\n    \"columns\": [\n      \"A\",\n      \"B\",\n      \"C\"\n    ],\n    \"shape\": [\n      1,\n      3\n    ],\n    \"describe\": {\n      \"A\": {\n        \"count\": 1.0,\n        \"mean\": 1.0,\n        \"std\": NaN,\n        \"min\": 1.0,\n        \"25%\": 1.0,\n        \"50%\": 1.0,\n        \"75%\": 1.0,\n        \"max\": 1.0\n      },\n      \"B\": {\n        \"count\": 0.0,\n        \"mean\": NaN,\n        \"std\": NaN,\n        \"min\": NaN,\n        \"25%\": NaN,\n        \"50%\": NaN,\n        \"75%\": NaN,\n        \"max\": NaN\n      },\n      \"C\": {\n        \"count\": 1.0,\n        \"mean\": 3.0,\n        \"std\": NaN,\n        \"min\": 3.0,\n        \"25%\": 3.0,\n        \"50%\": 3.0,\n        \"75%\": 3.0,\n        \"max\": 3.0\n      }\n    },\n    \"null_values\": {\n      \"A\": 0,\n      \"B\": 1,\n      \"C\": 0\n    },\n    \"dtypes\": {\n      \"A\": \"int64\",\n      \"B\": \"float64\",\n      \"C\": \"int64\"\n    }\n  },\n  \"visualizations\": [\n    {\n      \"A\": \"iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA10dzkAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjkuMiwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy8hTgPZAAAACXBIWXMAAA9hAAAPYQGoP6dpAAAsvElEQVR4nO3de1RVdf7/8dcBBWwK1CFBHQw1Nc0Ew2TQJqVBKf3SuObbN9JSZMJGE290JVMkG3GaVGYljV8vaBcvWKN+/S7JS6jjzEhfR5QaGy856ujSASXTo6SgsH9/zM8znUBDhbPlfJ6Ptc4qPmfvc95n26pne5/DcViWZQkAAADG8LF7AAAAAHgWAQgAAGAYAhAAAMAwBCAAAIBhCEAAAADDEIAAAACGIQABAAAMQwACAAAYhgAEAAAwDAEIAABgGAIQAADAMAQgAACAYQhAAAAAwxCAAAAAhiEAAQAADEMAAgAAGIYABAAAMAwBCAAAYBgCEAAAwDAEIAAAgGEIQAAAA...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计48346字符，剩余46946字符"
+        },
+        "execution_time": 0.17687439918518066,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Explore System File via Dataset Name",
+        "purpose": "验证工具是否安全地拒绝尝试通过dataset_name访问系统敏感资源",
+        "args": {
+          "dataset_name": "../Windows/system32/drivers/etc/hosts"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'Dataset not found: ../Windows/system32/drivers/etc/hosts'\"\n}"
+        },
+        "execution_time": 0.0060122013092041016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore Dataset with Special Characters in Name",
+        "purpose": "验证工具支持包含特殊字符的数据集名称进行探索",
+        "args": {
+          "dataset_name": "data_set@123#"
+        },
+        "response": {
+          "result": "{\n  \"stats\": {\n    \"columns\": [\n      \"# This is a header comment\"\n    ],\n    \"shape\": [\n      15,\n      1\n    ],\n    \"describe\": {\n      \"# This is a header comment\": {\n        \"count\": 15,\n        \"unique\": 9,\n        \"top\": \"1-8\",\n        \"freq\": 2\n      }\n    },\n    \"null_values\": {\n      \"# This is a header comment\": 0\n    },\n    \"dtypes\": {\n      \"# This is a header comment\": \"object\"\n    }\n  },\n  \"visualizations\": []\n}"
+        },
+        "execution_time": 0.007535696029663086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore Dataset with Long Name",
+        "purpose": "验证工具对超长字符串作为数据集名称的处理能力",
+        "args": {
+          "dataset_name": "VeryLongDatasetNameThatExceedsTypicalLengthLimitsForTestingPurposesOnly"
+        },
+        "response": {
+          "result": "{\n  \"stats\": {\n    \"columns\": [\n      \"auto_driving_id\",\n      \"auto_driving_name\",\n      \"system_version\",\n      \"sensors_count\",\n      \"accuracy_rate\",\n      \"processing_power\",\n      \"software_platform\",\n      \"ai_algorithm\",\n      \"certification\"\n    ],\n    \"shape\": [\n      20,\n      9\n    ],\n    \"describe\": {\n      \"sensors_count\": {\n        \"count\": 20.0,\n        \"mean\": 12.25,\n        \"std\": 6.934847169416057,\n        \"min\": 3.0,\n        \"25%\": 7.5,\n        \"50%\": 11.0,\n        \"75%\": 15.25,\n        \"max\": 30.0\n      },\n      \"accuracy_rate\": {\n        \"count\": 20.0,\n        \"mean\": 97.24999999999999,\n        \"std\": 2.1828277170004187,\n        \"min\": 92.1,\n        \"25%\": 96.0,\n        \"50%\": 97.65,\n        \"75%\": 98.825,\n        \"max\": 99.9\n      }\n    },\n    \"null_values\": {\n      \"auto_driving_id\": 0,\n      \"auto_driving_name\": 0,\n      \"system_version\": 0,\n      \"sensors_count\": 0,\n      \"accuracy_rate\": 0,\n      \"processing_power\": 0,\n      \"software_platform\": 0,\n      \"ai_algorithm\": 0,\n      \"certification\": 0\n    },\n    \"dtypes\": {\n      \"auto_driving_id\": \"object\",\n      \"auto_driving_name\": \"object\",\n      \"system_version\": \"object\",\n      \"sensors_count\": \"int64\",\n      \"accuracy_rate\": \"float64\",\n      \"processing_power\": \"object\",\n      \"software_platform\": \"object\",\n      \"ai_algorithm\": \"object\",\n      \"certification\": \"object\"\n    }\n  },\n  \"visualizations...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计40631字符，剩余39231字符"
+        },
+        "execution_time": 0.12144875526428223,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore Dataset with Invalid Visualization Type",
+        "purpose": "验证工具在提供无效的可视化类型参数时能否优雅处理",
+        "args": {
+          "dataset_name": "spreadsheet",
+          "visualization_type": "invalid_type"
+        },
+        "response": {
+          "result": "{\n  \"stats\": {\n    \"columns\": [\n      \"A\",\n      \"B\",\n      \"C\"\n    ],\n    \"shape\": [\n      2,\n      3\n    ],\n    \"describe\": {\n      \"A\": {\n        \"count\": 2.0,\n        \"mean\": 2.5,\n        \"std\": 2.1213203435596424,\n        \"min\": 1.0,\n        \"25%\": 1.75,\n        \"50%\": 2.5,\n        \"75%\": 3.25,\n        \"max\": 4.0\n      },\n      \"B\": {\n        \"count\": 2.0,\n        \"mean\": 3.5,\n        \"std\": 2.1213203435596424,\n        \"min\": 2.0,\n        \"25%\": 2.75,\n        \"50%\": 3.5,\n        \"75%\": 4.25,\n        \"max\": 5.0\n      },\n      \"C\": {\n        \"count\": 2.0,\n        \"mean\": 4.5,\n        \"std\": 2.1213203435596424,\n        \"min\": 3.0,\n        \"25%\": 3.75,\n        \"50%\": 4.5,\n        \"75%\": 5.25,\n        \"max\": 6.0\n      }\n    },\n    \"null_values\": {\n      \"A\": 0,\n      \"B\": 0,\n      \"C\": 0\n    },\n    \"dtypes\": {\n      \"A\": \"int64\",\n      \"B\": \"int64\",\n      \"C\": \"int64\"\n    }\n  },\n  \"visualizations\": []\n}"
+        },
+        "execution_time": 0.008912801742553711,
+        "is_functional_test": false
+      }
+    ],
+    "run_script": [
+      {
+        "case_name": "Execute Simple Data Analysis Script with Default Output Dataset",
+        "purpose": "验证工具能够成功执行一个简单的Python数据分析脚本，并将结果存储在默认输出数据集中",
+        "args": {
+          "script": "import pandas as pd\nresult = {'mean': pd.DataFrame({'A': [1, 2, 3]}).mean().to_dict()}\nresult",
+          "input_datasets": [],
+          "output_dataset": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool run_script: 1 validation error for run_scriptArguments\noutput_dataset\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.0050106048583984375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Execute Script with Input Dataset and Custom Output Name",
+        "purpose": "验证工具能正确使用输入数据集并指定自定义输出数据集名称",
+        "args": {
+          "script": "import pandas as pd\nresult = {'sum': input_data.sum().to_dict()}\nresult",
+          "input_datasets": [
+            "spreadsheet"
+          ],
+          "output_dataset": "analysis_result"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'NoneType' object is not subscriptable\"\n}"
+        },
+        "execution_time": 0.004008054733276367,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fail to Execute Invalid Python Script",
+        "purpose": "验证工具在执行无效的Python脚本时能否优雅处理错误",
+        "args": {
+          "script": "invalid syntax here",
+          "input_datasets": []
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"invalid syntax (<string>, line 1)\"\n}"
+        },
+        "execution_time": 0.010314464569091797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fail to Execute Script with Nonexistent Input Dataset",
+        "purpose": "验证工具在尝试使用不存在的输入数据集时能否正确返回错误信息",
+        "args": {
+          "script": "result = {'data': input_data.shape}",
+          "input_datasets": [
+            "NonExistentDataset"
+          ]
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'Dataset not found: NonExistentDataset'\"\n}"
+        },
+        "execution_time": 0.0029959678649902344,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Attempt to Execute System Command via Script",
+        "purpose": "验证工具是否安全地拒绝执行包含系统命令调用的脚本",
+        "args": {
+          "script": "import os\nos.system('dir')",
+          "input_datasets": []
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'NoneType' object is not subscriptable\"\n}"
+        },
+        "execution_time": 0.003366231918334961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Very Long Script Execution",
+        "purpose": "验证工具对超长Python脚本的执行能力",
+        "args": {
+          "script": "result = {'values': [i for i in range(10000)]}",
+          "input_datasets": []
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'NoneType' object is not subscriptable\"\n}"
+        },
+        "execution_time": 0.00503230094909668,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Output Dataset Name",
+        "purpose": "验证工具支持特殊字符作为输出数据集名称",
+        "args": {
+          "script": "result = {'data': {'col1': [1, 2], 'col2': [3, 4]}}",
+          "input_datasets": [],
+          "output_dataset": "output@dataset#123"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"Result must be a pandas DataFrame\"\n}"
+        },
+        "execution_time": 0.00416254997253418,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Script Accessing External Resource",
+        "purpose": "验证工具是否限制脚本对外部资源（如网络）的访问",
+        "args": {
+          "script": "import requests\nrequests.get('https://jsonplaceholder.typicode.com/posts/1')",
+          "input_datasets": []
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"'NoneType' object is not subscriptable\"\n}"
+        },
+        "execution_time": 0.0067174434661865234,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 24
+}

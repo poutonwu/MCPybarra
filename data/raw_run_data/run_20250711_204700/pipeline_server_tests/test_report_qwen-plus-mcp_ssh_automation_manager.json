@@ -1,0 +1,1139 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_ssh_automation_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_ssh_automation_manager/refined/server.py",
+  "timestamp": "2025-07-11T21:07:07.754343",
+  "tools": [
+    {
+      "name": "connect",
+      "description": "\n    建立与远程SSH服务器的安全连接，支持密码或密钥认证。\n\n    Args:（默认为已经配好key_path的免密登录的主机）\n        host: 目标SSH服务器的IP地址或主机名。（默认：10.70.4.146）\n        port: SSH服务端口号，默认22。（默认：26002）\n        username: 登录用户名。（默认：pengbocheng）\n        password: 登录密码（如果使用密钥认证则不需要）。（默认：123456）\n        key_path: 私钥文件路径（如果使用密码认证则不需要）。\n        key_passphrase: 密钥文件的密码短语。\n\n    Returns:\n        包含会话ID的字符串，用于后续操作标识该连接。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n        paramiko.SSHException: 如果SSH连接失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "host": {
+            "default": "10.70.4.146",
+            "title": "Host",
+            "type": "string"
+          },
+          "port": {
+            "default": 26002,
+            "title": "Port",
+            "type": "integer"
+          },
+          "username": {
+            "default": "pengbocheng",
+            "title": "Username",
+            "type": "string"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Password"
+          },
+          "key_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Key Path"
+          },
+          "key_passphrase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Key Passphrase"
+          }
+        },
+        "title": "connectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "disconnect",
+      "description": "\n    安全断开指定的SSH连接并释放相关资源。\n\n    Args:\n        session_id: 要断开的会话唯一标识符。\n\n    Returns:\n        包含操作结果状态的字符串（成功/失败）。\n\n    Raises:\n        ValueError: 如果会话ID无效。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "disconnectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_sessions",
+      "description": "\n    列出所有当前活跃的SSH会话信息。\n\n    Args:\n        无\n\n    Returns:\n        JSON格式字符串，包含活跃会话列表及详细信息。\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_sessionsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute",
+      "description": "\n    在指定的SSH会话中执行远程命令，支持标准输入和超时设置。\n\n    Args:\n        session_id: 要执行命令的会话ID。\n        command: 要执行的远程命令。\n        timeout: 命令执行超时时间(秒)，默认60秒。\n        stdin_input: 传递给命令的标准输入内容。\n\n    Returns:\n        JSON格式字符串，包含命令的标准输出、错误输出、退出状态码和执行时间。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "timeout": {
+            "default": 60,
+            "title": "Timeout",
+            "type": "integer"
+          },
+          "stdin_input": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Stdin Input"
+          }
+        },
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "title": "executeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "upload",
+      "description": "\n    将本地文件上传到远程SSH服务器的指定路径。\n\n    Args:\n        session_id: 使用的SSH会话ID。\n        local_path: 本地文件的完整路径。\n        remote_path: 远程服务器上的目标路径。\n\n    Returns:\n        包含传输结果状态的字符串（成功/失败）及传输统计信息。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "local_path",
+          "remote_path"
+        ],
+        "title": "uploadArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download",
+      "description": "\n    从远程SSH服务器下载文件到本地指定路径。\n\n    Args:\n        session_id: 使用的SSH会话ID。\n        remote_path: 远程服务器上的文件路径。\n        local_path: 本地保存文件的完整路径。\n\n    Returns:\n        包含传输结果状态的字符串（成功/失败）及传输统计信息。\n\n    Raises:\n        ValueError: 如果参数验证失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "remote_path",
+          "local_path"
+        ],
+        "title": "downloadArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "connect": [
+      {
+        "case_name": "使用默认参数成功建立SSH连接",
+        "purpose": "验证工具在使用所有默认参数的情况下能否成功建立SSH连接",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 必须提供密码或密钥路径进行认证。"
+        },
+        "execution_time": 0.008570671081542969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用密码认证建立SSH连接",
+        "purpose": "验证工具在提供密码而非密钥时是否能正常建立SSH连接",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "result": "8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "execution_time": 0.28668904304504395,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用密钥文件路径进行SSH连接",
+        "purpose": "验证工具是否支持通过指定私钥文件路径进行SSH认证",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\id_rsa"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\id_rsa'"
+        },
+        "execution_time": 0.02579188346862793,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用带密码短语的密钥进行SSH连接",
+        "purpose": "验证工具是否支持带有密码短语的私钥认证方式",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\id_rsa_encrypted",
+          "key_passphrase": "securepassphrase123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\id_rsa_encrypted'"
+        },
+        "execution_time": 0.02727222442626953,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定非默认主机地址和端口建立SSH连接",
+        "purpose": "验证工具是否能正确处理非默认的host和port参数",
+        "args": {
+          "host": "192.168.1.100",
+          "port": 22,
+          "username": "testuser"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 必须提供密码或密钥路径进行认证。"
+        },
+        "execution_time": 0.017931461334228516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "同时提供密码和密钥路径尝试连接",
+        "purpose": "验证工具是否优先使用密钥认证，忽略密码（或抛出警告）",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\id_rsa"
+        },
+        "response": {
+          "result": "15995068-3dab-4108-8270-1551a3ba4b9a"
+        },
+        "execution_time": 0.28238677978515625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空用户名尝试SSH连接",
+        "purpose": "验证工具是否拒绝空用户名的无效连接请求",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 'username' 必须是有效的字符串。"
+        },
+        "execution_time": 0.03534555435180664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误IP地址导致连接失败",
+        "purpose": "验证工具是否能正确识别并抛出无效主机地址的错误",
+        "args": {
+          "host": "999.999.999.999",
+          "port": 26002,
+          "username": "pengbocheng"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 必须提供密码或密钥路径进行认证。"
+        },
+        "execution_time": 0.016542911529541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误端口号导致连接失败",
+        "purpose": "验证工具是否能正确处理无效端口号的情况",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 70000,
+          "username": "pengbocheng"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 'port' 必须是1到65535之间的有效整数。"
+        },
+        "execution_time": 0.03625941276550293,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的私钥文件路径",
+        "purpose": "验证工具是否能检测到不存在的密钥文件并抛出异常",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "pengbocheng",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_id_rsa"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: [Errno 2] No such file or directory: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_id_rsa'"
+        },
+        "execution_time": 0.04914736747741699,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符用户名尝试连接",
+        "purpose": "验证工具是否能正确处理包含特殊字符的用户名",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "user@domain!#"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 必须提供密码或密钥路径进行认证。"
+        },
+        "execution_time": 0.025033950805664062,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长用户名尝试连接",
+        "purpose": "验证工具是否能处理极长用户名的情况",
+        "args": {
+          "host": "10.70.4.146",
+          "port": 26002,
+          "username": "a_very_long_username_that_may_cause_issues_in_some_systems_and_protocols"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 必须提供密码或密钥路径进行认证。"
+        },
+        "execution_time": 0.024473190307617188,
+        "is_functional_test": false
+      }
+    ],
+    "list_sessions": [
+      {
+        "case_name": "成功列出当前所有活跃SSH会话",
+        "purpose": "验证工具在存在已建立的SSH连接时，能正确返回所有活跃会话的详细信息",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.024018287658691406,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无活跃SSH会话时返回空列表",
+        "purpose": "验证工具在没有活跃SSH连接的情况下返回一个空数组",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.012520313262939453,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多用户并发会话信息准确性测试",
+        "purpose": "验证多个用户同时建立SSH连接后，工具能否准确列出所有会话",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.047374725341796875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "长时间运行后会话状态保持测试",
+        "purpose": "验证SSH会话在长时间运行后是否仍被正确记录在活跃列表中",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.01802372932434082,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "会话断开后自动从列表移除",
+        "purpose": "验证当某个SSH会话断开后，该会话是否会自动从list_sessions结果中移除",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.026630640029907227,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "跨平台SSH会话兼容性测试",
+        "purpose": "验证来自不同操作系统（如Linux、Windows）的SSH连接是否都能被正确识别并列出",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.013112783432006836,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "JSON格式输出结构验证",
+        "purpose": "验证list_sessions返回的JSON数据是否符合预期的数据结构和字段定义",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.027564287185668945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "输出内容敏感信息脱敏处理",
+        "purpose": "验证工具是否对敏感信息（如密码、私钥路径）进行脱敏或完全不包含在返回结果中",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.047103166580200195,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非授权访问尝试检测",
+        "purpose": "验证未经过身份验证的用户调用list_sessions时是否被拒绝执行",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.03084588050842285,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "异常输入参数处理",
+        "purpose": "验证工具在接收到非法参数时是否能正确忽略或抛出明确错误提示",
+        "args": {
+          "unexpected_param": "invalid_value"
+        },
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.013672351837158203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符会话ID兼容性测试",
+        "purpose": "验证当系统中存在含特殊字符的会话ID时，工具是否能正确解析并返回",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.015608549118041992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "超大会话数量压力测试",
+        "purpose": "验证工具在存在大量活跃SSH会话（例如1000+）时的性能表现与稳定性",
+        "args": {},
+        "response": {
+          "result": "{\"active_sessions\": [{\"session_id\": \"8afb74ac-8544-40b2-bbad-c97ae5f50916\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239273.9432342}, {\"session_id\": \"15995068-3dab-4108-8270-1551a3ba4b9a\", \"host\": \"10.70.4.146\", \"username\": \"pengbocheng\", \"connected_at\": 1752239274.4321296}], \"total_sessions\": 2}"
+        },
+        "execution_time": 0.02172565460205078,
+        "is_functional_test": false
+      }
+    ],
+    "execute": [
+      {
+        "case_name": "使用有效会话ID执行简单命令",
+        "purpose": "验证execute工具能够在已建立的SSH会话中成功执行一个基本命令（如'echo hello'）",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "echo hello"
+        },
+        "response": {
+          "result": "{\"stdout\": \"hello\\n\", \"stderr\": \"\", \"exit_code\": 0, \"execution_time\": 0.007569313049316406}"
+        },
+        "execution_time": 0.025082826614379883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用默认超时时间执行长时间命令",
+        "purpose": "验证execute工具在默认60秒超时设置下能否正确处理长时间运行的命令（如'sleep 30'）",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "sleep 30"
+        },
+        "response": {
+          "result": "{\"stdout\": \"\", \"stderr\": \"\", \"exit_code\": 0, \"execution_time\": 30.029401779174805}"
+        },
+        "execution_time": 30.04442811012268,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "自定义超时时间执行超时命令",
+        "purpose": "验证execute工具在指定较短超时时间（如5秒）时，是否能正确中断超时命令（如'sleep 10'）",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "sleep 10",
+          "timeout": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: "
+        },
+        "execution_time": 5.030905723571777,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "传递标准输入内容执行命令",
+        "purpose": "验证execute工具能否通过stdin_input参数向远程命令提供标准输入（如传递'yes'给需要交互的命令）",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "read input && echo \"Input was: $input\"",
+          "stdin_input": "yes"
+        },
+        "response": {
+          "error": "Tool call 'execute' was cancelled."
+        },
+        "execution_time": 60.00517916679382,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "执行不存在的命令返回错误信息",
+        "purpose": "验证execute工具在尝试执行一个不存在的命令（如'invalid_command'）时是否能正确返回错误输出和非零退出码",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "invalid_command"
+        },
+        "response": {
+          "result": "{\"stdout\": \"\", \"stderr\": \"bash: line 1: invalid_command: command not found\\n\", \"exit_code\": 127, \"execution_time\": 0.006508588790893555}"
+        },
+        "execution_time": 0.04172778129577637,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空命令导致参数验证失败",
+        "purpose": "验证execute工具对空命令字符串进行参数校验并抛出ValueError",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 'command' 必须是非空字符串。"
+        },
+        "execution_time": 0.0043659210205078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效或断开的会话ID执行命令",
+        "purpose": "验证execute工具在使用无效或已经断开的会话ID执行命令时是否能正确识别并报错",
+        "args": {
+          "session_id": "nonexistent_session_id",
+          "command": "echo test"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 无效的会话ID: nonexistent_session_id"
+        },
+        "execution_time": 0.007512092590332031,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符命令注入测试",
+        "purpose": "验证execute工具是否对包含特殊字符的命令进行安全处理，防止命令注入攻击（如'; rm -rf /'）",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "; rm -rf /"
+        },
+        "response": {
+          "result": "{\"stdout\": \"\", \"stderr\": \"bash: -c: line 1: syntax error near unexpected token `;'\\nbash: -c: line 1: `; rm -rf /'\\n\", \"exit_code\": 2, \"execution_time\": 0.026010990142822266}"
+        },
+        "execution_time": 0.034012556076049805,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "最大长度命令执行测试",
+        "purpose": "验证execute工具是否能处理极长的命令字符串（例如10000个字符）",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "echo ${RANDOM}${RANDOM}${RANDOM}${RANDOM}${RANDOM}"
+        },
+        "response": {
+          "result": "{\"stdout\": \"1886517479249772808024235\\n\", \"stderr\": \"\", \"exit_code\": 0, \"execution_time\": 0.04159355163574219}"
+        },
+        "execution_time": 0.04860210418701172,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多行命令执行测试",
+        "purpose": "验证execute工具是否支持执行包含换行符的多行命令脚本",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "echo 'Line 1';\necho 'Line 2'"
+        },
+        "response": {
+          "result": "{\"stdout\": \"Line 1\\nLine 2\\n\", \"stderr\": \"\", \"exit_code\": 0, \"execution_time\": 0.03803753852844238}"
+        },
+        "execution_time": 0.04727649688720703,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "超时时间设为0秒执行命令",
+        "purpose": "验证execute工具对非法超时值（如0）进行参数校验并抛出异常",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "echo test",
+          "timeout": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 'timeout' 必须是大于0的有效整数。"
+        },
+        "execution_time": 0.008028984069824219,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "负数超时时间参数验证",
+        "purpose": "验证execute工具是否对负数超时时间进行参数校验并抛出异常",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "command": "echo test",
+          "timeout": -10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: 'timeout' 必须是大于0的有效整数。"
+        },
+        "execution_time": 0.0053446292877197266,
+        "is_functional_test": false
+      }
+    ],
+    "upload": [
+      {
+        "case_name": "使用有效会话ID上传文件",
+        "purpose": "验证工具在提供有效SSH会话ID、本地路径和远程路径时，能否成功上传文件",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.txt",
+          "remote_path": "/home/pengbocheng/test_upload/empty_content.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [WinError 2] 系统找不到指定的文件。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content.txt'"
+        },
+        "execution_time": 0.025210857391357422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传大文件测试",
+        "purpose": "验证工具是否能处理较大文件的上传操作",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\multi_merged_output.zip",
+          "remote_path": "/home/pengbocheng/test_upload/multi_merged_output.zip"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.03881502151489258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传包含中文名称的文件",
+        "purpose": "验证工具是否支持上传带有中文文件名的文件",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\中文测试文档.docx",
+          "remote_path": "/home/pengbocheng/test_upload/中文测试文档.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.0333552360534668,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传带特殊字符文件名的文件",
+        "purpose": "验证工具是否能正确处理上传带有特殊字符（如@#%&()）的文件",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@#%&()_file.txt",
+          "remote_path": "/home/pengbocheng/test_upload/special@#%&()_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [WinError 2] 系统找不到指定的文件。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@#%&()_file.txt'"
+        },
+        "execution_time": 0.036093950271606445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传空文件测试",
+        "purpose": "验证工具是否能正常处理空文件上传",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.txt",
+          "remote_path": "/home/pengbocheng/test_upload/empty_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [WinError 2] 系统找不到指定的文件。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content.txt'"
+        },
+        "execution_time": 0.02402782440185547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效会话ID上传失败",
+        "purpose": "验证工具在提供无效会话ID时是否拒绝上传并抛出错误",
+        "args": {
+          "session_id": "invalid-session-id",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.txt",
+          "remote_path": "/home/pengbocheng/test_upload/fail_empty.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 无效的会话ID: invalid-session-id"
+        },
+        "execution_time": 0.022022485733032227,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "本地路径不存在导致上传失败",
+        "purpose": "验证工具在指定的本地文件不存在时是否能正确报错",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "remote_path": "/home/pengbocheng/test_upload/nonexistent.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [WinError 2] 系统找不到指定的文件。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt'"
+        },
+        "execution_time": 0.023018836975097656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "远程路径不可写导致上传失败",
+        "purpose": "验证工具在远程路径无写权限时是否能优雅地处理错误",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.txt",
+          "remote_path": "/root/test_upload/restricted_dir/empty_content.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [WinError 2] 系统找不到指定的文件。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content.txt'"
+        },
+        "execution_time": 0.042960405349731445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "缺少必要参数导致上传失败",
+        "purpose": "验证工具在缺少必填参数（如session_id）时是否抛出ValueError",
+        "args": {
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.txt",
+          "remote_path": "/home/pengbocheng/test_upload/no_session.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: 1 validation error for uploadArguments\nsession_id\n  Field required [type=missing, input_value={'local_path': 'D:\\\\devWo..._upload/no_session.txt'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.023843050003051758,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长远程路径上传测试",
+        "purpose": "验证工具是否能处理非常长的远程路径字符串",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content.txt",
+          "remote_path": "/home/pengbocheng/test_upload/this/is/a/very/long/path/to/upload/the/file/and/check/if/tool/supports/long/paths/correctly/without/error.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [WinError 2] 系统找不到指定的文件。: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content.txt'"
+        },
+        "execution_time": 0.043143510818481445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试上传可执行脚本文件",
+        "purpose": "验证工具是否允许上传潜在危险文件（如.sh），用于安全审计",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\code (1).html",
+          "remote_path": "/home/pengbocheng/test_upload/security_check.sh"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.038353919982910156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入风格文件名上传测试",
+        "purpose": "验证工具是否对特殊字符或SQL注入式文件名进行过滤或转义处理",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\icon_test';_DROP_TABLE_icons;--.docx",
+          "remote_path": "/home/pengbocheng/test_upload/icon_test';_DROP_TABLE_icons;--.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.02555537223815918,
+        "is_functional_test": false
+      }
+    ],
+    "download": [
+      {
+        "case_name": "使用有效会话ID下载远程文件",
+        "purpose": "验证工具在提供有效SSH会话ID、远程路径和本地路径时，能够成功下载文件并返回传输统计信息",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/testfile.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.016829967498779297,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试下载不存在的远程文件",
+        "purpose": "验证工具在远程文件不存在时是否能正确抛出错误并返回失败状态",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/nonexistent_file.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_nonexistent.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.01350855827331543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用无效SSH会话ID尝试下载",
+        "purpose": "验证工具在提供无效或不存在的session_id时是否能正确处理并抛出异常",
+        "args": {
+          "session_id": "invalid-session-id",
+          "remote_path": "/home/pengbocheng/testfile.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_invalid_session.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 无效的会话ID: invalid-session-id"
+        },
+        "execution_time": 0.008518695831298828,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未提供必填参数导致下载失败",
+        "purpose": "验证工具在缺少任意必填参数（如session_id）时是否能抛出ValueError并拒绝执行",
+        "args": {
+          "remote_path": "/home/pengbocheng/testfile.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\missing_session_id.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: 1 validation error for downloadArguments\nsession_id\n  Field required [type=missing, input_value={'remote_path': '/home/pe...missing_session_id.txt'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004601955413818359,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "下载大文件测试性能与稳定性",
+        "purpose": "验证工具在下载较大文件时是否能保持稳定并最终成功完成传输",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/largefile.iso",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_largefile.iso"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.016526222229003906,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "下载路径包含特殊字符的文件",
+        "purpose": "验证工具能否处理远程文件路径中包含特殊字符（如空格、括号、中文等）的情况",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/特殊@#%&()_文件.docx",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_special_name.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.018224000930786133,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "本地路径不可写导致下载失败",
+        "purpose": "验证当指定的本地路径无写权限或不可用时，工具是否能正确检测并报错",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/testfile.txt",
+          "local_path": "C:\\Windows\\system32\\downloaded_to_system_dir.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 13] Permission denied: 'C:\\\\Windows\\\\system32\\\\downloaded_to_system_dir.txt'"
+        },
+        "execution_time": 0.014057159423828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "中断下载过程并验证恢复机制",
+        "purpose": "模拟网络中断等情况，验证工具是否具备断点续传或妥善处理中断的能力",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/largefile.iso",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\partial_download.iso"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.013507604598999023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试覆盖只读本地文件",
+        "purpose": "验证工具在目标本地文件为只读属性时是否能正确处理并提示错误",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/testfile.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.01715564727783203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用超长文件路径进行下载测试",
+        "purpose": "验证工具是否支持长路径文件操作，并确保不会因路径过长而崩溃或失败",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/a_very_long_path_that_may_cause_issues_in_some_systems_and_protocols/testfile.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_downloaded.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.014643669128417969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试下载可执行文件以验证安全性",
+        "purpose": "验证工具是否会阻止下载潜在危险文件（如可执行程序），或至少记录警告信息",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/malicious.exe",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\malicious_downloaded.exe"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.015071392059326172,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "多线程并发下载多个文件",
+        "purpose": "验证工具在多个线程同时调用download方法时是否能保持稳定性和数据一致性",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916",
+          "remote_path": "/home/pengbocheng/file_{thread}.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\concurrent_download_{thread}.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: [Errno 2] No such file"
+        },
+        "execution_time": 0.014508485794067383,
+        "is_functional_test": true
+      }
+    ],
+    "disconnect": [
+      {
+        "case_name": "使用有效会话ID成功断开SSH连接",
+        "purpose": "验证工具在提供有效的session_id时能够安全地断开对应的SSH连接并释放资源",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "response": {
+          "result": "会话 8afb74ac-8544-40b2-bbad-c97ae5f50916 已成功断开。"
+        },
+        "execution_time": 0.00528717041015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试断开不存在的会话ID",
+        "purpose": "验证工具在提供无效或不存在的session_id时是否抛出ValueError异常",
+        "args": {
+          "session_id": "nonexistent-session-id"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: nonexistent-session-id"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "断开空字符串会话ID",
+        "purpose": "验证工具是否能正确处理空字符串作为session_id的情况，并抛出错误",
+        "args": {
+          "session_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: "
+        },
+        "execution_time": 0.004507303237915039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "断开格式非法的会话ID",
+        "purpose": "验证工具是否能检测到不合法格式的session_id（如非UUID格式）并抛出错误",
+        "args": {
+          "session_id": "invalid_format_123"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: invalid_format_123"
+        },
+        "execution_time": 0.005000114440917969,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "重复断开同一个会话ID",
+        "purpose": "验证工具在对已断开的会话再次执行disconnect操作时是否能优雅处理",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: 8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "execution_time": 0.006008625030517578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "断开后会话是否从list_sessions中移除",
+        "purpose": "验证调用disconnect后，对应会话是否被正确从活跃会话列表中移除",
+        "args": {
+          "session_id": "15995068-3dab-4108-8270-1551a3ba4b9a"
+        },
+        "response": {
+          "result": "会话 15995068-3dab-4108-8270-1551a3ba4b9a 已成功断开。"
+        },
+        "execution_time": 0.007024049758911133,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "并发断开多个会话",
+        "purpose": "验证工具能否同时处理多个disconnect请求，且不会出现状态混乱",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: 8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "execution_time": 0.0055027008056640625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "断开会话后资源是否完全释放",
+        "purpose": "验证工具在断开SSH连接后是否释放所有相关资源（如网络句柄、内存等）",
+        "args": {
+          "session_id": "15995068-3dab-4108-8270-1551a3ba4b9a"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: 15995068-3dab-4108-8270-1551a3ba4b9a"
+        },
+        "execution_time": 0.008004188537597656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "断开包含特殊字符的会话ID",
+        "purpose": "验证工具是否能正确处理包含特殊字符的session_id参数",
+        "args": {
+          "session_id": "special!@#$%^&*()_id"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: special!@#$%^&*()_id"
+        },
+        "execution_time": 0.004506111145019531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未授权用户尝试断开SSH连接",
+        "purpose": "验证工具是否拒绝未授权用户调用disconnect方法",
+        "args": {
+          "session_id": "8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: 8afb74ac-8544-40b2-bbad-c97ae5f50916"
+        },
+        "execution_time": 0.007524013519287109,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长会话ID导致断开失败",
+        "purpose": "验证工具是否能正确识别并拒绝处理长度超出限制的session_id",
+        "args": {
+          "session_id": "a_very_long_session_id_that_exceeds_reasonable_length_and_may_cause_issues_in_system"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: a_very_long_session_id_that_exceeds_reasonable_length_and_may_cause_issues_in_system"
+        },
+        "execution_time": 0.0059964656829833984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "断开由密钥认证建立的SSH会话",
+        "purpose": "验证通过密钥认证方式建立的SSH连接能否被正常断开",
+        "args": {
+          "session_id": "15995068-3dab-4108-8270-1551a3ba4b9a"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: 无效的会话ID: 15995068-3dab-4108-8270-1551a3ba4b9a"
+        },
+        "execution_time": 0.005478858947753906,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 72
+}

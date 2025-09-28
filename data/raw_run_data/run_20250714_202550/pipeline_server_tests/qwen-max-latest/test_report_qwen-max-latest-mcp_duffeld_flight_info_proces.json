@@ -1,0 +1,524 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_duffeld_flight_info_proces",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_duffeld_flight_info_proces/refined/server.py",
+  "timestamp": "2025-07-14T20:25:53.515015",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    Queries flight information based on parameters such as origin, destination, date, and cabin class.\n\n    Args:\n        origin: The departure city or airport code (required).\n        destination: The arrival city or airport code (required).\n        departure_date: Departure date in 'YYYY-MM-DD' format (required).\n        return_date: Return date in 'YYYY-MM-DD' format for round-trip queries (optional).\n        cabin_class: Desired cabin class (e.g., 'Economy', 'Business') (optional).\n        flight_type: Type of flight query ('one_way', 'round_trip', 'multi_city') (required).\n\n    Returns:\n        A JSON string containing a list of available flights with details on prices, timings, and airlines.\n\n    Example:\n        search_flights(\n            origin=\"JFK\",\n            destination=\"LAX\",\n            departure_date=\"2023-12-01\",\n            return_date=\"2023-12-10\",\n            cabin_class=\"Business\",\n            flight_type=\"round_trip\"\n        )\n    ",
+      "args_schema": {
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "departure_date": {
+            "title": "Departure Date",
+            "type": "string"
+          },
+          "return_date": {
+            "default": null,
+            "title": "Return Date",
+            "type": "string"
+          },
+          "cabin_class": {
+            "default": "Economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "flight_type": {
+            "default": "one_way",
+            "title": "Flight Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure_date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    Retrieves detailed information about a specific flight offer.\n\n    Args:\n        offer_id: The unique identifier for the flight offer (required).\n\n    Returns:\n        A JSON string containing detailed information about the specified flight offer.\n\n    Example:\n        get_offer_details(offer_id=\"OFFER123456789\")\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    Handles complex multi-city flight queries by planning an itinerary across several destinations.\n\n    Args:\n        cities: A list of dictionaries where each dictionary contains 'origin', 'destination', and 'departure_date' keys (required).\n        cabin_class: Desired cabin class (optional).\n\n    Returns:\n        A JSON string containing a list of available multi-city flight options with relevant details.\n\n    Example:\n        search_multi_city(\n            cities=[\n                {\"origin\": \"JFK\", \"destination\": \"LAX\", \"departure_date\": \"2023-12-01\"},\n                {\"origin\": \"LAX\", \"destination\": \"SFO\", \"departure_date\": \"2023-12-05\"}\n            ],\n            cabin_class=\"Business\"\n        )\n    ",
+      "args_schema": {
+        "properties": {
+          "cities": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Cities",
+            "type": "array"
+          },
+          "cabin_class": {
+            "default": "Economy",
+            "title": "Cabin Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cities"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "Basic One Way Flight Search",
+        "purpose": "验证基本单程航班查询功能是否正常，使用默认舱位等级和必填参数",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2023-12-01",
+          "flight_type": "one_way"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.9544920921325684,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Round Trip Flight Search with Return Date",
+        "purpose": "验证往返航班查询功能是否正常，提供返回日期和舱位等级",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2023-12-01",
+          "return_date": "2023-12-10",
+          "cabin_class": "Business",
+          "flight_type": "round_trip"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.3850860595703125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi City Flight Search without Return Date",
+        "purpose": "验证多城市航班查询功能是否正常，不提供返回日期",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2023-12-01",
+          "cabin_class": "Economy",
+          "flight_type": "multi_city"
+        },
+        "response": {
+          "result": "{\"error\": \"Unsupported flight type. Choose 'one_way' or 'round_trip'.\"}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Flight Search with Empty Cabin Class",
+        "purpose": "验证未指定舱位等级时是否默认为 Economy",
+        "args": {
+          "origin": "ORD",
+          "destination": "SFO",
+          "departure_date": "2023-11-15",
+          "flight_type": "one_way"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.4219141006469727,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Origin Field",
+        "purpose": "测试工具是否对 origin 参数进行输入过滤以防止 SQL 注入攻击",
+        "args": {
+          "origin": "JFK'; DROP TABLE flights;--",
+          "destination": "LAX",
+          "departure_date": "2023-12-01",
+          "flight_type": "one_way"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.4095404148101807,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Airport Code Input",
+        "purpose": "验证工具能否正确处理无效的机场代码输入",
+        "args": {
+          "origin": "XYZ",
+          "destination": "ABC",
+          "departure_date": "2023-12-01",
+          "flight_type": "one_way"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.3887991905212402,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Future Departure Date Test",
+        "purpose": "验证未来日期是否能被正常处理并返回有效结果",
+        "args": {
+          "origin": "LHR",
+          "destination": "CDG",
+          "departure_date": "2024-12-31",
+          "flight_type": "one_way"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.3828251361846924,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Destination Field",
+        "purpose": "测试工具是否能正确处理目的地字段中的特殊字符",
+        "args": {
+          "origin": "JFK",
+          "destination": "München",
+          "departure_date": "2023-12-01",
+          "flight_type": "one_way"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.4104726314544678,
+        "is_functional_test": false
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "Basic Offer Details Retrieval",
+        "purpose": "验证使用有效 offer_id 能否成功获取航班报价详情",
+        "args": {
+          "offer_id": "OFFER123456789"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.3796160221099854,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Offer ID Input",
+        "purpose": "验证当 offer_id 为空字符串时是否返回错误信息",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Missing required parameter: offer_id.\"}"
+        },
+        "execution_time": 0.0060007572174072266,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Offer ID Format",
+        "purpose": "验证使用非法格式的 offer_id（如特殊字符）是否能正确处理并返回错误",
+        "args": {
+          "offer_id": "!@#$%^&*()"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.414637565612793,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL Injection Attempt in Offer ID",
+        "purpose": "测试工具是否对 offer_id 参数进行输入过滤以防止 SQL 注入攻击",
+        "args": {
+          "offer_id": "OFFER123'; DROP TABLE offers;--"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.394432306289673,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Existent Offer ID",
+        "purpose": "验证使用不存在的 offer_id 是否能优雅地处理并返回提示信息",
+        "args": {
+          "offer_id": "NONEXISTENT123"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.3924217224121094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Offer Details with Leading/Trailing Spaces",
+        "purpose": "验证 offer_id 前后带有空格时能否自动去除并正常检索",
+        "args": {
+          "offer_id": " OFFER123456789 "
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.386868715286255,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Unicode Characters in Offer ID",
+        "purpose": "测试系统能否正确处理包含 Unicode 特殊字符的 offer_id",
+        "args": {
+          "offer_id": "OFFER_日本語_123"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.389362335205078,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "Basic Multi-City Flight Search with Default Cabin Class",
+        "purpose": "验证基本多城市航班查询功能是否正常，使用默认舱位等级（Economy）和必填参数",
+        "args": {
+          "cities": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "origin": "LAX",
+              "destination": "SFO",
+              "departure_date": "2023-12-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 3.266125202178955,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Multi-City Flight Search with Business Cabin Class",
+        "purpose": "验证多城市航班查询功能是否支持指定舱位等级（Business）并返回正确结果",
+        "args": {
+          "cities": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "origin": "LAX",
+              "destination": "SFO",
+              "departure_date": "2023-12-05"
+            }
+          ],
+          "cabin_class": "Business"
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.680924415588379,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL Injection Attempt in Origin Field for Multi-City",
+        "purpose": "测试工具是否对 origin 参数进行输入过滤以防止 SQL 注入攻击",
+        "args": {
+          "cities": [
+            {
+              "origin": "JFK'; DROP TABLE flights;--",
+              "destination": "LAX",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "origin": "LAX",
+              "destination": "SFO",
+              "departure_date": "2023-12-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.835550308227539,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Airport Code Input in Multi-City Search",
+        "purpose": "验证工具能否正确处理无效的机场代码输入",
+        "args": {
+          "cities": [
+            {
+              "origin": "XYZ",
+              "destination": "ABC",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "origin": "DEF",
+              "destination": "GHI",
+              "departure_date": "2023-12-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.8341288566589355,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Destination Field for Multi-City",
+        "purpose": "测试工具是否能正确处理目的地字段中的特殊字符",
+        "args": {
+          "cities": [
+            {
+              "origin": "JFK",
+              "destination": "München",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "origin": "München",
+              "destination": "SFO",
+              "departure_date": "2023-12-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.64864182472229,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Cities List in Multi-City Search",
+        "purpose": "验证当 cities 列表为空时是否返回错误信息",
+        "args": {
+          "cities": []
+        },
+        "response": {
+          "result": "{\"error\": \"Invalid or insufficient cities provided. At least two cities are required.\"}"
+        },
+        "execution_time": 0.21488475799560547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Missing Required Fields",
+        "purpose": "验证缺少 origin、destination 或 departure_date 字段时是否返回错误",
+        "args": {
+          "cities": [
+            {
+              "origin": "JFK",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "destination": "SFO",
+              "departure_date": "2023-12-05"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"Each city must contain 'origin', 'destination', and 'departure_date' keys.\"}"
+        },
+        "execution_time": 0.5197227001190186,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Multi-City Search with Maximum Allowed Cities",
+        "purpose": "验证工具是否能处理最大允许的城市数量（假设为10个）",
+        "args": {
+          "cities": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "departure_date": "2023-12-01"
+            },
+            {
+              "origin": "LAX",
+              "destination": "SFO",
+              "departure_date": "2023-12-02"
+            },
+            {
+              "origin": "SFO",
+              "destination": "ORD",
+              "departure_date": "2023-12-03"
+            },
+            {
+              "origin": "ORD",
+              "destination": "DFW",
+              "departure_date": "2023-12-04"
+            },
+            {
+              "origin": "DFW",
+              "destination": "SEA",
+              "departure_date": "2023-12-05"
+            },
+            {
+              "origin": "SEA",
+              "destination": "DEN",
+              "departure_date": "2023-12-06"
+            },
+            {
+              "origin": "DEN",
+              "destination": "ATL",
+              "departure_date": "2023-12-07"
+            },
+            {
+              "origin": "ATL",
+              "destination": "MIA",
+              "departure_date": "2023-12-08"
+            },
+            {
+              "origin": "MIA",
+              "destination": "PHX",
+              "departure_date": "2023-12-09"
+            },
+            {
+              "origin": "PHX",
+              "destination": "JFK",
+              "departure_date": "2023-12-10"
+            }
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"'userData'\"}"
+        },
+        "execution_time": 2.8850910663604736,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 23
+}

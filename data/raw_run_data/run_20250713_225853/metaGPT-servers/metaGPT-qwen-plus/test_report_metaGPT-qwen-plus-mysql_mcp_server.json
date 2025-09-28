@@ -1,0 +1,338 @@
+{
+  "server_name": "mysql_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-mysql_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\mysql_mcp_server.py",
+  "timestamp": "2025-07-13T23:00:04.844668",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "\n            列出数据库中所有可用的数据表。\n\n            Returns:\n                包含数据表列表的字典。\n\n            示例:\n                >>> list_resources()\n                {'tables': ['users', 'orders', 'products']}\n            ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "\n            读取指定表的完整数据内容。\n\n            Args:\n                table_name: 要读取数据的表名。\n\n            Returns:\n                包含表结构和数据的字典。\n\n            示例:\n                >>> read_resource(table_name='users')\n                {\n                    'columns': ['id', 'name', 'email'],\n                    'data': [\n                        [1, 'Alice', 'alice@example.com'],\n                        [2, 'Bob', 'bob@example.com']\n                    ]\n                }\n            ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "\n            执行自定义SQL查询语句。\n\n            Args:\n                sql: 要执行的SQL语句。\n\n            Returns:\n                包含执行结果的字典。对于SELECT查询，返回查询结果；\n                对于其他操作，返回受影响的行数。\n\n            示例:\n                >>> execute_sql(sql=\"SELECT * FROM users WHERE id = 1\")\n                {\n                    'columns': ['id', 'name', 'email'],\n                    'data': [[1, 'Alice', 'alice@example.com']]\n                }\n                \n                >>> execute_sql(sql=\"UPDATE users SET name = 'New Name' WHERE id = 1\")\n                {'affected_rows': 1}\n            ",
+      "args_schema": {
+        "properties": {
+          "sql": {
+            "title": "Sql",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "基本功能 - 列出所有可用数据表",
+        "purpose": "验证 list_resources 工具能正确返回数据库中所有可用的数据表列表。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.006060361862182617,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户调用",
+        "purpose": "验证非授权用户调用 list_resources 是否受到权限控制，不应返回敏感信息或报错详情。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.007997512817382812,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 数据库连接失败",
+        "purpose": "模拟数据库连接失败时，list_resources 是否能优雅地处理异常并返回适当的错误信息。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.00900411605834961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 数据库无任何数据表",
+        "purpose": "验证当数据库中没有任何数据表时，list_resources 是否返回空的 'tables' 列表。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.0045166015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "功能测试 - 返回包含特殊字符的表名",
+        "purpose": "验证 list_resources 能正确处理并返回包含特殊字符的数据表名称。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.00800466537475586,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "功能测试 - 大量数据表存在时的响应",
+        "purpose": "验证 list_resources 在数据库中存在大量数据表时仍能正常返回完整列表。",
+        "args": {},
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.004992961883544922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "错误处理测试 - 参数格式非法（意外输入）",
+        "purpose": "验证即使传入了非法参数格式，工具是否能够拒绝处理并返回错误信息。",
+        "args": {
+          "unexpected_param": "invalid_value"
+        },
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.006006717681884766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "功能测试 - 结合测试文件中的数据库结构",
+        "purpose": "使用测试区提供的数据库相关文件（如 modules.xml）验证 list_resources 是否能正确识别并列出对应数据表。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml"
+        },
+        "response": {
+          "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+        },
+        "execution_time": 0.007992029190063477,
+        "is_functional_test": true
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "基本功能 - 读取用户表数据",
+        "purpose": "验证 read_resource 工具能够正确读取 'users' 表的结构和数据。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"data\": [\n    [\n      1,\n      \"user1\",\n      \"new_email@example.com\",\n      28,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null,\n      \"2025-06-30T22:13:23\"\n    ],\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null,\n      \"2025-07-13T04:02:53\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.008001565933227539,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能 - 读取订单表数据",
+        "purpose": "验证 read_resource 工具能够正确读取 'orders' 表的结构和数据。",
+        "args": {
+          "table_name": "orders"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"user_id\",\n    \"order_date\",\n    \"total_amount\",\n    \"status\"\n  ],\n  \"data\": [\n    [\n      1,\n      1,\n      \"2023-01-15T10:30:00\",\n      \"899.99\",\n      \"completed\"\n    ],\n    [\n      2,\n      1,\n      \"2023-02-20T14:15:00\",\n      \"179.99\",\n      \"completed\"\n    ],\n    [\n      3,\n      2,\n      \"2023-03-05T09:45:00\",\n      \"79.99\",\n      \"completed\"\n    ],\n    [\n      4,\n      3,\n      \"2023-04-10T16:20:00\",\n      \"45000.00\",\n      \"completed\"\n    ],\n    [\n      5,\n      4,\n      \"2023-05-12T11:05:00\",\n      \"1299.99\",\n      \"shipped\"\n    ],\n    [\n      6,\n      5,\n      \"2023-06-18T13:30:00\",\n      \"49.99\",\n      \"paid\"\n    ],\n    [\n      7,\n      1,\n      \"2023-07-02T10:00:00\",\n      \"249.99\",\n      \"pending\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.015540361404418945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能 - 读取产品表数据",
+        "purpose": "验证 read_resource 工具能够正确读取 'products' 表的结构和数据。",
+        "args": {
+          "table_name": "products"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"name\",\n    \"price\",\n    \"company_id\",\n    \"category\"\n  ],\n  \"data\": [\n    [\n      1,\n      \"超级手机X\",\n      \"899.99\",\n      1,\n      \"电子产品\"\n    ],\n    [\n      2,\n      \"智能手表Y\",\n      \"249.99\",\n      1,\n      \"可穿戴设备\"\n    ],\n    [\n      3,\n      \"全能笔记本Z\",\n      \"1299.99\",\n      1,\n      \"电脑\"\n    ],\n    [\n      4,\n      \"无线耳机W\",\n      \"179.99\",\n      1,\n      \"音频设备\"\n    ],\n    [\n      5,\n      \"商务套装A\",\n      \"79.99\",\n      2,\n      \"服装\"\n    ],\n    [\n      6,\n      \"运动背包B\",\n      \"49.99\",\n      2,\n      \"箱包\"\n    ],\n    [\n      7,\n      \"智能电动汽车C\",\n      \"45000.00\",\n      3,\n      \"交通工具\"\n    ],\n    [\n      8,\n      \"家用轿车D\",\n      \"22000.00\",\n      3,\n      \"交通工具\"\n    ],\n    [\n      9,\n      \"u8d85u7ea7u624bu673aX\",\n      \"999.99\",\n      null,\n      null\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.01299905776977539,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 非授权访问敏感表",
+        "purpose": "验证非授权用户调用 read_resource 是否无法访问或获取敏感表内容。",
+        "args": {
+          "table_name": "sensitive_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: 表 'sensitive_data' 不存在"
+        },
+        "execution_time": 0.00700688362121582,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 请求不存在的数据表",
+        "purpose": "验证当请求一个不存在的数据表时，read_resource 是否能返回适当的错误信息。",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: 表 'nonexistent_table' 不存在"
+        },
+        "execution_time": 0.005998849868774414,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 数据库连接失败模拟",
+        "purpose": "验证在数据库连接失败的情况下，read_resource 是否能优雅地处理异常并返回错误信息。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"data\": [\n    [\n      1,\n      \"user1\",\n      \"new_email@example.com\",\n      28,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null,\n      \"2025-06-30T22:13:23\"\n    ],\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null,\n      \"2025-07-13T04:02:53\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.011556863784790039,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 读取包含特殊字符的表名",
+        "purpose": "验证 read_resource 能否正确处理包含特殊字符的表名（如 '@', '#', '$' 等）。",
+        "args": {
+          "table_name": "extracted_@#$"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: 表 'extracted_@#$' 不存在"
+        },
+        "execution_time": 0.007726192474365234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "边界条件测试 - 读取空表",
+        "purpose": "验证当指定表中没有任何数据时，read_resource 是否能正确返回空的 data 数组。",
+        "args": {
+          "table_name": "empty_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: 表 'empty_table' 不存在"
+        },
+        "execution_time": 0.005002260208129883,
+        "is_functional_test": true
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "基本功能 - 执行SELECT查询获取用户数据",
+        "purpose": "验证execute_sql工具能够正确执行SELECT语句并返回用户表中的数据。",
+        "args": {
+          "sql": "SELECT * FROM users WHERE id = 1"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"data\": [\n    [\n      1,\n      \"user1\",\n      \"new_email@example.com\",\n      28,\n      1,\n      \"2025-06-30T10:43:59\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.00500035285949707,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "基本功能 - 执行UPDATE操作修改用户名称",
+        "purpose": "验证execute_sql工具能够正确执行UPDATE语句并返回受影响行数。",
+        "args": {
+          "sql": "UPDATE users SET name = 'New Name' WHERE id = 1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: 1054 (42S22): Unknown column 'name' in 'field list'"
+        },
+        "execution_time": 0.005001068115234375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户执行敏感SQL操作",
+        "purpose": "验证非授权用户调用execute_sql执行DROP TABLE等敏感操作时是否被拒绝。",
+        "args": {
+          "sql": "DROP TABLE users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: 3730 (HY000): Cannot drop table 'users' referenced by a foreign key constraint 'orders_ibfk_1' on table 'orders'."
+        },
+        "execution_time": 0.00899505615234375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 执行无效的SQL语法",
+        "purpose": "验证execute_sql在遇到无效SQL语法时能否返回适当的错误信息。",
+        "args": {
+          "sql": "SELCT * FROM users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: 不支持的SQL语句类型: SELCT * FROM users..."
+        },
+        "execution_time": 0.004998922348022461,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 查询不存在的数据表",
+        "purpose": "验证execute_sql在查询一个不存在的表时是否能返回错误提示。",
+        "args": {
+          "sql": "SELECT * FROM nonexistent_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist"
+        },
+        "execution_time": 0.007000446319580078,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 执行包含特殊字符的SQL语句",
+        "purpose": "验证execute_sql能否正确处理包含特殊字符（如单引号、分号）的SQL语句。",
+        "args": {
+          "sql": "INSERT INTO users (name, email) VALUES ('O''Reilly', '\"secure\"@example.com')"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: 1054 (42S22): Unknown column 'name' in 'field list'"
+        },
+        "execution_time": 0.0070035457611083984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "边界条件测试 - 执行最大长度SQL语句",
+        "purpose": "验证execute_sql能否处理非常长的SQL语句，测试其边界处理能力。",
+        "args": {
+          "sql": "SELECT * FROM users WHERE id IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"username\",\n    \"email\",\n    \"age\",\n    \"company_id\",\n    \"created_at\"\n  ],\n  \"data\": [\n    [\n      1,\n      \"user1\",\n      \"new_email@example.com\",\n      28,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      2,\n      \"user2\",\n      \"user2@example.com\",\n      35,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      3,\n      \"user3\",\n      \"user3@example.com\",\n      42,\n      3,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      4,\n      \"user4\",\n      \"user4@example.com\",\n      25,\n      1,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      5,\n      \"user5\",\n      \"user5@example.com\",\n      31,\n      2,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      6,\n      \"user6\",\n      \"user6@example.com\",\n      29,\n      null,\n      \"2025-06-30T10:43:59\"\n    ],\n    [\n      7,\n      \"new_user\",\n      \"new_user@example.com\",\n      25,\n      null,\n      \"2025-06-30T22:13:23\"\n    ],\n    [\n      13,\n      \"O'Reilly\",\n      \"\\\"secure\\\"@example.com\",\n      null,\n      null,\n      \"2025-07-13T04:02:53\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.00800013542175293,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "功能测试 - 结合测试文件执行SQL查询",
+        "purpose": "使用测试文件中的数据库结构信息构造SQL语句并执行，验证execute_sql与实际数据库的一致性。",
+        "args": {
+          "sql": "SELECT * FROM products WHERE price > 1000",
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml"
+        },
+        "response": {
+          "result": "{\n  \"columns\": [\n    \"id\",\n    \"name\",\n    \"price\",\n    \"company_id\",\n    \"category\"\n  ],\n  \"data\": [\n    [\n      3,\n      \"全能笔记本Z\",\n      \"1299.99\",\n      1,\n      \"电脑\"\n    ],\n    [\n      7,\n      \"智能电动汽车C\",\n      \"45000.00\",\n      3,\n      \"交通工具\"\n    ],\n    [\n      8,\n      \"家用轿车D\",\n      \"22000.00\",\n      3,\n      \"交通工具\"\n    ]\n  ]\n}"
+        },
+        "execution_time": 0.0075147151947021484,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

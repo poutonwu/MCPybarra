@@ -1,0 +1,415 @@
+{
+  "server_name": "server",
+  "parent_dir": "mysql_mcp_server_refined",
+  "report_name": "mysql_mcp_server_refined-server",
+  "server_path": "workspace\\refinement\\mysql_mcp_server_refined\\server.py",
+  "timestamp": "2025-06-30T22:12:13.784466",
+  "tools": [
+    {
+      "name": "list_resources",
+      "description": "\n    列出所有可用的MySQL数据表。\n\n    功能描述:\n        获取当前数据库中所有表的列表，作为资源提供访问。\n\n    Args:\n        None\n\n    Returns:\n        str: 包含所有表名的JSON数组字符串。\n\n    Raises:\n        ConnectionError: 如果连接数据库失败。\n        RuntimeError: 如果获取表列表过程中发生错误。\n\n    示例:\n        >>> list_resources()\n        '[\"users\", \"orders\", \"products\"]'\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_resourcesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_resource",
+      "description": "\n    读取指定表的完整数据内容。\n\n    功能描述:\n        以行和列的格式返回表中的所有记录，最多返回100条记录。\n\n    Args:\n        table_name (str): 要读取的数据表名称。必填，必须是有效的表名。\n\n    Returns:\n        str: 包含表数据的JSON字符串，格式为包含字段名的字典列表。\n\n    Raises:\n        ValueError: 如果提供的表名无效或包含特殊字符。\n        ConnectionError: 如果连接数据库失败。\n        RuntimeError: 如果查询执行失败或获取结果失败。\n\n    示例:\n        >>> read_resource(table_name=\"users\")\n        '[{\"id\": 1, \"name\": \"Alice\", \"email\": \"alice@example.com\"}, {\"id\": 2, \"name\": \"Bob\", \"email\": \"bob@example.com\"}]'\n    ",
+      "args_schema": {
+        "properties": {
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "table_name"
+        ],
+        "title": "read_resourceArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute_sql",
+      "description": "\n    执行自定义SQL查询语句。\n\n    功能描述:\n        支持各种SQL操作（如SELECT、SHOW、INSERT、UPDATE等），\n        并根据查询类型返回结构化的结果。\n\n    Args:\n        sql_query (str): 要执行的SQL查询语句。必填。\n        params (dict, optional): SQL查询的参数字典。默认为None。\n\n    Returns:\n        str: JSON字符串，包含查询结果：\n            - 对于SELECT/SHOW查询：返回包含字段名的字典列表。\n            - 对于INSERT/UPDATE/DELETE查询：返回受影响行数的字典。\n\n    Raises:\n        ValueError: 如果SQL查询为空或格式不正确。\n        ConnectionError: 如果连接数据库失败。\n        RuntimeError: 如果查询执行失败或获取结果失败。\n\n    示例:\n        >>> execute_sql(sql_query=\"SELECT * FROM users WHERE id = %(id)s\", params={\"id\": 1})\n        '[{\"id\": 1, \"name\": \"Alice\", \"email\": \"alice@example.com\"}]'\n        \n        >>> execute_sql(sql_query=\"UPDATE users SET name = %(new_name)s WHERE id = %(id)s\", params={\"new_name\": \"Charlie\", \"id\": 1})\n        '{\"affected_rows\": 1}'\n    ",
+      "args_schema": {
+        "properties": {
+          "sql_query": {
+            "title": "Sql Query",
+            "type": "string"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Params"
+          }
+        },
+        "required": [
+          "sql_query"
+        ],
+        "title": "execute_sqlArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_resources": [
+      {
+        "case_name": "基本功能测试 - 正常获取表列表",
+        "purpose": "验证工具能够正确连接数据库并返回当前所有表名的JSON数组。",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.2427816390991211,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 数据库中无任何表",
+        "purpose": "验证当数据库中没有任何数据表时，工具是否返回空的JSON数组。",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.15365147590637207,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 数据库连接失败",
+        "purpose": "模拟数据库连接失败的情况，验证工具是否抛出ConnectionError异常。",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1473379135131836,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 获取表过程中发生异常",
+        "purpose": "模拟在获取表列表过程中出现错误（如权限不足或SQL执行失败），验证工具是否抛出RuntimeError。",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.14753985404968262,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户调用接口",
+        "purpose": "验证未授权用户调用该工具时是否被拒绝访问或抛出安全异常。",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.14811992645263672,
+        "is_security_test": true
+      },
+      {
+        "case_name": "性能测试 - 大量表存在时的响应时间",
+        "purpose": "验证当数据库中存在大量表时，工具能否高效获取并返回表列表。",
+        "args": {},
+        "response": {
+          "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+        },
+        "execution_time": 0.1478888988494873,
+        "is_security_test": false
+      }
+    ],
+    "read_resource": [
+      {
+        "case_name": "基本功能测试 - 正常读取有效表数据",
+        "purpose": "验证工具能够正确读取指定的有效表的所有记录，并以JSON格式返回。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"user1@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}]"
+        },
+        "execution_time": 0.1463146209716797,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 表中存在多条记录（接近100条）",
+        "purpose": "验证当表中存在大量记录（如99条）时，工具是否能正确返回所有记录，不超过上限100条。",
+        "args": {
+          "table_name": "products"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"name\": \"\\u8d85\\u7ea7\\u624b\\u673aX\", \"price\": \"899.99\", \"company_id\": 1, \"category\": \"\\u7535\\u5b50\\u4ea7\\u54c1\"}, {\"id\": 2, \"name\": \"\\u667a\\u80fd\\u624b\\u8868Y\", \"price\": \"249.99\", \"company_id\": 1, \"category\": \"\\u53ef\\u7a7f\\u6234\\u8bbe\\u5907\"}, {\"id\": 3, \"name\": \"\\u5168\\u80fd\\u7b14\\u8bb0\\u672cZ\", \"price\": \"1299.99\", \"company_id\": 1, \"category\": \"\\u7535\\u8111\"}, {\"id\": 4, \"name\": \"\\u65e0\\u7ebf\\u8033\\u673aW\", \"price\": \"179.99\", \"company_id\": 1, \"category\": \"\\u97f3\\u9891\\u8bbe\\u5907\"}, {\"id\": 5, \"name\": \"\\u5546\\u52a1\\u5957\\u88c5A\", \"price\": \"79.99\", \"company_id\": 2, \"category\": \"\\u670d\\u88c5\"}, {\"id\": 6, \"name\": \"\\u8fd0\\u52a8\\u80cc\\u5305B\", \"price\": \"49.99\", \"company_id\": 2, \"category\": \"\\u7bb1\\u5305\"}, {\"id\": 7, \"name\": \"\\u667a\\u80fd\\u7535\\u52a8\\u6c7d\\u8f66C\", \"price\": \"45000.00\", ...[截断]，共计983字符，剩余183字符"
+        },
+        "execution_time": 0.15357327461242676,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 表中无任何记录",
+        "purpose": "验证当目标表存在但没有数据时，工具是否返回空的JSON数组。",
+        "args": {
+          "table_name": "empty_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read resource from table 'empty_table': 1146 (42S02): Table 'user-db.empty_table' doesn't exist"
+        },
+        "execution_time": 0.15035700798034668,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 请求读取不存在的表",
+        "purpose": "验证当提供的表名在数据库中不存在时，工具是否抛出ValueError异常。",
+        "args": {
+          "table_name": "nonexistent_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read resource from table 'nonexistent_table': 1146 (42S02): Table 'user-db.nonexistent_table' doesn't exist"
+        },
+        "execution_time": 0.1505589485168457,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 表名为空字符串",
+        "purpose": "验证当提供的表名为空字符串时，工具是否抛出ValueError异常。",
+        "args": {
+          "table_name": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Invalid table name: ''. Only alphanumeric characters and underscores are allowed."
+        },
+        "execution_time": 0.005011320114135742,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 表名包含非法字符",
+        "purpose": "验证当提供的表名包含特殊字符（如';', '--'等）时，工具是否抛出ValueError异常以防止SQL注入风险。",
+        "args": {
+          "table_name": "users; DROP TABLE"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Invalid table name: 'users; DROP TABLE'. Only alphanumeric characters and underscores are allowed."
+        },
+        "execution_time": 0.006006956100463867,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 数据库连接失败",
+        "purpose": "模拟数据库连接失败的情况，验证工具是否抛出ConnectionError异常。",
+        "args": {
+          "table_name": "users"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"user1@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}]"
+        },
+        "execution_time": 0.15453505516052246,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 查询执行失败",
+        "purpose": "模拟查询执行失败（如权限不足或SQL语法错误），验证工具是否抛出RuntimeError。",
+        "args": {
+          "table_name": "restricted_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read resource from table 'restricted_table': 1146 (42S02): Table 'user-db.restricted_table' doesn't exist"
+        },
+        "execution_time": 0.15062618255615234,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户尝试访问敏感数据表",
+        "purpose": "验证未授权用户调用该工具读取敏感数据表时是否被拒绝访问或抛出安全异常。",
+        "args": {
+          "table_name": "sensitive_data"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read resource from table 'sensitive_data': 1146 (42S02): Table 'user-db.sensitive_data' doesn't exist"
+        },
+        "execution_time": 0.1496133804321289,
+        "is_security_test": true
+      },
+      {
+        "case_name": "安全性测试 - SQL注入攻击尝试",
+        "purpose": "验证工具是否对输入参数进行充分校验，防止通过表名参数进行SQL注入攻击。",
+        "args": {
+          "table_name": "users WHERE 1=1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Invalid table name: 'users WHERE 1=1'. Only alphanumeric characters and underscores are allowed."
+        },
+        "execution_time": 0.004000186920166016,
+        "is_security_test": false
+      },
+      {
+        "case_name": "性能测试 - 读取大型表数据响应时间",
+        "purpose": "验证当目标表中字段数量较多、单条记录较大时，工具能否高效返回结果。",
+        "args": {
+          "table_name": "large_table"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_resource: Failed to read resource from table 'large_table': 1146 (42S02): Table 'user-db.large_table' doesn't exist"
+        },
+        "execution_time": 0.15279150009155273,
+        "is_security_test": false
+      },
+      {
+        "case_name": "兼容性测试 - 表名大小写混合输入",
+        "purpose": "验证工具是否支持大小写混合的表名输入并正确识别对应的表。",
+        "args": {
+          "table_name": "UserS"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"user1@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}]"
+        },
+        "execution_time": 0.14752507209777832,
+        "is_security_test": false
+      }
+    ],
+    "execute_sql": [
+      {
+        "case_name": "基本功能测试 - 执行SELECT查询并返回结果",
+        "purpose": "验证execute_sql工具能够正确执行SELECT语句，并返回结构化数据。",
+        "args": {
+          "sql_query": "SELECT * FROM users WHERE age > %(age)s",
+          "params": {
+            "age": 30
+          }
+        },
+        "response": {
+          "result": "[{\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}]"
+        },
+        "execution_time": 0.17891836166381836,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 执行INSERT语句并返回受影响行数",
+        "purpose": "验证execute_sql工具能够正确执行INSERT语句，并返回插入记录的行数。",
+        "args": {
+          "sql_query": "INSERT INTO users (username, email, age) VALUES (%(username)s, %(email)s, %(age)s)",
+          "params": {
+            "username": "new_user",
+            "email": "new_user@example.com",
+            "age": 25
+          }
+        },
+        "response": {
+          "result": "{\"affected_rows\": 1}"
+        },
+        "execution_time": 0.17475080490112305,
+        "is_security_test": false
+      },
+      {
+        "case_name": "基本功能测试 - 执行UPDATE语句并返回受影响行数",
+        "purpose": "验证execute_sql工具能够正确执行UPDATE语句，并返回更新记录的行数。",
+        "args": {
+          "sql_query": "UPDATE users SET email = %(new_email)s WHERE username = %(username)s",
+          "params": {
+            "new_email": "updated_email@example.com",
+            "username": "user1"
+          }
+        },
+        "response": {
+          "result": "{\"affected_rows\": 1}"
+        },
+        "execution_time": 0.17579150199890137,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - SQL语句为空",
+        "purpose": "验证当SQL查询为空时，工具是否抛出ValueError异常。",
+        "args": {
+          "sql_query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: SQL query cannot be empty and must be a string."
+        },
+        "execution_time": 0.0258944034576416,
+        "is_security_test": false
+      },
+      {
+        "case_name": "边界条件测试 - 参数字典为空但SQL需要参数",
+        "purpose": "验证当SQL语句包含参数占位符但未提供params时，工具是否抛出错误。",
+        "args": {
+          "sql_query": "SELECT * FROM users WHERE id = %(id)s"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Failed to execute SQL query: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '%(id)s' at line 1\nQuery: SELECT * FROM users WHERE id = %(id)s"
+        },
+        "execution_time": 0.17341184616088867,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - SQL语法错误",
+        "purpose": "验证当提供的SQL语句存在语法错误时，工具是否抛出RuntimeError异常。",
+        "args": {
+          "sql_query": "SELEC * FROM users"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Only SELECT, INSERT, UPDATE, DELETE, and SHOW statements are allowed. Received: SELEC * FROM users..."
+        },
+        "execution_time": 0.020064592361450195,
+        "is_security_test": false
+      },
+      {
+        "case_name": "错误处理测试 - 数据库连接失败",
+        "purpose": "模拟数据库连接失败的情况，验证工具是否抛出ConnectionError异常。",
+        "args": {
+          "sql_query": "SELECT * FROM users"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"username\": \"user1\", \"email\": \"updated_email@example.com\", \"age\": 28, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 2, \"username\": \"user2\", \"email\": \"user2@example.com\", \"age\": 35, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 3, \"username\": \"user3\", \"email\": \"user3@example.com\", \"age\": 42, \"company_id\": 3, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 4, \"username\": \"user4\", \"email\": \"user4@example.com\", \"age\": 25, \"company_id\": 1, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 5, \"username\": \"user5\", \"email\": \"user5@example.com\", \"age\": 31, \"company_id\": 2, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 6, \"username\": \"user6\", \"email\": \"user6@example.com\", \"age\": 29, \"company_id\": null, \"created_at\": \"2025-06-30 10:43:59\"}, {\"id\": 7, \"username\": \"new...[截断]，共计909字符，剩余109字符"
+        },
+        "execution_time": 0.17348122596740723,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - SQL注入尝试",
+        "purpose": "验证工具是否对输入参数进行校验，防止通过参数注入恶意SQL代码。",
+        "args": {
+          "sql_query": "SELECT * FROM users WHERE username = %(username)s",
+          "params": {
+            "username": "admin'; DROP TABLE users;--"
+          }
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.1726083755493164,
+        "is_security_test": false
+      },
+      {
+        "case_name": "安全性测试 - 非授权用户执行敏感操作",
+        "purpose": "验证未授权用户调用该工具执行DELETE等敏感操作时是否被拒绝访问或抛出安全异常。",
+        "args": {
+          "sql_query": "DELETE FROM users WHERE id = %(id)s",
+          "params": {
+            "id": 1
+          }
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute_sql: Failed to execute SQL query: 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`user-db`.`addresses`, CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`))\nQuery: DELETE FROM users WHERE id = %(id)s"
+        },
+        "execution_time": 0.17060303688049316,
+        "is_security_test": true
+      },
+      {
+        "case_name": "性能测试 - 大量数据查询响应时间",
+        "purpose": "验证在执行涉及大量数据的SELECT查询时，工具能否高效返回结果。",
+        "args": {
+          "sql_query": "SELECT * FROM products LIMIT 10000"
+        },
+        "response": {
+          "result": "[{\"id\": 1, \"name\": \"\\u8d85\\u7ea7\\u624b\\u673aX\", \"price\": \"899.99\", \"company_id\": 1, \"category\": \"\\u7535\\u5b50\\u4ea7\\u54c1\"}, {\"id\": 2, \"name\": \"\\u667a\\u80fd\\u624b\\u8868Y\", \"price\": \"249.99\", \"company_id\": 1, \"category\": \"\\u53ef\\u7a7f\\u6234\\u8bbe\\u5907\"}, {\"id\": 3, \"name\": \"\\u5168\\u80fd\\u7b14\\u8bb0\\u672cZ\", \"price\": \"1299.99\", \"company_id\": 1, \"category\": \"\\u7535\\u8111\"}, {\"id\": 4, \"name\": \"\\u65e0\\u7ebf\\u8033\\u673aW\", \"price\": \"179.99\", \"company_id\": 1, \"category\": \"\\u97f3\\u9891\\u8bbe\\u5907\"}, {\"id\": 5, \"name\": \"\\u5546\\u52a1\\u5957\\u88c5A\", \"price\": \"79.99\", \"company_id\": 2, \"category\": \"\\u670d\\u88c5\"}, {\"id\": 6, \"name\": \"\\u8fd0\\u52a8\\u80cc\\u5305B\", \"price\": \"49.99\", \"company_id\": 2, \"category\": \"\\u7bb1\\u5305\"}, {\"id\": 7, \"name\": \"\\u667a\\u80fd\\u7535\\u52a8\\u6c7d\\u8f66C\", \"price\": \"45000.00\", ...[截断]，共计983字符，剩余183字符"
+        },
+        "execution_time": 0.18303346633911133,
+        "is_security_test": false
+      }
+    ]
+  },
+  "total_cases": 28
+}

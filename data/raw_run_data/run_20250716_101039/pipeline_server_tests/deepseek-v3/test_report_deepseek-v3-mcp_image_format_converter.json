@@ -1,0 +1,166 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_image_format_converter",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_image_format_converter/refined/server.py",
+  "timestamp": "2025-07-16T10:10:41.459497",
+  "tools": [
+    {
+      "name": "convert_image",
+      "description": "\n    Converts an image file from one format to another, handling transparency and color space conversion.\n    \n    Args:\n        source_path (str): Path to the source image file.\n        target_format (str): Desired output format (e.g., \"PNG\", \"JPEG\", \"BMP\", \"GIF\").\n        output_dir (str): Directory where the converted image will be saved.\n        preserve_alpha (bool, optional): Whether to preserve transparency (default: True).\n        quality (int, optional): Compression quality for lossy formats like JPEG (default: 95).\n    \n    Returns:\n        dict: Contains the following keys:\n            - status (str): \"success\" or \"error\".\n            - message (str): Detailed status or error message.\n            - output_path (str): Path to the converted image file (only on success).\n    \n    Raises:\n        ValueError: For invalid input paths or unsupported formats.\n    ",
+      "args_schema": {
+        "properties": {
+          "source_path": {
+            "title": "Source Path",
+            "type": "string"
+          },
+          "target_format": {
+            "title": "Target Format",
+            "type": "string"
+          },
+          "output_dir": {
+            "title": "Output Dir",
+            "type": "string"
+          },
+          "preserve_alpha": {
+            "default": true,
+            "title": "Preserve Alpha",
+            "type": "boolean"
+          },
+          "quality": {
+            "default": 95,
+            "title": "Quality",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source_path",
+          "target_format",
+          "output_dir"
+        ],
+        "title": "convert_imageArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_image": [
+      {
+        "case_name": "Basic Image Conversion PNG to JPEG",
+        "purpose": "验证工具能否将PNG图像正确转换为JPEG格式并保存到指定目录",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png",
+          "target_format": "JPEG",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"message\": \"Image converted successfully\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\output\\\\hit.jpeg\"\n}"
+        },
+        "execution_time": 0.030572175979614258,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Conversion with Alpha Preservation",
+        "purpose": "验证带透明通道的PNG图像在转换为支持透明度的格式（如GIF）时是否保留透明信息",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\20250507-151716.png",
+          "target_format": "GIF",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output",
+          "preserve_alpha": true
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"message\": \"Image converted successfully\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\output\\\\20250507-151716.gif\"\n}"
+        },
+        "execution_time": 0.00950932502746582,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Conversion with Quality Setting",
+        "purpose": "验证JPEG格式转换时quality参数对输出质量的影响",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "target_format": "JPEG",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output",
+          "quality": 75
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"message\": \"Image converted successfully\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\output\\\\xue.jpeg\"\n}"
+        },
+        "execution_time": 0.126082181930542,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Convert BMP to PNG with Default Parameters",
+        "purpose": "验证默认参数下BMP转PNG的基本功能，确保无额外参数仍能成功执行",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\xue.bmp",
+          "target_format": "PNG",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"message\": \"Image converted successfully\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\output\\\\xue.png\"\n}"
+        },
+        "execution_time": 2.1603240966796875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Invalid File Path",
+        "purpose": "验证工具对潜在路径穿越攻击的防御能力",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\..\\malicious_file.txt",
+          "target_format": "PNG",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"Source file does not exist: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\..\\\\malicious_file.txt\",\n  \"output_path\": null\n}"
+        },
+        "execution_time": 0.0049970149993896484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-Existent Source File",
+        "purpose": "验证当提供的源文件不存在时，工具能返回明确的错误信息",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_image.png",
+          "target_format": "JPEG",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"Source file does not exist: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_image.png\",\n  \"output_path\": null\n}"
+        },
+        "execution_time": 0.004391908645629883,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Unsupported Target Format",
+        "purpose": "验证不支持的目标格式是否被正确拒绝",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\hit.png",
+          "target_format": "WEBP",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"error\",\n  \"message\": \"Unsupported target format: WEBP. Supported formats: ['PNG', 'JPEG', 'BMP', 'GIF']\",\n  \"output_path\": null\n}"
+        },
+        "execution_time": 0.0035092830657958984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Condition - Maximum Quality Value",
+        "purpose": "验证quality参数的最大有效值（100）是否被正确处理",
+        "args": {
+          "source_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\xue.jpg",
+          "target_format": "JPEG",
+          "output_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output",
+          "quality": 100
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"message\": \"Image converted successfully\",\n  \"output_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\output\\\\xue.jpeg\"\n}"
+        },
+        "execution_time": 0.1277148723602295,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 8
+}

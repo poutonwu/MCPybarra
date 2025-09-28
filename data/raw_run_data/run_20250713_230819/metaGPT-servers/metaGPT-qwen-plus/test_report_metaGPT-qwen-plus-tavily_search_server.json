@@ -1,0 +1,506 @@
+{
+  "server_name": "tavily_search_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-tavily_search_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\tavily_search_server.py",
+  "timestamp": "2025-07-13T23:10:45.703411",
+  "tools": [
+    {
+      "name": "tavily_web_search",
+      "description": "\n    使用Tavily API进行全面的网络搜索，支持基础或高级搜索深度，可通过包含或排除特定域名精确控制搜索范围，\n    并返回结构化的网页内容。\n\n    Args:\n        query: 搜索查询字符串 (必填)。\n        search_depth: 搜索深度，可选值为 \"basic\" 或 \"advanced\" (默认值为 \"advanced\")。\n        include_domains: 包含的域名列表 (可选)。\n        exclude_domains: 排除的域名列表 (可选)。\n        max_results: 返回的最大结果数，必须是1到10之间的整数 (默认值为5)。\n\n    Returns:\n        一个包含搜索结果的JSON格式字符串，每个结果包括标题、URL和摘要。\n\n    Raises:\n        ValueError: 如果参数无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "advanced",
+            "title": "Search Depth",
+            "type": "string"
+          },
+          "include_domains": {
+            "default": null,
+            "items": {},
+            "title": "Include Domains",
+            "type": "array"
+          },
+          "exclude_domains": {
+            "default": null,
+            "items": {},
+            "title": "Exclude Domains",
+            "type": "array"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_web_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_answer_search",
+      "description": "\n    使用Tavily API根据查询内容直接生成回答并附带支持证据，适用于需要具体答案的问题，\n    默认使用高级搜索深度。\n\n    Args:\n        query: 查询字符串 (必填)。\n        search_depth: 搜索深度，可选值为 \"basic\" 或 \"advanced\" (默认值为 \"advanced\")。\n        max_results: 返回的最大结果数，必须是1到5之间的整数 (默认值为3)。\n\n    Returns:\n        一个包含答案和相关证据的JSON格式字符串。\n\n    Raises:\n        ValueError: 如果参数无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "search_depth": {
+            "default": "advanced",
+            "title": "Search Depth",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 3,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_answer_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "tavily_news_search",
+      "description": "\n    使用Tavily API专门搜索近期新闻文章，支持限定查询时效性（最多可追溯365天），\n    并可指定包含或排除的新闻源。\n\n    Args:\n        query: 新闻搜索查询字符串 (必填)。\n        days: 查询时效性，必须是1到365之间的整数 (默认值为7)。\n        include_sources: 包含的新闻源列表 (可选)。\n        exclude_sources: 排除的新闻源列表 (可选)。\n        max_results: 返回的最大结果数，必须是1到10之间的整数 (默认值为5)。\n\n    Returns:\n        一个包含新闻结果的JSON格式字符串，每个结果包括标题、URL、摘要和来源。\n\n    Raises:\n        ValueError: 如果参数无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "days": {
+            "default": 7,
+            "title": "Days",
+            "type": "integer"
+          },
+          "include_sources": {
+            "default": null,
+            "items": {},
+            "title": "Include Sources",
+            "type": "array"
+          },
+          "exclude_sources": {
+            "default": null,
+            "items": {},
+            "title": "Exclude Sources",
+            "type": "array"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "tavily_news_searchArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "tavily_web_search": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证使用默认参数执行基本搜索是否能返回结构化结果",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/web'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.866579294204712,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "高级搜索深度测试",
+        "purpose": "验证使用高级搜索深度是否能返回更详细的结构化结果",
+        "args": {
+          "query": "climate change",
+          "search_depth": "advanced"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/web'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8525028228759766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定最大结果数测试",
+        "purpose": "验证设置最大结果数是否能限制返回结果数量",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/web'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 4.621891736984253,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "包含特定域名搜索测试",
+        "purpose": "验证包含特定域名是否能正确过滤搜索结果",
+        "args": {
+          "query": "blockchain technology",
+          "include_domains": [
+            "techcrunch.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/web'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.3422250747680664,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "排除特定域名搜索测试",
+        "purpose": "验证排除特定域名是否能正确过滤搜索结果",
+        "args": {
+          "query": "machine learning",
+          "exclude_domains": [
+            "wikipedia.org"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/web'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.9925673007965088,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具是否能处理包含特殊字符的搜索查询",
+        "args": {
+          "query": "C++ programming"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/web'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8054759502410889,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询参数测试",
+        "purpose": "验证空查询参数是否能触发参数验证错误",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: 查询内容不能为空。"
+        },
+        "execution_time": 0.003000974655151367,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效最大结果数测试",
+        "purpose": "验证超过范围的最大结果数是否能触发参数验证错误",
+        "args": {
+          "query": "robotics",
+          "max_results": 11
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_web_search: 无效的结果数量: 11。必须是1到10之间的整数。"
+        },
+        "execution_time": 0.007014274597167969,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_answer_search": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证使用默认参数执行搜索是否能返回有效答案和证据",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: "
+        },
+        "execution_time": 5.459576368331909,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "高级搜索深度测试",
+        "purpose": "验证使用高级搜索深度是否能返回更详细的答案和证据",
+        "args": {
+          "query": "climate change",
+          "search_depth": "advanced"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/answer'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.154541254043579,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定最大结果数测试",
+        "purpose": "验证设置最大结果数是否能控制返回的证据数量",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/answer'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.7932980060577393,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具是否能处理包含特殊字符的搜索查询并返回合理响应",
+        "args": {
+          "query": "C++ programming"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/answer'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 3.3660402297973633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询参数测试",
+        "purpose": "验证空查询参数是否能触发参数验证错误",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: 查询内容不能为空。"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效最大结果数测试",
+        "purpose": "验证超过范围的最大结果数是否能触发参数验证错误",
+        "args": {
+          "query": "robotics",
+          "max_results": 11
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: 无效的结果数量: 11。必须是1到5之间的整数。"
+        },
+        "execution_time": 0.0030002593994140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效搜索深度测试",
+        "purpose": "验证非法搜索深度值是否能正确触发参数验证错误",
+        "args": {
+          "query": "machine learning",
+          "search_depth": "invalid_depth"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_answer_search: 无效的搜索深度: 'invalid_depth'。必须是 'basic' 或 'advanced'。"
+        },
+        "execution_time": 0.009903907775878906,
+        "is_functional_test": false
+      }
+    ],
+    "tavily_news_search": [
+      {
+        "case_name": "基本搜索功能测试",
+        "purpose": "验证使用默认参数执行基本新闻搜索是否能返回结构化结果",
+        "args": {
+          "query": "artificial intelligence"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.805238962173462,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定时效性搜索测试",
+        "purpose": "验证指定时效范围的新闻搜索是否能正确过滤结果",
+        "args": {
+          "query": "climate change",
+          "days": 30
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.346165180206299,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "包含特定新闻源测试",
+        "purpose": "验证包含特定新闻源是否能正确过滤搜索结果",
+        "args": {
+          "query": "blockchain technology",
+          "include_sources": [
+            "techcrunch.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.9924054145812988,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "排除特定新闻源测试",
+        "purpose": "验证排除特定新闻源是否能正确过滤搜索结果",
+        "args": {
+          "query": "machine learning",
+          "exclude_sources": [
+            "wikipedia.org"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8717622756958008,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定最大结果数测试",
+        "purpose": "验证设置最大结果数是否能限制返回结果数量",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.921504020690918,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符查询测试",
+        "purpose": "验证工具是否能处理包含特殊字符的搜索查询",
+        "args": {
+          "query": "C++ programming"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8228058815002441,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空查询参数测试",
+        "purpose": "验证空查询参数是否能触发参数验证错误",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: 查询内容不能为空。"
+        },
+        "execution_time": 0.006507396697998047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效时效性参数测试",
+        "purpose": "验证超出范围的时效性参数是否能触发参数验证错误",
+        "args": {
+          "query": "robotics",
+          "days": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: 无效的天数: 0。必须是1到365之间的整数。"
+        },
+        "execution_time": 0.008001089096069336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效最大结果数测试",
+        "purpose": "验证超过范围的最大结果数是否能触发参数验证错误",
+        "args": {
+          "query": "robotics",
+          "max_results": 11
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: 无效的结果数量: 11。必须是1到10之间的整数。"
+        },
+        "execution_time": 0.009998083114624023,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "跨域新闻源测试",
+        "purpose": "验证多个新闻源包含和排除组合是否能正确过滤",
+        "args": {
+          "query": "global economy",
+          "include_sources": [
+            "nytimes.com",
+            "theguardian.com"
+          ],
+          "exclude_sources": [
+            "wikipedia.org"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8100473880767822,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最大时效边界测试",
+        "purpose": "验证最大时效性边界值（365天）是否能正常处理",
+        "args": {
+          "query": "historical event",
+          "days": 365
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.9537138938903809,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最小时效边界测试",
+        "purpose": "验证最小时效性边界值（1天）是否能正常处理",
+        "args": {
+          "query": "breaking news",
+          "days": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.9052388668060303,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "非法新闻源输入测试",
+        "purpose": "验证非法格式的新闻源是否能被正确拒绝",
+        "args": {
+          "query": "sports news",
+          "include_sources": [
+            "invalid*domain.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8425040245056152,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "高风险命令注入测试",
+        "purpose": "验证工具是否安全地拒绝潜在命令注入尝试",
+        "args": {
+          "query": "malicious command; rm -rf /"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool tavily_news_search: Client error '404 Not Found' for url 'https://api.tavily.com/search/news'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.52482271194458,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 29
+}

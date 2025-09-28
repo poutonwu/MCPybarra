@@ -1,0 +1,219 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all available tables in the database to verify connectivity and basic functionality."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "{\n  \"tables\": [\n    \"addresses\",\n    \"companies\",\n    \"order_items\",\n    \"orders\",\n    \"products\",\n    \"reviews\",\n    \"users\"\n  ]\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_all_tables.tables[0]"
+      },
+      "description": "Dependent call: Read data from the first table returned by list_resources. This ensures read_resource works with valid input."
+    },
+    "substituted_params": {
+      "table_name": "addresses"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"columns\": [\n    \"id\",\n    \"user_id\",\n    \"street\",\n    \"city\",\n    \"state\",\n    \"zip_code\",\n    \"country\",\n    \"is_primary\"\n  ],\n  \"rows\": [\n    [\n      1,\n      1,\n      \"科技大道100号\",\n      \"北京\",\n      \"北京\",\n      \"100000\",\n      \"China\",\n      1\n    ],\n    [\n      2,\n      1,\n      \"科技园20号\",\n      \"北京\",\n      \"北京\",\n      \"100001\",\n      \"China\",\n      0\n    ],\n    [\n      3,\n      2,\n      \"商业街50号\",\n      \"上海\",\n      \"上海\",\n      \"200000\",\n      \"China\",\n      1\n    ],\n    [\n      4,\n      3,\n      \"汽车城15号\",\n      \"广州\",\n      \"广东\",\n      \"510000\",\n      \"China\",\n      1\n    ],\n    [\n      5,\n      4,\n      \"软件园35号\",\n      \"深圳\",\n      \"广东\",\n      \"518000\",\n      \"China\",\n      1\n    ],\n    [\n      6,\n      5,\n      \"购物中心88号\",\n      \"杭州\",\n      \"浙江\",\n      \"310000\",\n      \"China\",\n      1\n    ],\n    [\n      7,\n      6,\n      \"创业路77号\",\n      \"成都\",\n      \"四川\",\n      \"610000\",\n      \"China\",\n      1\n    ]\n  ]\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `$outputs.list_all_tables.tables[0]` LIMIT 10"
+      },
+      "description": "Execute a SELECT query on the first table to validate SQL execution capability and ensure consistency with read_resource output."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `$outputs.list_all_tables.tables[0]` LIMIT 10"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: An error occurred while executing the SQL query: (1146, \"Table 'user-db.$outputs.list_all_tables.tables[0]' doesn't exist\")"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELCT * FORM invalid_table"
+      },
+      "description": "Edge case: Test handling of an invalid SQL query syntax to ensure proper error reporting."
+    },
+    "substituted_params": {
+      "query": "SELCT * FORM invalid_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: An error occurred while executing the SQL query: (1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELCT * FORM invalid_table' at line 1\")"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_drop_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DROP TABLE IF EXISTS test_table"
+      },
+      "description": "Sensitive action: Attempt to drop a non-existent table to verify DROP queries are blocked as per security restrictions."
+    },
+    "substituted_params": {
+      "query": "DROP TABLE IF EXISTS test_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: name 'SecurityWarning' is not defined"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+      },
+      "description": "Test creating a new table to verify DDL support and ensure future steps can insert/select from it."
+    },
+    "substituted_params": {
+      "query": "CREATE TABLE IF NOT EXISTS test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "INSERT INTO test_table (id, name) VALUES (1, 'Alice')"
+      },
+      "description": "Test inserting data into the newly created table to validate DML operations."
+    },
+    "substituted_params": {
+      "query": "INSERT INTO test_table (id, name) VALUES (1, 'Alice')"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 1\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "select_from_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM test_table"
+      },
+      "description": "Verify that inserted data is correctly stored and retrievable from the test_table."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM test_table"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"columns\": [\n    \"id\",\n    \"name\"\n  ],\n  \"rows\": [\n    [\n      1,\n      \"Alice\"\n    ]\n  ]\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "update_in_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "UPDATE test_table SET name = 'Bob' WHERE id = 1"
+      },
+      "description": "Test updating existing records to ensure transaction control and update logic work properly."
+    },
+    "substituted_params": {
+      "query": "UPDATE test_table SET name = 'Bob' WHERE id = 1"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 1\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_from_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DELETE FROM test_table WHERE id = 1"
+      },
+      "description": "Sensitive action: Delete a record to confirm DELETE operations work and respect WHERE clauses."
+    },
+    "substituted_params": {
+      "query": "DELETE FROM test_table WHERE id = 1"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"affected_rows\": 1\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "drop_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DROP TABLE test_table"
+      },
+      "description": "Sensitive action: Drop the test table after testing to clean up resources. This step confirms DROP is allowed if previous restriction was bypassed or corrected."
+    },
+    "substituted_params": {
+      "query": "DROP TABLE test_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: name 'SecurityWarning' is not defined"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_nonexistent_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "nonexistent_table"
+      },
+      "description": "Edge case: Attempt to read from a non-existent table to test error handling and validation."
+    },
+    "substituted_params": {
+      "table_name": "nonexistent_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_resource: Table 'nonexistent_table' not found in the database."
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_empty_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Pass an empty string as a query to check parameter validation robustness."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool execute_sql: Parameter 'query' must be a non-empty SQL string."
+    }
+  }
+]

@@ -1,0 +1,242 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_duckduckgo_search_fetcher",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_duckduckgo_search_fetcher/refined/server.py",
+  "timestamp": "2025-07-13T03:54:43.004065",
+  "tools": [
+    {
+      "name": "DuckDuckGo_search",
+      "description": "\n    Performs a search on DuckDuckGo using the provided query and returns the results in a structured format.\n    This tool is designed to give users quick access to search results without needing to manually open a browser.\n\n    Args:\n        query (str): The search term or phrase that the user wants to look up. This parameter is mandatory.\n                     Example: \"Python programming language\"\n\n    Returns:\n        str: A JSON formatted string representing a list of search results. Each item in the list\n             is an object containing 'title', 'link', and 'snippet'.\n             Example:\n             \"[{\"title\": \"Official Python Website\", \"link\": \"https://www.python.org\", \"snippet\": \"The official home of the Python Programming Language...\"}]\"\n\n    Raises:\n        ValueError: If the query parameter is empty or contains only whitespace.\n        httpx.HTTPStatusError: If the request to the DuckDuckGo API fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "DuckDuckGo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetches the content from a given URL, parses the HTML, and extracts the primary text content.\n    It aims to remove boilerplate elements like navigation, ads, and footers.\n\n    Args:\n        url (str): The full URL of the webpage from which to extract content. This parameter is mandatory.\n                   Example: \"https://www.python.org/doc/\"\n\n    Returns:\n        str: A single string containing the cleaned, primary text content of the webpage.\n             Paragraphs are separated by newlines.\n             Example:\n             \"The Python programming language is a versatile and powerful tool...\\n\\nThis article will explore...\"\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.RequestError: If there is a problem with the network request.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "DuckDuckGo_search": [
+      {
+        "case_name": "Basic Search Query",
+        "purpose": "验证 DuckDuckGo_search 工具能够正确执行基本搜索并返回结果。",
+        "args": {
+          "query": "Python programming language"
+        },
+        "response": {
+          "result": "[{\"title\": \"Python (programming language) Category\", \"link\": \"https://duckduckgo.com/c/Python_(programming_language)\", \"snippet\": \"\"}, {\"title\": \"Python syntax and semantics\", \"link\": \"https://duckduckgo.com/Python_syntax_and_semantics\", \"snippet\": \"The syntax of the Python programming language is the set of rules that defines how a Python program will be written and interpreted. The Python language has many similarities to Perl, C, and Java. However, there are some definite differences between the languages.\"}, {\"title\": \"History of programming languages\", \"link\": \"https://duckduckgo.com/History_of_programming_languages\", \"snippet\": \"The history of programming languages spans from documentation of early mechanical computers to modern tools for software development. Early programming languages were highly specialized, relying on mathematical notation and similarly obscure syntax.\"}, {\"title\": \"Pattern matching programming languages\", \"link\": \"https://duckduckgo.com/c/Pattern_matching_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Class-based programming languages\", \"link\": \"https://duckduckgo.com/c/Class-based_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Multi-paradigm programming languages\", \"link\": \"https://duckduckgo.com/c/Multi-paradigm_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Text-oriented programming languages\", \"link\": \"https://duckduckgo.com/c/Text-oriented_programming_languages\", \"snippet\": \"\"}, {\"title\": \"Concurrent programming languages\", \"link\"...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计2677字符，剩余1177字符"
+        },
+        "execution_time": 1.1432435512542725,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input",
+        "purpose": "测试当 query 参数为空字符串时是否抛出 ValueError 异常。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool DuckDuckGo_search: The 'query' parameter cannot be empty."
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only Query",
+        "purpose": "测试当 query 参数仅包含空白字符时是否抛出 ValueError 异常。",
+        "args": {
+          "query": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool DuckDuckGo_search: The 'query' parameter cannot be empty."
+        },
+        "execution_time": 0.00600123405456543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具能正确处理包含特殊字符的查询，如符号和非英文字符。",
+        "args": {
+          "query": "C++ tutorial @2025"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.3328425884246826,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Query String",
+        "purpose": "测试工具对长查询字符串的处理能力。",
+        "args": {
+          "query": "This is a very long search query that tests the maximum length of input the tool can accept without failure."
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.3303680419921875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Query from Test File Content",
+        "purpose": "从测试文件中提取内容作为搜索关键词，验证工具与外部数据源的兼容性。",
+        "args": {
+          "query": "Artificial Intelligence and Machine Learning"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.31858301162719727,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid API Response Handling",
+        "purpose": "模拟 DuckDuckGo API 返回错误状态码，验证工具是否能正确捕获 httpx.HTTPStatusError。",
+        "args": {
+          "query": "simulate error"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.32037830352783203,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Check for Malformed Queries",
+        "purpose": "测试工具是否对潜在恶意输入（如脚本注入）进行安全过滤或拒绝处理。",
+        "args": {
+          "query": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.31616926193237305,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Basic URL Content Fetch",
+        "purpose": "验证 fetch_content 工具能够正确从有效URL获取并清理网页内容。",
+        "args": {
+          "url": "https://www.python.org/doc/"
+        },
+        "response": {
+          "result": "Notice:While JavaScript is not essential for this website, your interaction with the content will be limited. Please turn JavaScript on for the full experience.\n\nPython's documentation, tutorials, and guides are constantly evolving.\n\nGet started here, or scroll down for documentation broken out by type and subject.\n\nPython Docs\n\nSee alsoDocumentation Releases by Version\n\nCan’t find what you’re looking for?Try our comprehensive Help section\n\nOpen source software is made better when users can easily contribute code and documentation to fix bugs and add features. Python strongly encourages community involvement in improving the software.Learn moreabout how to make Python better for everyone.\n\nContribute to PythonIssue Tracker\n\nCopyright ©2001-2025.Python Software FoundationLegal StatementsPrivacy Notice"
+        },
+        "execution_time": 1.0288403034210205,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty URL Input",
+        "purpose": "测试当 url 参数为空字符串时是否抛出 ValueError 异常。",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A valid URL starting with 'http://' or 'https://' is required."
+        },
+        "execution_time": 0.006276369094848633,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only URL",
+        "purpose": "测试当 url 参数仅包含空白字符时是否抛出 ValueError 异常。",
+        "args": {
+          "url": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A valid URL starting with 'http://' or 'https://' is required."
+        },
+        "execution_time": 0.011519670486450195,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "测试工具对无效格式的URL（如无协议头）的处理能力。",
+        "args": {
+          "url": "www.invalid-url.com"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: A valid URL starting with 'http://' or 'https://' is required."
+        },
+        "execution_time": 0.008503913879394531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in URL",
+        "purpose": "验证工具能正确处理包含特殊字符的URL，如符号和非英文字符。",
+        "args": {
+          "url": "https://example.com/page?query=中文&lang=es"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Failed to fetch content due to HTTP status 404 for URL: https://example.com/page?query=中文&lang=es"
+        },
+        "execution_time": 1.3707365989685059,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Nonexistent Page URL",
+        "purpose": "测试工具访问一个不存在页面时是否抛出 httpx.RequestError 错误。",
+        "args": {
+          "url": "https://www.python.org/nonexistent-page-404"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Failed to fetch content due to HTTP status 404 for URL: https://www.python.org/nonexistent-page-404"
+        },
+        "execution_time": 0.46686697006225586,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long URL String",
+        "purpose": "测试工具对长URL的处理能力。",
+        "args": {
+          "url": "https://example.com/very-long-path-that-tests-the-maximum-length-of-a-url-string-for-the-fetch-content-tool?param1=value1&param2=value2&param3=value3&param4=value4&param5=value5"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Failed to fetch content due to HTTP status 404 for URL: https://example.com/very-long-path-that-tests-the-maximum-length-of-a-url-string-for-the-fetch-content-tool?param1=value1&param2=value2&param3=value3&param4=value4&param5=value5"
+        },
+        "execution_time": 0.4991490840911865,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check for XSS Injection Attempt",
+        "purpose": "测试工具是否对潜在恶意输入（如脚本注入）进行安全过滤或拒绝处理。",
+        "args": {
+          "url": "https://example.com/<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Failed to fetch content due to HTTP status 404 for URL: https://example.com/<script>alert('xss')</script>"
+        },
+        "execution_time": 0.5028843879699707,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 16
+}

@@ -1,0 +1,182 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_academic_paper_search_tool",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_academic_paper_search_tool/refined/server.py",
+  "timestamp": "2025-07-14T21:15:07.116393",
+  "tools": [
+    {
+      "name": "search_papers_tool",
+      "description": "\n    Searches for academic papers based on keywords and limits the number of results.\n\n    Args:\n        keywords (str): The search terms or phrases to look for in academic papers.\n        max_results (int): The maximum number of results to return (between 1 and 100).\n\n    Returns:\n        A JSON string representing a list of dictionaries, each containing `title`, `authors`, `year`, and `doi`.\n\n    Raises:\n        ValueError: If keywords are empty or max_results is not between 1 and 100.\n\n    Example:\n        search_papers_tool(keywords=\"machine learning\", max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "max_results": {
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords",
+          "max_results"
+        ],
+        "title": "search_papers_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details_tool",
+      "description": "\n    Retrieves detailed information about a specific paper based on its ID and source.\n\n    Args:\n        paper_id (str): The unique identifier of the paper (either DOI or Semantic Scholar ID).\n        source (str): The source to fetch details from (`Semantic Scholar` or `Crossref`).\n\n    Returns:\n        A JSON string containing the `title`, `authors`, `abstract`, and `publication_venue` of the specified paper.\n\n    Raises:\n        ValueError: If an invalid source is provided or paper_id is empty.\n\n    Example:\n        fetch_paper_details_tool(paper_id=\"10.1093/mind/lix.236.433\", source=\"Semantic Scholar\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_details_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic_tool",
+      "description": "\n    Searches for papers based on topic keywords, with optional filters for year range and result count limit.\n\n    Args:\n        topic_keywords (str): Keywords related to the topic of interest.\n        year_range_start (int, optional): Start year for filtering results.\n        year_range_end (int, optional): End year for filtering results.\n        max_results (int, optional): The maximum number of results to return (between 1 and 100).\n\n    Returns:\n        A JSON string representing a list of dictionaries, each containing `title`, `authors`, `year`, and `doi`.\n\n    Raises:\n        ValueError: If topic_keywords are empty or max_results is not between 1 and 100.\n\n    Example:\n        search_by_topic_tool(topic_keywords=\"AI ethics\", year_range_start=2015, year_range_end=2020, max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "topic_keywords": {
+            "title": "Topic Keywords",
+            "type": "string"
+          },
+          "year_range_start": {
+            "default": null,
+            "title": "Year Range Start",
+            "type": "integer"
+          },
+          "year_range_end": {
+            "default": null,
+            "title": "Year Range End",
+            "type": "integer"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic_keywords"
+        ],
+        "title": "search_by_topic_toolArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers_tool": [
+      {
+        "case_name": "Basic Search with Valid Keywords and Default Results",
+        "purpose": "验证使用默认max_results值时工具能否正确搜索论文",
+        "args": {
+          "keywords": "machine learning"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: 1 validation error for search_papers_toolArguments\nmax_results\n  Field required [type=missing, input_value={'keywords': 'machine learning'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.00470733642578125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Max Results",
+        "purpose": "验证指定max_results参数时工具能否正确返回相应数量的论文结果",
+        "args": {
+          "keywords": "deep learning",
+          "max_results": 10
+        },
+        "response": {
+          "error": "Tool execution timed out after 50.0 seconds."
+        },
+        "execution_time": 50.0,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Input",
+        "purpose": "验证当keywords为空时是否抛出ValueError",
+        "args": {
+          "keywords": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: Keywords cannot be empty or blank."
+        },
+        "execution_time": 0.011002540588378906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Below Minimum Limit",
+        "purpose": "验证当max_results小于1时是否抛出ValueError",
+        "args": {
+          "keywords": "neural networks",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: max_results must be between 1 and 100 inclusive."
+        },
+        "execution_time": 0.0039048194885253906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Above Maximum Limit",
+        "purpose": "验证当max_results大于100时是否抛出ValueError",
+        "args": {
+          "keywords": "data science",
+          "max_results": 150
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers_tool: Error in search_papers_tool: max_results must be between 1 and 100 inclusive."
+        },
+        "execution_time": 0.005001068115234375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Special Characters in Keywords",
+        "purpose": "验证包含特殊字符的关键词是否能被正确处理",
+        "args": {
+          "keywords": "AI & robotics",
+          "max_results": 5
+        },
+        "response": {
+          "error": "Tool execution timed out after 50.0 seconds."
+        },
+        "execution_time": 50.0,
+        "is_functional_test": true
+      }
+    ],
+    "search_by_topic_tool": [
+      {
+        "case_name": "Basic Search with Valid Keywords and Default Results",
+        "purpose": "验证使用默认max_results值时工具能否正确搜索论文",
+        "args": {
+          "topic_keywords": "machine learning"
+        },
+        "response": {
+          "error": "Tool execution timed out after 50.0 seconds."
+        },
+        "execution_time": 50.0,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 7,
+  "abnormal_termination": "Consecutive tool timeouts indicate a server issue."
+}

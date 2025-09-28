@@ -1,0 +1,170 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_duckduckgo_search_and_fetc",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_duckduckgo_search_and_fetc/refined/server.py",
+  "timestamp": "2025-07-16T09:56:21.925618",
+  "tools": [
+    {
+      "name": "duckduckgo_search",
+      "description": "\n    Perform a search on DuckDuckGo and return structured results.\n\n    Args:\n        query: The search term or phrase to query on DuckDuckGo (required).\n        max_results: Maximum number of search results to return (default: 5).\n\n    Returns:\n        A dictionary containing search results with 'title', 'url', and 'snippet' under 'results' key.\n\n    Raises:\n        ValueError: If the query is empty or max_results is invalid.\n        httpx.HTTPStatusError: If the API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "duckduckgo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetch and parse the main text content of a webpage.\n\n    Args:\n        url: The URL of the webpage to scrape (required).\n\n    Returns:\n        A string containing the cleaned, main text content of the webpage.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.HTTPStatusError: If the request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "duckduckgo_search": [
+      {
+        "case_name": "Basic Search Query",
+        "purpose": "验证 duckduckgo_search 是否能正常执行基本搜索并返回结果。",
+        "args": {
+          "query": "artificial intelligence",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Artificial intelligence Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence\\\">Artificial intelligence</a> Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\"\n    },\n    {\n      \"title\": \"A.I. Artificial Intelligence A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\",\n      \"url\": \"https://duckduckgo.com/A.I._Artificial_Intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/A.I._Artificial_Intelligence\\\">A.I. Artificial Intelligence</a> A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\"\n    },\n    {\n      \"title\": \"Artificial intelligence in video games In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence_in_video_games\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence_in_video_games\\\">Artificial intelligence in video games</a>In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\"\n    }\n  ]\n}"
+        },
+        "execution_time": 6.17403769493103,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Custom Max Results",
+        "purpose": "验证工具在指定 max_results 参数时是否能正确返回相应数量的结果。",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 3
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Quantum computing Category\",\n      \"url\": \"https://duckduckgo.com/c/Quantum_computing\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Quantum_computing\\\">Quantum computing Category</a>\"\n    },\n    {\n      \"title\": \"Open problems\",\n      \"url\": \"https://duckduckgo.com/c/Open_problems\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Open_problems\\\">Open problems</a>\"\n    },\n    {\n      \"title\": \"Quantum cryptography\",\n      \"url\": \"https://duckduckgo.com/c/Quantum_cryptography\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Quantum_cryptography\\\">Quantum cryptography</a>\"\n    }\n  ]\n}"
+        },
+        "execution_time": 1.595329761505127,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Validation",
+        "purpose": "验证当 query 参数为空时是否抛出 ValueError。",
+        "args": {
+          "query": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Query cannot be empty."
+        },
+        "execution_time": 0.006181240081787109,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "验证当 max_results 为负数或非整数时是否抛出 ValueError。",
+        "args": {
+          "query": "blockchain technology",
+          "max_results": -2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.004096031188964844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "验证搜索包含特殊字符的查询是否能正确处理。",
+        "args": {
+          "query": "!@#$%^&*()_+{}|:\"<>?",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Redirect response '301 Moved Permanently' for url 'https://api.duckduckgo.com/?q=!@#$%^&*()_+{}|:%22%3C%3E?&format=json&no_html=1&no_redirect=1'\nRedirect location: 'https://duckduckgo.com'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/301"
+        },
+        "execution_time": 1.5398566722869873,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt In Query",
+        "purpose": "验证工具是否安全地处理潜在 XSS 攻击字符串，防止脚本注入。",
+        "args": {
+          "query": "<script>alert('xss')</script>",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 13.279152870178223,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Zero Handling",
+        "purpose": "验证 max_results 设置为 0 时的行为是否符合预期（应抛出错误）。",
+        "args": {
+          "query": "machine learning",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.006021022796630859,
+        "is_functional_test": false
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Empty URL Validation",
+        "purpose": "验证当 url 参数为空时是否抛出 ValueError。",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: URL cannot be empty."
+        },
+        "execution_time": 0.004701137542724609,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Format",
+        "purpose": "验证传入非法格式的 URL（如无协议头）是否会引发错误。",
+        "args": {
+          "url": "invalid-url-format"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 0.4854586124420166,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 9
+}

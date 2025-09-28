@@ -1,0 +1,482 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_arxiv_paper_processor",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_arxiv_paper_processor/refined/server.py",
+  "timestamp": "2025-07-16T09:56:21.947510",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Searches arXiv for academic papers based on the provided query.\n\n    Args:\n        query: The search query string (e.g., \"machine learning\").\n        max_results: Maximum number of results to return (default: 5).\n\n    Returns:\n        A JSON string containing a list of dictionaries with paper metadata (title, authors, arXiv ID, abstract).\n\n    Raises:\n        ValueError: If the query is empty or max_results is not a positive integer.\n        httpx.HTTPStatusError: If the arXiv API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    Downloads the PDF of a specified arXiv paper and stores it locally.\n\n    Args:\n        paper_id: The arXiv ID of the paper (e.g., \"2307.12345\").\n        save_path: Local directory path to save the PDF (default: \"./papers\").\n\n    Returns:\n        A JSON string with a success/failure message and the local file path.\n\n    Raises:\n        ValueError: If the paper_id is empty or invalid.\n        httpx.HTTPStatusError: If the PDF download fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "save_path": {
+            "default": "./papers",
+            "title": "Save Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    Lists all papers stored locally, optionally filtered by a query.\n\n    Args:\n        query: Optional filter string to match against paper titles or authors.\n\n    Returns:\n        A JSON string containing a list of dictionaries with local paper details.\n\n    Raises:\n        OSError: If the papers directory cannot be accessed.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "default": null,
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    Reads the content of a specified locally stored paper.\n\n    Args:\n        paper_id: The arXiv ID or local filename of the paper.\n        mode: \"text\" for raw text or \"metadata\" for structured data (default: \"text\").\n\n    Returns:\n        A JSON string with the paper content or metadata.\n\n    Raises:\n        ValueError: If the paper_id is empty or mode is invalid.\n        FileNotFoundError: If the paper file does not exist.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "mode": {
+            "default": "text",
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search with Default Results",
+        "purpose": "验证使用默认参数的基本搜索功能是否正常工作",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "[{\"title\": \"Self-supervised Learning on Camera Trap Footage Yields a Strong Universal Face Embedder\", \"authors\": [\"Vladimir Iashin\", \"Horace Lee\", \"Dan Schofield\", \"Andrew Zisserman\"], \"arxiv_id\": \"2507.10552v1\", \"abstract\": \"Camera traps are revolutionising wildlife monitoring by capturing vast\\namounts of visual data; however, the manual identification of individual\\nanimals remains a significant bottleneck. This study introduces a fully\\nself-supervised approach to learning robust chimpanzee face embeddings from\\nunlabeled camera-trap footage. Leveraging the DINOv2 framework, we train Vision\\nTransformers on automatically mined face crops, eliminating the need for\\nidentity labels. Our method demonstrates strong open-set re-identification\\nperformance, surpassing supervised baselines on challenging benchmarks such as\\nBossou, despite utilising no labelled data during training. This work\\nunderscores the potential of self-supervised learning in biodiversity\\nmonitoring and paves the way for scalable, non-invasive population studies.\"}, {\"title\": \"EmbRACE-3K: Embodied Reasoning and Action in Complex Environments\", \"authors\": [\"Mingxian Lin\", \"Wei Huang\", \"Yitang Li\", \"Chengjie Jiang\", \"Kui Wu\", \"Fangwei Zhong\", \"Shengju Qian\", \"Xin Wang\", \"Xiaojuan Qi\"], \"arxiv_id\": \"2507.10548v1\", \"abstract\": \"Recent advanced vision-language models(VLMs) have demonstrated strong\\nperformance ...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计7782字符，剩余6382字符"
+        },
+        "execution_time": 1.7565085887908936,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Result Limit",
+        "purpose": "验证工具在指定返回结果数量时的功能是否正常",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[{\"title\": \"Self-supervised Learning on Camera Trap Footage Yields a Strong Universal Face Embedder\", \"authors\": [\"Vladimir Iashin\", \"Horace Lee\", \"Dan Schofield\", \"Andrew Zisserman\"], \"arxiv_id\": \"2507.10552v1\", \"abstract\": \"Camera traps are revolutionising wildlife monitoring by capturing vast\\namounts of visual data; however, the manual identification of individual\\nanimals remains a significant bottleneck. This study introduces a fully\\nself-supervised approach to learning robust chimpanzee face embeddings from\\nunlabeled camera-trap footage. Leveraging the DINOv2 framework, we train Vision\\nTransformers on automatically mined face crops, eliminating the need for\\nidentity labels. Our method demonstrates strong open-set re-identification\\nperformance, surpassing supervised baselines on challenging benchmarks such as\\nBossou, despite utilising no labelled data during training. This work\\nunderscores the potential of self-supervised learning in biodiversity\\nmonitoring and paves the way for scalable, non-invasive population studies.\"}, {\"title\": \"The Value Problem for Weighted Timed Games with Two Clocks is Undecidable\", \"authors\": [\"Quentin Guilmant\", \"Jo\\u00ebl Ouaknine\", \"Isa Vialard\"], \"arxiv_id\": \"2507.10550v1\", \"abstract\": \"The Value Problem for weighted timed games (WTGs) consists in determining,\\ngiven a two-player weighted timed game with a reachability objective and...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计16945字符，剩余15545字符"
+        },
+        "execution_time": 1.4065361022949219,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Validation",
+        "purpose": "验证工具是否正确抛出空查询参数的错误",
+        "args": {
+          "query": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: Query cannot be empty."
+        },
+        "execution_time": 0.006528377532958984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Max Results Handling",
+        "purpose": "验证工具是否能正确处理非正整数的最大结果数参数",
+        "args": {
+          "query": "neural networks",
+          "max_results": -3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: max_results must be a positive integer."
+        },
+        "execution_time": 0.005221843719482422,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Query",
+        "purpose": "验证工具是否能正确处理包含特殊字符的搜索查询",
+        "args": {
+          "query": "自然语言处理 & 深度学习",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.7723026275634766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Minimum Valid Max Results",
+        "purpose": "验证工具在最小有效 max_results 值下的行为",
+        "args": {
+          "query": "robotics",
+          "max_results": 1
+        },
+        "response": {
+          "result": "[{\"title\": \"MP1: Mean Flow Tames Policy Learning in 1-step for Robotic Manipulation\", \"authors\": [\"Juyi Sheng\", \"Ziyi Wang\", \"Peiming Li\", \"Mengyuan Liu\"], \"arxiv_id\": \"2507.10543v1\", \"abstract\": \"In robot manipulation, robot learning has become a prevailing approach.\\nHowever, generative models within this field face a fundamental trade-off\\nbetween the slow, iterative sampling of diffusion models and the architectural\\nconstraints of faster Flow-based methods, which often rely on explicit\\nconsistency losses. To address these limitations, we introduce MP1, which pairs\\n3D point-cloud inputs with the MeanFlow paradigm to generate action\\ntrajectories in one network function evaluation (1-NFE). By directly learning\\nthe interval-averaged velocity via the MeanFlow Identity, our policy avoids any\\nadditional consistency constraints. This formulation eliminates numerical\\nODE-solver errors during inference, yielding more precise trajectories. MP1\\nfurther incorporates CFG for improved trajectory controllability while\\nretaining 1-NFE inference without reintroducing structural constraints. Because\\nsubtle scene-context variations are critical for robot learning, especially in\\nfew-shot learning, we introduce a lightweight Dispersive Loss that repels state\\nembeddings during training, boosting generalization without slowing inference.\\nWe validate our method on the Adroit and Meta-W...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计1740字符，剩余340字符"
+        },
+        "execution_time": 1.2488751411437988,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Allowed Max Results",
+        "purpose": "验证工具是否支持 arXiv 允许的最大结果数（如100）",
+        "args": {
+          "query": "computer vision",
+          "max_results": 100
+        },
+        "response": {
+          "result": "[{\"title\": \"Self-supervised Learning on Camera Trap Footage Yields a Strong Universal Face Embedder\", \"authors\": [\"Vladimir Iashin\", \"Horace Lee\", \"Dan Schofield\", \"Andrew Zisserman\"], \"arxiv_id\": \"2507.10552v1\", \"abstract\": \"Camera traps are revolutionising wildlife monitoring by capturing vast\\namounts of visual data; however, the manual identification of individual\\nanimals remains a significant bottleneck. This study introduces a fully\\nself-supervised approach to learning robust chimpanzee face embeddings from\\nunlabeled camera-trap footage. Leveraging the DINOv2 framework, we train Vision\\nTransformers on automatically mined face crops, eliminating the need for\\nidentity labels. Our method demonstrates strong open-set re-identification\\nperformance, surpassing supervised baselines on challenging benchmarks such as\\nBossou, despite utilising no labelled data during training. This work\\nunderscores the potential of self-supervised learning in biodiversity\\nmonitoring and paves the way for scalable, non-invasive population studies.\"}, {\"title\": \"The Value Problem for Weighted Timed Games with Two Clocks is Undecidable\", \"authors\": [\"Quentin Guilmant\", \"Jo\\u00ebl Ouaknine\", \"Isa Vialard\"], \"arxiv_id\": \"2507.10550v1\", \"abstract\": \"The Value Problem for weighted timed games (WTGs) consists in determining,\\ngiven a two-player weighted timed game with a reachability objective and...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计150417字符，剩余149017字符"
+        },
+        "execution_time": 1.2399160861968994,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid API Endpoint Handling",
+        "purpose": "模拟调用失败场景，验证工具是否能正确处理 arXiv API 请求失败的情况",
+        "args": {
+          "query": "test failure",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[{\"title\": \"Disentangling Neural Disjunctive Normal Form Models\", \"authors\": [\"Kexin Gu Baugh\", \"Vincent Perreault\", \"Matthew Baugh\", \"Luke Dickens\", \"Katsumi Inoue\", \"Alessandra Russo\"], \"arxiv_id\": \"2507.10546v1\", \"abstract\": \"Neural Disjunctive Normal Form (DNF) based models are powerful and\\ninterpretable approaches to neuro-symbolic learning and have shown promising\\nresults in classification and reinforcement learning settings without prior\\nknowledge of the tasks. However, their performance is degraded by the\\nthresholding of the post-training symbolic translation process. We show here\\nthat part of the performance degradation during translation is due to its\\nfailure to disentangle the learned knowledge represented in the form of the\\nnetworks' weights. We address this issue by proposing a new disentanglement\\nmethod; by splitting nodes that encode nested rules into smaller independent\\nnodes, we are able to better preserve the models' performance. Through\\nexperiments on binary, multiclass, and multilabel classification tasks\\n(including those requiring predicate invention), we demonstrate that our\\ndisentanglement method provides compact and interpretable logical\\nrepresentations for the neural DNF-based models, with performance closer to\\nthat of their pre-translation counterparts. Our code is available at\\nhttps://github.com/kittykg/disentangling-ndnf-classification...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计9574字符，剩余8174字符"
+        },
+        "execution_time": 1.7570297718048096,
+        "is_functional_test": false
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic Download with Valid Paper ID",
+        "purpose": "验证使用有效的 arXiv ID 下载论文的基本功能是否正常工作",
+        "args": {
+          "paper_id": "2507.10552v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"./papers\\\\2507.10552v1.pdf\"}"
+        },
+        "execution_time": 1.7832159996032715,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download with Custom Save Path",
+        "purpose": "验证指定自定义保存路径时工具能否正确下载并保存论文 PDF",
+        "args": {
+          "paper_id": "2507.10543v1",
+          "save_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\papers\\\\2507.10543v1.pdf\"}"
+        },
+        "execution_time": 8.068232774734497,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Paper ID Format Handling",
+        "purpose": "验证工具是否能正确处理无效的 arXiv ID 格式",
+        "args": {
+          "paper_id": "invalid_id"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: HTTPStatusError.__init__() missing 2 required keyword-only arguments: 'request' and 'response'"
+        },
+        "execution_time": 1.827531099319458,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Paper ID Input",
+        "purpose": "验证工具是否能正确处理空的 paper_id 参数",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: Paper ID cannot be empty."
+        },
+        "execution_time": 0.0030553340911865234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Paper ID Handling",
+        "purpose": "验证工具在提供不存在的 arXiv ID 时是否返回适当的错误信息",
+        "args": {
+          "paper_id": "9999.99999v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: HTTPStatusError.__init__() missing 2 required keyword-only arguments: 'request' and 'response'"
+        },
+        "execution_time": 1.5792458057403564,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Paper ID",
+        "purpose": "验证工具是否能正确处理包含特殊字符的 paper_id 输入",
+        "args": {
+          "paper_id": "2507.1055@v1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_paper: HTTPStatusError.__init__() missing 2 required keyword-only arguments: 'request' and 'response'"
+        },
+        "execution_time": 1.784019947052002,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Write Protection on Save Path",
+        "purpose": "验证工具在目标目录不可写时是否能优雅地处理错误",
+        "args": {
+          "paper_id": "2507.10550v1",
+          "save_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\readonly_dir\\\\2507.10550v1.pdf\"}"
+        },
+        "execution_time": 11.765851736068726,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download to Default Directory",
+        "purpose": "验证工具是否能正确将论文保存到默认目录",
+        "args": {
+          "paper_id": "2507.10546v1"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"file_path\": \"./papers\\\\2507.10546v1.pdf\"}"
+        },
+        "execution_time": 1.8065221309661865,
+        "is_functional_test": true
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "Basic List All Papers",
+        "purpose": "验证在未提供查询参数时，工具能否正确列出所有本地存储的论文",
+        "args": {},
+        "response": {
+          "result": "[{\"arxiv_id\": \"2507.10546v1\", \"file_path\": \"./papers\\\\2507.10546v1.pdf\", \"download_time\": 1752631070.7651966}, {\"arxiv_id\": \"2507.10552v1\", \"file_path\": \"./papers\\\\2507.10552v1.pdf\", \"download_time\": 1752631043.9197538}]"
+        },
+        "execution_time": 0.004293680191040039,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers with Valid Query",
+        "purpose": "验证使用有效查询字符串时，工具能否正确过滤并列出匹配的论文",
+        "args": {
+          "query": "machine learning"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.003004789352416992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers with Empty Query",
+        "purpose": "验证空查询参数是否被正确处理，并返回适当的错误信息",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "[{\"arxiv_id\": \"2507.10546v1\", \"file_path\": \"./papers\\\\2507.10546v1.pdf\", \"download_time\": 1752631070.7651966}, {\"arxiv_id\": \"2507.10552v1\", \"file_path\": \"./papers\\\\2507.10552v1.pdf\", \"download_time\": 1752631043.9197538}]"
+        },
+        "execution_time": 0.003513336181640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Papers with Special Characters in Query",
+        "purpose": "验证包含特殊字符的查询是否能被安全处理，防止注入或异常",
+        "args": {
+          "query": "量子计算 & 深度学习"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0030171871185302734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers When Directory Not Accessible",
+        "purpose": "模拟 papers 目录不可访问的情况，验证工具是否能正确抛出 OSError 异常",
+        "args": {
+          "query": "robotics"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0043718814849853516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Papers with Non-Existent Query",
+        "purpose": "验证当查询不匹配任何论文时，工具是否返回空列表而不报错",
+        "args": {
+          "query": "xyz123nonexistent"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.003009796142578125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers with Null Query",
+        "purpose": "验证 null 查询参数是否被视为默认行为（即列出所有论文）",
+        "args": {
+          "query": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_papers: 1 validation error for list_papersArguments\nquery\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.002999544143676758,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic Read Paper Text Content",
+        "purpose": "验证使用默认参数（mode=text）读取本地论文的基本功能是否正常工作",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\2507.10543v1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Failed to read paper: Paper with ID D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\2507.10543v1.pdf not found."
+        },
+        "execution_time": 0.004006147384643555,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Paper Metadata Only",
+        "purpose": "验证以metadata模式读取论文元数据的功能是否正常工作",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\2507.10543v1.pdf",
+          "mode": "metadata"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Failed to read paper: Paper with ID D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\2507.10543v1.pdf not found."
+        },
+        "execution_time": 0.004884243011474609,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Nonexistent Paper File",
+        "purpose": "验证工具在指定不存在的paper_id时是否抛出FileNotFoundError",
+        "args": {
+          "paper_id": "nonexistent_paper.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Failed to read paper: Paper with ID nonexistent_paper.pdf not found."
+        },
+        "execution_time": 0.00465846061706543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read with Invalid Mode Parameter",
+        "purpose": "验证工具在提供非法mode参数时是否正确抛出ValueError",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\2507.10543v1.pdf",
+          "mode": "invalid_mode"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Mode must be either 'text' or 'metadata'."
+        },
+        "execution_time": 0.005106210708618164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Paper ID Input",
+        "purpose": "验证工具在paper_id为空字符串时是否正确抛出ValueError",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Paper ID cannot be empty."
+        },
+        "execution_time": 0.0038268566131591797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Paper from Read-only Directory",
+        "purpose": "验证工具能否从只读目录中读取论文文件",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\2507.10550v1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Failed to read paper: Paper with ID D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly_dir\\2507.10550v1.pdf not found."
+        },
+        "execution_time": 0.00408172607421875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Paper with Special Characters in Filename",
+        "purpose": "验证工具是否能正确处理包含特殊字符的论文文件名",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\~$w_document_copy.docx"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Failed to read paper: Paper with ID D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\papers\\~$w_document_copy.docx not found."
+        },
+        "execution_time": 0.004009246826171875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Very Large Paper File",
+        "purpose": "验证工具是否能正确处理非常大的论文文件",
+        "args": {
+          "paper_id": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool read_paper: Failed to read paper: Paper with ID D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf not found."
+        },
+        "execution_time": 0.0035216808319091797,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 31
+}

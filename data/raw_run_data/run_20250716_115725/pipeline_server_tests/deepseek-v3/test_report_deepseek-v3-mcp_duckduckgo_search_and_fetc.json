@@ -1,0 +1,255 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_duckduckgo_search_and_fetc",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_duckduckgo_search_and_fetc/refined/server.py",
+  "timestamp": "2025-07-16T11:57:27.922057",
+  "tools": [
+    {
+      "name": "duckduckgo_search",
+      "description": "\n    Perform a search on DuckDuckGo and return structured results.\n\n    Args:\n        query: The search term or phrase to query on DuckDuckGo (required).\n        max_results: Maximum number of search results to return (default: 5).\n\n    Returns:\n        A dictionary containing search results with 'title', 'url', and 'snippet' under 'results' key.\n\n    Raises:\n        ValueError: If the query is empty or max_results is invalid.\n        httpx.HTTPStatusError: If the API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "duckduckgo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_content",
+      "description": "\n    Fetch and parse the main text content of a webpage.\n\n    Args:\n        url: The URL of the webpage to scrape (required).\n\n    Returns:\n        A string containing the cleaned, main text content of the webpage.\n\n    Raises:\n        ValueError: If the URL is invalid or empty.\n        httpx.HTTPStatusError: If the request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "duckduckgo_search": [
+      {
+        "case_name": "Basic Search with Default Results",
+        "purpose": "验证使用默认参数执行基本搜索功能是否正常",
+        "args": {
+          "query": "artificial intelligence",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Artificial intelligence Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence\\\">Artificial intelligence</a> Artificial intelligence, in its broadest sense, is intelligence exhibited by machines...\"\n    },\n    {\n      \"title\": \"A.I. Artificial Intelligence A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\",\n      \"url\": \"https://duckduckgo.com/A.I._Artificial_Intelligence\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/A.I._Artificial_Intelligence\\\">A.I. Artificial Intelligence</a> A.I. Artificial Intelligence is a 2001 American science fiction film directed by Steven...\"\n    },\n    {\n      \"title\": \"Artificial intelligence in video games In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\",\n      \"url\": \"https://duckduckgo.com/Artificial_intelligence_in_video_games\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Artificial_intelligence_in_video_games\\\">Artificial intelligence in video games</a>In video games, artificial intelligence is used to generate responsive, adaptive or intelligent...\"\n    }\n  ]\n}"
+        },
+        "execution_time": 9.989793062210083,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Custom Result Limit",
+        "purpose": "验证指定返回结果数量时搜索功能是否正常",
+        "args": {
+          "query": "machine learning",
+          "max_results": 3
+        },
+        "response": {
+          "result": "{\n  \"results\": [\n    {\n      \"title\": \"Machine learning Category\",\n      \"url\": \"https://duckduckgo.com/c/Machine_learning\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/c/Machine_learning\\\">Machine learning Category</a>\"\n    },\n    {\n      \"title\": \"Deep learning — branch of ML concerned with artificial neural network s.\",\n      \"url\": \"https://duckduckgo.com/Deep_learning\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/Deep_learning\\\">Deep learning</a> — branch of ML concerned with <a href=\\\"https://duckduckgo.com/?q=Artificial%20neural%20network\\\">artificial neural network</a>s.\"\n    },\n    {\n      \"title\": \"M-theory (learning framework) - In machine learning and computer vision, M-theory is a learning framework inspired by feed-forward processing in the ventral stream of visual cortex and originally developed for recognition and classification of objects in visual scenes.\",\n      \"url\": \"https://duckduckgo.com/M-theory_(learning_framework)\",\n      \"snippet\": \"<a href=\\\"https://duckduckgo.com/M-theory_(learning_framework)\\\">M-theory (learning framework)</a> - In machine learning and computer vision, M-theory is a learning framework inspired by feed-forward processing in the ventral stream of visual cortex and originally developed for recognition and classification of objects in visual scenes.\"\n    }\n  ]\n}"
+        },
+        "execution_time": 1.412041425704956,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search for Specific File Type",
+        "purpose": "验证搜索特定文件类型（如PDF）是否正常",
+        "args": {
+          "query": "filetype:pdf autonomous vehicles",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 1.3936505317687988,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search with Special Characters",
+        "purpose": "验证搜索包含特殊字符的查询是否正常处理",
+        "args": {
+          "query": "\"self-driving cars\" site:edu",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 1.3125977516174316,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证空查询是否抛出ValueError",
+        "args": {
+          "query": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: Query cannot be empty."
+        },
+        "execution_time": 0.0035088062286376953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "验证max_results为非法值时是否抛出ValueError",
+        "args": {
+          "query": "blockchain technology",
+          "max_results": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.005003452301025391,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Query",
+        "purpose": "验证是否对潜在的XSS攻击输入进行安全处理",
+        "args": {
+          "query": "<script>alert('xss')</script>",
+          "max_results": 5
+        },
+        "response": {
+          "result": "{\n  \"results\": [],\n  \"warning\": \"No results found. This may be due to API limitations or query restrictions.\"\n}"
+        },
+        "execution_time": 1.3219630718231201,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search with Maximum Allowed Results",
+        "purpose": "验证最大允许结果数是否被正确处理",
+        "args": {
+          "query": "quantum computing",
+          "max_results": 100
+        },
+        "response": {
+          "error": "ToolException: Error executing tool duckduckgo_search: max_results must be between 1 and 10."
+        },
+        "execution_time": 0.0039980411529541016,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_content": [
+      {
+        "case_name": "Basic Content Fetching",
+        "purpose": "验证工具能否正确抓取并解析一个有效网页的主要文本内容",
+        "args": {
+          "url": "https://duckduckgo.com/Artificial_intelligence"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Redirect response '302 Moved Temporarily' for url 'https://duckduckgo.com/Artificial_intelligence'\nRedirect location: 'https://duckduckgo.com/?q=Artificial_intelligence&&rpl=1'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302"
+        },
+        "execution_time": 1.938920021057129,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Content from Empty URL",
+        "purpose": "验证空URL是否抛出ValueError",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: URL cannot be empty."
+        },
+        "execution_time": 0.005000591278076172,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Content from Invalid URL",
+        "purpose": "验证无效URL是否导致错误处理机制正常触发",
+        "args": {
+          "url": "htp:/invalid.url"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 0.45119190216064453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Content with XSS Attempt in URL",
+        "purpose": "验证包含潜在XSS攻击的URL是否被安全处理",
+        "args": {
+          "url": "https://example.com/page?param=<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 5.454909801483154,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Content from Non-Existent Page",
+        "purpose": "验证访问不存在的页面时是否能正确抛出HTTPStatusError",
+        "args": {
+          "url": "https://duckduckgo.com/NonExistentPage123456"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Redirect response '302 Moved Temporarily' for url 'https://duckduckgo.com/NonExistentPage123456'\nRedirect location: 'https://duckduckgo.com/?q=NonExistentPage123456&&rpl=1'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/302"
+        },
+        "execution_time": 11.23263144493103,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Content from PDF File",
+        "purpose": "验证工具能否处理PDF文件链接并提取其文本内容",
+        "args": {
+          "url": "file:///D:/devWorkspace/MCPServer-Generator/testSystem/testFiles/paper1.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: HTTPStatusError.__init__() missing 1 required keyword-only argument: 'response'"
+        },
+        "execution_time": 0.5047037601470947,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Content with Maximum Length URL",
+        "purpose": "验证超长URL是否能被正确处理",
+        "args": {
+          "url": "https://example.com/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Client error '404 Not Found' for url 'https://example.com/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 4.108557462692261,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Content with Special Characters in URL",
+        "purpose": "验证带有特殊字符的URL是否能被正确处理",
+        "args": {
+          "url": "https://example.com/path with spaces!@#$%^&*()_+[]{}|;':\",./<>?"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_content: Client error '404 Not Found' for url 'https://example.com/path%20with%20spaces!@#$%^&*()_+[]{}|;':%22,./%3C%3E?'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.0501928329467773,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 16
+}

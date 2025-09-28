@@ -1,0 +1,234 @@
+[
+  {
+    "step": {
+      "step_id": "connect_ssh",
+      "tool_name": "connect",
+      "parameters": {
+        "host": "10.70.5.21",
+        "port": 26002,
+        "username": "pengbocheng",
+        "password": "123456"
+      },
+      "description": "Happy path: Establish an SSH connection with default credentials."
+    },
+    "substituted_params": {
+      "host": "10.70.5.21",
+      "port": 26002,
+      "username": "pengbocheng",
+      "password": "123456"
+    },
+    "result": {
+      "status": "success",
+      "result": "session_1"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_sessions_after_connect",
+      "tool_name": "list_sessions",
+      "parameters": {},
+      "description": "Verify that the newly established session is listed in active sessions."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x000002663BAD6F00>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_simple_command",
+      "tool_name": "execute",
+      "parameters": {
+        "session_id": "$outputs.connect_ssh",
+        "command": "echo 'Hello, World!'"
+      },
+      "description": "Execute a simple command on the connected session to verify command execution capability."
+    },
+    "substituted_params": {
+      "session_id": "session_1",
+      "command": "echo 'Hello, World!'"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"stdout\": \"Hello, World!\\n\",\n  \"stderr\": \"\",\n  \"exit_status\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "upload_file",
+      "tool_name": "upload",
+      "parameters": {
+        "session_id": "$outputs.connect_ssh",
+        "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+        "remote_path": "/tmp/sample1.pdf"
+      },
+      "description": "Upload a file from local machine to remote server to test upload functionality."
+    },
+    "substituted_params": {
+      "session_id": "session_1",
+      "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+      "remote_path": "/tmp/sample1.pdf"
+    },
+    "result": {
+      "status": "success",
+      "result": "true"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_file",
+      "tool_name": "download",
+      "parameters": {
+        "session_id": "$outputs.connect_ssh",
+        "remote_path": "/tmp/sample1.pdf",
+        "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_sample1.pdf"
+      },
+      "description": "Download the previously uploaded file back to verify download functionality."
+    },
+    "substituted_params": {
+      "session_id": "session_1",
+      "remote_path": "/tmp/sample1.pdf",
+      "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_sample1.pdf"
+    },
+    "result": {
+      "status": "success",
+      "result": "true"
+    }
+  },
+  {
+    "step": {
+      "step_id": "disconnect_session",
+      "tool_name": "disconnect",
+      "parameters": {
+        "session_id": "$outputs.connect_ssh"
+      },
+      "description": "Gracefully disconnect the SSH session and clean up resources."
+    },
+    "substituted_params": {
+      "session_id": "session_1"
+    },
+    "result": {
+      "status": "success",
+      "result": "true"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_sessions_after_disconnect",
+      "tool_name": "list_sessions",
+      "parameters": {},
+      "description": "Ensure that the session list reflects the disconnection by not listing the closed session."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "No output returned."
+    }
+  },
+  {
+    "step": {
+      "step_id": "connect_with_invalid_password",
+      "tool_name": "connect",
+      "parameters": {
+        "host": "10.70.5.21",
+        "port": 26002,
+        "username": "pengbocheng",
+        "password": "wrong_password"
+      },
+      "description": "Edge case: Attempt connection with incorrect password to test authentication failure handling."
+    },
+    "substituted_params": {
+      "host": "10.70.5.21",
+      "port": 26002,
+      "username": "pengbocheng",
+      "password": "wrong_password"
+    },
+    "result": {
+      "status": "success",
+      "result": "session_1"
+    }
+  },
+  {
+    "step": {
+      "step_id": "connect_with_key_path",
+      "tool_name": "connect",
+      "parameters": {
+        "host": "10.70.5.21",
+        "port": 26002,
+        "username": "pengbocheng",
+        "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\private_key.pem"
+      },
+      "description": "Test key-based authentication for SSH connection."
+    },
+    "substituted_params": {
+      "host": "10.70.5.21",
+      "port": 26002,
+      "username": "pengbocheng",
+      "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\private_key.pem"
+    },
+    "result": {
+      "status": "success",
+      "result": "session_2"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_with_timeout",
+      "tool_name": "execute",
+      "parameters": {
+        "session_id": "$outputs.connect_with_key_path",
+        "command": "sleep 5 && echo 'Done'",
+        "timeout": 3
+      },
+      "description": "Test command execution timeout handling."
+    },
+    "substituted_params": {
+      "session_id": "session_2",
+      "command": "sleep 5 && echo 'Done'",
+      "timeout": 3
+    },
+    "result": {
+      "status": "success",
+      "result": "{\n  \"stdout\": \"Done\\n\",\n  \"stderr\": \"\",\n  \"exit_status\": 0\n}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "disconnect_invalid_session",
+      "tool_name": "disconnect",
+      "parameters": {
+        "session_id": "invalid_session_999"
+      },
+      "description": "Edge case: Try to disconnect a non-existent session to test error handling."
+    },
+    "substituted_params": {
+      "session_id": "invalid_session_999"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool disconnect: No active session found with ID: invalid_session_999"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_missing_file",
+      "tool_name": "download",
+      "parameters": {
+        "session_id": "$outputs.connect_with_key_path",
+        "remote_path": "/tmp/missing_file.txt",
+        "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\missing_file.txt"
+      },
+      "description": "Edge case: Attempt to download a non-existing file from the remote server."
+    },
+    "substituted_params": {
+      "session_id": "session_2",
+      "remote_path": "/tmp/missing_file.txt",
+      "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\missing_file.txt"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool download: Remote file not found: /tmp/missing_file.txt"
+    }
+  }
+]

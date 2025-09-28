@@ -1,0 +1,326 @@
+{
+  "server_name": "server",
+  "parent_dir": "duckduckgo_search_and_fetch_co_refined",
+  "report_name": "duckduckgo_search_and_fetch_co_refined-server",
+  "server_path": "workspace\\refinement\\duckduckgo_search_and_fetch_co_refined\\server.py",
+  "timestamp": "2025-07-01T18:34:10.916039",
+  "tools": [
+    {
+      "name": "perform_duckduckgo_search",
+      "description": "\n    在DuckDuckGo上执行搜索。\n\n    Args:\n        query: 搜索关键词 (必填)。不能为空或仅包含空白字符。\n\n    Returns:\n        JSON格式的搜索结果列表。\n\n    示例:\n        perform_duckduckgo_search('Python web scraping')\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "perform_duckduckgo_searchArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_webpage_content",
+      "description": "\n    抓取并返回给定URL的网页主要内容。\n\n    Args:\n        url: 目标网页的URL (必填)。必须以'http://'或'https://'开头。\n\n    Returns:\n        网页的主要文本内容。\n\n    示例:\n        fetch_webpage_content('https://example.com')\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "fetch_webpage_contentArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "perform_duckduckgo_search": [
+      {
+        "case_name": "Basic DuckDuckGo Search Test",
+        "purpose": "验证perform_duckduckgo_search工具在正常输入下是否能返回有效的搜索结果",
+        "args": {
+          "query": "Python programming"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 搜索失败: https://html.duckduckgo.com/html 202 Ratelimit"
+        },
+        "execution_time": 1.8779444694519043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Input Test",
+        "purpose": "验证当提供空字符串作为查询参数时，工具是否能正确处理错误情况",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 'query' 不能为空或仅包含空白字符。"
+        },
+        "execution_time": 0.004511594772338867,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only Query Test",
+        "purpose": "验证当查询参数仅包含空白字符时，工具是否能正确拒绝请求",
+        "args": {
+          "query": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 'query' 不能为空或仅包含空白字符。"
+        },
+        "execution_time": 0.006999969482421875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters Query Test",
+        "purpose": "测试工具对特殊字符查询的处理能力",
+        "args": {
+          "query": "!@#$%^&*()_+=-`~[]{}|\\:;\"',./<>?"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.3204848766326904,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Query Input Test",
+        "purpose": "测试工具能否处理长查询字符串",
+        "args": {
+          "query": "This is a very long search query that tests the maximum allowed length for search queries in the tool implementation"
+        },
+        "response": {
+          "result": "[{\"title\": \"What is the maximum allowed length for any search string with ...\", \"href\": \"https://discuss.elastic.co/t/what-is-the-maximum-allowed-length-for-any-search-string-with-wildcard/371581\", \"body\": \"This will depend on the mapping of your field. If it is mapped as keyword the maximum indexed length is by default 256 characters. If you want to handle longer strings and search using wildcard queries I would recommend instead (or in addition map it) as a wildcard field as that is much more efficient and generally offer better performance. Query large keyword fields with wildcard queries is ...\"}, {\"title\": \"How To Set Maximal Number Of Words For Search Query\", \"href\": \"https://advanced-woo-search.com/guide/how-to-set-maximal-number-of-words-for-search-query/\", \"body\": \"Some very long ...[截断]，共计5102字符，剩余4302字符"
+        },
+        "execution_time": 1.888749361038208,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Query Test",
+        "purpose": "验证工具是否能够处理包含Unicode字符的搜索查询",
+        "args": {
+          "query": "你好世界 Hello World"
+        },
+        "response": {
+          "result": "[{\"title\": \"Hello World - \\u7ef4\\u57fa\\u767e\\u79d1\\uff0c\\u81ea\\u7531\\u7684\\u767e\\u79d1\\u5168\\u4e66\", \"href\": \"https://zh.wikipedia.org/wiki/HELLO_WORLD\", \"body\": \"\\u300aHELLO WORLD\\u300b\\uff08\\u65e5\\u8a9e\\uff1a \\u30cf\\u30ed\\u30fc\\u30fb\\u30ef\\u30fc\\u30eb\\u30c9\\uff09\\u662f2019\\u5e749\\u670820\\u65e5\\u4e8e\\u65e5\\u672c\\u4e0a\\u6620\\u7684 \\u65e5\\u672c \\u539f\\u5275\\u52d5\\u756b\\u96fb\\u5f71\\u3002 \\u6b64\\u5916\\u672c\\u4f5c\\u6709\\u51fa\\u5916\\u50b3\\u77ed\\u7bc7\\u4e09\\u7bc7\\uff0c\\u6bcf\\u96c6\\u7d0410\\u5206\\u9418\\u3002\"}, {\"title\": \"\\u4f60\\u597d\\u4e16\\u754c\\uff08\\u65e5\\u672c2019\\u5e74\\u4f0a\\u85e4\\u667a\\u5f66\\u6267\\u5bfc\\u7684\\u52a8\\u753b\\u7535\\u5f71\\uff09_\\u767e\\u5ea6\\u767e\\u79d1\", \"href\": \"https://baike.baidu.com/item/\\u4f60\\u597d\\u4e16\\u754c/24628627\", \"body\": \"\\u300a\\u4f60\\u597d\\u4e16\\u754c\\u300b\\uff08HEL...[截断]，共计6848字符，剩余6048字符"
+        },
+        "execution_time": 1.7301785945892334,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With File Name From Test Files",
+        "purpose": "测试使用测试区文件名作为搜索关键词的功能",
+        "args": {
+          "query": "文档_另存为测试_unicodethis_is_a_very_long_suffix_that_exceeds_normal_length_limits_and_tests_the_maximum_allowed_size_for_suffix_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints.docx"
+        },
+        "response": {
+          "result": "[{\"title\": \"VScode\\u6253\\u5f00\\u8d85\\u4e24\\u4e07\\u5b57\\u7b26\\u7684\\u5927\\u6587\\u4ef6\\u65f6\\u4f1a\\u63d0\\u793a\\u4e0d\\u8fdb\\u884c\\u6807\\u8bb0\\u5316\\uff0c\\u6709\\u6ca1\\u6709\\u529e\\u6cd5\\u89e3\\u51b3\\uff1f - \\u77e5\\u4e4e\", \"href\": \"https://www.zhihu.com/question/307250779\", \"body\": \"\\u5728VS Code\\u4e2d\\u7684\\u8bbe\\u7f6e\\u4e2d\\u6709\\u548c\\u63d0\\u793a\\u4e00\\u6a21\\u4e00\\u6837\\u7684\\u8bed\\u53e5\\uff0c\\u5c06\\u8fd9\\u4e2a\\u8bbe\\u7f6e\\u503c\\uff08\\u9ed8\\u8ba420000\\uff09\\u4fee\\u6539\\u7684\\u8f83\\u5c0f\\u5373\\u53ef\\u3002 Editor: Max Tokenization Line Length \\u7531\\u4e8e\\u6027\\u80fd\\u539f\\u56e0\\uff0c\\u8d85\\u8fc7\\u8fd9\\u4e2a\\u957f\\u5ea6\\u7684\\u884c\\u5c06\\u4e0d\\u4f1a\\u88ab\\u6807\\u8bb0 20000 \\u6ce8\\u610f\\uff1a \\u4e00\\u884c\\u8d85\\u8fc720000\\u5b57\\u7b26\\u7684\\u4ee3\\u7801\\uff0c\\u683c\\u5f0f\\u5316\\u771f\\u7684\\u5f88\\u54...[截断]，共计7055字符，剩余6255字符"
+        },
+        "execution_time": 1.5930533409118652,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Command Injection Attempt",
+        "purpose": "验证工具是否安全地处理潜在命令注入尝试",
+        "args": {
+          "query": "test; rm -rf /"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+        },
+        "execution_time": 1.8130855560302734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt",
+        "purpose": "测试工具对SQL注入攻击的防护能力",
+        "args": {
+          "query": "test'; DROP TABLE users;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 搜索失败: https://html.duckduckgo.com/html 202 Ratelimit"
+        },
+        "execution_time": 1.8258745670318604,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Network Failure Simulation Test",
+        "purpose": "模拟网络故障情况下，验证工具是否能优雅地处理错误",
+        "args": {
+          "query": "network failure test"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+        },
+        "execution_time": 1.8276150226593018,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search For PDF Content",
+        "purpose": "使用PDF文件内容相关关键词进行搜索测试",
+        "args": {
+          "query": "城市道路管理条例"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool perform_duckduckgo_search: 搜索失败: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+        },
+        "execution_time": 1.8129162788391113,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_webpage_content": [
+      {
+        "case_name": "Basic Webpage Fetch Test",
+        "purpose": "验证fetch_webpage_content工具能否成功抓取一个有效网页的主要内容",
+        "args": {
+          "url": "https://example.com"
+        },
+        "response": {
+          "result": "Example Domain\nExample Domain\nThis domain is for use in illustrative examples in documents. You may use this\ndomain in literature without prior coordination or asking for permission.\nMore information..."
+        },
+        "execution_time": 1.143395185470581,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty URL Input Test",
+        "purpose": "验证当提供空字符串作为URL参数时，工具是否能正确拒绝请求",
+        "args": {
+          "url": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无效的URL: '{url}'。必须以'http://'或'https://'开头。"
+        },
+        "execution_time": 0.002996683120727539,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Whitespace Only URL Test",
+        "purpose": "验证当URL参数仅包含空白字符时，工具是否能正确拒绝请求",
+        "args": {
+          "url": "   "
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无效的URL: '{url}'。必须以'http://'或'https://'开头。"
+        },
+        "execution_time": 0.003000020980834961,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid URL Scheme Test",
+        "purpose": "测试工具对不以'http://'或'https://'开头的URL的处理能力",
+        "args": {
+          "url": "ftp://example.com"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无效的URL: '{url}'。必须以'http://'或'https://'开头。"
+        },
+        "execution_time": 0.004068613052368164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long URL Input Test",
+        "purpose": "测试工具能否处理长URL字符串",
+        "args": {
+          "url": "https://example.com/path/to/resource?param=this_is_a_very_long_query_string_that_tests_the_maximum_allowed_length_for_url_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无法访问URL: 404 Client Error: Not Found for url: https://example.com/path/to/resource?param=this_is_a_very_long_query_string_that_tests_the_maximum_allowed_length_for_url_in_the_tool_implementation_it_should_be_accepted_if_within_system_constraints"
+        },
+        "execution_time": 0.5117709636688232,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode URL Test",
+        "purpose": "验证工具是否能够处理包含Unicode字符的URL",
+        "args": {
+          "url": "https://例子.测试/路径/你好世界"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无法访问URL: HTTPSConnectionPool(host='xn--fsqu00a.xn--0zwm56d', port=443): Max retries exceeded with url: /%E8%B7%AF%E5%BE%84/%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C (Caused by SSLError(SSLEOFError(8, '[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)')))"
+        },
+        "execution_time": 1.4296875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Command Injection Attempt in URL",
+        "purpose": "验证工具是否安全地处理潜在命令注入尝试",
+        "args": {
+          "url": "http://example.com; rm -rf /"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 内容抓取失败: b'example.com;'"
+        },
+        "execution_time": 0.00602269172668457,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt in URL",
+        "purpose": "测试工具对SQL注入攻击的防护能力",
+        "args": {
+          "url": "http://example.com?query=test'; DROP TABLE users;"
+        },
+        "response": {
+          "result": "Example Domain\nExample Domain\nThis domain is for use in illustrative examples in documents. You may use this\ndomain in literature without prior coordination or asking for permission.\nMore information..."
+        },
+        "execution_time": 0.8258092403411865,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "NonExistent Webpage Test",
+        "purpose": "验证工具在目标网页不存在时是否能优雅地处理错误",
+        "args": {
+          "url": "https://example.com/nonexistent-page-that-should-return-404"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无法访问URL: 404 Client Error: Not Found for url: https://example.com/nonexistent-page-that-should-return-404"
+        },
+        "execution_time": 0.4985957145690918,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "HTTP Status Code Handling Test",
+        "purpose": "验证工具是否能正确处理不同HTTP状态码（如301重定向、403禁止访问）",
+        "args": {
+          "url": "https://httpbin.org/status/403"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无法访问URL: 403 Client Error: FORBIDDEN for url: https://httpbin.org/status/403"
+        },
+        "execution_time": 1.6448612213134766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in URL Path Test",
+        "purpose": "测试工具对URL路径中包含特殊字符的处理能力",
+        "args": {
+          "url": "https://example.com/path!@#$%^&*()_+=-`~[]{}|\\:;\"',./<>?"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无法访问URL: 404 Client Error: Not Found for url: https://example.com/path!@#$%25%5E&*()_+=-%60~%5B%5D%7B%7D%7C%5C:;%22',./%3C%3E?"
+        },
+        "execution_time": 0.5161187648773193,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch PDF Content via URL Test",
+        "purpose": "使用PDF文件相关关键词构造URL进行内容抓取测试",
+        "args": {
+          "url": "https://example.com/document/city-road-regulation.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_webpage_content: 无法访问URL: 404 Client Error: Not Found for url: https://example.com/document/city-road-regulation.pdf"
+        },
+        "execution_time": 0.9882023334503174,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 23
+}

@@ -1,0 +1,439 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_image_search_download_icon",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_image_search_download_icon/refined/server.py",
+  "timestamp": "2025-07-13T02:42:34.251465",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    Search for images based on user-provided keywords using APIs from Unsplash, Pexels, or Pixabay.\n\n    Args:\n        keyword (str): The search term used to find relevant images. Example: \"sunset\"\n        source (str): The image source to query ('unsplash', 'pexels', or 'pixabay'). Example: \"unsplash\"\n\n    Returns:\n        str: A JSON string representing a list of dictionaries, where each dictionary contains:\n            image_url (str): URL of the image.\n            author (str): Name of the image creator.\n            metadata (dict): Additional metadata, such as image dimensions and license information.\n\n    Example:\n        search_images(keyword=\"beach\", source=\"unsplash\")\n    ",
+      "args_schema": {
+        "properties": {
+          "keyword": {
+            "title": "Keyword",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyword",
+          "source"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    Download an image from a given URL and save it to a specified file path with a custom filename.\n\n    Args:\n        image_url (str): The URL of the image to be downloaded. Example: \"https://example.com/image.jpg\"\n        file_name (str): The desired name for the saved image file, including the extension. Example: \"image.jpg\"\n        directory (str): The directory path where the image will be saved. Example: \"./images\"\n\n    Returns:\n        str: A JSON string containing:\n            status (str): The result of the operation ('success' or 'failure').\n            file_path (str): The full path to the saved image file.\n\n    Example:\n        download_image(image_url=\"https://example.com/image.jpg\", file_name=\"image.jpg\", directory=\"./images\")\n    ",
+      "args_schema": {
+        "properties": {
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "type": "string"
+          },
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_url",
+          "file_name",
+          "directory"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    Generate an icon based on a textual description. If a cloud-based generation service is unavailable, \n    it uses a local sample image for simulation.\n\n    Args:\n        description (str): A textual description of the desired icon. Example: \"sun and clouds\"\n        size (tuple[int, int]): Dimensions of the icon (width, height). Example: (128, 128)\n        directory (str): The directory path where the icon will be saved. Example: \"./icons\"\n\n    Returns:\n        str: A JSON string containing:\n            status (str): The result of the operation ('success' or 'failure').\n            file_path (str): The full path to the generated icon file.\n\n    Example:\n        generate_icon(description=\"sun and clouds\", size=(128, 128), directory=\"./icons\")\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Size",
+            "type": "array"
+          },
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "size",
+          "directory"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search on Unsplash",
+        "purpose": "验证工具能否在Unsplash上根据关键词搜索到图片",
+        "args": {
+          "keyword": "sunset",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.0054018497467041016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Basic Image Search on Pexels",
+        "purpose": "验证工具能否在Pexels上根据关键词搜索到图片",
+        "args": {
+          "keyword": "nature",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No images found for 'nature' on pexels. Try different search terms or check API connectivity.\"\n}"
+        },
+        "execution_time": 1.995032787322998,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic Image Search on Pixabay",
+        "purpose": "验证工具能否在Pixabay上根据关键词搜索到图片",
+        "args": {
+          "keyword": "mountains",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '400 Bad Request' for url 'https://pixabay.com/api/?query=mountains&per_page=10'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400\"\n}"
+        },
+        "execution_time": 1.5173180103302002,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keyword Search",
+        "purpose": "测试使用空字符串作为关键词时的错误处理行为",
+        "args": {
+          "keyword": "",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.0040035247802734375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Input",
+        "purpose": "测试使用非法图像源参数时的错误处理行为",
+        "args": {
+          "keyword": "ocean",
+          "source": "invalid_source"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Invalid source 'invalid_source'. Must be one of: unsplash, pexels, pixabay\"\n}"
+        },
+        "execution_time": 0.0035130977630615234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Keyword",
+        "purpose": "测试包含特殊字符的关键词是否能被正确处理",
+        "args": {
+          "keyword": "!@#$%^&*()_+{}[]|\"';:<>,.?/~`",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No images found for '!@#$%^&*()_+{}[]|\\\"';:<>,.?/~`' on pexels. Try different search terms or check API connectivity.\"\n}"
+        },
+        "execution_time": 1.852722406387329,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check for Malicious Keywords",
+        "purpose": "测试工具是否会对潜在恶意关键词执行不安全操作",
+        "args": {
+          "keyword": "malware OR exploit OR root",
+          "source": "unsplash"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"No API key found for unsplash. Please set UNSPLASH_API_KEY environment variable to use this functionality.\"\n}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download Success",
+        "purpose": "验证工具能否从给定URL下载图片并保存到指定目录",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "file_name": "image.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '404 Not Found' for url 'https://example.com/image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"\n}"
+        },
+        "execution_time": 1.651021957397461,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Image with Special Characters in File Name",
+        "purpose": "测试包含特殊字符的文件名是否能被正确处理",
+        "args": {
+          "image_url": "https://example.com/photo.png",
+          "file_name": "photo_@#$.png",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '404 Not Found' for url 'https://example.com/photo.png'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"\n}"
+        },
+        "execution_time": 2.2402114868164062,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download to Non-Existent Directory",
+        "purpose": "测试目标目录不存在时的行为",
+        "args": {
+          "image_url": "https://example.com/test_image.jpg",
+          "file_name": "test_image.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_dir"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '404 Not Found' for url 'https://example.com/test_image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"\n}"
+        },
+        "execution_time": 2.3656249046325684,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Image URL Format",
+        "purpose": "测试无效图像URL格式的错误处理行为",
+        "args": {
+          "image_url": "invalid-url",
+          "file_name": "image.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Request URL is missing an 'http://' or 'https://' protocol.\"\n}"
+        },
+        "execution_time": 0.4530329704284668,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty File Name Input",
+        "purpose": "测试空文件名输入时的错误处理",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "file_name": "",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"File name cannot be empty or whitespace only.\"\n}"
+        },
+        "execution_time": 0.004202365875244141,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Check for Malicious File Name",
+        "purpose": "测试工具是否会对潜在恶意文件名执行不安全操作",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "file_name": "../../../malicious_file.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '404 Not Found' for url 'https://example.com/image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"\n}"
+        },
+        "execution_time": 1.7434487342834473,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Very Long File Name Boundary Test",
+        "purpose": "测试超长文件名边界情况",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "file_name": "a_very_long_file_name_that_exceeds_maximum_length_limit_and_may_cause_issues_on_some_systems.jpg",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '404 Not Found' for url 'https://example.com/image.jpg'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"\n}"
+        },
+        "execution_time": 1.6816270351409912,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Character Support in File Name",
+        "purpose": "测试支持Unicode字符的文件名是否能被正确处理",
+        "args": {
+          "image_url": "https://example.com/image.png",
+          "file_name": "图片_中文_file.png",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"Client error '404 Not Found' for url 'https://example.com/image.png'\\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404\"\n}"
+        },
+        "execution_time": 1.6073484420776367,
+        "is_functional_test": true
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation Success",
+        "purpose": "验证工具能否根据描述生成一个图标并保存到指定目录",
+        "args": {
+          "description": "sun and clouds",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icon_sun_and_clouds.png\"\n}"
+        },
+        "execution_time": 0.016905546188354492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Default Size",
+        "purpose": "验证工具在未指定尺寸时是否使用默认值 (128, 128)",
+        "args": {
+          "description": "mountain landscape",
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 1 validation error for generate_iconArguments\nsize\n  Field required [type=missing, input_value={'description': 'mountain...\\testSystem\\\\testFiles'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.004001140594482422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation Using Local Sample Fallback",
+        "purpose": "验证当云服务不可用时，工具是否能回退使用本地样本图像",
+        "args": {
+          "description": "technology circuit board",
+          "size": [
+            64,
+            64
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icon_technology_circuit_board.png\"\n}"
+        },
+        "execution_time": 0.004515409469604492,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Description Handling",
+        "purpose": "测试空字符串描述的错误处理行为",
+        "args": {
+          "description": "",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icon_.png\"\n}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Directory Path Handling",
+        "purpose": "测试无效目标目录路径时的行为",
+        "args": {
+          "description": "space galaxy",
+          "size": [
+            256,
+            256
+          ],
+          "directory": "D:\\invalid\\path\\that\\does\\not\\exist"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\invalid\\\\path\\\\that\\\\does\\\\not\\\\exist\\\\icon_space_galaxy.png\"\n}"
+        },
+        "execution_time": 0.00551295280456543,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Description",
+        "purpose": "测试包含特殊字符的描述是否能被正确处理",
+        "args": {
+          "description": "!@#$%^&*()_+{}[]|\"';:<>,.?/~`",
+          "size": [
+            32,
+            32
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"failure\",\n  \"error\": \"[Errno 22] Invalid argument: 'D:\\\\\\\\devWorkspace\\\\\\\\MCPServer-Generator\\\\\\\\testSystem\\\\\\\\testFiles\\\\\\\\icon_!@#$%^&*()_+{}[]|\\\"\\\\';:<>,.?\\\\\\\\~`.png'\"\n}"
+        },
+        "execution_time": 0.007515907287597656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Check for Malicious File Paths",
+        "purpose": "测试工具是否会对潜在恶意文件路径执行不安全操作",
+        "args": {
+          "description": "../../../malicious_icon",
+          "size": [
+            128,
+            128
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icon_../../../malicious_icon.png\"\n}"
+        },
+        "execution_time": 0.00499725341796875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Minimum Allowed Size Boundary Test",
+        "purpose": "测试最小允许尺寸边界情况（例如 16x16）",
+        "args": {
+          "description": "light bulb idea",
+          "size": [
+            16,
+            16
+          ],
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\n  \"status\": \"success\",\n  \"file_path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icon_light_bulb_idea.png\"\n}"
+        },
+        "execution_time": 0.009034872055053711,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 23
+}

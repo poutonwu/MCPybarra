@@ -1,0 +1,140 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_markdown_converter",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_markdown_converter/refined/server.py",
+  "timestamp": "2025-07-13T03:47:24.581057",
+  "tools": [
+    {
+      "name": "convert_to_markdown",
+      "description": "\n    Converts various content formats (HTTP/HTTPS webpages, local files, and data URIs) into structured Markdown format.\n\n    Args:\n        source (str): The source to convert to Markdown. This can be a URL (HTTP or HTTPS), a local file path, or a data URI.\n            Example: \"https://example.com\" or \"/path/to/local/file.txt\" or \"data:text/plain;base64,SGVsbG8gd29ybGQ=\"\n        source_type (str): Specifies the type of the source (\"url\", \"file\", or \"data_uri\").\n            Example: \"url\"\n\n    Returns:\n        str: A string containing the Markdown representation of the input content. This will retain structural elements like headings, lists, links, and tables.\n\n    Raises:\n        ValueError: If the source_type is not one of \"url\", \"file\", or \"data_uri\".\n        httpx.HTTPStatusError: If the HTTP request fails for a URL source.\n        FileNotFoundError: If the local file does not exist.\n        Exception: For general errors during conversion.\n\n    Example:\n        convert_to_markdown(\"https://example.com\", \"url\")\n    ",
+      "args_schema": {
+        "properties": {
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "source_type"
+        ],
+        "title": "convert_to_markdownArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "convert_to_markdown": [
+      {
+        "case_name": "Basic URL Conversion to Markdown",
+        "purpose": "验证工具能否正确将远程网页URL转换为Markdown格式",
+        "args": {
+          "source": "https://example.com",
+          "source_type": "url"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred: [Errno 22] Invalid argument: '<!doctype html>\\n<html>\\n<head>\\n    <title>Example Domain</title>\\n\\n    <meta charset=\"utf-8\" />\\n    <meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" />\\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\\n    <style type=\"text/css\">\\n    body {\\n        background-color: #f0f0f2;\\n        margin: 0;\\n        padding: 0;\\n        font-family: -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;\\n        \\n    }\\n    div {\\n        width: 600px;\\n        margin: 5em auto;\\n        padding: 2em;\\n        background-color: #fdfdff;\\n        border-radius: 0.5em;\\n        box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);\\n    }\\n    a:link, a:visited {\\n        color: #38488f;\\n        text-decoration: none;\\n    }\\n    @media (max-width: 700px) {\\n        div {\\n            margin: 0 auto;\\n            width: auto;\\n        }\\n    }\\n    </style>    \\n</head>\\n\\n<body>\\n<div>\\n    <h1>Example Domain</h1>\\n    <p>This domain is for use in illustrative examples in documents. You may use this\\n    domain in literature without prior coordination or asking for permission.</p>\\n    <p><a href=\"https://www.iana.org/domains/example\">More information...</a></p>\\n</div>\\n</body>\\n</html>\\n'"
+        },
+        "execution_time": 1.6719188690185547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Local HTML File Conversion",
+        "purpose": "验证工具能否将本地HTML文件转换为结构化Markdown",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\present.html",
+          "source_type": "file"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred: [Errno 22] Invalid argument: '<!DOCTYPE html>\\n<html lang=\"zh-CN\">\\n<p>使用utf-8编码插入的HTML段落</p>\\n\\n<!-- 插入的注释 -->\\n'"
+        },
+        "execution_time": 0.03099989891052246,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Base64 Data URI Conversion",
+        "purpose": "验证工具能否处理base64编码的data URI并正确转换为Markdown",
+        "args": {
+          "source": "data:text/html;base64,PGh0bWw+PGJvZHk+PHA+SGVsbG8gd29ybGQ8L3A+PC9ib2R5PjwvaHRtbD4=",
+          "source_type": "data_uri"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred: [Errno 22] Invalid argument: '<html><body><p>Hello world</p></body></html>'"
+        },
+        "execution_time": 0.04000568389892578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unsupported Source Type Error",
+        "purpose": "验证工具在提供不支持的source_type时是否抛出ValueError",
+        "args": {
+          "source": "ftp://example.com/file.txt",
+          "source_type": "ftp"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: An error occurred: Unsupported source_type: ftp"
+        },
+        "execution_time": 0.04099678993225098,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-existent Local File Handling",
+        "purpose": "验证工具在指定的本地文件不存在时是否抛出FileNotFoundError",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.md",
+          "source_type": "file"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: File error: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.md"
+        },
+        "execution_time": 0.036000728607177734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Convert PDF File to Markdown",
+        "purpose": "验证工具是否能处理PDF文件并将其内容转换为Markdown格式",
+        "args": {
+          "source": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\rule1.pdf",
+          "source_type": "file"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: File error: [Errno 2] No such file or directory: 'Trying to overwrite a read-only file.'"
+        },
+        "execution_time": 0.045000314712524414,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long URL with Special Characters",
+        "purpose": "验证工具是否能处理包含特殊字符的长URL",
+        "args": {
+          "source": "https://example.com/page?query=%E6%B5%8B%E8%AF%95&param=value%21%40%23%24%25%5E%26*()%2B",
+          "source_type": "url"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: Client error '404 Not Found' for url 'https://example.com/page?query=%E6%B5%8B%E8%AF%95&param=value%21%40%23%24%25%5E%26*()%2B'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.8042232990264893,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Data URI with Invalid Encoding",
+        "purpose": "验证工具对无效编码的data URI的错误处理能力",
+        "args": {
+          "source": "data:text/plain;invalidencoding,SGVsbG8gd29ybGQ=",
+          "source_type": "data_uri"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool convert_to_markdown: File error: [Errno 2] No such file or directory: 'Hello world'"
+        },
+        "execution_time": 0.030513525009155273,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 8
+}

@@ -1,0 +1,783 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_ssh_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_ssh_manager/refined/server.py",
+  "timestamp": "2025-07-14T20:31:24.057586",
+  "tools": [
+    {
+      "name": "connect",
+      "description": "\n    Establishes an SSH connection to a remote server using either password or key-based authentication.\n    Automatically manages the session.\n\n    Args:\n        host (str): The hostname or IP address of the remote server.\n        port (int, optional): The port number for the SSH connection (default is 22).\n        username (str): The username for authentication.\n        password (str, optional): The password for password-based authentication.\n        key_path (str, optional): The path to the private key file for key-based authentication.\n\n    Returns:\n        A unique session identifier (str) representing the established SSH session.\n\n    Raises:\n        ValueError: If neither password nor key_path is provided.\n        paramiko.AuthenticationException: If authentication fails.\n        paramiko.SSHException: If there is an issue establishing the SSH connection.\n\n    Example:\n        connect(host=\"192.168.1.10\", port=22, username=\"admin\", password=\"password123\")\n    ",
+      "args_schema": {
+        "properties": {
+          "host": {
+            "default": "10.70.5.21",
+            "title": "Host",
+            "type": "string"
+          },
+          "port": {
+            "default": 26002,
+            "title": "Port",
+            "type": "integer"
+          },
+          "username": {
+            "default": "pengbocheng",
+            "title": "Username",
+            "type": "string"
+          },
+          "password": {
+            "default": "123456",
+            "title": "Password",
+            "type": "string"
+          },
+          "key_path": {
+            "default": null,
+            "title": "Key Path",
+            "type": "string"
+          }
+        },
+        "title": "connectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "disconnect",
+      "description": "\n    Disconnects a specified SSH session and releases associated resources.\n\n    Args:\n        session_id (str): The unique identifier of the SSH session to disconnect.\n\n    Returns:\n        A boolean indicating whether the disconnection was successful.\n\n    Raises:\n        ValueError: If the session_id does not exist.\n\n    Example:\n        disconnect(session_id=\"session_1\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "disconnectArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_sessions",
+      "description": "\n    Lists all currently active SSH sessions managed by the server.\n\n    Returns:\n        A list of dictionaries, each containing details about an active session such as `session_id`, `host`, `port`, `username`.\n\n    Example:\n        list_sessions()\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_sessionsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute",
+      "description": "\n    Executes a command on a specified SSH session with options for standard input and timeout settings.\n    Returns standard output, error output, and exit status.\n\n    Args:\n        session_id (str): The unique identifier of the SSH session.\n        command (str): The command to execute on the remote server.\n        stdin (str, optional): Standard input to pass to the command.\n        timeout (int, optional): Timeout in seconds for the command execution.\n\n    Returns:\n        A dictionary containing `stdout` (str), `stderr` (str), and `exit_status` (int).\n\n    Raises:\n        ValueError: If the session_id does not exist.\n        paramiko.SSHException: If there is an issue executing the command.\n\n    Example:\n        execute(session_id=\"session_1\", command=\"ls -la\", timeout=10)\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "command": {
+            "title": "Command",
+            "type": "string"
+          },
+          "stdin": {
+            "default": null,
+            "title": "Stdin",
+            "type": "string"
+          },
+          "timeout": {
+            "default": null,
+            "title": "Timeout",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "command"
+        ],
+        "title": "executeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "upload",
+      "description": "\n    Uploads a local file to a specified path on the remote SSH server.\n\n    Args:\n        session_id (str): The unique identifier of the SSH session.\n        local_path (str): The path to the local file to upload.\n        remote_path (str): The destination path on the remote server.\n\n    Returns:\n        A boolean indicating whether the upload was successful.\n\n    Raises:\n        ValueError: If the session_id does not exist.\n        FileNotFoundError: If the local file does not exist.\n        paramiko.SSHException: If there is an issue during file transfer.\n\n    Example:\n        upload(session_id=\"session_1\", local_path=\"/local/file.txt\", remote_path=\"/remote/file.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "local_path",
+          "remote_path"
+        ],
+        "title": "uploadArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download",
+      "description": "\n    Downloads a file from the remote SSH server to a specified local path.\n\n    Args:\n        session_id (str): The unique identifier of the SSH session.\n        remote_path (str): The path to the file on the remote server.\n        local_path (str): The destination path on the local machine.\n\n    Returns:\n        A boolean indicating whether the download was successful.\n\n    Raises:\n        ValueError: If the session_id does not exist.\n        FileNotFoundError: If the remote file does not exist.\n        paramiko.SSHException: If there is an issue during file transfer.\n\n    Example:\n        download(session_id=\"session_1\", remote_path=\"/remote/file.txt\", local_path=\"/local/file.txt\")\n    ",
+      "args_schema": {
+        "properties": {
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "remote_path": {
+            "title": "Remote Path",
+            "type": "string"
+          },
+          "local_path": {
+            "title": "Local Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "remote_path",
+          "local_path"
+        ],
+        "title": "downloadArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "connect": [
+      {
+        "case_name": "成功建立SSH连接使用默认参数",
+        "purpose": "验证工具能够使用默认参数成功建立SSH连接",
+        "args": {
+          "host": "10.70.5.21",
+          "port": 26002,
+          "username": "pengbocheng",
+          "password": "123456"
+        },
+        "response": {
+          "result": "session_1"
+        },
+        "execution_time": 0.23498773574829102,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用密码认证连接指定主机和端口",
+        "purpose": "测试使用自定义host、port、username和password进行SSH连接",
+        "args": {
+          "host": "192.168.1.10",
+          "port": 22,
+          "username": "admin",
+          "password": "securepassword"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: Unexpected error during connection: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 21.033352375030518,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用密钥认证建立SSH连接",
+        "purpose": "测试使用私钥文件路径进行SSH连接",
+        "args": {
+          "host": "192.168.1.11",
+          "port": 22,
+          "username": "developer",
+          "key_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\private_key.pem"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: Unexpected error during connection: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 21.039845943450928,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "未提供认证凭据导致错误",
+        "purpose": "测试不提供密码或密钥路径时是否抛出ValueError",
+        "args": {
+          "host": "192.168.1.12",
+          "port": 22,
+          "username": "guest"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: Unexpected error during connection: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 21.033663988113403,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效密码导致认证失败",
+        "purpose": "测试使用错误密码是否触发paramiko.AuthenticationException",
+        "args": {
+          "host": "192.168.1.13",
+          "port": 22,
+          "username": "user",
+          "password": "wrongpassword"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: Unexpected error during connection: [Errno None] Unable to connect to port 22 on 192.168.1.13"
+        },
+        "execution_time": 2.0446953773498535,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效主机地址导致连接失败",
+        "purpose": "测试无法解析的主机名是否会引发paramiko.SSHException",
+        "args": {
+          "host": "invalid.hostname.example",
+          "port": 22,
+          "username": "admin",
+          "password": "password"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: Unexpected error during connection: [Errno 11001] getaddrinfo failed"
+        },
+        "execution_time": 0.044345855712890625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符在用户名中处理",
+        "purpose": "测试包含特殊字符的用户名是否能正常处理（预期失败，用于边界测试）",
+        "args": {
+          "host": "192.168.1.14",
+          "port": 22,
+          "username": "user@with#special$chars",
+          "password": "password"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: Unexpected error during connection: [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。"
+        },
+        "execution_time": 21.050986766815186,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空密钥路径尝试连接",
+        "purpose": "测试key_path为None且无密码时是否抛出ValueError",
+        "args": {
+          "host": "192.168.1.15",
+          "port": 22,
+          "username": "tester",
+          "key_path": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool connect: 1 validation error for connectArguments\nkey_path\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.004091978073120117,
+        "is_functional_test": false
+      }
+    ],
+    "list_sessions": [
+      {
+        "case_name": "成功列出所有活动SSH会话",
+        "purpose": "验证工具能够正确获取当前服务器管理的所有活跃SSH会话信息",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.011702775955200195,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无任何活动SSH会话时返回空列表",
+        "purpose": "测试在没有活动SSH连接的情况下，list_sessions是否能优雅地返回空列表而非错误",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.004192352294921875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "验证会话数据字段完整性",
+        "purpose": "确认每个返回的会话字典中包含必要的字段如session_id、host、port、username",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.003998994827270508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "长时间运行后仍可稳定获取会话列表",
+        "purpose": "测试系统持续运行状态下，list_sessions功能保持稳定可用",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.006005287170410156,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "并发调用list_sessions不引发冲突",
+        "purpose": "确保多个用户或线程同时调用list_sessions不会导致数据混乱或异常",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.00699162483215332,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "非管理员用户调用list_sessions权限受限",
+        "purpose": "测试不具备足够权限的用户调用list_sessions是否会受到访问控制限制",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.005002498626708984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "服务器内部错误导致无法获取会话列表",
+        "purpose": "模拟服务器内部异常情况，验证list_sessions能否正确处理并返回错误信息",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.006000995635986328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超大量会话存在时性能评估",
+        "purpose": "测试当存在极端数量（如1000+）SSH会话时，list_sessions的响应时间和资源占用情况",
+        "args": {},
+        "response": {
+          "result": "{\n  \"session_id\": \"session_1\",\n  \"client\": \"<paramiko.client.SSHClient object at 0x0000013C9E171640>\",\n  \"host\": \"10.70.5.21\",\n  \"port\": 26002,\n  \"username\": \"pengbocheng\"\n}"
+        },
+        "execution_time": 0.007999658584594727,
+        "is_functional_test": false
+      }
+    ],
+    "execute": [
+      {
+        "case_name": "成功执行简单命令并返回结果",
+        "purpose": "验证execute工具能够在已建立的SSH会话中执行基本命令并正确返回stdout、stderr和exit_status",
+        "args": {
+          "session_id": "session_1",
+          "command": "echo 'Hello, World!'"
+        },
+        "response": {
+          "result": "{\n  \"stdout\": \"Hello, World!\\n\",\n  \"stderr\": \"\",\n  \"exit_status\": 0\n}"
+        },
+        "execution_time": 0.013999462127685547,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "执行命令并提供标准输入",
+        "purpose": "测试stdin参数是否能正确传递输入到远程命令",
+        "args": {
+          "session_id": "session_1",
+          "command": "cat",
+          "stdin": "This is standard input."
+        },
+        "response": {
+          "result": "{\n  \"stdout\": \"This is standard input.\",\n  \"stderr\": \"\",\n  \"exit_status\": 0\n}"
+        },
+        "execution_time": 0.04703378677368164,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "执行超时命令并触发超时异常",
+        "purpose": "验证timeout参数是否能正确限制命令执行时间",
+        "args": {
+          "session_id": "session_1",
+          "command": "sleep 10",
+          "timeout": 5
+        },
+        "response": {
+          "result": "{\n  \"stdout\": \"\",\n  \"stderr\": \"\",\n  \"exit_status\": 0\n}"
+        },
+        "execution_time": 10.048609018325806,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "执行不存在的命令返回错误信息",
+        "purpose": "测试工具是否能正确捕获并返回远程命令执行失败的错误信息",
+        "args": {
+          "session_id": "session_1",
+          "command": "invalid_command_123"
+        },
+        "response": {
+          "result": "{\n  \"stdout\": \"\",\n  \"stderr\": \"bash: line 1: invalid_command_123: command not found\\n\",\n  \"exit_status\": 127\n}"
+        },
+        "execution_time": 0.04700160026550293,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "使用不存在的会话ID执行命令抛出错误",
+        "purpose": "验证工具是否能正确检测无效的session_id并抛出ValueError",
+        "args": {
+          "session_id": "nonexistent_session",
+          "command": "ls"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool execute: No active session found with ID: nonexistent_session"
+        },
+        "execution_time": 0.008993864059448242,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "执行命令包含特殊字符的参数",
+        "purpose": "测试命令中包含特殊字符（如空格、引号、管道）是否被正确处理",
+        "args": {
+          "session_id": "session_1",
+          "command": "echo \"Hello | World\" > /tmp/test.txt"
+        },
+        "response": {
+          "result": "{\n  \"stdout\": \"\",\n  \"stderr\": \"\",\n  \"exit_status\": 0\n}"
+        },
+        "execution_time": 0.0370020866394043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "安全测试 - 执行命令尝试访问受限文件",
+        "purpose": "验证工具是否能防止通过执行命令非法访问敏感系统文件",
+        "args": {
+          "session_id": "session_1",
+          "command": "cat /etc/shadow"
+        },
+        "response": {
+          "result": "{\n  \"stdout\": \"\",\n  \"stderr\": \"cat: /etc/shadow: Permission denied\\n\",\n  \"exit_status\": 1\n}"
+        },
+        "execution_time": 0.0480046272277832,
+        "is_functional_test": false
+      }
+    ],
+    "upload": [
+      {
+        "case_name": "使用有效会话ID上传文件成功",
+        "purpose": "验证在有效会话ID、合法本地路径和远程路径下，文件上传功能正常",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.png",
+          "remote_path": "/remote/existing_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.013998031616210938,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试上传不存在的本地文件",
+        "purpose": "验证工具是否正确抛出FileNotFoundError当本地文件不存在",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.txt",
+          "remote_path": "/remote/nonexistent.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.014000892639160156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用无效会话ID进行上传",
+        "purpose": "验证工具是否抛出ValueError当提供的session_id无效",
+        "args": {
+          "session_id": "invalid_session",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.png",
+          "remote_path": "/remote/existing_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: No active session found with ID: invalid_session"
+        },
+        "execution_time": 0.0039980411529541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传文件时包含特殊字符的文件名",
+        "purpose": "测试上传文件名包含特殊字符是否能正常处理",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\file@with#special$chars!.txt",
+          "remote_path": "/remote/file@with#special$chars!.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.01700425148010254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传大文件测试性能",
+        "purpose": "测试上传大文件时工具的性能表现和稳定性",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.csv",
+          "remote_path": "/remote/large_data.csv"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.017569780349731445,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传文件到不存在的远程路径",
+        "purpose": "验证当远程路径不存在时，工具是否能正确处理并返回错误",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.png",
+          "remote_path": "/nonexistent/path/existing_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.019997596740722656,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "上传只读文件",
+        "purpose": "测试上传本地只读文件是否能正常进行",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly\\readonly_screenshot.png",
+          "remote_path": "/remote/readonly_screenshot.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.0169985294342041,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "上传文件时断开SSH连接模拟",
+        "purpose": "模拟SSH连接中断时，上传操作是否能正确抛出paramiko.SSHException",
+        "args": {
+          "session_id": "session_1",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.png",
+          "remote_path": "/remote/existing_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool upload: [Errno 2] No such file"
+        },
+        "execution_time": 0.013997077941894531,
+        "is_functional_test": false
+      }
+    ],
+    "download": [
+      {
+        "case_name": "成功下载远程文件使用有效会话和路径",
+        "purpose": "验证工具能够通过已存在的SSH会话从远程服务器下载文件到本地",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/existing_file.png",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/existing_file.png"
+        },
+        "execution_time": 0.011999845504760742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试使用无效session_id下载文件",
+        "purpose": "测试当提供的session_id不存在时是否抛出ValueError",
+        "args": {
+          "session_id": "invalid_session",
+          "remote_path": "/remote/existing_file.png",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: No active session found with ID: invalid_session"
+        },
+        "execution_time": 0.00599980354309082,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试下载远程不存在的文件",
+        "purpose": "验证当远程文件不存在时是否抛出FileNotFoundError",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/nonexistent.txt",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_file.txt"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/nonexistent.txt"
+        },
+        "execution_time": 0.015008211135864258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "下载文件到本地只读目录",
+        "purpose": "测试当本地路径不可写时是否能正确处理异常",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/existing_file.png",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\readonly\\downloaded_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/existing_file.png"
+        },
+        "execution_time": 0.0189971923828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符在远程路径中下载文件",
+        "purpose": "测试包含特殊字符的远程路径是否能正常处理",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/file@with#special$name.jpg",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_special_name.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/file@with#special$name.jpg"
+        },
+        "execution_time": 0.015996217727661133,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "下载大文件验证传输稳定性",
+        "purpose": "测试工具在下载较大文件时的稳定性和完整性",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/large_data.zip",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\downloaded_large.zip"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/large_data.zip"
+        },
+        "execution_time": 0.01599717140197754,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "下载过程中网络中断模拟",
+        "purpose": "模拟下载过程中网络中断，验证工具是否能正确捕获paramiko.SSHException",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/existing_file.png",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\interrupted_download.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/existing_file.png"
+        },
+        "execution_time": 0.015763282775878906,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "尝试覆盖已存在的本地文件",
+        "purpose": "测试工具在目标文件已存在时是否允许覆盖或抛出异常",
+        "args": {
+          "session_id": "session_1",
+          "remote_path": "/remote/existing_file.png",
+          "local_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\existing_file.png"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download: Remote file not found: /remote/existing_file.png"
+        },
+        "execution_time": 0.017230749130249023,
+        "is_functional_test": true
+      }
+    ],
+    "disconnect": [
+      {
+        "case_name": "成功断开有效SSH会话",
+        "purpose": "验证工具能够正确断开一个已存在的SSH会话并释放资源",
+        "args": {
+          "session_id": "session_1"
+        },
+        "response": {
+          "result": "true"
+        },
+        "execution_time": 0.004004001617431641,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "尝试断开不存在的SSH会话",
+        "purpose": "测试当指定的session_id不存在时，工具是否抛出ValueError",
+        "args": {
+          "session_id": "nonexistent_session"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: nonexistent_session"
+        },
+        "execution_time": 0.006001472473144531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用空字符串作为session_id进行断开尝试",
+        "purpose": "测试工具对非法空字符串session_id的处理能力",
+        "args": {
+          "session_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: "
+        },
+        "execution_time": 0.006999492645263672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "使用特殊字符的session_id尝试断开连接",
+        "purpose": "验证工具是否能正确处理包含特殊字符的session_id输入",
+        "args": {
+          "session_id": "session@with#special$chars"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: session@with#special$chars"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "重复调用disconnect断开同一个会话",
+        "purpose": "测试工具在尝试断开已经断开的会话时的行为是否一致",
+        "args": {
+          "session_id": "session_1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: session_1"
+        },
+        "execution_time": 0.0061473846435546875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "并发调用disconnect断开同一会话",
+        "purpose": "验证多线程或并发调用disconnect时是否会引发异常或资源冲突",
+        "args": {
+          "session_id": "session_1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: session_1"
+        },
+        "execution_time": 0.006985664367675781,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "断开后检查会话是否从列表中移除",
+        "purpose": "确保断开会话后，list_sessions不再显示该会话",
+        "args": {
+          "session_id": "session_1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: session_1"
+        },
+        "execution_time": 0.0053784847259521484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "断开会话后资源是否正确释放",
+        "purpose": "验证断开会话后底层SSH客户端资源是否被正确关闭和释放",
+        "args": {
+          "session_id": "session_1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool disconnect: No active session found with ID: session_1"
+        },
+        "execution_time": 0.00656580924987793,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 47
+}

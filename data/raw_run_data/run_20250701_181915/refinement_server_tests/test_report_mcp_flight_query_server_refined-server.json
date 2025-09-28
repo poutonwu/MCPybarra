@@ -1,0 +1,686 @@
+{
+  "server_name": "server",
+  "parent_dir": "mcp_flight_query_server_refined",
+  "report_name": "mcp_flight_query_server_refined-server",
+  "server_path": "workspace\\refinement\\mcp_flight_query_server_refined\\server.py",
+  "timestamp": "2025-07-01T18:34:10.996931",
+  "tools": [
+    {
+      "name": "search_flights",
+      "description": "\n    根据指定参数搜索航班信息。\n\n    Args:\n        origin: 出发地的IATA代码 (必填)。\n        destination: 目的地的IATA代码 (必填)。\n        departure_date: 出发日期，格式为YYYY-MM-DD (必填)。\n        cabin_class: 舱位等级，默认为经济舱（可选：economy, premium_economy, business, first）。\n        trip_type: 行程类型（one_way 单程 / round_trip 往返 / multi_city 多城市）。\n        return_date: 返回日期，仅在往返行程时使用，格式为YYYY-MM-DD。\n        adults: 成人数量，默认为1。\n        children: 儿童数量，默认为0。\n        infants: 婴儿数量，默认为0。\n\n    Returns:\n        包含航班信息的JSON字符串，包括价格、时间、航空公司等详细信息。\n\n    Raises:\n        ValueError: 如果输入参数不合法或不符合API要求。\n        Exception: 如果调用Duffel API过程中发生错误。\n    \n    示例:\n        search_flights(origin=\"LHR\", destination=\"JFK\", departure_date=\"2023-10-15\")\n    ",
+      "args_schema": {
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "departure_date": {
+            "title": "Departure Date",
+            "type": "string"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "trip_type": {
+            "default": "one_way",
+            "title": "Trip Type",
+            "type": "string"
+          },
+          "return_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Return Date"
+          },
+          "adults": {
+            "default": 1,
+            "title": "Adults",
+            "type": "integer"
+          },
+          "children": {
+            "default": 0,
+            "title": "Children",
+            "type": "integer"
+          },
+          "infants": {
+            "default": 0,
+            "title": "Infants",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "origin",
+          "destination",
+          "departure_date"
+        ],
+        "title": "search_flightsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_offer_details",
+      "description": "\n    获取特定航班报价的详细信息。\n\n    Args:\n        offer_id: 航班报价的唯一标识符 (必填)。\n\n    Returns:\n        包含报价详细信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果offer_id无效。\n        Exception: 如果调用Duffel API过程中发生错误。\n\n    示例:\n        get_offer_details(offer_id=\"off_1234567890\")\n    ",
+      "args_schema": {
+        "properties": {
+          "offer_id": {
+            "title": "Offer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offer_id"
+        ],
+        "title": "get_offer_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_multi_city",
+      "description": "\n    处理多城市航班查询，支持复杂的行程规划。\n\n    Args:\n        routes: 包含多个行程段的列表，每个段包含出发地、目的地和出发日期。\n            示例格式: [{\"origin\": \"LHR\", \"destination\": \"AMS\", \"departure_date\": \"2023-10-15\"},\n                      {\"origin\": \"AMS\", \"destination\": \"JFK\", \"departure_date\": \"2023-10-18\"}]\n        cabin_class: 舱位等级，默认为经济舱。\n        adults: 成人数量，默认为1。\n        children: 儿童数量，默认为0。\n        infants: 婴儿数量，默认为0。\n\n    Returns:\n        包含多城市航班信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果routes格式不正确或缺少必要字段。\n        Exception: 如果调用Duffel API过程中发生错误。\n\n    示例:\n        search_multi_city(routes=[{\n            \"origin\": \"LHR\",\n            \"destination\": \"AMS\",\n            \"departure_date\": \"2023-10-15\"\n        }, {\n            \"origin\": \"AMS\",\n            \"destination\": \"JFK\",\n            \"departure_date\": \"2023-10-18\"\n        }])\n    ",
+      "args_schema": {
+        "properties": {
+          "routes": {
+            "items": {
+              "type": "object"
+            },
+            "title": "Routes",
+            "type": "array"
+          },
+          "cabin_class": {
+            "default": "economy",
+            "title": "Cabin Class",
+            "type": "string"
+          },
+          "adults": {
+            "default": 1,
+            "title": "Adults",
+            "type": "integer"
+          },
+          "children": {
+            "default": 0,
+            "title": "Children",
+            "type": "integer"
+          },
+          "infants": {
+            "default": 0,
+            "title": "Infants",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "routes"
+        ],
+        "title": "search_multi_cityArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_flights": [
+      {
+        "case_name": "基本单程航班搜索",
+        "purpose": "验证使用默认参数进行单程航班搜索的基本功能是否正常",
+        "args": {
+          "origin": "LHR",
+          "destination": "JFK",
+          "departure_date": "2023-10-15"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.8319399356842041,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定舱位等级的往返航班搜索",
+        "purpose": "验证指定舱位等级和往返行程的航班搜索功能",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2023-11-01",
+          "cabin_class": "business",
+          "trip_type": "round_trip",
+          "return_date": "2023-11-08"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4165174961090088,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "多城市航班搜索",
+        "purpose": "验证多城市行程类型的航班搜索功能",
+        "args": {
+          "origin": "SFO",
+          "destination": "CHI",
+          "departure_date": "2024-01-10",
+          "trip_type": "multi_city"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4177417755126953,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "带乘客数量的经济舱航班搜索",
+        "purpose": "验证包含成人、儿童和婴儿数量的航班搜索功能",
+        "args": {
+          "origin": "AMS",
+          "destination": "MAD",
+          "departure_date": "2023-09-20",
+          "adults": 2,
+          "children": 1,
+          "infants": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.41715335845947266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效出发地IATA代码测试",
+        "purpose": "验证工具对无效出发地IATA代码的处理",
+        "args": {
+          "origin": "XYZ",
+          "destination": "JFK",
+          "departure_date": "2023-10-15"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.41887378692626953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未来日期边界测试",
+        "purpose": "验证最大合法日期输入，确保不会导致系统错误",
+        "args": {
+          "origin": "LHR",
+          "destination": "JFK",
+          "departure_date": "2030-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4198033809661865,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非字符串参数注入测试",
+        "purpose": "验证工具是否能够正确拒绝非字符串类型的输入（安全性）",
+        "args": {
+          "origin": 123,
+          "destination": "JFK",
+          "departure_date": "2023-10-15"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 1 validation error for search_flightsArguments\norigin\n  Input should be a valid string [type=string_type, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.00518035888671875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "验证工具是否能安全处理恶意构造的输入（安全性）",
+        "args": {
+          "origin": "LHR' OR '1'='1",
+          "destination": "JFK",
+          "departure_date": "2023-10-15"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 出发地代码无效: 'LHR' OR '1'='1'。必须是三个大写字母的IATA代码。"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "返回日期缺失的往返行程测试",
+        "purpose": "验证在trip_type为往返但未提供返回日期时的错误处理",
+        "args": {
+          "origin": "JFK",
+          "destination": "LAX",
+          "departure_date": "2023-11-01",
+          "trip_type": "round_trip"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 往返行程需要提供返回日期。"
+        },
+        "execution_time": 0.003509044647216797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "最小乘客数量测试",
+        "purpose": "验证乘客数量的最小边界值是否被正确处理",
+        "args": {
+          "origin": "CDG",
+          "destination": "FRA",
+          "departure_date": "2023-08-01",
+          "adults": 0,
+          "children": -1,
+          "infants": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 乘客数量不能为负数。"
+        },
+        "execution_time": 0.004998445510864258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符IATA代码测试",
+        "purpose": "验证工具对包含特殊字符的IATA代码的处理能力",
+        "args": {
+          "origin": "L@H",
+          "destination": "J#K",
+          "departure_date": "2023-10-15"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 出发地代码无效: 'L@H'。必须是三个大写字母的IATA代码。"
+        },
+        "execution_time": 0.0035092830657958984,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "跨年往返航班搜索",
+        "purpose": "验证跨越年度的往返航班搜索功能",
+        "args": {
+          "origin": "SYD",
+          "destination": "AKL",
+          "departure_date": "2023-12-28",
+          "trip_type": "round_trip",
+          "return_date": "2024-01-05"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_flights: 搜索航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4179573059082031,
+        "is_functional_test": true
+      }
+    ],
+    "get_offer_details": [
+      {
+        "case_name": "获取有效报价详情",
+        "purpose": "验证使用有效的offer_id可以成功获取报价详细信息",
+        "args": {
+          "offer_id": "off_1234567890"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 获取报价详情失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4145669937133789,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无效报价ID测试",
+        "purpose": "验证工具对无效offer_id的处理能力",
+        "args": {
+          "offer_id": "invalid_offer_id"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 无效的offer_id格式: 'invalid_offer_id'。必须以'off_'开头。"
+        },
+        "execution_time": 0.004299163818359375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空报价ID测试",
+        "purpose": "验证当提供空字符串作为offer_id时的错误处理",
+        "args": {
+          "offer_id": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: offer_id必须是非空字符串。"
+        },
+        "execution_time": 0.00400233268737793,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符报价ID测试",
+        "purpose": "验证工具是否能安全处理包含特殊字符的offer_id输入",
+        "args": {
+          "offer_id": "off_!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 获取报价详情失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4194474220275879,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "验证工具是否能安全处理恶意构造的offer_id输入（如SQL注入）",
+        "args": {
+          "offer_id": "off_12345 OR '1'='1"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 获取报价详情失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.416656494140625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非字符串类型报价ID测试",
+        "purpose": "验证工具是否能够正确拒绝非字符串类型的offer_id输入",
+        "args": {
+          "offer_id": 1234567890
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 1 validation error for get_offer_detailsArguments\noffer_id\n  Input should be a valid string [type=string_type, input_value=1234567890, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.004001617431640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "超长报价ID边界测试",
+        "purpose": "验证工具对极长offer_id的处理能力",
+        "args": {
+          "offer_id": "off_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 获取报价详情失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.41731739044189453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "调用Duffel API失败模拟",
+        "purpose": "验证当Duffel API调用失败时，工具能否正确抛出异常",
+        "args": {
+          "offer_id": "off_api_failure"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_offer_details: 获取报价详情失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.41139912605285645,
+        "is_functional_test": false
+      }
+    ],
+    "search_multi_city": [
+      {
+        "case_name": "基本多城市航班搜索",
+        "purpose": "验证使用默认参数进行多城市航班搜索的基本功能是否正常",
+        "args": {
+          "routes": [
+            {
+              "origin": "LHR",
+              "destination": "AMS",
+              "departure_date": "2023-10-15"
+            },
+            {
+              "origin": "AMS",
+              "destination": "JFK",
+              "departure_date": "2023-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 1.1935350894927979,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定舱位等级的多城市航班搜索",
+        "purpose": "验证指定舱位等级下的多城市航班搜索功能",
+        "args": {
+          "routes": [
+            {
+              "origin": "JFK",
+              "destination": "LAX",
+              "departure_date": "2023-11-01"
+            },
+            {
+              "origin": "LAX",
+              "destination": "SFO",
+              "departure_date": "2023-11-05"
+            }
+          ],
+          "cabin_class": "business"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4279611110687256,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "带乘客数量的多城市航班搜索",
+        "purpose": "验证包含成人、儿童和婴儿数量的多城市航班搜索功能",
+        "args": {
+          "routes": [
+            {
+              "origin": "AMS",
+              "destination": "MAD",
+              "departure_date": "2023-09-20"
+            },
+            {
+              "origin": "MAD",
+              "destination": "CDG",
+              "departure_date": "2023-09-25"
+            }
+          ],
+          "adults": 2,
+          "children": 1,
+          "infants": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4315609931945801,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "SQL注入尝试测试",
+        "purpose": "验证工具是否能安全处理恶意构造的输入（安全性）",
+        "args": {
+          "routes": [
+            {
+              "origin": "LHR' OR '1'='1",
+              "destination": "JFK",
+              "departure_date": "2023-10-15"
+            },
+            {
+              "origin": "JFK",
+              "destination": "AMS",
+              "departure_date": "2023-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 第1个行程段的出发地代码无效: 'LHR' OR '1'='1'。必须是三个大写字母的IATA代码。"
+        },
+        "execution_time": 0.0035114288330078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效出发地IATA代码测试",
+        "purpose": "验证工具对无效出发地IATA代码的处理",
+        "args": {
+          "routes": [
+            {
+              "origin": "XYZ",
+              "destination": "JFK",
+              "departure_date": "2023-10-15"
+            },
+            {
+              "origin": "JFK",
+              "destination": "ABC",
+              "departure_date": "2023-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.427351713180542,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非字符串参数注入测试",
+        "purpose": "验证工具是否能够正确拒绝非字符串类型的输入（安全性）",
+        "args": {
+          "routes": [
+            {
+              "origin": 123,
+              "destination": "JFK",
+              "departure_date": "2023-10-15"
+            },
+            {
+              "origin": "JFK",
+              "destination": 456,
+              "departure_date": "2023-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: expected string or bytes-like object, got 'int'。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.0034601688385009766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "未来日期边界测试",
+        "purpose": "验证最大合法日期输入，确保不会导致系统错误",
+        "args": {
+          "routes": [
+            {
+              "origin": "LHR",
+              "destination": "AMS",
+              "departure_date": "2030-12-31"
+            },
+            {
+              "origin": "AMS",
+              "destination": "JFK",
+              "departure_date": "2031-01-01"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4248998165130615,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "最小乘客数量测试",
+        "purpose": "验证乘客数量的最小边界值是否被正确处理",
+        "args": {
+          "routes": [
+            {
+              "origin": "CDG",
+              "destination": "FRA",
+              "departure_date": "2023-08-01"
+            },
+            {
+              "origin": "FRA",
+              "destination": "MUC",
+              "departure_date": "2023-08-05"
+            }
+          ],
+          "adults": 0,
+          "children": -1,
+          "infants": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.4307537078857422,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "特殊字符IATA代码测试",
+        "purpose": "验证工具对包含特殊字符的IATA代码的处理能力",
+        "args": {
+          "routes": [
+            {
+              "origin": "L@H",
+              "destination": "J#K",
+              "departure_date": "2023-10-15"
+            },
+            {
+              "origin": "T!E",
+              "destination": "S$O",
+              "departure_date": "2023-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 第1个行程段的出发地代码无效: 'L@H'。必须是三个大写字母的IATA代码。"
+        },
+        "execution_time": 0.005453824996948242,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "跨年多城市航班搜索",
+        "purpose": "验证跨越年度的多城市航班搜索功能",
+        "args": {
+          "routes": [
+            {
+              "origin": "SYD",
+              "destination": "AKL",
+              "departure_date": "2023-12-28"
+            },
+            {
+              "origin": "AKL",
+              "destination": "SIN",
+              "departure_date": "2024-01-05"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 搜索多城市航班失败: invalid_request_error: Unsupported version: The version set in the 'Duffel-Version' header is no longer supported by the API. Please upgrade.。建议检查网络连接并确认Duffel API服务状态。"
+        },
+        "execution_time": 0.434539794921875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空行程列表测试",
+        "purpose": "验证当提供空的routes列表时的错误处理",
+        "args": {
+          "routes": []
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: routes必须是一个非空列表。"
+        },
+        "execution_time": 0.003003835678100586,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "缺少必要字段的行程段测试",
+        "purpose": "验证当某个行程段缺少必要字段时的错误处理",
+        "args": {
+          "routes": [
+            {
+              "origin": "LHR",
+              "destination": "AMS"
+            },
+            {
+              "origin": "AMS",
+              "departure_date": "2023-10-18"
+            }
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_multi_city: 第1个行程段缺少必要字段: origin, destination 或 departure_date。"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 32
+}

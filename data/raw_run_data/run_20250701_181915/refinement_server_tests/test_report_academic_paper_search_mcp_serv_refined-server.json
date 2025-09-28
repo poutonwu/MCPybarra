@@ -1,0 +1,499 @@
+{
+  "server_name": "server",
+  "parent_dir": "academic_paper_search_mcp_serv_refined",
+  "report_name": "academic_paper_search_mcp_serv_refined-server",
+  "server_path": "workspace\\refinement\\academic_paper_search_mcp_serv_refined\\server.py",
+  "timestamp": "2025-07-01T18:34:10.953617",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    根据关键词搜索学术论文。\n\n    Args:\n        keywords: 搜索关键词 (字符串类型，必填)。\n        max_results: 最大结果数量 (整数类型，必填)。\n\n    Returns:\n        包含论文列表的JSON格式字符串。\n\n    Raises:\n        ValueError: 如果输入参数无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n\n    示例:\n        search_papers(keywords=\"machine learning\", max_results=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "max_results": {
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords",
+          "max_results"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "fetch_paper_details",
+      "description": "\n    根据论文ID从指定来源获取论文详细信息。\n\n    Args:\n        paper_id: 论文ID，可以是DOI或Semantic Scholar ID (字符串类型，必填)。\n        source: 来源 ('semantic_scholar' 或 'crossref') (字符串类型，必填)。\n\n    Returns:\n        包含论文详细信息的JSON格式字符串。\n\n    Raises:\n        ValueError: 如果输入参数无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n\n    示例:\n        fetch_paper_details(paper_id=\"10.1145/3368089.3409732\", source=\"crossref\")\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id",
+          "source"
+        ],
+        "title": "fetch_paper_detailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_by_topic",
+      "description": "\n    根据主题关键词搜索论文，优先使用Semantic Scholar。\n\n    Args:\n        topic_keywords: 主题关键词 (字符串类型，必填)。\n        year_range: 年份范围 (例如 '2010-2020')，可选 (字符串类型)。\n        max_results: 最大结果数量，默认为10 (整数类型)。\n\n    Returns:\n        包含论文列表的JSON格式字符串。\n\n    Raises:\n        ValueError: 如果输入参数无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n\n    示例:\n        search_by_topic(topic_keywords=\"artificial intelligence\", year_range=\"2015-2020\", max_results=3)\n    ",
+      "args_schema": {
+        "properties": {
+          "topic_keywords": {
+            "title": "Topic Keywords",
+            "type": "string"
+          },
+          "year_range": {
+            "default": null,
+            "title": "Year Range",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "topic_keywords"
+        ],
+        "title": "search_by_topicArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Paper Search with Valid Keywords and Default Results",
+        "purpose": "验证使用有效关键词和默认最大结果数时能否成功搜索论文",
+        "args": {
+          "keywords": "machine learning",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=machine%20learning&limit=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.456726312637329,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Paper With Chinese Keywords",
+        "purpose": "验证是否支持中文关键词的学术论文搜索",
+        "args": {
+          "keywords": "人工智能",
+          "max_results": 3
+        },
+        "response": {
+          "result": "{\"papers\": [{\"title\": \"\\u4eba\\u5de5\\u667a\\u80fd\\u8d4b\\u80fd\\u9ad8\\u6821\\u5b66\\u751f\\u601d\\u60f3\\u653f\\u6cbb\\u6559\\u80b2\\u7814\\u7a76\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"\\u57fa\\u4e8e\\u4eba\\u5de5\\u667a\\u80fd\\u6280\\u672f\\u7684\\u4f53\\u80b2\\u4ea7\\u4e1a\\u7ba1\\u7406\\u4e0e\\u521b\\u65b0\\u6a21\\u5f0f\\u7814\\u7a76\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"\\u65b0\\u8d28\\u751f\\u4ea7\\u529b\\u89c6\\u57df\\u4e0b\\u4eba\\u5de5\\u667a\\u80fd\\u8d4b\\u80fd\\u5927\\u5b66\\u751f\\u5c31\\u4e1a\\u76d1\\u6d4b\\u53cd\\u9988\\u673a\\u5236\\u7684\\u8def\\u5f84\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}]}"
+        },
+        "execution_time": 1.866835117340088,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Paper With Special Characters in Keywords",
+        "purpose": "测试特殊字符在关键词中是否被正确处理",
+        "args": {
+          "keywords": "quantum@computing!2025",
+          "max_results": 4
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=quantum@computing!2025&limit=4'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.4921228885650635,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search With Maximum Allowed Results",
+        "purpose": "测试系统允许的最大结果数量是否能正常返回数据",
+        "args": {
+          "keywords": "deep learning",
+          "max_results": 100
+        },
+        "response": {
+          "result": "{\"papers\": [{\"title\": \"PyTorch: An Imperative Style, High-Performance Deep Learning Library\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Towards Deep Learning Models Resistant to Adversarial Attacks\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Review of deep learning: concepts, CNN architectures, challenges, applications, future directions\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"A survey on Image Data Augmentation for Deep Learning\", \"authors\": [], \"year\": \"N/A\", \"doi\":...[截断]，共计12210字符，剩余11410字符"
+        },
+        "execution_time": 1.9418938159942627,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search With Minimum Result Count",
+        "purpose": "验证最小结果数（1）是否正常工作",
+        "args": {
+          "keywords": "neural networks",
+          "max_results": 1
+        },
+        "response": {
+          "result": "{\"papers\": [{\"title\": \"Finding Chaos in Noisy Systems\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}]}"
+        },
+        "execution_time": 1.796151876449585,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Keywords Input Type Test",
+        "purpose": "验证当传入非字符串类型的关键词时是否抛出ValueError",
+        "args": {
+          "keywords": 123,
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 1 validation error for search_papersArguments\nkeywords\n  Input should be a valid string [type=string_type, input_value=123, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.003503561019897461,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value Test",
+        "purpose": "验证负数作为最大结果数时是否抛出ValueError",
+        "args": {
+          "keywords": "blockchain",
+          "max_results": -5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: max_results必须是正整数"
+        },
+        "execution_time": 0.005004405975341797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Keywords Search Test",
+        "purpose": "验证空关键词是否触发参数校验异常",
+        "args": {
+          "keywords": "",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: keywords必须是非空字符串"
+        },
+        "execution_time": 0.007435321807861328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Max Results Exceeding System Limit",
+        "purpose": "测试超过系统允许的最大结果数是否被正确拒绝",
+        "args": {
+          "keywords": "cybersecurity",
+          "max_results": 1000
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=cybersecurity&limit=1000'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.2238619327545166,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in Keywords",
+        "purpose": "验证是否存在关键词注入漏洞（如SQL/命令注入尝试）",
+        "args": {
+          "keywords": "robotics; DROP TABLE papers;",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=robotics;%20DROP%20TABLE%20papers;&limit=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.4427108764648438,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Single Character Keyword",
+        "purpose": "测试单个字符作为关键词是否能正确处理",
+        "args": {
+          "keywords": "A",
+          "max_results": 2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: 搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=A&limit=2'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.454838752746582,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Zero Results Requested",
+        "purpose": "测试请求0个结果时是否返回空列表或报错",
+        "args": {
+          "keywords": "cloud computing",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_papers: max_results必须是正整数"
+        },
+        "execution_time": 0.0029976367950439453,
+        "is_functional_test": true
+      }
+    ],
+    "search_by_topic": [
+      {
+        "case_name": "Basic Paper Search with Valid Keywords",
+        "purpose": "验证使用有效关键词和默认最大结果数时能否成功搜索论文",
+        "args": {
+          "topic_keywords": "machine learning"
+        },
+        "response": {
+          "result": "{\"papers\": [{\"title\": \"Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"TensorFlow: Large-Scale Machine Learning on Heterogeneous Distributed Systems\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"A Survey on Bias and Fairness in Machine Learning\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Membership Inference Attacks Against Machine Learning Models\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"An Introduction to Machine Learning\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Convoluti...[截断]，共计1234字符，剩余434字符"
+        },
+        "execution_time": 1.9264960289001465,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search with Specific Max Results",
+        "purpose": "验证指定max_results参数是否能正确返回对应数量的论文",
+        "args": {
+          "topic_keywords": "blockchain",
+          "max_results": 5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=blockchain&limit=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.1172163486480713,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Paper Search within Year Range",
+        "purpose": "验证在指定年份范围内搜索论文是否生效",
+        "args": {
+          "topic_keywords": "neural networks",
+          "year_range": "2010-2020"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=neural%20networks&limit=10&year=2010-2020'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.4004411697387695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Search with All Parameters",
+        "purpose": "验证同时使用关键词、年份范围和最大结果数是否能正常工作",
+        "args": {
+          "topic_keywords": "deep learning",
+          "year_range": "2015-2023",
+          "max_results": 7
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=deep%20learning&limit=7&year=2015-2023'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.431978464126587,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Paper With Chinese Keywords",
+        "purpose": "验证是否支持中文关键词的学术论文搜索",
+        "args": {
+          "topic_keywords": "人工智能"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD&limit=10'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.0925867557525635,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - SQL Injection Attempt in Keywords",
+        "purpose": "验证是否存在关键词SQL注入漏洞",
+        "args": {
+          "topic_keywords": "robotics; DROP TABLE papers;"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=robotics;%20DROP%20TABLE%20papers;&limit=10'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.3501672744750977,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Command Injection Attempt in Keywords",
+        "purpose": "验证是否存在命令注入漏洞（如通过分号传递额外命令）",
+        "args": {
+          "topic_keywords": "cybersecurity; rm -rf /tmp"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 主题搜索失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/search?query=cybersecurity;%20rm%20-rf%20/tmp&limit=10'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.1082463264465332,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Keywords Input Type Test",
+        "purpose": "验证当传入非字符串类型的关键词时是否抛出ValueError",
+        "args": {
+          "topic_keywords": 12345
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: 1 validation error for search_by_topicArguments\ntopic_keywords\n  Input should be a valid string [type=string_type, input_value=12345, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.018654584884643555,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Keywords Search Test",
+        "purpose": "验证空关键词是否触发参数校验异常",
+        "args": {
+          "topic_keywords": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: topic_keywords必须是非空字符串"
+        },
+        "execution_time": 0.01658153533935547,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value Test",
+        "purpose": "验证负数作为最大结果数时是否抛出ValueError",
+        "args": {
+          "topic_keywords": "blockchain",
+          "max_results": -5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: max_results必须是正整数"
+        },
+        "execution_time": 0.011555910110473633,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Single Character Keyword",
+        "purpose": "测试单个字符作为关键词是否能正确处理",
+        "args": {
+          "topic_keywords": "A"
+        },
+        "response": {
+          "result": "{\"papers\": [{\"title\": \"The spectrum of disease in chronic traumatic encephalopathy.\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Fundamentals of Recurrent Neural Network (RNN) and Long Short-Term Memory (LSTM) Network\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Sensitivity of revised diagnostic criteria for the behavioural variant of frontotemporal dementia.\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Pattern classification and scene analysis\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Density-functional exchange-energy approximation with correct asymptotic behavior.\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Elementary gates for quantum computation.\", \"authors\": [], \"year\": \"N/A\", \"doi\": \"N/A\"}, {\"title\": \"Graph theoret...[截断]，共计1320字符，剩余520字符"
+        },
+        "execution_time": 1.9044747352600098,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Zero Results Requested",
+        "purpose": "测试请求0个结果时是否返回空列表或报错",
+        "args": {
+          "topic_keywords": "cloud computing",
+          "max_results": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_by_topic: max_results必须是正整数"
+        },
+        "execution_time": 0.002000093460083008,
+        "is_functional_test": true
+      }
+    ],
+    "fetch_paper_details": [
+      {
+        "case_name": "Basic Paper Details Fetch with Valid DOI and Crossref",
+        "purpose": "验证使用有效的DOI和crossref来源能否成功获取论文详细信息",
+        "args": {
+          "paper_id": "10.1145/3368089.3409732",
+          "source": "crossref"
+        },
+        "response": {
+          "result": "{\"title\": \"Inductive program synthesis over noisy data\", \"authors\": [\"Shivam Handa\", \"Martin C. Rinard\"], \"abstract\": \"N/A\", \"venue\": \"Proceedings of the 28th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering\"}"
+        },
+        "execution_time": 2.041233539581299,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Basic Paper Details Fetch with Valid Semantic Scholar ID",
+        "purpose": "验证使用有效的Semantic Scholar ID能否成功获取论文详细信息",
+        "args": {
+          "paper_id": "abcd1234efgh5678ijklmnopqrstuvwx",
+          "source": "semantic_scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 获取论文详情失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/abcd1234efgh5678ijklmnopqrstuvwx'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.647963285446167,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Fetch Paper Details With Empty PaperID",
+        "purpose": "验证空字符串作为paper_id时是否抛出ValueError",
+        "args": {
+          "paper_id": "",
+          "source": "crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: paper_id必须是非空字符串"
+        },
+        "execution_time": 0.003582477569580078,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Paper Details With Invalid Source",
+        "purpose": "验证无效的source参数是否触发异常",
+        "args": {
+          "paper_id": "10.1145/3368089.3409732",
+          "source": "invalid_source"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: source必须是'semantic_scholar'或'crossref'"
+        },
+        "execution_time": 0.0030066967010498047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Fetch Paper Details With NonString PaperID",
+        "purpose": "验证非字符串类型的paper_id是否被拒绝",
+        "args": {
+          "paper_id": 1234567890,
+          "source": "semantic_scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 1 validation error for fetch_paper_detailsArguments\npaper_id\n  Input should be a valid string [type=string_type, input_value=1234567890, input_type=int]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.00626826286315918,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Injection Attempt in PaperID",
+        "purpose": "验证是否存在PaperID注入漏洞（如特殊字符尝试）",
+        "args": {
+          "paper_id": "test; DROP TABLE papers;",
+          "source": "crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 获取论文详情失败: Client error '404 Not Found' for url 'https://api.crossref.org/works/test;%20DROP%20TABLE%20papers;'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 2.000213384628296,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Max Length PaperID for Semantic Scholar",
+        "purpose": "测试最大长度的Semantic Scholar ID是否能正确处理",
+        "args": {
+          "paper_id": "abcdefghijklmnopqrstuvwxyzaaaaaa",
+          "source": "semantic_scholar"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 获取论文详情失败: Client error '429 ' for url 'https://api.semanticscholar.org/graph/v1/paper/abcdefghijklmnopqrstuvwxyzaaaaaa'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        },
+        "execution_time": 1.4106099605560303,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Special Characters in PaperID",
+        "purpose": "测试包含特殊字符的PaperID是否被正确处理",
+        "args": {
+          "paper_id": "paper@id!with#special$chars",
+          "source": "crossref"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool fetch_paper_details: 获取论文详情失败: Client error '404 Not Found' for url 'https://api.crossref.org/works/paper@id!with#special$chars'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 3.0326499938964844,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 32
+}

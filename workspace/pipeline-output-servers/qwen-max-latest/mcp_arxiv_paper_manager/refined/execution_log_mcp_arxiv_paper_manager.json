@@ -1,0 +1,185 @@
+[
+  {
+    "step": {
+      "step_id": "search_papers_valid",
+      "tool_name": "search_papers",
+      "parameters": {
+        "query": "quantum computing"
+      },
+      "description": "Happy path: Search for papers related to 'quantum computing' and verify the response includes valid paper metadata."
+    },
+    "substituted_params": {
+      "query": "quantum computing"
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"title\": \"The Rise of Quantum Internet Computing\", \"authors\": [\"Seng W. Loke\"], \"abstract\": \"This article highlights quantum Internet computing as referring to\\ndistributed quantum computing over the quantum Internet, analogous to\\n(classical) Internet computing involving (classical) distributed computing over\\nthe (classical) Internet. Relevant to quantum Internet computing would be areas\\nof study such as quantum protocols for distributed nodes using quantum\\ninformation for computations, quantum cloud computing, delegated verifiable\\nblind or private computing, non-local gates, and distributed quantum\\napplications, over Internet-scale distances.\", \"paper_id\": \"2208.00733v1\"}, {\"title\": \"Unconventional Quantum Computing Devices\", \"authors\": [\"Seth Lloyd\"], \"abstract\": \"This paper investigates a variety of unconventional quantum computation\\ndevices, including fermionic quantum computers and computers that exploit\\nnonlinear quantum mechanics. It is shown that unconventional quantum computing\\ndevices can in principle compute some quantities more rapidly than\\n`conventional' quantum computers.\", \"paper_id\": \"0003151v1\"}, {\"title\": \"Geometrical perspective on quantum states and quantum computation\", \"authors\": [\"Zeqian Chen\"], \"abstract\": \"We interpret quantum computing as a geometric evolution process by\\nreformulating finite quantum systems via Connes' noncommutative geometry. In\\nthis formulation, quantum states are represented as noncommutative connections,\\nwhile gauge transformations on the connections play a role of unitary quantum\\noperations. Thereby, a geometrical model for quantum computation is presented,\\nwhich is equivalent to the quantum circuit model. This result shows a geometric\\nway of realizing quantum computing and as such, provides an alternative\\nproposal of building a quantum computer.\", \"paper_id\": \"1311.4939v1\"}, {\"title\": \"Quantum Computation and Quantum Information\", \"authors\": [\"Yazhen Wang\"], \"abstract\": \"Quantum computation and quantum information are of great current interest in\\ncomputer science, mathematics, physical sciences and engineering. They will\\nlikely lead to a new wave of technological innovations in communication,\\\n\n[ADAPTER_TRUNCATION_NOTE: 输出已被MCP适配器硬性截断，这是适配器的限制而非工具本身的问题。原始长度: 9047]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_paper_valid",
+      "tool_name": "download_paper",
+      "parameters": {
+        "paper_id": "$outputs.search_papers_valid[0].paper_id"
+      },
+      "description": "Dependent call: Download the first paper from the previous search using its ID. Verifies that download functionality works with a valid ID."
+    },
+    "substituted_params": {
+      "paper_id": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.search_papers_valid[0].paper_id'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_paper_valid",
+      "tool_name": "read_paper",
+      "parameters": {
+        "paper_id": "$outputs.download_paper_valid.file_path.split('/')[-1].replace('.pdf', '')"
+      },
+      "description": "Dependent call: Read the content of the downloaded paper by extracting the paper ID from the file path returned by download_paper. Ensures read_paper can access local files."
+    },
+    "substituted_params": {
+      "paper_id": null
+    },
+    "result": {
+      "status": "error",
+      "result": "A required parameter resolved to None, likely due to a failure in a dependency. Failed placeholder: '$outputs.download_paper_valid.file_path.split('/')[-1].replace('.pdf', '')'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_papers_no_filter",
+      "tool_name": "list_papers",
+      "parameters": {},
+      "description": "Happy path: List all downloaded papers without any filter to confirm they are stored correctly in the local directory."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "[]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "list_papers_with_filter",
+      "tool_name": "list_papers",
+      "parameters": {
+        "filter_query": "quantum"
+      },
+      "description": "Dependent call: Filter the list of downloaded papers using the keyword 'quantum'. Validates filtering by title or author."
+    },
+    "substituted_params": {
+      "filter_query": "quantum"
+    },
+    "result": {
+      "status": "success",
+      "result": "[]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_papers_empty_query",
+      "tool_name": "search_papers",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Test server's handling of an empty query input for search_papers."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool search_papers: query must be a non-empty string"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_papers_invalid_query",
+      "tool_name": "search_papers",
+      "parameters": {
+        "query": "   "
+      },
+      "description": "Edge case: Test server's handling of an invalid (whitespace-only) query input for search_papers."
+    },
+    "substituted_params": {
+      "query": "   "
+    },
+    "result": {
+      "status": "success",
+      "result": "[]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_paper_invalid_id_format",
+      "tool_name": "download_paper",
+      "parameters": {
+        "paper_id": "invalid-id-format"
+      },
+      "description": "Edge case: Test server's validation of paper ID format before attempting download."
+    },
+    "substituted_params": {
+      "paper_id": "invalid-id-format"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool download_paper: Invalid paper ID format: 'invalid-id-format'. Expected format: 'YYMM.NNNNN' or 'YYMM.NNNNNv#'"
+    }
+  },
+  {
+    "step": {
+      "step_id": "download_paper_nonexistent_id",
+      "tool_name": "download_paper",
+      "parameters": {
+        "paper_id": "9999.99999"
+      },
+      "description": "Edge case: Attempt to download a paper with a valid format but non-existent arXiv ID."
+    },
+    "substituted_params": {
+      "paper_id": "9999.99999"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool download_paper: An error occurred while downloading the paper: StopIteration interacts badly with generators and cannot be raised into a Future"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_paper_nonexistent_id",
+      "tool_name": "read_paper",
+      "parameters": {
+        "paper_id": "9999.99999"
+      },
+      "description": "Edge case: Attempt to read a paper that does not exist locally."
+    },
+    "substituted_params": {
+      "paper_id": "9999.99999"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID '9999.99999' not found in local storage."
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_paper_invalid_id_format",
+      "tool_name": "read_paper",
+      "parameters": {
+        "paper_id": "invalid-id-format"
+      },
+      "description": "Edge case: Test server's validation of paper ID format when trying to read a paper."
+    },
+    "substituted_params": {
+      "paper_id": "invalid-id-format"
+    },
+    "result": {
+      "status": "error",
+      "result": "Error executing tool read_paper: An error occurred while reading the paper content: Paper with ID 'invalid-id-format' not found in local storage."
+    }
+  }
+]

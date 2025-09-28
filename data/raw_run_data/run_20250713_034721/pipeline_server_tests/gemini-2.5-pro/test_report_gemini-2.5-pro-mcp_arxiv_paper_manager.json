@@ -1,0 +1,459 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gemini-2.5-pro-mcp_arxiv_paper_manager",
+  "server_path": "workspace/pipeline-output-servers/gemini-2.5-pro/mcp_arxiv_paper_manager/refined/server.py",
+  "timestamp": "2025-07-13T03:54:23.843453",
+  "tools": [
+    {
+      "name": "search_papers",
+      "description": "\n    Searches the arXiv repository for papers matching a given query.\n\n    This function queries the arXiv API for academic papers based on a search\n    term. It can search by keywords, author names, or other arXiv-supported\n    syntax. The results are sorted by their submission date.\n\n    Args:\n        query (str): The search query (e.g., \"quantum computing\", \"author:John Doe\").\n        max_results (int): The maximum number of results to return. Defaults to 10.\n\n    Returns:\n        str: A JSON string representing a list of papers with their metadata,\n             including ID, title, authors, and summary. Returns a JSON object\n             with an \"error\" key if the search fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 10,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_paper",
+      "description": "\n    Downloads the PDF of a specific paper using its arXiv ID.\n\n    This function fetches a paper's metadata from arXiv using its unique ID,\n    retrieves the PDF URL, and downloads the file into a local 'papers'\n    directory. The downloaded file is named using its arXiv ID (e.g., '2301.12345.pdf').\n\n    Args:\n        paper_id (str): The unique arXiv ID of the paper to download (e.g., '2301.12345').\n\n    Returns:\n        str: A JSON string indicating the result of the download operation.\n             On success, it returns a message confirming the download. On failure,\n             it returns a JSON object with an \"error\" key.\n    ",
+      "args_schema": {
+        "properties": {
+          "paper_id": {
+            "title": "Paper Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_id"
+        ],
+        "title": "download_paperArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_papers",
+      "description": "\n    Lists all the academic papers that have been downloaded locally.\n\n    This function scans the 'papers' directory and returns a list of all\n    files that end with the '.pdf' extension. This provides a quick way to see\n    which papers are available for local reading.\n\n    Returns:\n        str: A JSON string representing a list of filenames of downloaded papers.\n             If the directory doesn't exist or is empty, it returns an empty list.\n             Returns a JSON object with an \"error\" key if an unexpected error occurs.\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_papersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_paper",
+      "description": "\n    Reads the text content from a specified, locally stored PDF file.\n\n    This function opens a PDF from the local 'papers' directory and uses the\n    PyMuPDF library (fitz) to extract all text content from its pages.\n    The extracted text is returned as a single string.\n\n    Args:\n        filename (str): The filename of the paper to read from the 'papers'\n                        directory (e.g., '2301.12345.pdf').\n\n    Returns:\n        str: A JSON string containing the filename and the full extracted text\n             of the paper. If the file is not found or an error occurs during\n             reading, it returns a JSON object with an \"error\" key.\n    ",
+      "args_schema": {
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename"
+        ],
+        "title": "read_paperArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_papers": [
+      {
+        "case_name": "Basic Search With Default Results",
+        "purpose": "验证使用默认 max_results 参数值的基本搜索功能是否正常工作。",
+        "args": {
+          "query": "quantum computing"
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.08000v1\", \"title\": \"Impact of Pretraining Word Co-occurrence on Compositional Generalization in Multimodal Models\", \"authors\": [\"Helen Qu\", \"Sang Michael Xie\"], \"summary\": \"CLIP and large multimodal models (LMMs) have better accuracy on examples\\ninvolving concepts that are highly represented in the training data. However,\\nthe role of concept combinations in the training data on compositional\\ngeneralization is largely unclear -- for instance, how does accuracy vary when\\na common object appears in an uncommon pairing with another object? In this\\npaper, we investigate how word co-occurrence statistics in the pretraining\\ndataset (a proxy for co-occurrence of visual concepts) impacts CLIP/LMM\\nperformance. To disentangle the effects of word co-occurrence frequencies from\\nsingle-word frequencies, we measure co-occurrence with pointwise mutual\\ninformation (PMI), which normalizes the joint probability of two words\\nco-occurring by the probability of co-occurring independently. Using\\nsynthetically generated images with a variety of concept pairs, we show a\\nstrong correlation between PMI in the CLIP pretraining data and zero-shot\\naccuracy in CLIP models trained on LAION-400M (r=0.97 and 14% accuracy gap\\nbetween images in the top and bottom 5% of PMI values), demonstrating that even\\naccuracy on common concepts is affected by the combination of concepts in the\\nimage. Leveraging this finding, we reproduce this effect in natural images by\\nediting them to contai...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计14968字符，剩余13468字符"
+        },
+        "execution_time": 1.6534039974212646,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Custom Result Limit",
+        "purpose": "验证工具在指定 max_results 参数时能否正确返回指定数量的论文结果。",
+        "args": {
+          "query": "machine learning",
+          "max_results": 5
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.08000v1\", \"title\": \"Impact of Pretraining Word Co-occurrence on Compositional Generalization in Multimodal Models\", \"authors\": [\"Helen Qu\", \"Sang Michael Xie\"], \"summary\": \"CLIP and large multimodal models (LMMs) have better accuracy on examples\\ninvolving concepts that are highly represented in the training data. However,\\nthe role of concept combinations in the training data on compositional\\ngeneralization is largely unclear -- for instance, how does accuracy vary when\\na common object appears in an uncommon pairing with another object? In this\\npaper, we investigate how word co-occurrence statistics in the pretraining\\ndataset (a proxy for co-occurrence of visual concepts) impacts CLIP/LMM\\nperformance. To disentangle the effects of word co-occurrence frequencies from\\nsingle-word frequencies, we measure co-occurrence with pointwise mutual\\ninformation (PMI), which normalizes the joint probability of two words\\nco-occurring by the probability of co-occurring independently. Using\\nsynthetically generated images with a variety of concept pairs, we show a\\nstrong correlation between PMI in the CLIP pretraining data and zero-shot\\naccuracy in CLIP models trained on LAION-400M (r=0.97 and 14% accuracy gap\\nbetween images in the top and bottom 5% of PMI values), demonstrating that even\\naccuracy on common concepts is affected by the combination of concepts in the\\nimage. Leveraging this finding, we reproduce this effect in natural images by\\nediting them to contai...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计8524字符，剩余7024字符"
+        },
+        "execution_time": 1.5684232711791992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search By Author Name",
+        "purpose": "验证工具是否支持通过作者名称进行搜索，并正确解析 arXiv 的查询语法。",
+        "args": {
+          "query": "author:Albert Einstein",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.07977v1\", \"title\": \"From spatial to null infinity: Connecting initial data to peeling\", \"authors\": [\"Berend Schneider\", \"Neev Khera\"], \"summary\": \"The asymptotic structure of space-time is studied by imposing conditions on\\nthe asymptotics of the metric. These conditions are weak enough to include\\nlarge classes of physically relevant isolated space-times, but have a rich\\nenough structure to be able to define important physically meaningful\\nquantities like mass, angular momentum, and gravitational waves.\\n  By using a unified expansion of the metric in a neighborhood of spatial\\ninfinity that includes a piece of null infinity, we connect the asymptotic\\nexpansions of solutions to Einstein's equations in the different asymptotic\\nregimes. Within the class of space-times under consideration, we find a\\nconnection between the peeling properties of the Weyl scalars and symmetries of\\ninitial data near spatial infinity. In particular, we show that for initial\\ndata that to leading order is symmetric under parity + time reversal, $\\\\Psi_2$\\nhas the usual $1/r^3$ fall-off rate at null infinity. If, in addition, the\\nsubleading part of the data is antisymmetric under parity + time reversal, then\\n$\\\\Psi_1$ has the usual $1/r^4$ fall-off rate at future null infinity.\"}, {\"id\": \"2507.07972v1\", \"title\": \"EinHops: Einsum Notation for Expressive Homomorphic Operations on RNS-CKKS Tensors\", \"authors\": [\"Karthik Garimella\", \"Austin Ebel\", \"Brandon Reagen\"], \"summary\": \"Fully...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计15556字符，剩余14056字符"
+        },
+        "execution_time": 1.662102460861206,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Query Test",
+        "purpose": "验证当提供空查询字符串时，工具是否能正确处理并返回错误信息。",
+        "args": {
+          "query": ""
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.0073890686035156,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Max Results Value",
+        "purpose": "验证当提供无效的 max_results 值（如负数）时，工具是否能优雅地处理错误。",
+        "args": {
+          "query": "blockchain",
+          "max_results": -5
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0029973983764648438,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Query",
+        "purpose": "验证工具是否能够处理包含特殊字符的查询字符串。",
+        "args": {
+          "query": "deep learning & neural networks!",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 1.4059526920318604,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Max Results Boundary Value",
+        "purpose": "验证工具在最大允许结果数边界值时的行为（例如最大值为100）。",
+        "args": {
+          "query": "AI ethics",
+          "max_results": 100
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.07957v1\", \"title\": \"MIRIX: Multi-Agent Memory System for LLM-Based Agents\", \"authors\": [\"Yu Wang\", \"Xi Chen\"], \"summary\": \"Although memory capabilities of AI agents are gaining increasing attention,\\nexisting solutions remain fundamentally limited. Most rely on flat, narrowly\\nscoped memory components, constraining their ability to personalize, abstract,\\nand reliably recall user-specific information over time. To this end, we\\nintroduce MIRIX, a modular, multi-agent memory system that redefines the future\\nof AI memory by solving the field's most critical challenge: enabling language\\nmodels to truly remember. Unlike prior approaches, MIRIX transcends text to\\nembrace rich visual and multimodal experiences, making memory genuinely useful\\nin real-world scenarios. MIRIX consists of six distinct, carefully structured\\nmemory types: Core, Episodic, Semantic, Procedural, Resource Memory, and\\nKnowledge Vault, coupled with a multi-agent framework that dynamically controls\\nand coordinates updates and retrieval. This design enables agents to persist,\\nreason over, and accurately retrieve diverse, long-term user data at scale. We\\nvalidate MIRIX in two demanding settings. First, on ScreenshotVQA, a\\nchallenging multimodal benchmark comprising nearly 20,000 high-resolution\\ncomputer screenshots per sequence, requiring deep contextual understanding and\\nwhere no existing memory systems can be applied, MIRIX achieves 35% higher\\naccuracy than the RAG baseline while reduc...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计168540字符，剩余167040字符"
+        },
+        "execution_time": 1.6486132144927979,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Non-Existent Topic Search",
+        "purpose": "验证当搜索不存在的主题时，工具是否能正确返回空结果而不是报错。",
+        "args": {
+          "query": "this topic does not exist",
+          "max_results": 10
+        },
+        "response": {
+          "result": "[{\"id\": \"2507.08000v1\", \"title\": \"Impact of Pretraining Word Co-occurrence on Compositional Generalization in Multimodal Models\", \"authors\": [\"Helen Qu\", \"Sang Michael Xie\"], \"summary\": \"CLIP and large multimodal models (LMMs) have better accuracy on examples\\ninvolving concepts that are highly represented in the training data. However,\\nthe role of concept combinations in the training data on compositional\\ngeneralization is largely unclear -- for instance, how does accuracy vary when\\na common object appears in an uncommon pairing with another object? In this\\npaper, we investigate how word co-occurrence statistics in the pretraining\\ndataset (a proxy for co-occurrence of visual concepts) impacts CLIP/LMM\\nperformance. To disentangle the effects of word co-occurrence frequencies from\\nsingle-word frequencies, we measure co-occurrence with pointwise mutual\\ninformation (PMI), which normalizes the joint probability of two words\\nco-occurring by the probability of co-occurring independently. Using\\nsynthetically generated images with a variety of concept pairs, we show a\\nstrong correlation between PMI in the CLIP pretraining data and zero-shot\\naccuracy in CLIP models trained on LAION-400M (r=0.97 and 14% accuracy gap\\nbetween images in the top and bottom 5% of PMI values), demonstrating that even\\naccuracy on common concepts is affected by the combination of concepts in the\\nimage. Leveraging this finding, we reproduce this effect in natural images by\\nediting them to contai...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计16529字符，剩余15029字符"
+        },
+        "execution_time": 1.9276673793792725,
+        "is_functional_test": true
+      }
+    ],
+    "download_paper": [
+      {
+        "case_name": "Basic Paper Download",
+        "purpose": "验证使用有效的 arXiv ID 能够成功下载论文 PDF。",
+        "args": {
+          "paper_id": "2301.12345"
+        },
+        "response": {
+          "result": "{\"message\": \"Successfully downloaded '2301.12345.pdf'\"}"
+        },
+        "execution_time": 3.107335090637207,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download With Invalid Paper ID Format",
+        "purpose": "验证当提供格式不正确的 arXiv ID 时，工具能否正确返回错误信息。",
+        "args": {
+          "paper_id": "invalid_id_format"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=invalid_id_format&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.828876733779907,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Non-Existent Paper",
+        "purpose": "验证当提供一个格式正确但不存在的 arXiv ID 时，工具是否能优雅处理并返回错误。",
+        "args": {
+          "paper_id": "9999.99999"
+        },
+        "response": {
+          "result": "{\"error\": \"Paper '9999.99999' not found.\"}"
+        },
+        "execution_time": 1.1100623607635498,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper ID With Special Characters",
+        "purpose": "验证工具是否能够安全地拒绝包含特殊字符的无效 arXiv ID 输入。",
+        "args": {
+          "paper_id": "2301@.12345"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=2301%40.12345&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.761850833892822,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Paper ID Input",
+        "purpose": "验证当提供空字符串作为 arXiv ID 时，工具是否能正确处理输入异常。",
+        "args": {
+          "paper_id": ""
+        },
+        "response": {
+          "result": "{\"error\": \"Paper '' not found.\"}"
+        },
+        "execution_time": 1.003387451171875,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Paper Already Exists Locally",
+        "purpose": "验证当目标路径中已存在同名论文文件时，工具是否会覆盖或提示冲突（需观察行为一致性）。",
+        "args": {
+          "paper_id": "2301.12345"
+        },
+        "response": {
+          "result": "{\"message\": \"Successfully downloaded '2301.12345.pdf'\"}"
+        },
+        "execution_time": 3.055241346359253,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Paper With Network Failure Simulation",
+        "purpose": "模拟网络连接失败情况，验证工具是否能正确捕获异常并返回用户友好的错误信息。",
+        "args": {
+          "paper_id": "2301.12345"
+        },
+        "response": {
+          "result": "{\"message\": \"Successfully downloaded '2301.12345.pdf'\"}"
+        },
+        "execution_time": 2.882256507873535,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Paper ID Boundary Test",
+        "purpose": "验证当提供超长 arXiv ID 字符串时，工具是否能正确识别无效输入。",
+        "args": {
+          "paper_id": "2301.12345678901234567890"
+        },
+        "response": {
+          "result": "{\"error\": \"An unexpected error occurred: Page request resulted in HTTP 400 (https://export.arxiv.org/api/query?search_query=&id_list=2301.12345678901234567890&sortBy=relevance&sortOrder=descending&start=0&max_results=100)\"}"
+        },
+        "execution_time": 11.55605697631836,
+        "is_functional_test": false
+      }
+    ],
+    "list_papers": [
+      {
+        "case_name": "List Papers In Default Directory",
+        "purpose": "验证工具能否正确扫描默认的 'papers' 目录并列出所有 .pdf 文件。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.003999233245849609,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Directory Does Not Exist",
+        "purpose": "验证当指定的 'papers' 目录不存在时，工具是否返回空列表。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.008002281188964844,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Directory Test",
+        "purpose": "验证当 'papers' 目录存在但为空时，工具是否返回空列表。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.007997512817382812,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Papers With Non-PDF Files",
+        "purpose": "验证工具是否只列出 .pdf 文件，忽略其他格式文件。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.0040013790130615234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Permission Denied On Directory Access",
+        "purpose": "验证当用户没有访问 'papers' 目录权限时，工具是否能优雅处理错误并返回包含 error 键的 JSON 对象。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.006000041961669922,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In File Names",
+        "purpose": "验证工具是否能够正确处理包含特殊字符的 PDF 文件名。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.0039997100830078125,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Large Number Of PDF Files",
+        "purpose": "验证工具在 'papers' 目录中存在大量 PDF 文件时是否仍能正常返回完整列表。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Hidden Files And Directories",
+        "purpose": "验证工具是否忽略隐藏文件和子目录，仅列出顶层的 .pdf 文件。",
+        "args": {},
+        "response": {
+          "result": "[\"2301.12345.pdf\"]"
+        },
+        "execution_time": 0.0070002079010009766,
+        "is_functional_test": true
+      }
+    ],
+    "read_paper": [
+      {
+        "case_name": "Basic PDF Reading Test",
+        "purpose": "验证工具能否正确读取一个有效的PDF文件并提取其文本内容。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\paper1.pdf\", \"content\": \"Proceedings of the 3rd Workshop for Natural Language Processing Open Source Software (NLP-OSS 2023), pages 212\\u2013218\\nDecember 6, 2023 \\u00a92023 Association for Computational Linguistics\\nGPTCache: An Open-Source Semantic Cache for LLM Applications\\nEnabling Faster Answers and Cost Savings\\nBang Fu, Di Feng\\nZilliz Inc.\\nAbstract\\nThe rise of ChatGPT 1 has led to the develop-\\nment of artificial intelligence (AI) applications,\\nparticularly those that rely on large language\\nmodels (LLMs). However, recalling LLM APIs\\ncan be expensive, and the response speed may\\nslow down during LLMs\\u2019 peak times, caus-\\ning frustration among developers. Potential\\nsolutions to this problem include using better\\nLLM models or investing in more computing re-\\nsources. However, these options may increase\\nproduct development costs and decrease devel-\\nopment speed. GPTCache 2 is an open-source\\nsemantic cache that stores LLM responses to\\naddress this issue. When integrating an AI ap-\\nplication with GPTCache, user queries are first\\nsent to GPTCache for a response before be-\\ning sent to LLMs like ChatGPT. If GPTCache\\nhas the answer to a question, it quickly returns\\nthe answer to the user without having to query\\nthe LLM. This approach saves costs on API\\nrecalls and makes response times much faster.\\nFor instance, integrating GPTCache with the\\nGPT service offered by OpenAI can incr...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计30374字符，剩余28874字符"
+        },
+        "execution_time": 0.021997928619384766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Non-Existent PDF File",
+        "purpose": "验证当指定的PDF文件不存在时，工具是否能返回包含error键的JSON对象。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\non_existent_paper.pdf"
+        },
+        "response": {
+          "result": "{\"error\": \"File 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\non_existent_paper.pdf' not found.\"}"
+        },
+        "execution_time": 0.002999544143676758,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Empty PDF File",
+        "purpose": "验证工具在尝试读取一个空PDF文件时的行为（应返回有效但可能为空的文本内容）。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_test.txt"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_test.txt\", \"content\": \"Inserted into empty file.\\n\"}"
+        },
+        "execution_time": 0.00700831413269043,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File With Special Characters In Name",
+        "purpose": "验证工具是否能够处理包含特殊字符的PDF文件名。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@#$.docx"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@#$.docx\", \"content\": \"\\u8be5\\u6587\\u6863\\u7684\\u8def\\u5f84\\u5305\\u542b\\u7279\\u6b8a\\u5b57\\u7b26\\uff0c\\u5e94\\u4ecd\\u53ef\\u6b63\\u5e38\\u5199\\u5165\\u3002\\n\"}"
+        },
+        "execution_time": 0.005992412567138672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read Large PDF File",
+        "purpose": "验证工具是否能成功处理一个大体积PDF文件的文本提取。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\long_metadata.docx"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\long_metadata.docx\", \"content\": \"\"}"
+        },
+        "execution_time": 0.0060040950775146484,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Non-PDF File",
+        "purpose": "验证工具是否能识别非PDF文件格式并返回错误信息。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg"
+        },
+        "response": {
+          "result": "{\"filename\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.jpeg\", \"content\": \"\"}"
+        },
+        "execution_time": 0.00899648666381836,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read File Without Read Permissions",
+        "purpose": "验证工具在尝试读取没有读取权限的PDF文件时是否能优雅地处理错误。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: Failed to open file 'D:\\\\\\\\devWorkspace\\\\\\\\MCPServer-Generator\\\\\\\\testSystem\\\\\\\\testFiles\\\\\\\\.git\\\\\\\\config'.\"}"
+        },
+        "execution_time": 0.005000114440917969,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Read PDF From Nested Directory",
+        "purpose": "验证工具是否能正确读取嵌套路径下的PDF文件。",
+        "args": {
+          "filename": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\objects\\03\\d4ea726431b63ae416cbdd1fa8a2012efdadc3"
+        },
+        "response": {
+          "result": "{\"error\": \"An error occurred while reading the paper: Failed to open file 'D:\\\\\\\\devWorkspace\\\\\\\\MCPServer-Generator\\\\\\\\testSystem\\\\\\\\testFiles\\\\\\\\.git\\\\\\\\objects\\\\\\\\03\\\\\\\\d4ea726431b63ae416cbdd1fa8a2012efdadc3'.\"}"
+        },
+        "execution_time": 0.00800013542175293,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 32
+}

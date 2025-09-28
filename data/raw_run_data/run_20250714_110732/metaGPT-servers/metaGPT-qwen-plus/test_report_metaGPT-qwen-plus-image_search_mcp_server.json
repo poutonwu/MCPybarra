@@ -1,0 +1,378 @@
+{
+  "server_name": "image_search_mcp_server",
+  "parent_dir": "metaGPT-qwen-plus",
+  "report_name": "metaGPT-qwen-plus-image_search_mcp_server",
+  "server_path": "workspace\\metaGPT-servers\\metaGPT-qwen-plus\\image_search_mcp_server.py",
+  "timestamp": "2025-07-14T11:07:35.371936",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    根据关键词在指定图片源中检索图片。\n\n    Args:\n        keyword: 搜索关键词。\n        source: 图片源（unsplash, pexels, pixabay）。\n\n    Returns:\n        包含图片链接、作者等信息的JSON字符串。\n\n    Raises:\n        ValueError: 如果图片源无效。\n        httpx.HTTPStatusError: 如果API请求失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "keyword": {
+            "title": "Keyword",
+            "type": "string"
+          },
+          "source": {
+            "default": "unsplash",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "keyword"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    下载并保存指定URL的图片。\n\n    Args:\n        url: 图片URL。\n        filename: 保存的文件名。\n\n    Returns:\n        包含保存状态和路径的JSON字符串。\n\n    Raises:\n        httpx.HTTPStatusError: 如果图片下载失败。\n    ",
+      "args_schema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "filename"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    根据描述生成指定尺寸的图标。\n\n    Args:\n        description: 图标描述。\n        size: 图标尺寸，默认为64。\n\n    Returns:\n        包含保存状态和路径的JSON字符串。\n\n    Raises:\n        ValueError: 如果尺寸小于16或大于256。\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "default": 64,
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search with Default Source",
+        "purpose": "验证工具在使用默认图片源（unsplash）和有效关键词时能否正常检索图片",
+        "args": {
+          "keyword": "nature"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '401 Unauthorized' for url 'https://api.unsplash.com/search/photos?query=nature&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+        },
+        "execution_time": 1.5976512432098389,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search from Pexels",
+        "purpose": "验证工具能从指定图片源pexels中正确搜索图片",
+        "args": {
+          "keyword": "technology",
+          "source": "pexels"
+        },
+        "response": {
+          "result": "{\"page\":1,\"per_page\":5,\"photos\":[{\"id\":546819,\"width\":4288,\"height\":2848,\"url\":\"https://www.pexels.com/photo/close-up-photo-of-programming-of-codes-546819/\",\"photographer\":\"luis gomes\",\"photographer_url\":\"https://www.pexels.com/@luis-gomes-166706\",\"photographer_id\":166706,\"avg_color\":\"#282C44\",\"src\":{\"original\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg\",\"large2x\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026dpr=2\\u0026h=650\\u0026w=940\",\"large\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026h=650\\u0026w=940\",\"medium\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026h=350\",\"small\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026h=130\",\"portrait\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026fit=crop\\u0026h=1200\\u0026w=800\",\"landscape\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026fit=crop\\u0026h=627\\u0026w=1200\",\"tiny\":\"https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress\\u0026cs=tinysrgb\\u0026dpr=1\\u0026fit=crop\\u0026h=200\\u0026w=280\"},\"liked\":false,\"alt\":\"Close-up of a computer screen displaying programming code in a dark environment.\"},{\"id\":356056,\"width\":4288,\"height\":2848,\"url\":\"https://www.pexels....[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计7325字符，剩余5825字符"
+        },
+        "execution_time": 2.7559010982513428,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search from Pixabay",
+        "purpose": "验证工具能从指定图片源pixabay中正确搜索图片",
+        "args": {
+          "keyword": "animals",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\"total\":1479207,\"totalHits\":500,\"hits\":[{\"id\":9704301,\"pageURL\":\"https://pixabay.com/photos/wheat-cereal-ear-seeds-field-9704301/\",\"type\":\"photo\",\"tags\":\"wheat, cereal, ear, seeds, field, village, rural, growth, nature, agriculture, farm, food\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/09/10/09/wheat-9704301_150.jpg\",\"previewWidth\":150,\"previewHeight\":100,\"webformatURL\":\"https://pixabay.com/get/g3fe36dcf63c08940ae499cfa585e2c49143b1253b327815d8077d366c9b985caceb5f8a31d609642ab07e795ffef2022dc6099e8875422234579de34cded6f91_640.jpg\",\"webformatWidth\":640,\"webformatHeight\":427,\"largeImageURL\":\"https://pixabay.com/get/g8af556084d601cf9e34cfe85746a202802fce2e089fff3bddde9efc3575e3e4b7967cb871ccc8b11eb5d6962779aab5713976fa051ce2d5866275e1f293170f9_1280.jpg\",\"imageWidth\":6000,\"imageHeight\":4000,\"imageSize\":4550930,\"views\":2142,\"downloads\":1674,\"collections\":3,\"likes\":59,\"comments\":27,\"user_id\":9363663,\"user\":\"Nowaja\",\"userImageURL\":\"https://cdn.pixabay.com/user/2020/09/15/15-16-12-52_250x250.jpg\",\"noAiTraining\":false,\"isAiGenerated\":false,\"isGRated\":true,\"isLowQuality\":0,\"userURL\":\"https://pixabay.com/users/9363663/\"},{\"id\":9702173,\"pageURL\":\"https://pixabay.com/photos/eastern-yellow-robin-yellow-robin-9702173/\",\"type\":\"photo\",\"tags\":\"eastern yellow robin, yellow robin, robin, bird, eopsaltria australis, wildlife, wild, nature, avian, birdwatching, plumage, feathers, australia, australian bush\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/08/07/01/eastern-yellow-rob...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计5714字符，剩余4214字符"
+        },
+        "execution_time": 1.5156221389770508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keyword Search",
+        "purpose": "验证工具对空关键词的处理能力，应返回错误或合理结果",
+        "args": {
+          "keyword": "",
+          "source": "unsplash"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '401 Unauthorized' for url 'https://api.unsplash.com/search/photos?query=&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+        },
+        "execution_time": 1.5159077644348145,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Handling",
+        "purpose": "验证工具在提供无效图片源时是否抛出ValueError",
+        "args": {
+          "keyword": "flowers",
+          "source": "invalid_source"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: 无效的图片源: invalid_source"
+        },
+        "execution_time": 0.005512237548828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Keyword",
+        "purpose": "验证工具是否能正确处理包含特殊字符的关键词",
+        "args": {
+          "keyword": "!@#$%^&*()_+{}[]<>?/\\|=~`",
+          "source": "pixabay"
+        },
+        "response": {
+          "result": "{\"total\":1479207,\"totalHits\":500,\"hits\":[{\"id\":9704301,\"pageURL\":\"https://pixabay.com/photos/wheat-cereal-ear-seeds-field-9704301/\",\"type\":\"photo\",\"tags\":\"wheat, cereal, ear, seeds, field, village, rural, growth, nature, agriculture, farm, food\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/09/10/09/wheat-9704301_150.jpg\",\"previewWidth\":150,\"previewHeight\":100,\"webformatURL\":\"https://pixabay.com/get/g07cf859f702ab0f5be080bf2cdd753fc2b807c07992cbda3231597c50e69f4049d6eeb23f4d306fbfd3607b5533b59fca6220c8b22397f99345169cdd3722728_640.jpg\",\"webformatWidth\":640,\"webformatHeight\":427,\"largeImageURL\":\"https://pixabay.com/get/g469bf21067a7fd778f523a0261cb32eabb74f2a0d8f220dade7af9a774b7a8fb2966408f14b372200c0a8f6e01c742620ec00e6420087272fc33c057231ef2d3_1280.jpg\",\"imageWidth\":6000,\"imageHeight\":4000,\"imageSize\":4550930,\"views\":2142,\"downloads\":1674,\"collections\":3,\"likes\":59,\"comments\":27,\"user_id\":9363663,\"user\":\"Nowaja\",\"userImageURL\":\"https://cdn.pixabay.com/user/2020/09/15/15-16-12-52_250x250.jpg\",\"noAiTraining\":false,\"isAiGenerated\":false,\"isGRated\":true,\"isLowQuality\":0,\"userURL\":\"https://pixabay.com/users/9363663/\"},{\"id\":9702173,\"pageURL\":\"https://pixabay.com/photos/eastern-yellow-robin-yellow-robin-9702173/\",\"type\":\"photo\",\"tags\":\"eastern yellow robin, yellow robin, robin, bird, eopsaltria australis, wildlife, wild, nature, avian, birdwatching, plumage, feathers, australia, australian bush\",\"previewURL\":\"https://cdn.pixabay.com/photo/2025/07/08/07/01/eastern-yellow-rob...[截断]，输出已被MCP适配器截断，这是适配器的限制而非工具本身的问题。共计5714字符，剩余4214字符"
+        },
+        "execution_time": 1.5121889114379883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Keyword",
+        "purpose": "验证工具是否安全处理潜在的XSS攻击向量",
+        "args": {
+          "keyword": "<script>alert('xss')</script>",
+          "source": "unsplash"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '401 Unauthorized' for url 'https://api.unsplash.com/search/photos?query=%3Cscript%3Ealert%28%27xss%27%29%3C%2Fscript%3E&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+        },
+        "execution_time": 1.7556440830230713,
+        "is_functional_test": false
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download",
+        "purpose": "验证工具能够从有效的URL下载图片并保存为指定文件名",
+        "args": {
+          "url": "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg",
+          "filename": "downloaded_image.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\downloaded_image.jpg\"}"
+        },
+        "execution_time": 1.7216200828552246,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Image with Special Characters in Filename",
+        "purpose": "验证工具能否正确处理包含特殊字符的文件名",
+        "args": {
+          "url": "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg",
+          "filename": "image_@#$%^&*.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: [Errno 22] Invalid argument: './images\\\\image_@#$%^&*.jpg'"
+        },
+        "execution_time": 1.6481640338897705,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download from Invalid URL",
+        "purpose": "验证工具在提供无效图片URL时是否抛出HTTP错误",
+        "args": {
+          "url": "https://example.com/nonexistent-image.jpg",
+          "filename": "invalid_url_image.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/nonexistent-image.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.9184327125549316,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "XSS Attempt in Filename",
+        "purpose": "验证工具是否安全处理潜在的XSS攻击向量作为文件名",
+        "args": {
+          "url": "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg",
+          "filename": "<script>alert('xss')</script>.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: [Errno 22] Invalid argument: \"./images\\\\<script>alert('xss')</script>.jpg\""
+        },
+        "execution_time": 1.6004955768585205,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Filename Handling",
+        "purpose": "验证工具对空文件名的处理能力，应返回错误或合理提示",
+        "args": {
+          "url": "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg",
+          "filename": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: [Errno 2] No such file or directory: './images\\\\'"
+        },
+        "execution_time": 1.7483832836151123,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Long Filename Boundary Test",
+        "purpose": "验证工具对超长文件名的处理能力（边界测试）",
+        "args": {
+          "url": "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg",
+          "filename": "a_very_long_filename_that_exceeds_maximum_path_length_limit_on_windows_systems_and_may_cause_issues_when_saving_the_image_file.jpg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\a_very_long_filename_that_exceeds_maximum_path_length_limit_on_windows_systems_and_may_cause_issues_when_saving_the_image_file.jpg\"}"
+        },
+        "execution_time": 1.732064962387085,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download and Overwrite Existing File",
+        "purpose": "验证工具是否能覆盖已存在的文件",
+        "args": {
+          "url": "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg",
+          "filename": "nature.jpeg"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\nature.jpeg\"}"
+        },
+        "execution_time": 1.694852590560913,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid URL Format Handling",
+        "purpose": "验证工具对格式不正确的URL的处理能力",
+        "args": {
+          "url": "htp:/invalid-url-format.jpg",
+          "filename": "invalid_format.jpg"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Request URL is missing an 'http://' or 'https://' protocol."
+        },
+        "execution_time": 0.4451887607574463,
+        "is_functional_test": false
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation with Default Size",
+        "purpose": "验证工具在使用默认尺寸64和有效描述时能否正常生成图标",
+        "args": {
+          "description": "A simple blue circle"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_simple_blue_circle_64x64.png\"}"
+        },
+        "execution_time": 0.006091117858886719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation with Custom Size",
+        "purpose": "验证工具在指定合法尺寸（如128）时是否能正确生成图标",
+        "args": {
+          "description": "A red square with rounded corners",
+          "size": 128
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_red_square_with_rounded_corners_128x128.png\"}"
+        },
+        "execution_time": 0.006196260452270508,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "XSS Attempt in Description",
+        "purpose": "验证工具是否安全处理潜在的XSS攻击向量作为描述内容",
+        "args": {
+          "description": "<script>alert('xss')</script>"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: [Errno 22] Invalid argument: \"./images\\\\icon_<script>alert('xss')</script>_64x64.png\""
+        },
+        "execution_time": 0.0059969425201416016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Size Handling - Below Minimum",
+        "purpose": "验证工具在提供小于最小允许尺寸（16）时是否抛出ValueError",
+        "args": {
+          "description": "A green triangle",
+          "size": 15
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 尺寸超出范围: 15. 有效范围是16到256。"
+        },
+        "execution_time": 0.005140066146850586,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Size Handling - Above Maximum",
+        "purpose": "验证工具在提供大于最大允许尺寸（256）时是否抛出ValueError",
+        "args": {
+          "description": "A yellow star",
+          "size": 257
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: 尺寸超出范围: 257. 有效范围是16到256。"
+        },
+        "execution_time": 0.0050008296966552734,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Description",
+        "purpose": "验证工具是否能正确处理包含特殊字符的图标描述",
+        "args": {
+          "description": "!@#$%^&*()_+{}[]<>?/\\|=~`"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: [Errno 22] Invalid argument: './images\\\\icon_!@#$%^&*()_+{}[]<>?/\\\\|=~`_64x64.png'"
+        },
+        "execution_time": 0.0050618648529052734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Description Handling",
+        "purpose": "验证工具对空描述的处理能力，应返回错误或合理结果",
+        "args": {
+          "description": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon__64x64.png\"}"
+        },
+        "execution_time": 0.005001544952392578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Minimum Valid Size",
+        "purpose": "验证工具在最小合法尺寸（16）下是否能正确生成图标",
+        "args": {
+          "description": "A black dot",
+          "size": 16
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./images\\icon_a_black_dot_16x16.png\"}"
+        },
+        "execution_time": 0.009518861770629883,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 23
+}

@@ -1,0 +1,405 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_image_search_download_icon",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_image_search_download_icon/refined/server.py",
+  "timestamp": "2025-07-16T10:16:57.088680",
+  "tools": [
+    {
+      "name": "search_images",
+      "description": "\n    Searches for images based on user-provided keywords across popular image sources.\n\n    Args:\n        keywords: The search query for images.\n        source: Specify the image source (e.g., \"unsplash\", \"pexels\", \"pixabay\"). Defaults to searching all sources.\n        max_results: Maximum number of results to return. Defaults to 5.\n\n    Returns:\n        A JSON string containing a list of dictionaries with image details.\n\n    Raises:\n        ValueError: If no API keys are configured for the specified source.\n        httpx.HTTPStatusError: If the API request fails.\n    ",
+      "args_schema": {
+        "properties": {
+          "keywords": {
+            "title": "Keywords",
+            "type": "string"
+          },
+          "source": {
+            "default": null,
+            "title": "Source",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keywords"
+        ],
+        "title": "search_imagesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "download_image",
+      "description": "\n    Downloads an image from a given URL and saves it to a specified directory.\n\n    Args:\n        image_url: URL of the image to download.\n        filename: Name to save the file as (excluding extension).\n        save_dir: Directory path to save the image. Defaults to \"./downloads\".\n\n    Returns:\n        A JSON string containing the save status and path information.\n\n    Raises:\n        httpx.HTTPStatusError: If the download request fails.\n        IOError: If the file cannot be saved.\n    ",
+      "args_schema": {
+        "properties": {
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "save_dir": {
+            "default": "./downloads",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image_url",
+          "filename"
+        ],
+        "title": "download_imageArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "generate_icon",
+      "description": "\n    Generates an icon based on a user-provided description and saves it to a specified directory.\n\n    Args:\n        description: Text description of the desired icon.\n        size: Dimensions of the icon (e.g., \"64x64\"). Defaults to \"32x32\".\n        save_dir: Directory path to save the icon. Defaults to \"./icons\".\n\n    Returns:\n        A JSON string containing the save status and path information.\n\n    Raises:\n        IOError: If the file cannot be saved.\n    ",
+      "args_schema": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "size": {
+            "default": "32x32",
+            "title": "Size",
+            "type": "string"
+          },
+          "save_dir": {
+            "default": "./icons",
+            "title": "Save Dir",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "generate_iconArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "search_images": [
+      {
+        "case_name": "Basic Image Search Without Source",
+        "purpose": "验证工具在仅提供关键词时能否正常搜索图片（使用默认参数）",
+        "args": {
+          "keywords": "nature"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: "
+        },
+        "execution_time": 5.019392728805542,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Search From Specific Source",
+        "purpose": "验证工具能否从指定来源（如 pixabay）正确搜索图片",
+        "args": {
+          "keywords": "mountains",
+          "source": "pixabay"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: "
+        },
+        "execution_time": 5.0157387256622314,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search With Custom Max Results",
+        "purpose": "验证工具能否根据 max_results 参数返回指定数量的图像结果",
+        "args": {
+          "keywords": "technology",
+          "max_results": 10
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: "
+        },
+        "execution_time": 5.008166074752808,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Keywords Input",
+        "purpose": "验证当 keywords 参数为空时是否能正确抛出错误",
+        "args": {
+          "keywords": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: Client error '400 Bad Request' for url 'https://api.unsplash.com/search/photos?query=&per_page=5'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"
+        },
+        "execution_time": 4.019979953765869,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Source Name",
+        "purpose": "验证当指定一个不支持的 source 时是否能正确处理错误",
+        "args": {
+          "keywords": "cars",
+          "source": "invalid_source"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.0048542022705078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Keywords",
+        "purpose": "验证工具能否处理包含特殊字符的关键词搜索",
+        "args": {
+          "keywords": "café!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: "
+        },
+        "execution_time": 5.860357999801636,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Max Results Boundary Test",
+        "purpose": "验证最大结果数边界值（如 1 或非常大的数字）",
+        "args": {
+          "keywords": "animals",
+          "max_results": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: "
+        },
+        "execution_time": 5.3057541847229,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Command Injection Attempt",
+        "purpose": "验证工具是否对潜在命令注入尝试进行安全过滤或拒绝",
+        "args": {
+          "keywords": "nature; rm -rf /tmp"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_images: "
+        },
+        "execution_time": 5.36847448348999,
+        "is_functional_test": false
+      }
+    ],
+    "download_image": [
+      {
+        "case_name": "Basic Image Download With Default Directory",
+        "purpose": "验证工具在提供基本 image_url 和 filename 时能否使用默认目录成功下载图片",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": "test_image"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: "
+        },
+        "execution_time": 5.0094006061553955,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Image Download To Custom Directory",
+        "purpose": "验证工具是否能将图片保存到指定的自定义目录",
+        "args": {
+          "image_url": "https://example.com/image.png",
+          "filename": "custom_dir_image",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/image.png'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 1.3570919036865234,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Download Image With Special Characters In Filename",
+        "purpose": "验证文件名中包含特殊字符时能否正确处理并保存",
+        "args": {
+          "image_url": "https://example.com/special.jpg",
+          "filename": "file@name#with!special$chars"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/special.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 0.430034875869751,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Command Injection In Filename",
+        "purpose": "验证工具是否对文件名中的潜在命令注入尝试进行安全过滤或拒绝",
+        "args": {
+          "image_url": "https://example.com/secure.jpg",
+          "filename": "malicious_file; rm -rf /tmp"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/secure.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 0.4264497756958008,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Image URL",
+        "purpose": "验证当提供的 image_url 无效时是否能正确抛出 HTTP 错误",
+        "args": {
+          "image_url": "https://invalid-url-that-will-404/image.jpg",
+          "filename": "invalid_url_image"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: "
+        },
+        "execution_time": 2.0065348148345947,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Filename Input",
+        "purpose": "验证当 filename 参数为空时是否能正确抛出错误",
+        "args": {
+          "image_url": "https://example.com/image.jpg",
+          "filename": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/image.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 0.24581527709960938,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Download Image With Long Filename",
+        "purpose": "验证工具是否能处理超长文件名的图片下载",
+        "args": {
+          "image_url": "https://example.com/longname.jpg",
+          "filename": "this_is_an_very_long_filename_that_might_exceed_windows_or_linux_path_limit_and_should_be_handled_properly"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/longname.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 0.4410440921783447,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Use Existing File Path For Overwrite Prevention",
+        "purpose": "验证工具是否能检测目标路径已有文件并避免覆盖",
+        "args": {
+          "image_url": "https://example.com/existing.jpg",
+          "filename": "existing_file",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool download_image: Client error '404 Not Found' for url 'https://example.com/existing.jpg'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+        },
+        "execution_time": 0.8117070198059082,
+        "is_functional_test": true
+      }
+    ],
+    "generate_icon": [
+      {
+        "case_name": "Basic Icon Generation With Default Parameters",
+        "purpose": "验证工具在仅提供描述并使用默认大小和保存路径时能否成功生成图标",
+        "args": {
+          "description": "A simple red circle"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./icons\\\\icon_A_simple_red_circle.png\"}"
+        },
+        "execution_time": 0.021983623504638672,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation With Custom Size",
+        "purpose": "验证工具在指定非默认大小时能否正确生成指定尺寸的图标",
+        "args": {
+          "description": "A blue square",
+          "size": "128x128"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./icons\\\\icon_A_blue_square.png\"}"
+        },
+        "execution_time": 0.004218101501464844,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Icon Generation To Custom Save Directory",
+        "purpose": "验证工具能否将图标保存到用户指定的自定义目录",
+        "args": {
+          "description": "A green triangle",
+          "save_dir": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\icon_A_green_triangle.png\"}"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Command Injection In Description",
+        "purpose": "验证工具是否对描述字段中的潜在命令注入尝试进行安全过滤或拒绝",
+        "args": {
+          "description": "malicious icon; rm -rf /tmp"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./icons\\\\icon_malicious_icon_rm_rf_tmp.png\"}"
+        },
+        "execution_time": 0.0043261051177978516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Description Input",
+        "purpose": "验证当 description 参数为空时是否能正确抛出错误",
+        "args": {
+          "description": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./icons\\\\icon_.png\"}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Size Format",
+        "purpose": "验证当 size 参数格式不正确时是否能正确处理错误",
+        "args": {
+          "description": "A star icon",
+          "size": "invalidsize"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool generate_icon: invalid literal for int() with base 10: 'invalidsize'"
+        },
+        "execution_time": 0.0025043487548828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters In Description",
+        "purpose": "验证工具能否处理包含特殊字符的描述文本",
+        "args": {
+          "description": "A café icon with symbols !@#$%^&*()"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./icons\\\\icon_A_caf\\u00e9_icon_with_symbols.png\"}"
+        },
+        "execution_time": 0.00337982177734375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Minimum Size",
+        "purpose": "验证工具在最小支持尺寸下是否能正常生成图标",
+        "args": {
+          "description": "Minimum size icon",
+          "size": "16x16"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"path\": \"./icons\\\\icon_Minimum_size_icon.png\"}"
+        },
+        "execution_time": 0.002997875213623047,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}

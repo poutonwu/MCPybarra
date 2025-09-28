@@ -1,0 +1,716 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-max-latest-mcp_pdf_automation_tool",
+  "server_path": "workspace/pipeline-output-servers/qwen-max-latest/mcp_pdf_automation_tool/refined/server.py",
+  "timestamp": "2025-07-14T20:25:53.504012",
+  "tools": [
+    {
+      "name": "merge_pdfs_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "pdf_files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pdf Files",
+            "type": "array"
+          }
+        },
+        "required": [
+          "pdf_files"
+        ],
+        "title": "merge_pdfs_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "extract_pages_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "pdf_file": {
+            "title": "Pdf File",
+            "type": "string"
+          },
+          "pages": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdf_file",
+          "pages",
+          "output_path"
+        ],
+        "title": "extract_pages_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_pdfs_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "directory": {
+            "title": "Directory",
+            "type": "string"
+          },
+          "pattern": {
+            "title": "Pattern",
+            "type": "string"
+          }
+        },
+        "required": [
+          "directory",
+          "pattern"
+        ],
+        "title": "search_pdfs_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "merge_pdfs_ordered_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "pdf_files": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Pdf Files",
+            "type": "array"
+          },
+          "order_pattern": {
+            "title": "Order Pattern",
+            "type": "string"
+          },
+          "fuzzy_match": {
+            "default": false,
+            "title": "Fuzzy Match",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pdf_files",
+          "order_pattern"
+        ],
+        "title": "merge_pdfs_ordered_toolArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "find_related_pdfs_tool",
+      "description": "",
+      "args_schema": {
+        "properties": {
+          "target_pdf": {
+            "title": "Target Pdf",
+            "type": "string"
+          },
+          "content_similarity_threshold": {
+            "default": 0.8,
+            "title": "Content Similarity Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "target_pdf"
+        ],
+        "title": "find_related_pdfs_toolArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "merge_pdfs_tool": [
+      {
+        "case_name": "基本合并PDF文件测试",
+        "purpose": "验证工具可以成功合并多个有效的PDF文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf"
+          ]
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.33196043968200684,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "单个PDF文件合并测试",
+        "purpose": "验证当仅提供一个PDF文件时，工具是否仍能正常处理并返回该文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+          ]
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.10291075706481934,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空数组参数测试",
+        "purpose": "验证当传入空的pdf_files数组时，工具是否能正确处理错误",
+        "args": {
+          "pdf_files": []
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.003999471664428711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非PDF文件尝试合并测试",
+        "purpose": "验证工具是否能够检测到非PDF文件并进行错误处理",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\re2.doc"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.004003047943115234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的文件路径测试",
+        "purpose": "验证工具在遇到无效或不存在的文件路径时能否优雅地处理",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf"
+        },
+        "execution_time": 0.006998538970947266,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "大量PDF文件合并测试",
+        "purpose": "验证工具在处理大量PDF文件时的边界情况（如性能和稳定性）",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+          ]
+        },
+        "response": {
+          "result": "merged_output.pdf"
+        },
+        "execution_time": 0.9334425926208496,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "包含特殊字符路径的PDF文件测试",
+        "purpose": "验证工具是否能正确处理包含特殊字符的文件路径",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf"
+        },
+        "execution_time": 0.004997968673706055,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "权限不足导致无法读取文件测试",
+        "purpose": "验证工具在尝试访问没有读取权限的PDF文件时的行为",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected.pdf"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_tool: Error merging PDFs: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected.pdf"
+        },
+        "execution_time": 0.005002498626708984,
+        "is_functional_test": false
+      }
+    ],
+    "extract_pages_tool": [
+      {
+        "case_name": "基本提取PDF页面测试",
+        "purpose": "验证工具可以成功提取指定页码的PDF页面",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "pages": [
+            1,
+            2
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_output.pdf"
+        },
+        "response": {
+          "result": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_output.pdf"
+        },
+        "execution_time": 0.05709385871887207,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "单页提取测试",
+        "purpose": "验证工具在仅提取一页时是否正常工作",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "pages": [
+            3
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_single_page.pdf"
+        },
+        "response": {
+          "result": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_single_page.pdf"
+        },
+        "execution_time": 0.03751111030578613,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "连续多页提取测试",
+        "purpose": "验证工具能否正确提取连续多页内容",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extracted_continuous_pages.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid page number: 2"
+        },
+        "execution_time": 0.08906388282775879,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "非PDF文件尝试提取测试",
+        "purpose": "验证工具是否能够检测到非PDF文件并进行错误处理",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_extract_output.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.006001472473144531,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "不存在的PDF文件路径测试",
+        "purpose": "验证工具在遇到无效或不存在的PDF文件路径时能否优雅地处理",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extract_output_nonexistent.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf"
+        },
+        "execution_time": 0.008251667022705078,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "包含特殊字符的输出路径测试",
+        "purpose": "验证工具是否能正确处理包含特殊字符的输出路径",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "pages": [
+            1
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\output_!@#$%^&*().pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: [Errno 22] Invalid argument: 'D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\output_!@#$%^&*().pdf'"
+        },
+        "execution_time": 0.03399991989135742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "超出页码范围的提取测试",
+        "purpose": "验证当请求的页码超过PDF总页数时，工具是否能处理该边界情况",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "pages": [
+            999
+          ],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\extract_out_of_range.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool extract_pages_tool: Error extracting pages: Invalid page number: 999"
+        },
+        "execution_time": 0.011999845504760742,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空页码数组参数测试",
+        "purpose": "验证当传入空的pages数组时，工具是否能正确处理错误",
+        "args": {
+          "pdf_file": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "pages": [],
+          "output_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_pages_output.pdf"
+        },
+        "response": {
+          "result": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_pages_output.pdf"
+        },
+        "execution_time": 0.011001825332641602,
+        "is_functional_test": false
+      }
+    ],
+    "search_pdfs_tool": [
+      {
+        "case_name": "基本PDF搜索测试",
+        "purpose": "验证工具可以成功在指定目录中搜索符合模式的PDF文件",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*.pdf"
+        },
+        "response": [
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+        ],
+        "execution_time": 0.010998725891113281,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "带子目录的PDF搜索测试",
+        "purpose": "验证工具是否能够递归搜索子目录中的PDF文件",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "**/*.pdf"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.019999980926513672,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无匹配结果的搜索测试",
+        "purpose": "验证当指定模式没有匹配项时，工具是否能正确处理空结果",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles",
+          "pattern": "*.xyz"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.010003805160522461,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符路径搜索测试",
+        "purpose": "验证工具能否正确处理包含特殊字符的目录路径",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\invalid_output_dir",
+          "pattern": "*.png"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.029005050659179688,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "不存在的目录搜索测试",
+        "purpose": "验证工具在遇到无效或不存在的目录路径时能否优雅地处理",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_dir",
+          "pattern": "*.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs_tool: Error searching PDFs: Directory not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_dir"
+        },
+        "execution_time": 0.0197296142578125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "权限不足导致无法访问目录测试",
+        "purpose": "验证工具在尝试访问没有读取权限的目录时的行为",
+        "args": {
+          "directory": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected_dir",
+          "pattern": "*.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs_tool: Error searching PDFs: Directory not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected_dir"
+        },
+        "execution_time": 0.0124359130859375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "空参数测试",
+        "purpose": "验证当传入空字符串作为目录和模式参数时，工具是否能正确处理错误",
+        "args": {
+          "directory": "",
+          "pattern": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_pdfs_tool: Error searching PDFs: Directory not found: "
+        },
+        "execution_time": 0.014029264450073242,
+        "is_functional_test": false
+      }
+    ],
+    "merge_pdfs_ordered_tool": [
+      {
+        "case_name": "基本有序合并PDF文件测试",
+        "purpose": "验证工具可以成功按照指定顺序合并多个有效的PDF文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf"
+          ],
+          "order_pattern": "{filename}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.4200146198272705,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "默认参数模糊匹配合并测试",
+        "purpose": "验证使用默认参数（fuzzy_match为False）时，是否能按精确顺序合并PDF文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+          ],
+          "order_pattern": "{filename}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.35672783851623535,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "启用模糊匹配的合并测试",
+        "purpose": "验证当启用fuzzy_match=True时，能否根据模式自动排序并合并包含特殊字符的PDF文件",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+          ],
+          "order_pattern": "auto_driving|paper",
+          "fuzzy_match": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf"
+        },
+        "execution_time": 0.36274242401123047,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "空数组参数错误处理测试",
+        "purpose": "验证当传入空的pdf_files数组时，工具是否能正确返回错误信息",
+        "args": {
+          "pdf_files": [],
+          "order_pattern": "{filename}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.6052122116088867,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "无效排序模式导致合并失败测试",
+        "purpose": "验证当提供的order_pattern无法匹配任何文件名时，工具是否能优雅地处理错误",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf"
+          ],
+          "order_pattern": "nonexistent_pattern"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.4772472381591797,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "大量PDF文件有序合并测试",
+        "purpose": "验证工具在处理大量PDF文件并按指定顺序合并时的性能和稳定性",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf"
+          ],
+          "order_pattern": "{filename}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: No files matched the order pattern."
+        },
+        "execution_time": 0.3301081657409668,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "特殊字符路径与模糊匹配测试",
+        "purpose": "验证工具在处理包含特殊字符的文件路径且启用fuzzy_match时的兼容性",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+          ],
+          "order_pattern": "auto|paper",
+          "fuzzy_match": true
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf"
+        },
+        "execution_time": 0.22847723960876465,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "无权限读取PDF文件合并测试",
+        "purpose": "验证工具在尝试合并没有读取权限的PDF文件时的行为",
+        "args": {
+          "pdf_files": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected.pdf"
+          ],
+          "order_pattern": "{filename}"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool merge_pdfs_ordered_tool: Error merging PDFs in order: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected.pdf"
+        },
+        "execution_time": 0.17426300048828125,
+        "is_functional_test": false
+      }
+    ],
+    "find_related_pdfs_tool": [
+      {
+        "case_name": "基本PDF相关性查找测试",
+        "purpose": "验证工具可以成功查找与目标PDF内容相似的其他PDF文件（使用默认阈值）",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 1.1119368076324463,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "指定相似度阈值查找测试",
+        "purpose": "验证工具在指定内容相似度阈值时能正确执行查找",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\sample1.pdf",
+          "content_similarity_threshold": 0.75
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.6211628913879395,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "不存在的目标PDF文件测试",
+        "purpose": "验证工具在目标PDF文件路径无效或不存在时能否优雅地处理",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.pdf"
+        },
+        "execution_time": 0.44956374168395996,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "非PDF文件作为目标测试",
+        "purpose": "验证工具是否能够检测到目标文件不是PDF并进行错误处理",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: Invalid file format (expected .pdf): D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\cs.csv"
+        },
+        "execution_time": 0.4710702896118164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "包含特殊字符的PDF路径测试",
+        "purpose": "验证工具是否能正确处理包含特殊字符的目标PDF文件路径",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\68078d40e08a19b806665fee_1745325376_auto_driving_system.pdf"
+        },
+        "execution_time": 0.5049052238464355,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "极低相似度阈值测试",
+        "purpose": "验证工具在设置极低相似度阈值时是否仍能正常运行并返回结果",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\whole_framework.pdf",
+          "content_similarity_threshold": 0.1
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 1.1451213359832764,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "极高相似度阈值测试",
+        "purpose": "验证工具在设置接近1的相似度阈值时是否仍能正常运行",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "content_similarity_threshold": 0.99
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 1.0118775367736816,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "权限不足导致无法读取目标PDF测试",
+        "purpose": "验证工具在尝试访问没有读取权限的目标PDF文件时的行为",
+        "args": {
+          "target_pdf": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected.pdf"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool find_related_pdfs_tool: Error finding related PDFs: File not found: D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\protected.pdf"
+        },
+        "execution_time": 0.7340908050537109,
+        "is_functional_test": false
+      }
+    ]
+  },
+  "total_cases": 39
+}

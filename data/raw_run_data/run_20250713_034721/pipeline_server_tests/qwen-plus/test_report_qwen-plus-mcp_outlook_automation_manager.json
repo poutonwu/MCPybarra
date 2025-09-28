@@ -1,0 +1,744 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_outlook_automation_manager",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_outlook_automation_manager/refined/server.py",
+  "timestamp": "2025-07-13T04:17:00.099464",
+  "tools": [
+    {
+      "name": "list_folders",
+      "description": "List all available Outlook mail folders.\n    \n    Args:\n        None\n    \n    Returns:\n        JSON string containing a list of folder objects with name and path, like:\n        [\n          {\"name\": \"收件箱\", \"path\": \"\\收件箱\"},\n          {\"name\": \"已发送邮件\", \"path\": \"\\已发送邮件\"},\n          ...\n        ]\n    \n    Raises:\n        RuntimeError: If connection to Outlook fails\n        ValueError: If folder structure cannot be accessed\n\n    Example:\n        >>> list_folders()\n        '[{\"name\": \"收件箱\", \"path\": \"\\\\收件箱\"}]'\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_foldersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_recent_emails",
+      "description": "Get recent emails from specified folder and cache them.\n    \n    Args:\n        days (int): Number of days to look back (positive integer)\n        folder_path (str): Path to folder (default is Inbox)\n    \n    Returns:\n        JSON string containing list of email objects with subject, sender, date, like:\n        [\n          {\n            \"subject\": \"会议通知\",\n            \"sender\": \"张三 <zhangsan@example.com>\",\n            \"date\": \"2023-10-15T14:30:00Z\"\n          },\n          ...\n        ]\n    \n    Raises:\n        ValueError: If days is not positive or folder not found\n        RuntimeError: If email retrieval fails\n\n    Example:\n        >>> list_recent_emails(7, \"\\Inbox\")\n        '[{\"subject\": \"项目更新\", \"sender\": \"李四 <lisi@example.com>\", \"date\": \"2023-10-16T09:45:00Z\"}]'\n    ",
+      "args_schema": {
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "folder_path": {
+            "default": "\\Inbox",
+            "title": "Folder Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "days"
+        ],
+        "title": "list_recent_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_emails",
+      "description": "Search emails by date range, contact or keyword.\n    \n    Args:\n        start_date (str): Start date in YYYY-MM-DD format\n        end_date (str): End date in YYYY-MM-DD format\n        folder_path (str): Path to folder (default is Inbox)\n        contact (str): Contact name or email address to filter by (optional)\n        keyword (str): Keyword to search in subject or body (optional)\n    \n    Returns:\n        JSON string containing list of matching emails with subject, sender, date\n    \n    Raises:\n        ValueError: If dates are invalid or folder not found\n        RuntimeError: If search operation fails\n\n    Example:\n        >>> search_emails(\"2023-10-10\", \"2023-10-17\", contact=\"李四\", keyword=\"项目\")\n        '[{\"subject\": \"项目更新\", \"sender\": \"李四 <lisi@example.com>\", \"date\": \"2023-10-16T09:45:00Z\"}]'\n    ",
+      "args_schema": {
+        "properties": {
+          "start_date": {
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "title": "End Date",
+            "type": "string"
+          },
+          "folder_path": {
+            "default": "\\Inbox",
+            "title": "Folder Path",
+            "type": "string"
+          },
+          "contact": {
+            "default": null,
+            "title": "Contact",
+            "type": "string"
+          },
+          "keyword": {
+            "default": null,
+            "title": "Keyword",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start_date",
+          "end_date"
+        ],
+        "title": "search_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_email_by_number",
+      "description": "Get detailed information about a specific email from recent list.\n    \n    Args:\n        email_index (int): Index of email in the last retrieved list\n    \n    Returns:\n        JSON string containing complete email info including subject, sender, date, body, attachments\n    \n    Raises:\n        IndexError: If email index is out of range\n        RuntimeError: If email details cannot be retrieved\n\n    Example:\n        >>> get_email_by_number(0)\n        '{\"subject\": \"合同签署确认\", \"sender\": \"王五 <wangwu@example.com>\", \"date\": \"2023-10-17T11:20:00Z\", \"body\": \"请尽快完成合同签署...\", \"attachments\": [{\"filename\": \"合同.pdf\", \"size\": 245678}]}' \n    ",
+      "args_schema": {
+        "properties": {
+          "email_index": {
+            "title": "Email Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email_index"
+        ],
+        "title": "get_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "reply_to_email_by_number",
+      "description": "Reply to a specific email from recent list.\n    \n    Args:\n        email_index (int): Index of email in the last retrieved list\n        reply_content (str): Content to include in the reply\n    \n    Returns:\n        JSON string confirming successful reply\n    \n    Raises:\n        IndexError: If email index is out of range\n        ValueError: If reply content is empty\n        RuntimeError: If reply operation fails\n\n    Example:\n        >>> reply_to_email_by_number(0, \"我已收到并会尽快处理。\")\n        '\"回复邮件已成功发送。\"'\n    ",
+      "args_schema": {
+        "properties": {
+          "email_index": {
+            "title": "Email Index",
+            "type": "integer"
+          },
+          "reply_content": {
+            "title": "Reply Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email_index",
+          "reply_content"
+        ],
+        "title": "reply_to_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "compose_email",
+      "description": "Create and send a new email.\n    \n    Args:\n        subject (str): Email subject line\n        body (str): Email body text\n        to (str): Recipient email address\n        cc (str): Optional CC recipient address\n    \n    Returns:\n        JSON string confirming successful delivery\n    \n    Raises:\n        ValueError: If required fields are missing or invalid\n        RuntimeError: If email sending fails\n\n    Example:\n        >>> compose_email(\"会议确认\", \"明天下午3点开会\", \"zhangsan@example.com\")\n        '\"邮件已成功发送至 zhangsan@example.com。\"'\n    ",
+      "args_schema": {
+        "properties": {
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "to": {
+            "title": "To",
+            "type": "string"
+          },
+          "cc": {
+            "default": null,
+            "title": "Cc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "body",
+          "to"
+        ],
+        "title": "compose_emailArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_folders": [
+      {
+        "case_name": "List Outlook Folders Successfully",
+        "purpose": "验证 list_folders 工具能够成功连接 Outlook 并列出所有可用邮件文件夹",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.032041311264038086,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Outlook Connection Failure Handling",
+        "purpose": "验证当无法连接到 Outlook 时，list_folders 是否抛出 RuntimeError",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.0069615840911865234,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Folder Structure Access Error Handling",
+        "purpose": "验证当无法访问文件夹结构时，list_folders 是否抛出 ValueError",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.008995771408081055,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Empty Folder List Response",
+        "purpose": "验证当没有可用邮件文件夹时，list_folders 返回空数组",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.010008811950683594,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Folder Names Support",
+        "purpose": "验证工具是否支持包含 Unicode 字符（如中文）的文件夹名称",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.009998559951782227,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Character in Folder Path Handling",
+        "purpose": "验证路径中包含特殊字符时是否能正确返回 JSON 格式数据",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.009999990463256836,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Folder Name Boundary Test",
+        "purpose": "验证工具能否处理超长文件夹名称边界情况",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.010999679565429688,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Hidden Folder Visibility",
+        "purpose": "验证隐藏或系统文件夹是否也被包含在返回结果中",
+        "args": {},
+        "response": {
+          "result": "[{\"name\": \"Inbox\", \"path\": \"\\\\Inbox\"}]"
+        },
+        "execution_time": 0.007999420166015625,
+        "is_functional_test": true
+      }
+    ],
+    "list_recent_emails": [
+      {
+        "case_name": "Basic Email Retrieval from Inbox",
+        "purpose": "验证工具在默认文件夹（Inbox）中正确获取最近7天的邮件",
+        "args": {
+          "days": 7
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.06197810173034668,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Retrieval from Custom Folder",
+        "purpose": "验证工具从指定非默认文件夹中获取最近30天的邮件",
+        "args": {
+          "days": 30,
+          "folder_path": "\\Work\\ProjectUpdates"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Root folder not found: Work"
+        },
+        "execution_time": 0.012509584426879883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Zero Days Input Handling",
+        "purpose": "验证当days参数为0时是否抛出ValueError",
+        "args": {
+          "days": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Days must be a positive number"
+        },
+        "execution_time": 0.0039980411529541016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Days Input Handling",
+        "purpose": "验证当days参数为负数时是否抛出ValueError",
+        "args": {
+          "days": -5
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Days must be a positive number"
+        },
+        "execution_time": 0.004001617431640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Folder Path Handling",
+        "purpose": "验证当提供的文件夹路径不存在时是否抛出ValueError",
+        "args": {
+          "days": 14,
+          "folder_path": "\\InvalidFolder\\Test"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Root folder not found: InvalidFolder"
+        },
+        "execution_time": 0.011774539947509766,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Character in Folder Path",
+        "purpose": "验证包含特殊字符的文件夹路径是否能被正确处理",
+        "args": {
+          "days": 5,
+          "folder_path": "\\Folder@#$_Test"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Root folder not found: Folder@#$_Test"
+        },
+        "execution_time": 0.011951208114624023,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Folder Name Support",
+        "purpose": "验证工具是否支持中文等Unicode字符作为文件夹名称",
+        "args": {
+          "days": 10,
+          "folder_path": "\\收件箱\\项目通知"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Folder not found: 项目通知"
+        },
+        "execution_time": 0.010047674179077148,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Long Folder Path Boundary Test",
+        "purpose": "验证超长文件夹路径是否能被正确处理",
+        "args": {
+          "days": 3,
+          "folder_path": "\\VeryLongFolderPath_12345678901234567890123456789012345678901234567890\\SubFolder\\AnotherSubFolder"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Error retrieving recent emails: Root folder not found: VeryLongFolderPath_12345678901234567890123456789012345678901234567890"
+        },
+        "execution_time": 0.013022422790527344,
+        "is_functional_test": true
+      }
+    ],
+    "search_emails": [
+      {
+        "case_name": "Basic Email Search by Date Range",
+        "purpose": "验证在默认文件夹（Inbox）中使用日期范围搜索邮件的基本功能是否正常",
+        "args": {
+          "start_date": "2023-10-10",
+          "end_date": "2023-10-17"
+        },
+        "response": {
+          "result": "[]"
+        },
+        "execution_time": 0.012407064437866211,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Search by Contact in Custom Folder",
+        "purpose": "验证工具能否在指定的非默认文件夹中按联系人过滤邮件",
+        "args": {
+          "start_date": "2023-10-01",
+          "end_date": "2023-10-31",
+          "folder_path": "\\Work\\ProjectUpdates",
+          "contact": "李四"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: Root folder not found: Work"
+        },
+        "execution_time": 0.01700115203857422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Search by Keyword in Subject or Body",
+        "purpose": "验证工具能否通过关键词搜索邮件主题或正文内容",
+        "args": {
+          "start_date": "2023-11-01",
+          "end_date": "2023-11-15",
+          "keyword": "项目"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '条件无效。', None, 0, -2147352567), None)"
+        },
+        "execution_time": 0.010000228881835938,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Combined Search with All Filters",
+        "purpose": "验证工具能否同时使用日期范围、联系人和关键词进行组合搜索",
+        "args": {
+          "start_date": "2023-09-01",
+          "end_date": "2023-09-30",
+          "folder_path": "\\Work\\Reports",
+          "contact": "张三",
+          "keyword": "季度"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: Root folder not found: Work"
+        },
+        "execution_time": 0.01399993896484375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Invalid Date Format Handling",
+        "purpose": "验证当提供非法日期格式时，工具是否抛出 ValueError",
+        "args": {
+          "start_date": "2023/10/10",
+          "end_date": "2023/10/17",
+          "contact": "李四"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: Invalid date format: time data '2023/10/10' does not match format '%Y-%m-%d'. Please use YYYY-MM-DD format."
+        },
+        "execution_time": 0.004997730255126953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Nonexistent Folder Path Handling",
+        "purpose": "验证当提供的文件夹路径不存在时，工具是否抛出 ValueError",
+        "args": {
+          "start_date": "2023-10-10",
+          "end_date": "2023-10-17",
+          "folder_path": "\\InvalidFolder\\Test",
+          "keyword": "测试"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: Root folder not found: InvalidFolder"
+        },
+        "execution_time": 0.0149993896484375,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Character in Folder Path",
+        "purpose": "验证包含特殊字符的文件夹路径是否能被正确处理",
+        "args": {
+          "start_date": "2023-08-01",
+          "end_date": "2023-08-31",
+          "folder_path": "\\Folder@#$_Test",
+          "keyword": "报告"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: Root folder not found: Folder@#$_Test"
+        },
+        "execution_time": 0.014002561569213867,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Unicode Folder Name Support",
+        "purpose": "验证工具是否支持中文等 Unicode 字符作为文件夹名称",
+        "args": {
+          "start_date": "2023-07-01",
+          "end_date": "2023-07-31",
+          "folder_path": "\\收件箱\\项目通知",
+          "contact": "王五"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Error searching emails: Folder not found: 项目通知"
+        },
+        "execution_time": 0.008998632431030273,
+        "is_functional_test": true
+      }
+    ],
+    "get_email_by_number": [
+      {
+        "case_name": "Basic Email Detail Retrieval",
+        "purpose": "验证 get_email_by_number 工具能够根据索引获取最近邮件的详细信息（正向测试）",
+        "args": {
+          "email_index": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.005998134613037109,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Negative Email Index Handling",
+        "purpose": "验证当提供负数索引时，工具是否抛出 IndexError",
+        "args": {
+          "email_index": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.008005142211914062,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Index Exceeding Email List Size",
+        "purpose": "验证当提供的索引大于邮件列表长度时是否抛出 IndexError",
+        "args": {
+          "email_index": 999
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.009004592895507812,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Non-Integer Email Index Input",
+        "purpose": "验证当传入非整数类型作为索引参数时是否进行类型检查并报错",
+        "args": {
+          "email_index": "first"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 1 validation error for get_email_by_numberArguments\nemail_index\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='first', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.005992412567138672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Zero-Based Index Boundary Test",
+        "purpose": "验证最小有效索引（0）是否能正确获取第一封邮件详情",
+        "args": {
+          "email_index": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.008001565933227539,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Maximum Valid Index Test",
+        "purpose": "验证最大有效索引（如5封邮件时为4）是否能正确获取最后一封邮件详情",
+        "args": {
+          "email_index": 4
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.006992816925048828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Details Integrity Check",
+        "purpose": "验证返回的邮件详情是否包含完整字段：主题、发件人、日期、正文和附件",
+        "args": {
+          "email_index": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.007002592086791992,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security: Special Character in Email Content",
+        "purpose": "验证当邮件内容包含特殊字符（如 <, >, &, 空格等）时能否安全处理并正确转义输出",
+        "args": {
+          "email_index": 2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Error retrieving email details: Email index out of range (0--1)"
+        },
+        "execution_time": 0.006997823715209961,
+        "is_functional_test": false
+      }
+    ],
+    "reply_to_email_by_number": [
+      {
+        "case_name": "Basic Email Reply Functionality",
+        "purpose": "验证 reply_to_email_by_number 工具能够使用指定索引和内容成功回复邮件",
+        "args": {
+          "email_index": 0,
+          "reply_content": "我已收到并会尽快处理。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.005001068115234375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Empty Reply Content Handling",
+        "purpose": "验证当回复内容为空字符串时是否抛出 ValueError",
+        "args": {
+          "email_index": 1,
+          "reply_content": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.005000114440917969,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Email Index Handling",
+        "purpose": "验证当 email_index 为负数时是否抛出 IndexError",
+        "args": {
+          "email_index": -1,
+          "reply_content": "这是一个测试回复。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.003998756408691406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Email Index Out of Range Handling",
+        "purpose": "验证当 email_index 超出最近邮件列表长度时是否抛出 IndexError",
+        "args": {
+          "email_index": 999,
+          "reply_content": "这封邮件不存在，应触发错误。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Unicode Reply Content Support",
+        "purpose": "验证工具是否支持包含中文字符的回复内容",
+        "args": {
+          "email_index": 0,
+          "reply_content": "邮件内容包含中文字符：测试回复"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.00500178337097168,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Character in Reply Content Handling",
+        "purpose": "验证回复内容中包含特殊字符（如 @#$_）是否能被正确处理",
+        "args": {
+          "email_index": 0,
+          "reply_content": "这是带有特殊字符的回复内容：@#$_test!@#$%^&*()"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.007997512817382812,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply Operation Failure Simulation",
+        "purpose": "模拟回复操作失败情况，验证是否抛出 RuntimeError",
+        "args": {
+          "email_index": 0,
+          "reply_content": "模拟发送失败的回复内容"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Error replying to email: Email index out of range (0--1)"
+        },
+        "execution_time": 0.003997802734375,
+        "is_functional_test": false
+      }
+    ],
+    "compose_email": [
+      {
+        "case_name": "Basic Email Composition and Sending",
+        "purpose": "验证 compose_email 工具能否使用最小必要参数成功创建并发送一封邮件",
+        "args": {
+          "subject": "测试邮件",
+          "body": "这是一封测试邮件内容。",
+          "to": "zhangsan@example.com"
+        },
+        "response": {
+          "result": "\"邮件已成功发送至 zhangsan@example.com。\""
+        },
+        "execution_time": 6.7183520793914795,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Email Composition with CC Field",
+        "purpose": "验证当提供可选的 CC 参数时，compose_email 能否正确处理",
+        "args": {
+          "subject": "带抄送的测试邮件",
+          "body": "这封邮件包含一个抄送地址。",
+          "to": "zhangsan@example.com",
+          "cc": "lisi@example.com"
+        },
+        "response": {
+          "result": "\"邮件已成功发送至 zhangsan@example.com。\""
+        },
+        "execution_time": 7.232405424118042,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Missing Required Subject Field",
+        "purpose": "验证当缺少必填字段 subject 时是否抛出 ValueError",
+        "args": {
+          "body": "缺少主题的邮件内容。",
+          "to": "zhangsan@example.com"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 1 validation error for compose_emailArguments\nsubject\n  Field required [type=missing, input_value={'body': '缺少主题的... 'zhangsan@example.com'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.005078792572021484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required Body Field",
+        "purpose": "验证当缺少必填字段 body 时是否抛出 ValueError",
+        "args": {
+          "subject": "无正文邮件测试",
+          "to": "zhangsan@example.com"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 1 validation error for compose_emailArguments\nbody\n  Field required [type=missing, input_value={'subject': '无正文邮... 'zhangsan@example.com'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.012592315673828125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Missing Required To Field",
+        "purpose": "验证当缺少必填字段 to 时是否抛出 ValueError",
+        "args": {
+          "subject": "无收件人邮件测试",
+          "body": "这封邮件没有指定收件人。"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: 1 validation error for compose_emailArguments\nto\n  Field required [type=missing, input_value={'subject': '无收件人...有指定收件人。'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing"
+        },
+        "execution_time": 0.009516716003417969,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid Email Address Format",
+        "purpose": "验证当提供的邮箱地址格式不合法时是否抛出 ValueError",
+        "args": {
+          "subject": "无效邮箱地址测试",
+          "body": "这封邮件尝试使用非法邮箱地址。",
+          "to": "invalid-email"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Error sending email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.835601806640625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Special Characters in Subject Line",
+        "purpose": "验证工具是否支持在邮件主题中使用特殊字符（如中文、符号）",
+        "args": {
+          "subject": "测试@邮件#主题<含特殊字符>",
+          "body": "这封邮件的主题包含特殊字符。",
+          "to": "zhangsan@example.com"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Error sending email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.48776674270629883,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 46
+}

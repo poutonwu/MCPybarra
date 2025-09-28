@@ -1,0 +1,185 @@
+[
+  {
+    "step": {
+      "step_id": "list_all_tables",
+      "tool_name": "list_resources",
+      "parameters": {},
+      "description": "Happy path: List all available tables in the database to verify connectivity and basic functionality."
+    },
+    "substituted_params": {},
+    "result": {
+      "status": "success",
+      "result": "[\"addresses\", \"companies\", \"order_items\", \"orders\", \"products\", \"reviews\", \"users\"]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_first_table_data",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "$outputs.list_all_tables[0]"
+      },
+      "description": "Dependent call (list access): Read data from the first table returned by list_resources. Assumes at least one table exists."
+    },
+    "substituted_params": {
+      "table_name": "addresses"
+    },
+    "result": {
+      "status": "success",
+      "result": "[{\"id\": 1, \"user_id\": 1, \"street\": \"科技大道100号\", \"city\": \"北京\", \"state\": \"北京\", \"zip_code\": \"100000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 2, \"user_id\": 1, \"street\": \"科技园20号\", \"city\": \"北京\", \"state\": \"北京\", \"zip_code\": \"100001\", \"country\": \"China\", \"is_primary\": 0}, {\"id\": 3, \"user_id\": 2, \"street\": \"商业街50号\", \"city\": \"上海\", \"state\": \"上海\", \"zip_code\": \"200000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 4, \"user_id\": 3, \"street\": \"汽车城15号\", \"city\": \"广州\", \"state\": \"广东\", \"zip_code\": \"510000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 5, \"user_id\": 4, \"street\": \"软件园35号\", \"city\": \"深圳\", \"state\": \"广东\", \"zip_code\": \"518000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 6, \"user_id\": 5, \"street\": \"购物中心88号\", \"city\": \"杭州\", \"state\": \"浙江\", \"zip_code\": \"310000\", \"country\": \"China\", \"is_primary\": 1}, {\"id\": 7, \"user_id\": 6, \"street\": \"创业路77号\", \"city\": \"成都\", \"state\": \"四川\", \"zip_code\": \"610000\", \"country\": \"China\", \"is_primary\": 1}]"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_select_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM `$outputs.list_all_tables[0]` LIMIT 1"
+      },
+      "description": "Dependent call (raw string substitution): Execute a SELECT query on the first table to validate SQL execution capability."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM `$outputs.list_all_tables[0]` LIMIT 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.$outputs.list_all_tables[0]' doesn't exist\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_invalid_sql",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELEC * FORM invalid_table"
+      },
+      "description": "Edge case: Test handling of syntactically incorrect SQL queries."
+    },
+    "substituted_params": {
+      "query": "SELEC * FORM invalid_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SELEC * FORM invalid_table' at line 1\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "execute_empty_query",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": ""
+      },
+      "description": "Edge case: Test handling of empty SQL query input."
+    },
+    "substituted_params": {
+      "query": ""
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Invalid query provided. Must be a non-empty string.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "read_nonexistent_table",
+      "tool_name": "read_resource",
+      "parameters": {
+        "table_name": "nonexistent_table_for_testing"
+      },
+      "description": "Edge case: Attempt to read from a non-existent table to test error handling."
+    },
+    "substituted_params": {
+      "table_name": "nonexistent_table_for_testing"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.nonexistent_table_for_testing' doesn't exist\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "CREATE TEMPORARY TABLE test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+      },
+      "description": "Happy path: Create a temporary test table for subsequent insert/update/delete tests."
+    },
+    "substituted_params": {
+      "query": "CREATE TEMPORARY TABLE test_table (id INT PRIMARY KEY, name VARCHAR(255))"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"affected_rows\": 0}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "insert_into_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "INSERT INTO test_table (id, name) VALUES (1, 'Alice')"
+      },
+      "description": "Dependent call (table creation): Insert a record into the created test table to verify write operations."
+    },
+    "substituted_params": {
+      "query": "INSERT INTO test_table (id, name) VALUES (1, 'Alice')"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.test_table' doesn't exist\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "select_from_test_table",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "SELECT * FROM test_table"
+      },
+      "description": "Dependent call (insertion): Select records from the test table to verify insertion success."
+    },
+    "substituted_params": {
+      "query": "SELECT * FROM test_table"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.test_table' doesn't exist\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "update_test_table_record",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "UPDATE test_table SET name = 'Bob' WHERE id = 1"
+      },
+      "description": "Dependent call (selection): Update a record in the test table to verify update operations."
+    },
+    "substituted_params": {
+      "query": "UPDATE test_table SET name = 'Bob' WHERE id = 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.test_table' doesn't exist\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "delete_test_table_record",
+      "tool_name": "execute_sql",
+      "parameters": {
+        "query": "DELETE FROM test_table WHERE id = 1"
+      },
+      "description": "Dependent call (update): Delete a record from the test table to verify deletion operations."
+    },
+    "substituted_params": {
+      "query": "DELETE FROM test_table WHERE id = 1"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Database connection failed: 1146 (42S02): Table 'user-db.test_table' doesn't exist\"}"
+    }
+  }
+]

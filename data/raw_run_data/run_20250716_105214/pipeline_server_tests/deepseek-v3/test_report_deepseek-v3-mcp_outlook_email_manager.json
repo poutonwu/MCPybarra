@@ -1,0 +1,793 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "deepseek-v3-mcp_outlook_email_manager",
+  "server_path": "workspace/pipeline-output-servers/deepseek-v3/mcp_outlook_email_manager/refined/server.py",
+  "timestamp": "2025-07-16T11:02:26.464854",
+  "tools": [
+    {
+      "name": "list_folders",
+      "description": "\n    Lists all available Outlook mail folders.\n\n    Returns:\n        A list of folder names (strings).\n    ",
+      "args_schema": {
+        "properties": {},
+        "title": "list_foldersArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_recent_emails",
+      "description": "\n    Retrieves email titles from a specified folder within a given number of days. Caches email metadata.\n\n    Args:\n        days: Number of days to look back.\n        folder_name: Specific folder name (default: Inbox).\n\n    Returns:\n        A list of dictionaries containing 'subject', 'sender', and 'received_time' for each email.\n    ",
+      "args_schema": {
+        "properties": {
+          "days": {
+            "title": "Days",
+            "type": "integer"
+          },
+          "folder_name": {
+            "default": "Inbox",
+            "title": "Folder Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "days"
+        ],
+        "title": "list_recent_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_emails",
+      "description": "\n    Searches emails by keyword or sender within a specified time range and folder.\n\n    Args:\n        query: Keyword or sender name.\n        start_date: Start date in 'YYYY-MM-DD' format.\n        end_date: End date in 'YYYY-MM-DD' format.\n        folder_name: Folder to search (default: Inbox).\n\n    Returns:\n        A list of dictionaries with 'subject', 'sender', and 'received_time'.\n    ",
+      "args_schema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "start_date": {
+            "default": null,
+            "title": "Start Date",
+            "type": "string"
+          },
+          "end_date": {
+            "default": null,
+            "title": "End Date",
+            "type": "string"
+          },
+          "folder_name": {
+            "default": "Inbox",
+            "title": "Folder Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "search_emailsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_email_by_number",
+      "description": "\n    Retrieves the full content (body + attachments) of an email from the cached list.\n\n    Args:\n        email_number: Index of the email in the last retrieved list.\n\n    Returns:\n        A dictionary with 'subject', 'sender', 'body', and 'attachments' (list of file paths).\n    ",
+      "args_schema": {
+        "properties": {
+          "email_number": {
+            "title": "Email Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "email_number"
+        ],
+        "title": "get_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "reply_to_email_by_number",
+      "description": "\n    Replies to a specific email (by index) with a given message.\n\n    Args:\n        email_number: Index of the email in the last retrieved list.\n        reply_text: The reply message.\n\n    Returns:\n        Confirmation message (success/failure).\n    ",
+      "args_schema": {
+        "properties": {
+          "email_number": {
+            "title": "Email Number",
+            "type": "integer"
+          },
+          "reply_text": {
+            "title": "Reply Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email_number",
+          "reply_text"
+        ],
+        "title": "reply_to_email_by_numberArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "compose_email",
+      "description": "\n    Creates and sends a new email.\n\n    Args:\n        subject: Email subject.\n        body: Email body.\n        recipients: List of recipient email addresses.\n        cc: List of CC recipients.\n\n    Returns:\n        Confirmation message (success/failure).\n    ",
+      "args_schema": {
+        "properties": {
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "recipients": {
+            "items": {},
+            "title": "Recipients",
+            "type": "array"
+          },
+          "cc": {
+            "default": null,
+            "items": {},
+            "title": "Cc",
+            "type": "array"
+          }
+        },
+        "required": [
+          "subject",
+          "body",
+          "recipients"
+        ],
+        "title": "compose_emailArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "list_folders": [
+      {
+        "case_name": "List Folders Successfully",
+        "purpose": "验证 list_folders 工具在默认参数下可以成功列出所有可用的Outlook邮件文件夹。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.014901399612426758,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Folders Without Connection",
+        "purpose": "验证当Outlook连接不可用时，list_folders 工具是否能优雅地处理错误并返回适当的提示信息。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.008010625839233398,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Folders with Unauthorized Access",
+        "purpose": "验证用户没有权限访问Outlook账户时，工具是否能够安全地拒绝操作并返回权限错误。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.010567188262939453,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Empty Folders",
+        "purpose": "验证工具是否能正确处理Outlook中没有配置任何邮件文件夹的情况，并返回空列表。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.010553836822509766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Folders with Special Characters in Folder Names",
+        "purpose": "验证工具能否正确处理包含特殊字符的Outlook文件夹名称。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.008508682250976562,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Folders with Long Path Depth",
+        "purpose": "验证工具能否处理Outlook中存在深层嵌套文件夹结构的情况。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.01213836669921875,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Folders Under High Load",
+        "purpose": "验证工具在系统高负载情况下仍能稳定运行并返回结果。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.012817144393920898,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Folders with Invalid Session",
+        "purpose": "验证工具在会话失效后能否安全退出并提示重新认证。",
+        "args": {},
+        "response": [
+          "1291980381@qq.com",
+          "zhihutangjiang@126.com",
+          "outformcptest@outlook.com"
+        ],
+        "execution_time": 0.007996082305908203,
+        "is_functional_test": false
+      }
+    ],
+    "list_recent_emails": [
+      {
+        "case_name": "List Recent Emails in Inbox for 7 Days",
+        "purpose": "验证 list_recent_emails 工具在默认文件夹 'Inbox' 中，能够正确检索过去7天内的邮件标题、发件人和接收时间。",
+        "args": {
+          "days": 7
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.059340476989746094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Recent Emails in Custom Folder for 30 Days",
+        "purpose": "验证 list_recent_emails 工具在指定文件夹中，能够正确检索过去30天内的邮件标题、发件人和接收时间。",
+        "args": {
+          "days": 30,
+          "folder_name": "Work"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+        },
+        "execution_time": 0.0050258636474609375,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Recent Emails with Zero Days",
+        "purpose": "验证当 days 参数为 0 时，工具是否能正确处理并返回当天的邮件列表。",
+        "args": {
+          "days": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.04761815071105957,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Recent Emails with Invalid Folder Name",
+        "purpose": "验证当指定的文件夹名称不存在时，工具是否能优雅地处理错误并返回空列表。",
+        "args": {
+          "days": 7,
+          "folder_name": "InvalidFolder"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+        },
+        "execution_time": 0.005013942718505859,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Recent Emails Without Connection",
+        "purpose": "验证当Outlook连接不可用时，list_recent_emails 工具是否能优雅地处理错误并返回适当的提示信息。",
+        "args": {
+          "days": 7
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.043720245361328125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Recent Emails with Unauthorized Access",
+        "purpose": "验证当用户没有权限访问Outlook账户时，list_recent_emails 工具是否能安全地拒绝操作并返回权限错误。",
+        "args": {
+          "days": 7
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.04644155502319336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "List Recent Emails with Special Characters in Folder Name",
+        "purpose": "验证 list_recent_emails 工具能否正确处理包含特殊字符的文件夹名称。",
+        "args": {
+          "days": 7,
+          "folder_name": "Test!@#$%^&*"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "List Recent Emails with Long Folder Path",
+        "purpose": "验证 list_recent_emails 工具能否处理深层嵌套的Outlook文件夹结构。",
+        "args": {
+          "days": 7,
+          "folder_name": "a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l\\m\\n\\o\\p\\q\\r\\s\\t\\u\\v\\w\\x\\y\\z"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool list_recent_emails: Failed to list recent emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+        },
+        "execution_time": 0.006517648696899414,
+        "is_functional_test": true
+      }
+    ],
+    "search_emails": [
+      {
+        "case_name": "Search Emails by Keyword in Inbox with Date Range",
+        "purpose": "验证在默认文件夹 'Inbox' 中，使用关键词和日期范围能够正确检索邮件主题、发件人和接收时间。",
+        "args": {
+          "query": "project update",
+          "start_date": "2024-01-01",
+          "end_date": "2024-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Failed to search emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.062447547912597656,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails by Sender in Custom Folder",
+        "purpose": "验证在指定文件夹中，使用发件人名称进行搜索是否能正确返回相关邮件信息。",
+        "args": {
+          "query": "john.doe@example.com",
+          "folder_name": "Work"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Failed to search emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+        },
+        "execution_time": 0.007112741470336914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails Without Date Range",
+        "purpose": "验证不提供起止日期时，工具能否默认搜索所有时间段的邮件并返回结果。",
+        "args": {
+          "query": "meeting"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 3.998920440673828,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails with Invalid Query Format",
+        "purpose": "验证当查询参数为空或非字符串类型时，工具是否能优雅地处理错误并返回提示。",
+        "args": {
+          "query": "",
+          "start_date": "2024-01-01"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Failed to search emails: Query cannot be empty"
+        },
+        "execution_time": 0.010337114334106445,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search Emails with Future Dates",
+        "purpose": "验证使用未来的开始和结束日期是否能正确返回空列表或合理响应。",
+        "args": {
+          "query": "reminder",
+          "start_date": "2099-01-01",
+          "end_date": "2099-12-31"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Failed to search emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.07272934913635254,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails with Special Characters in Query",
+        "purpose": "验证工具能否正确处理包含特殊字符的搜索关键词或发件人名称。",
+        "args": {
+          "query": "!@#$%^&*",
+          "folder_name": "Inbox"
+        },
+        "response": {
+          "result": ""
+        },
+        "execution_time": 0.13083982467651367,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Search Emails with Unauthorized Access",
+        "purpose": "验证用户没有权限访问Outlook账户时，工具是否能安全拒绝操作并返回权限错误。",
+        "args": {
+          "query": "report",
+          "start_date": "2024-01-01"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Failed to search emails: can't compare offset-naive and offset-aware datetimes"
+        },
+        "execution_time": 0.06806039810180664,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Search Emails with Long Folder Path",
+        "purpose": "验证工具能否处理深层嵌套Outlook文件夹结构中的邮件搜索请求。",
+        "args": {
+          "query": "document",
+          "folder_name": "a\\b\\c\\d\\e\\f\\g\\h\\i\\j\\k\\l\\m\\n\\o\\p\\q\\r\\s\\t\\u\\v\\w\\x\\y\\z"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool search_emails: Failed to search emails: (-2147352567, '发生意外。', (4096, 'Microsoft Outlook', '尝试的操作失败。找不到某个对象。', None, 0, -2147221233), None)"
+        },
+        "execution_time": 0.01003575325012207,
+        "is_functional_test": true
+      }
+    ],
+    "get_email_by_number": [
+      {
+        "case_name": "Retrieve Email by Number Successfully",
+        "purpose": "验证 get_email_by_number 工具在提供有效邮件索引时能够成功从缓存中检索完整的邮件内容（包括正文和附件）。",
+        "args": {
+          "email_number": 1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.004511356353759766,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Retrieve Email with Invalid Index",
+        "purpose": "验证当提供的邮件索引超出缓存邮件列表范围时，工具是否能优雅地处理错误并返回适当的提示信息。",
+        "args": {
+          "email_number": 999
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.0049991607666015625,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Retrieve Email with Negative Index",
+        "purpose": "验证当提供的邮件索引为负数时，工具是否能正确识别参数无效并返回错误提示。",
+        "args": {
+          "email_number": -1
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.009925365447998047,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Retrieve Email from Empty Cache",
+        "purpose": "验证在没有通过 list_recent_emails 获取邮件列表的情况下直接调用 get_email_by_number 是否能安全处理并提示缓存为空。",
+        "args": {
+          "email_number": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.0075914859771728516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Retrieve Email with Non-Integer Index",
+        "purpose": "验证当提供的邮件索引不是整数类型时，工具是否能拒绝非法输入并返回参数验证错误。",
+        "args": {
+          "email_number": "one"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: 1 validation error for get_email_by_numberArguments\nemail_number\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='one', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/int_parsing"
+        },
+        "execution_time": 0.0036003589630126953,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Retrieve Email with Zero Index",
+        "purpose": "验证当邮件索引为0时，get_email_by_number 是否能正确获取第一条邮件内容。",
+        "args": {
+          "email_number": 0
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.004153728485107422,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Retrieve Email Under High Load",
+        "purpose": "验证在系统高负载情况下调用 get_email_by_number 工具是否仍能稳定返回结果。",
+        "args": {
+          "email_number": 2
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.00710606575012207,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Retrieve Email with Special Characters in Attachments",
+        "purpose": "验证 get_email_by_number 工具能否正确处理包含特殊字符的附件文件路径。",
+        "args": {
+          "email_number": 3
+        },
+        "response": {
+          "error": "ToolException: Error executing tool get_email_by_number: Failed to get email by number: Invalid email number"
+        },
+        "execution_time": 0.0070018768310546875,
+        "is_functional_test": true
+      }
+    ],
+    "reply_to_email_by_number": [
+      {
+        "case_name": "Reply to Valid Email by Number with Normal Text",
+        "purpose": "验证 reply_to_email_by_number 工具在提供有效 email_number 和普通文本时能够成功发送回复。",
+        "args": {
+          "email_number": 1,
+          "reply_text": "This is a normal reply message."
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.004608869552612305,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply to Email with Empty Reply Text",
+        "purpose": "验证当 reply_text 参数为空字符串时，工具是否仍能正常执行并发送空回复。",
+        "args": {
+          "email_number": 2,
+          "reply_text": ""
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.008002519607543945,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply to Email with Special Characters in Reply Text",
+        "purpose": "验证 reply_to_email_by_number 工具能否正确处理包含特殊字符的回复内容。",
+        "args": {
+          "email_number": 3,
+          "reply_text": "This reply contains special characters: !@#$%^&*()_+{}|:\"<>?"
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.003536701202392578,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply to Email with Non-Existent Email Index",
+        "purpose": "验证当提供的 email_number 超出邮件列表范围时，工具是否能优雅地返回错误信息。",
+        "args": {
+          "email_number": 999,
+          "reply_text": "This should not be sent."
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.0029981136322021484,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Reply to Email with Negative Email Number",
+        "purpose": "验证当 email_number 为负数时，工具是否能正确拒绝请求并提示参数无效。",
+        "args": {
+          "email_number": -1,
+          "reply_text": "Negative index test."
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.005507946014404297,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Reply to Email with Zero Email Number",
+        "purpose": "验证当 email_number 为0时，工具是否能正确处理（最小合法值边界）。",
+        "args": {
+          "email_number": 0,
+          "reply_text": "Testing zero-based index."
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.007994890213012695,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Reply to Email Without Connection",
+        "purpose": "验证在Outlook连接不可用的情况下，reply_to_email_by_number 是否能安全地返回连接失败提示。",
+        "args": {
+          "email_number": 1,
+          "reply_text": "Connection lost test reply."
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.00299835205078125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Reply to Email with Unauthorized Access",
+        "purpose": "验证用户没有权限访问Outlook账户时，工具是否能够安全地拒绝操作并返回权限错误。",
+        "args": {
+          "email_number": 1,
+          "reply_text": "Unauthorized access test reply."
+        },
+        "response": {
+          "error": "ToolException: Error executing tool reply_to_email_by_number: Failed to reply to email: Invalid email number"
+        },
+        "execution_time": 0.00804281234741211,
+        "is_functional_test": false
+      }
+    ],
+    "compose_email": [
+      {
+        "case_name": "Send Email with Valid Parameters",
+        "purpose": "验证使用有效参数调用 compose_email 工具时是否能成功创建并发送邮件。",
+        "args": {
+          "subject": "Test Email",
+          "body": "This is a test email body.",
+          "recipients": [
+            "test@example.com"
+          ],
+          "cc": [
+            "cc@example.com"
+          ]
+        },
+        "response": {
+          "result": "Email sent successfully"
+        },
+        "execution_time": 6.395652770996094,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Send Email with Empty CC List",
+        "purpose": "验证当 CC 列表为空时，compose_email 工具是否能正常发送邮件。",
+        "args": {
+          "subject": "Test Email with Empty CC",
+          "body": "This is a test email with empty CC list.",
+          "recipients": [
+            "test@example.com"
+          ],
+          "cc": []
+        },
+        "response": {
+          "result": "Email sent successfully"
+        },
+        "execution_time": 6.303334951400757,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Send Email with Missing CC Parameter",
+        "purpose": "验证当不提供 CC 参数时，compose_email 工具是否能使用默认值正常发送邮件。",
+        "args": {
+          "subject": "Test Email without CC",
+          "body": "This is a test email without CC parameter.",
+          "recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Failed to compose email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.6096525192260742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Send Email with Long Subject and Body",
+        "purpose": "验证工具是否能处理包含长主题和正文的邮件。",
+        "args": {
+          "subject": "This is a very long subject line that exceeds the typical length limits of an email subject",
+          "body": "This is a very long email body that contains multiple paragraphs and extensive information. It should test the tool's ability to handle large amounts of text input.",
+          "recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Failed to compose email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.28017711639404297,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Send Email with Special Characters in Subject and Body",
+        "purpose": "验证工具是否能正确处理包含特殊字符的主题和正文。",
+        "args": {
+          "subject": "Test Email with Special Characters!@#$%^&*",
+          "body": "This email contains special characters like: !@#$%^&*()_+=-`~[]{}|;':\",./<>?",
+          "recipients": [
+            "test@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Failed to compose email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.3118894100189209,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Send Email with Invalid Recipient",
+        "purpose": "验证当收件人地址无效时，工具是否能优雅地处理错误并返回提示。",
+        "args": {
+          "subject": "Test Email",
+          "body": "This email has an invalid recipient.",
+          "recipients": [
+            "invalid-email"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Failed to compose email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.27850937843322754,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Send Email Without Recipients",
+        "purpose": "验证当收件人列表为空时，工具是否能正确处理错误并返回提示。",
+        "args": {
+          "subject": "Test Email",
+          "body": "This email has no recipients.",
+          "recipients": []
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Failed to compose email: At least one recipient is required"
+        },
+        "execution_time": 0.005377292633056641,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Send Email with Multiple Recipients",
+        "purpose": "验证工具是否能正确处理多个收件人地址。",
+        "args": {
+          "subject": "Test Email with Multiple Recipients",
+          "body": "This email is sent to multiple recipients.",
+          "recipients": [
+            "user1@example.com",
+            "user2@example.com",
+            "user3@example.com"
+          ]
+        },
+        "response": {
+          "error": "ToolException: Error executing tool compose_email: Failed to compose email: (-2147467260, '已中止操作', None, None)"
+        },
+        "execution_time": 0.2571852207183838,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 48
+}

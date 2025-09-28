@@ -1,0 +1,901 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "qwen-plus-mcp_text_file_processor",
+  "server_path": "workspace/pipeline-output-servers/qwen-plus/mcp_text_file_processor/refined/server.py",
+  "timestamp": "2025-07-13T04:12:51.450749",
+  "tools": [
+    {
+      "name": "get_text_file_contents",
+      "description": "\n    Read content from one or more text files, optionally limited to a range of lines.\n    Returns both content and SHA-256 hashes for concurrency control.\n\n    Args:\n        file_paths: A list of file paths to read.\n        start_line: Starting line index (inclusive, 0-based).\n        end_line: Ending line index (inclusive, 0-based).\n\n    Returns:\n        JSON string containing:\n        - \"contents\": Dictionary mapping file paths to their contents (list of lines).\n        - \"hashes\": Dictionary mapping file paths to their SHA-256 hashes.\n\n    Raises:\n        ValueError: If invalid file paths or line ranges are provided.\n\n    Example:\n        get_text_file_contents(file_paths=[\"example.txt\"], start_line=0, end_line=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "file_paths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "File Paths",
+            "type": "array"
+          },
+          "start_line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Line"
+          },
+          "end_line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Line"
+          }
+        },
+        "required": [
+          "file_paths"
+        ],
+        "title": "get_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "create_text_file",
+      "description": "\n    Create a new text file and write initial content.\n\n    Args:\n        file_path: Path where the new file should be created.\n        content: Initial content to write into the file.\n\n    Returns:\n        JSON string containing:\n        - \"success\": Boolean indicating success status.\n        - \"message\": Description of the operation result.\n        - \"hash\": SHA-256 hash of the newly created file.\n\n    Raises:\n        ValueError: If invalid parameters or file paths are used.\n\n    Example:\n        create_text_file(file_path=\"new_file.txt\", content=\"This is the content\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "content"
+        ],
+        "title": "create_text_fileArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "append_text_file_contents",
+      "description": "\n    Append content to an existing text file.\n\n    Args:\n        file_path: Path to the target file.\n        content: Content to append to the file.\n\n    Returns:\n        JSON string containing:\n        - \"success\": Boolean indicating success status.\n        - \"message\": Description of the operation result.\n        - \"new_hash\": SHA-256 hash of the modified file.\n\n    Raises:\n        ValueError: If file does not exist or invalid parameters are used.\n\n    Example:\n        append_text_file_contents(file_path=\"existing_file.txt\", content=\"\nNew appended content\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "content"
+        ],
+        "title": "append_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "delete_text_file_contents",
+      "description": "\n    Delete a range of lines from a text file using concurrency-safe hash validation.\n\n    Args:\n        file_path: Path to the file to modify.\n        start_line: Start line index (inclusive, 0-based).\n        end_line: End line index (inclusive, 0-based).\n        expected_hash: Expected SHA-256 hash of the file before modification.\n\n    Returns:\n        JSON string containing:\n        - \"success\": Boolean indicating success status.\n        - \"message\": Description of the operation result.\n        - \"new_hash\": SHA-256 hash of the modified file.\n\n    Raises:\n        ValueError: If file doesn't exist, line range is invalid, or hash mismatch occurs.\n\n    Example:\n        delete_text_file_contents(file_path=\"example.txt\", start_line=2, end_line=5)\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "start_line": {
+            "title": "Start Line",
+            "type": "integer"
+          },
+          "end_line": {
+            "title": "End Line",
+            "type": "integer"
+          },
+          "expected_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Hash"
+          }
+        },
+        "required": [
+          "file_path",
+          "start_line",
+          "end_line"
+        ],
+        "title": "delete_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "insert_text_file_contents",
+      "description": "\n    Insert content at a specific position in a text file using concurrency-safe hash validation.\n\n    Args:\n        file_path: Path to the file to modify.\n        insert_line: Line index where content should be inserted (before this line).\n        content: Content to insert.\n        expected_hash: Expected SHA-256 hash of the file before modification.\n\n    Returns:\n        JSON string containing:\n        - \"success\": Boolean indicating success status.\n        - \"message\": Description of the operation result.\n        - \"new_hash\": SHA-256 hash of the modified file.\n\n    Raises:\n        ValueError: If file doesn't exist, line range is invalid, or hash mismatch occurs.\n\n    Example:\n        insert_text_file_contents(file_path=\"example.txt\", insert_line=3, content=\"Inserted content\n\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "insert_line": {
+            "title": "Insert Line",
+            "type": "integer"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "expected_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Hash"
+          }
+        },
+        "required": [
+          "file_path",
+          "insert_line",
+          "content"
+        ],
+        "title": "insert_text_file_contentsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "patch_text_file_contents",
+      "description": "\n    Replace content on a specific line in a text file using concurrency-safe hash validation.\n\n    Args:\n        file_path: Path to the file to modify.\n        line_number: Index of the line to replace.\n        old_content: Current content of the line (for verification).\n        new_content: New content to set.\n        expected_hash: Expected SHA-256 hash of the file before modification.\n\n    Returns:\n        JSON string containing:\n        - \"success\": Boolean indicating success status.\n        - \"message\": Description of the operation result.\n        - \"new_hash\": SHA-256 hash of the modified file.\n\n    Raises:\n        ValueError: If file doesn't exist, line number is invalid, content mismatch, or hash mismatch occurs.\n\n    Example:\n        patch_text_file_contents(file_path=\"example.txt\", line_number=4, old_content=\"Old content\", new_content=\"New content\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "line_number": {
+            "title": "Line Number",
+            "type": "integer"
+          },
+          "old_content": {
+            "title": "Old Content",
+            "type": "string"
+          },
+          "new_content": {
+            "title": "New Content",
+            "type": "string"
+          },
+          "expected_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Expected Hash"
+          }
+        },
+        "required": [
+          "file_path",
+          "line_number",
+          "old_content",
+          "new_content"
+        ],
+        "title": "patch_text_file_contentsArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "create_text_file": [
+      {
+        "case_name": "Basic File Creation with Default Content",
+        "purpose": "验证工具能够使用默认内容创建一个新文本文件，并返回成功状态和哈希值。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\new_test_file.txt",
+          "content": "Default content for testing."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\new_test_file.txt\"}"
+        },
+        "execution_time": 0.009994983673095703,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Creation with Empty Content",
+        "purpose": "验证当内容为空字符串时，工具是否能正确创建空文件并返回有效哈希。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_test.txt",
+          "content": ""
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_test.txt\"}"
+        },
+        "execution_time": 0.014004945755004883,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Creation with Special Characters in Path",
+        "purpose": "验证路径中包含特殊字符时能否正常创建文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@#$_path\\test_file.txt",
+          "content": "Content with special path test."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@#$_path\\\\test_file.txt\"}"
+        },
+        "execution_time": 0.00999760627746582,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Creation in Read-only Directory",
+        "purpose": "验证在只读目录下尝试创建文件时是否会抛出错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\readonly-check\\readonly_output.txt",
+          "content": "Attempt to write in readonly directory."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\readonly-check\\\\readonly_output.txt\"}"
+        },
+        "execution_time": 0.013996124267578125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "File Creation with Long File Path",
+        "purpose": "验证工具是否支持长文件路径的创建。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\long_branch_name_1234567890123456789012345678901234567890\\deep\\nested\\path\\testfile.txt",
+          "content": "Long file path test content."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\long_branch_name_1234567890123456789012345678901234567890\\\\deep\\\\nested\\\\path\\\\testfile.txt\"}"
+        },
+        "execution_time": 0.010599613189697266,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "File Creation with Invalid File Path",
+        "purpose": "验证传入非法路径（如含非法字符或不存在路径）时能否正确处理错误。",
+        "args": {
+          "file_path": "invalid/<path>:name|test.txt",
+          "content": "Invalid path test content."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: [Errno 22] Invalid argument: 'invalid/<path>:name|test.txt'\"}"
+        },
+        "execution_time": 0.017989397048950195,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "File Creation with Existing File Overwrite",
+        "purpose": "验证覆盖已存在的文件时是否能正常执行并更新哈希。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "content": "Overwriting existing file content."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.013999700546264648,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt File Creation in Git Internal Directory",
+        "purpose": "验证是否能在 .git 内部目录中写入文件以测试潜在的安全风险。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config\\malicious_file.txt",
+          "content": "Test writing into git internal directory."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Failed to create file: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\config\\\\malicious_file.txt\"}"
+        },
+        "execution_time": 0.01202082633972168,
+        "is_functional_test": false
+      }
+    ],
+    "get_text_file_contents": [
+      {
+        "case_name": "Basic Text File Content Reading",
+        "purpose": "验证工具能否正确读取单个文本文件的完整内容并返回哈希值。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.007313251495361328,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Specific Line Range from Text File",
+        "purpose": "验证工具是否能正确读取指定行范围的内容（从第2到第5行）。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml"
+          ],
+          "start_line": 1,
+          "end_line": 4
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.004687309265136719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read Multiple Text Files Simultaneously",
+        "purpose": "验证工具是否支持同时读取多个文本文件的内容和哈希。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonname.html"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.005610466003417969,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Read File with Special Characters in Path",
+        "purpose": "验证路径中包含特殊字符时，工具是否仍能正常读取文件内容。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\config\"}"
+        },
+        "execution_time": 0.005853176116943359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Read Git Internal File",
+        "purpose": "验证是否能从 .git 内部目录读取文件以测试潜在的安全风险。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\index"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\index\"}"
+        },
+        "execution_time": 0.009515047073364258,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Invalid File Path Handling",
+        "purpose": "验证传入非法或不存在的文件路径时是否能抛出错误。",
+        "args": {
+          "file_paths": [
+            "invalid/<path>:name|test.txt"
+          ]
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Error reading file invalid/<path>:name|test.txt: [Errno 22] Invalid argument: 'invalid/<path>:name|test.txt'\"}"
+        },
+        "execution_time": 0.008846759796142578,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Line Index Handling",
+        "purpose": "验证负数行索引是否被正确处理或抛出错误。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml"
+          ],
+          "start_line": -1,
+          "end_line": 5
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.01059865951538086,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "End Line Exceeds File Length",
+        "purpose": "验证当 end_line 超过文件实际行数时是否能安全处理。",
+        "args": {
+          "file_paths": [
+            "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml"
+          ],
+          "start_line": 0,
+          "end_line": 1000
+        },
+        "response": {
+          "result": "{\"error\": \"get_text_file_contents failed\", \"message\": \"Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.011041879653930664,
+        "is_functional_test": true
+      }
+    ],
+    "append_text_file_contents": [
+      {
+        "case_name": "Basic Append to Existing Text File",
+        "purpose": "验证工具能否成功向一个已存在的文本文件追加内容，并返回成功状态和新的SHA-256哈希值。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "content": "Appended content for basic test."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.8016641139984131,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append Empty Content to File",
+        "purpose": "验证当传入空字符串作为内容时，工具是否能正确处理并更新文件的哈希。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "content": ""
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 1.716306209564209,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append with Special Characters in Content",
+        "purpose": "验证内容中包含特殊字符（如换行、引号、符号）时能否正常追加。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "content": "Special characters test:\n\"Hello, World!\"@#$%^&*()"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 1.4549574851989746,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Append to File with Special Path",
+        "purpose": "验证路径中包含特殊字符时能否正常追加内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@#$_document.docx",
+          "content": "Appending to file with special path."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@#$_document.docx\"}"
+        },
+        "execution_time": 1.7324423789978027,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt Append in Git Internal Directory",
+        "purpose": "验证是否能在 .git 内部目录中追加内容以测试潜在的安全风险。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config",
+          "content": "Malicious append attempt in git internal directory."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\config\"}"
+        },
+        "execution_time": 1.3670341968536377,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid File Path",
+        "purpose": "验证传入非法路径（如含非法字符或不存在路径）时能否正确处理错误。",
+        "args": {
+          "file_path": "invalid/<path>:name|test.txt",
+          "content": "Invalid path test content."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: File invalid/<path>:name|test.txt does not exist\"}"
+        },
+        "execution_time": 1.0478711128234863,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Non-existent File",
+        "purpose": "验证目标文件不存在时是否抛出 ValueError 异常。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "content": "Trying to append to a non-existent file."
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Append failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\"}"
+        },
+        "execution_time": 2.70286226272583,
+        "is_functional_test": false
+      }
+    ],
+    "insert_text_file_contents": [
+      {
+        "case_name": "Basic Text Insertion at Line 3",
+        "purpose": "验证工具能否在指定行前插入内容，并返回新的文件哈希值。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "insert_line": 3,
+          "content": "Inserted content before line 3.",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.0067403316497802734,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Insert into Git Internal File",
+        "purpose": "验证是否能在 .git 内部文件中插入内容以测试潜在的安全风险。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\config",
+          "insert_line": 0,
+          "content": "[malicious \"injection\"]",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\config\"}"
+        },
+        "execution_time": 0.007158994674682617,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert with Invalid File Path",
+        "purpose": "验证传入非法路径（如含非法字符）时是否能抛出错误。",
+        "args": {
+          "file_path": "invalid/<path>:name|test.txt",
+          "insert_line": 2,
+          "content": "Invalid path insertion attempt.",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: File invalid/<path>:name|test.txt does not exist\"}"
+        },
+        "execution_time": 0.009054183959960938,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert into Non-existent File",
+        "purpose": "验证尝试向不存在的文件中插入内容时是否能正确处理错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "insert_line": 1,
+          "content": "Content to non-existent file.",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\"}"
+        },
+        "execution_time": 0.007997274398803711,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert with Negative Line Index",
+        "purpose": "验证负数行索引是否被正确处理或抛出错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "insert_line": -1,
+          "content": "Negative line index test content.",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.011042356491088867,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Insert Content at End of File",
+        "purpose": "验证插入位置为超出当前文件行数的位置时，是否能将内容追加到文件末尾。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "insert_line": 1000,
+          "content": "Appended content via high line index.",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.006000041961669922,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Insert Special Characters in Content Field",
+        "purpose": "验证插入内容包含特殊字符时是否能正常写入文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\special@#$_document_saved.docx",
+          "insert_line": 0,
+          "content": "Special characters: @ # $ _ { } [ ] | \" ' : ; , . < > / ?",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Insert failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\special@#$_document_saved.docx\"}"
+        },
+        "execution_time": 0.010000944137573242,
+        "is_functional_test": true
+      }
+    ],
+    "patch_text_file_contents": [
+      {
+        "case_name": "Basic Line Replacement with Valid Parameters",
+        "purpose": "验证工具能否使用有效参数在指定行替换内容，并正确返回成功状态和新哈希。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "line_number": 1,
+          "old_content": "",
+          "new_content": "New line content",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Line Replacement with Hash Validation",
+        "purpose": "验证工具在提供预期哈希值的情况下是否能安全地进行内容替换并返回新的哈希值。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "line_number": 2,
+          "old_content": "<module name=\"core\" version=\"1.0\" />",
+          "new_content": "<module name=\"core\" version=\"2.0\" />",
+          "expected_hash": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.006000995635986328,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Replacement Fails When Old Content Mismatch",
+        "purpose": "验证当提供的旧内容与实际文件内容不一致时，工具是否会拒绝修改并抛出错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "line_number": 2,
+          "old_content": "<module name=\"core\" version=\"1.5\" />",
+          "new_content": "<module name=\"core\" version=\"2.0\" />",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.01199030876159668,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Replacement Fails When File Does Not Exist",
+        "purpose": "验证尝试修改不存在的文件时是否会抛出文件不存在的错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent_file.txt",
+          "line_number": 1,
+          "old_content": "Old content",
+          "new_content": "New content",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent_file.txt\"}"
+        },
+        "execution_time": 0.0059986114501953125,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Attempt to Modify Git Internal File",
+        "purpose": "验证是否能在 .git 内部目录中执行文件内容替换以测试潜在的安全风险。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\index",
+          "line_number": 1,
+          "old_content": "Git internal data",
+          "new_content": "Modified git index",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\index\"}"
+        },
+        "execution_time": 0.009004831314086914,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Replace First Line of File",
+        "purpose": "验证工具是否能正确处理首行（第1行）的内容替换。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "line_number": 1,
+          "old_content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+          "new_content": "<?xml version=\"1.1\" encoding=\"UTF-8\"?>",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.005999088287353516,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Replace Last Line of File",
+        "purpose": "验证工具是否能正确处理末行内容替换。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "line_number": 5,
+          "old_content": "</modules>",
+          "new_content": "</modules> <!-- End of file -->",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.006001710891723633,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in New Content Handling",
+        "purpose": "验证新内容包含特殊字符时是否能正确写入文件。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "line_number": 3,
+          "old_content": "<module name=\"ui\" version=\"1.0\" />",
+          "new_content": "<module name=\"ui@#$_test\" version=\"1.0\" />",
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Patch failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.007501125335693359,
+        "is_functional_test": true
+      }
+    ],
+    "delete_text_file_contents": [
+      {
+        "case_name": "Basic Line Range Deletion with Valid Hash",
+        "purpose": "验证工具能正确删除指定行范围并使用匹配的哈希值进行安全修改。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\empty_content_write.txt",
+          "start_line": 1,
+          "end_line": 3,
+          "expected_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\empty_content_write.txt\"}"
+        },
+        "execution_time": 0.006041049957275391,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete All Lines in File",
+        "purpose": "验证当 start_line=0 且 end_line 覆盖所有行时能否正确清空文件内容。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "start_line": 0,
+          "end_line": 100,
+          "expected_hash": "a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcde"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.006957054138183594,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Delete Single Line Using Valid Hash",
+        "purpose": "验证删除单行内容是否成功，并确保哈希验证通过。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonname.html",
+          "start_line": 2,
+          "end_line": 2,
+          "expected_hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonname.html\"}"
+        },
+        "execution_time": 0.009000301361083984,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Hash Mismatch Handling",
+        "purpose": "验证提供的哈希与实际文件哈希不一致时是否抛出错误并拒绝操作。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "start_line": 0,
+          "end_line": 5,
+          "expected_hash": "invalidhash1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.008001089096069336,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Attempt Delete on Non-Text File",
+        "purpose": "验证尝试对非文本文件（如图片或二进制文件）执行删除操作时的行为。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nature.jpeg",
+          "start_line": 0,
+          "end_line": 5,
+          "expected_hash": null
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nature.jpeg\"}"
+        },
+        "execution_time": 0.005998134613037109,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Attempt Modify Git Internal File",
+        "purpose": "验证是否能在 .git 内部文件中删除内容以测试潜在的安全风险。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\.git\\index",
+          "start_line": 0,
+          "end_line": 2,
+          "expected_hash": "some_valid_hash"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\.git\\\\index\"}"
+        },
+        "execution_time": 0.009013891220092773,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Negative Line Index Handling",
+        "purpose": "验证负数行索引是否被正确处理或抛出错误。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "start_line": -1,
+          "end_line": 3,
+          "expected_hash": "valid_hash_here"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.005999088287353516,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "End Line Exceeds File Length",
+        "purpose": "验证当 end_line 超过文件实际行数时是否能安全处理。",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\modules.xml",
+          "start_line": 5,
+          "end_line": 1000,
+          "expected_hash": "valid_hash_here"
+        },
+        "response": {
+          "result": "{\"success\": false, \"message\": \"Delete failed: Invalid file path: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\modules.xml\"}"
+        },
+        "execution_time": 0.0070018768310546875,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 78
+}

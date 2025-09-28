@@ -1,0 +1,305 @@
+[
+  {
+    "step": {
+      "step_id": "create_new_document",
+      "tool_name": "create_document",
+      "parameters": {
+        "title": "Test Document",
+        "author": "Test Author",
+        "subject": "Test Subject"
+      },
+      "description": "Happy path: Create a new document with valid metadata."
+    },
+    "substituted_params": {
+      "title": "Test Document",
+      "author": "Test Author",
+      "subject": "Test Subject"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Document created successfully\", \"file_path\": \"Test_Document.docx\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_document_created",
+      "tool_name": "get_document_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path"
+      },
+      "description": "Dependent call: Verify the document exists and is readable (empty content expected)."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "add_paragraph_to_document",
+      "tool_name": "add_paragraph",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "text": "This is a test paragraph."
+      },
+      "description": "Dependent call: Add a paragraph to the newly created document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "text": "This is a test paragraph."
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Paragraph added successfully\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_paragraph_added",
+      "tool_name": "get_document_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path"
+      },
+      "description": "Verify that the paragraph was successfully added to the document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"This is a test paragraph.\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "add_heading_to_document",
+      "tool_name": "add_heading",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "text": "Introduction",
+        "level": 1
+      },
+      "description": "Add a heading to the document for structural testing."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "text": "Introduction",
+      "level": 1
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Heading added successfully\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "verify_heading_added",
+      "tool_name": "get_document_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path"
+      },
+      "description": "Verify that the heading was successfully added to the document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"This is a test paragraph.\\nIntroduction\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "search_for_paragraph_content",
+      "tool_name": "find_text_in_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "search_text": "test paragraph"
+      },
+      "description": "Search for the previously added paragraph text in the document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "search_text": "test paragraph"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"occurrences\": [0]}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "create_custom_style",
+      "tool_name": "create_custom_style",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "style_name": "CustomBoldStyle",
+        "font_name": "Arial",
+        "font_size": 14,
+        "bold": true,
+        "italic": false
+      },
+      "description": "Create a custom style to be used for formatting text."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "style_name": "CustomBoldStyle",
+      "font_name": "Arial",
+      "font_size": 14,
+      "bold": true,
+      "italic": false
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"<WD_PARAGRAPH_ALIGNMENT.LEFT: 0> is not a valid WD_STYLE_TYPE\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "format_paragraph_with_style",
+      "tool_name": "format_text",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "start": 0,
+        "end": 2,
+        "style_name": "CustomBoldStyle"
+      },
+      "description": "Apply the custom style to a range of paragraphs in the document."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "start": 0,
+      "end": 2,
+      "style_name": "CustomBoldStyle"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"\\\"no style with name 'CustomBoldStyle'\\\"\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "retrieve_paragraph_by_index",
+      "tool_name": "get_paragraph_text_from_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "paragraph_index": 1
+      },
+      "description": "Retrieve the second paragraph by index to verify content."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "paragraph_index": 1
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"text\": \"Introduction\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "attempt_password_protection",
+      "tool_name": "protect_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "password": "testpassword123"
+      },
+      "description": "Attempt to apply password protection (expected failure, as it's not implemented)."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "password": "testpassword123"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Password protection not implemented\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "attempt_add_footnote",
+      "tool_name": "add_footnote_to_document",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "text": "This is a test footnote."
+      },
+      "description": "Attempt to add a footnote (expected failure, as it's not implemented)."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "text": "This is a test footnote."
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Footnote addition not implemented\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_invalid_file_path",
+      "tool_name": "get_document_text",
+      "parameters": {
+        "file_path": "nonexistent.docx"
+      },
+      "description": "Edge case: Attempt to read from a non-existent file."
+    },
+    "substituted_params": {
+      "file_path": "nonexistent.docx"
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"Package not found at 'nonexistent.docx'\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_empty_title_create_document",
+      "tool_name": "create_document",
+      "parameters": {
+        "title": "",
+        "author": "Empty Title Tester",
+        "subject": "Empty Title Test"
+      },
+      "description": "Edge case: Attempt to create a document with an empty title."
+    },
+    "substituted_params": {
+      "title": "",
+      "author": "Empty Title Tester",
+      "subject": "Empty Title Test"
+    },
+    "result": {
+      "status": "success",
+      "result": "{\"message\": \"Document created successfully\", \"file_path\": \".docx\"}"
+    }
+  },
+  {
+    "step": {
+      "step_id": "test_negative_font_size",
+      "tool_name": "create_custom_style",
+      "parameters": {
+        "file_path": "$outputs.create_new_document.file_path",
+        "style_name": "NegativeFontSizeStyle",
+        "font_name": "Times New Roman",
+        "font_size": -12,
+        "bold": false,
+        "italic": true
+      },
+      "description": "Edge case: Attempt to create a style with a negative font size."
+    },
+    "substituted_params": {
+      "file_path": "Test_Document.docx",
+      "style_name": "NegativeFontSizeStyle",
+      "font_name": "Times New Roman",
+      "font_size": -12,
+      "bold": false,
+      "italic": true
+    },
+    "result": {
+      "status": "error",
+      "result": "{\"error\": \"<WD_PARAGRAPH_ALIGNMENT.LEFT: 0> is not a valid WD_STYLE_TYPE\"}"
+    }
+  }
+]

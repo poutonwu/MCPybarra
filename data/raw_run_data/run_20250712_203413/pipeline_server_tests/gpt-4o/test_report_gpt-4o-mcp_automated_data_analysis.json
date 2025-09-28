@@ -1,0 +1,383 @@
+{
+  "server_name": "server",
+  "parent_dir": "refined",
+  "report_name": "gpt-4o-mcp_automated_data_analysis",
+  "server_path": "workspace/pipeline-output-servers/gpt-4o/mcp_automated_data_analysis/refined/server.py",
+  "timestamp": "2025-07-12T20:34:18.049888",
+  "tools": [
+    {
+      "name": "load_csv",
+      "description": "\n    Load a CSV file into memory and store it with a user-defined dataset name.\n\n    Args:\n        file_path (str): The path to the CSV file to be loaded.\n        dataset_name (str): A unique name to associate with the dataset.\n\n    Returns:\n        str: JSON-formatted string indicating success or error.\n\n    Example:\n        load_csv(\"data/sales.csv\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path",
+          "dataset_name"
+        ],
+        "title": "load_csvArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "run_script",
+      "description": "\n    Execute a Python script dynamically using a dataset loaded in memory.\n\n    Args:\n        script_code (str): The Python code to execute as a string.\n        dataset_name (str): The name of the dataset to pass to the script.\n\n    Returns:\n        str: JSON-formatted string indicating success or error with execution output.\n\n    Example:\n        run_script(\"print(dataset.head())\", \"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "script_code": {
+            "title": "Script Code",
+            "type": "string"
+          },
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "script_code",
+          "dataset_name"
+        ],
+        "title": "run_scriptArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "explore_data",
+      "description": "\n    Generate an automated profile report for a dataset in memory.\n\n    Args:\n        dataset_name (str): The name of the dataset to explore.\n\n    Returns:\n        str: JSON-formatted string with summary insights and the path to the generated report.\n\n    Example:\n        explore_data(\"sales_data\")\n    ",
+      "args_schema": {
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "explore_dataArguments",
+        "type": "object"
+      }
+    }
+  ],
+  "test_results": {
+    "load_csv": [
+      {
+        "case_name": "Basic CSV Load Test",
+        "purpose": "Verify that a valid CSV file can be loaded into memory with a user-defined dataset name.",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'performance_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 0.005999565124511719,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Load CSV with Empty Dataset Name",
+        "purpose": "Test behavior when dataset name is an empty string.",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset '' loaded successfully.\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 0.008514642715454102,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load Nonexistent CSV File",
+        "purpose": "Test loading a CSV file that does not exist to ensure proper error handling.",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\nonexistent.csv",
+          "dataset_name": "invalid_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"File not found: D:\\\\devWorkspace\\\\MCPServer-Generator\\\\testSystem\\\\testFiles\\\\nonexistent.csv\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004993915557861328,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV Using Special Characters in Dataset Name",
+        "purpose": "Test the tool's ability to handle special characters in the dataset name.",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "data_set@2025!"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'data_set@2025!' loaded successfully.\", \"outputs\": {\"dataset_name\": \"data_set@2025!\"}}"
+        },
+        "execution_time": 0.004998683929443359,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Attempt to Load Non-CSV File as CSV",
+        "purpose": "Test system response when attempting to load a non-CSV file using the load_csv tool.",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\paper1.pdf",
+          "dataset_name": "non_csv_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Only .csv or .zip files are supported.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.007005214691162109,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Load CSV with Maximum Length Dataset Name",
+        "purpose": "Test system behavior when using a very long dataset name (boundary condition).",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string' loaded successfully.\", \"outputs\": {\"dataset_name\": \"this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string\"}}"
+        },
+        "execution_time": 0.005197763442993164,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Security Test - Attempt to Load System File",
+        "purpose": "Check if the system prevents loading of sensitive or system-level files.",
+        "args": {
+          "file_path": "C:\\Windows\\System32\\drivers\\etc\\hosts",
+          "dataset_name": "system_hosts"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Only .csv or .zip files are supported.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.008515357971191406,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Consecutive Loads with Same Dataset Name",
+        "purpose": "Verify that attempting to load a new file into the same dataset name behaves correctly (e.g., overwrites or fails gracefully).",
+        "args": {
+          "file_path": "D:\\devWorkspace\\MCPServer-Generator\\testSystem\\testFiles\\performance_results.csv",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"message\": \"Dataset 'performance_data' loaded successfully.\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 0.00519108772277832,
+        "is_functional_test": true
+      }
+    ],
+    "explore_data": [
+      {
+        "case_name": "Basic Data Exploration Test",
+        "purpose": "Verify that the dataset 'performance_data' can be explored successfully and generates a valid profile report.",
+        "args": {
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at performance_data_profile_report.html\", \"report_path\": \"performance_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 5.790977716445923,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Explore Data with Empty Dataset Name",
+        "purpose": "Test behavior when attempting to explore data with an empty dataset name.",
+        "args": {
+          "dataset_name": ""
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at _profile_report.html\", \"report_path\": \"_profile_report.html\", \"outputs\": {\"dataset_name\": \"\"}}"
+        },
+        "execution_time": 4.738230228424072,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore Nonexistent Dataset",
+        "purpose": "Test system response when attempting to explore a dataset that has not been loaded.",
+        "args": {
+          "dataset_name": "nonexistent_dataset"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_dataset' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004000186920166016,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Explore Data with Special Characters in Dataset Name",
+        "purpose": "Test the tool's ability to handle special characters in the dataset name during exploration.",
+        "args": {
+          "dataset_name": "data_set@2025!"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at data_set@2025!_profile_report.html\", \"report_path\": \"data_set@2025!_profile_report.html\", \"outputs\": {\"dataset_name\": \"data_set@2025!\"}}"
+        },
+        "execution_time": 3.3322882652282715,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Explore System-Level Dataset",
+        "purpose": "Check if the system prevents exploring sensitive or restricted datasets (e.g., system-level names).",
+        "args": {
+          "dataset_name": "system_hosts"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'system_hosts' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.003507375717163086,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Null Dataset Name",
+        "purpose": "Test error handling when null is passed as the dataset name.",
+        "args": {
+          "dataset_name": null
+        },
+        "response": {
+          "error": "ToolException: Error executing tool explore_data: 1 validation error for explore_dataArguments\ndataset_name\n  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]\n    For further information visit https://errors.pydantic.dev/2.10/v/string_type"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Long Dataset Name",
+        "purpose": "Test system behavior when exploring a dataset with a very long name (boundary condition).",
+        "args": {
+          "dataset_name": "this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string_profile_report.html\", \"report_path\": \"this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string_profile_report.html\", \"outputs\": {\"dataset_name\": \"this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string\"}}"
+        },
+        "execution_time": 3.422159194946289,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Functional Test - Re-explore Same Dataset",
+        "purpose": "Verify that re-exploring the same dataset behaves correctly (should return consistent results).",
+        "args": {
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"summary\": \"Profile report generated at performance_data_profile_report.html\", \"report_path\": \"performance_data_profile_report.html\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 3.618696451187134,
+        "is_functional_test": true
+      }
+    ],
+    "run_script": [
+      {
+        "case_name": "Basic Script Execution Test",
+        "purpose": "Verify that a simple Python script can be executed successfully using the run_script tool with a valid dataset.",
+        "args": {
+          "script_code": "print(dataset.head())",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 0.007999420166015625,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Security Test - Attempt to Execute Malicious Code",
+        "purpose": "Test if the system prevents execution of potentially harmful scripts (e.g., file deletion).",
+        "args": {
+          "script_code": "import os; os.remove('test_output.txt')",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"[WinError 2] \\u7cfb\\u7edf\\u627e\\u4e0d\\u5230\\u6307\\u5b9a\\u7684\\u6587\\u4ef6\\u3002: 'test_output.txt'\", \"outputs\": {}}"
+        },
+        "execution_time": 0.004000425338745117,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Invalid Dataset Name",
+        "purpose": "Test error handling when attempting to execute a script on a non-existent dataset.",
+        "args": {
+          "script_code": "print(dataset.shape)",
+          "dataset_name": "nonexistent_dataset"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"Dataset 'nonexistent_dataset' not found.\", \"outputs\": {}}"
+        },
+        "execution_time": 0.006999492645263672,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Error Handling - Empty Script Code",
+        "purpose": "Check system behavior when an empty script code is provided.",
+        "args": {
+          "script_code": "",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 0.00400090217590332,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Boundary Test - Long Script Execution",
+        "purpose": "Test execution of a long script containing multiple operations.",
+        "args": {
+          "script_code": "print(dataset.describe()); print(dataset.isnull().sum()); print(len(dataset))",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 0.015997648239135742,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Special Characters in Script Code",
+        "purpose": "Test execution of a script containing special characters and symbols.",
+        "args": {
+          "script_code": "print(dataset[['CPU Usage (%)', 'Memory Usage (MB)']].corr())",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"error\", \"message\": \"\\\"None of [Index(['CPU Usage (%)', 'Memory Usage (MB)'], dtype='object')] are in the [columns]\\\"\", \"outputs\": {}}"
+        },
+        "execution_time": 0.003999948501586914,
+        "is_functional_test": true
+      },
+      {
+        "case_name": "Boundary Test - Very Long Dataset Name",
+        "purpose": "Verify that the tool can handle a very long dataset name during script execution.",
+        "args": {
+          "script_code": "print(dataset.shape)",
+          "dataset_name": "this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"this_is_a_very_long_dataset_name_that_tests_the_upper_limit_of_allowed_characters_in_a_dataset_name_string\"}}"
+        },
+        "execution_time": 0.0029997825622558594,
+        "is_functional_test": false
+      },
+      {
+        "case_name": "Functional Test - Re-execute Same Script",
+        "purpose": "Ensure consistent behavior when re-executing the same script on the same dataset.",
+        "args": {
+          "script_code": "print(dataset.head())",
+          "dataset_name": "performance_data"
+        },
+        "response": {
+          "result": "{\"status\": \"success\", \"output\": \"Script executed successfully.\", \"outputs\": {\"dataset_name\": \"performance_data\"}}"
+        },
+        "execution_time": 0.007999658584594727,
+        "is_functional_test": true
+      }
+    ]
+  },
+  "total_cases": 24
+}
