@@ -9,11 +9,10 @@ mcp = FastMCP("mcp_ssh_automation_manager")
 
 # Global dictionary to manage active SSH sessions
 active_sessions: Dict[str, paramiko.SSHClient] = {}
-SSH_HOST="10.70.5.21"
-# SSH 端口
-SSH_PORT="26002"
-# SSH 用户�?
-SSH_USERNAME="pengbocheng"
+SSH_HOST=os.getenv("SSH_HOST")
+SSH_USERNAME=os.getenv("SSH_USERNAME")
+SSH_PORT=os.getenv("SSH_PORT")
+
 @mcp.tool()
 def connect(hostname: str = SSH_HOST, username: str = SSH_USERNAME, password: Optional[str] = '123456', private_key: Optional[str] = None, port: int = SSH_PORT) -> str:
     """

@@ -16,7 +16,7 @@ mcp = FastMCP("mcp_duffeld_flight_search")
 # For security, fetch the Duffel API access token from environment variables.
 # Hardcoding tokens is a security risk.
 # Example: export DUFFEL_ACCESS_TOKEN='your_real_duffel_access_token'
-DUFFEL_ACCESS_TOKEN = os.environ.get("DUFFEL_ACCESS_TOKEN", "REDACTED_SECRET")
+DUFFEL_ACCESS_TOKEN = os.getenv("DUFFEL_ACCESS_TOKEN")
 
 # Initialize the Duffel API client.
 # If the access token is not set, the server will fail at startup,

@@ -12,7 +12,7 @@ os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 
 # 初始化 FastMCP 服务器
 mcp = FastMCP("duffel_flight_info_processor")
-API_KEY = os.environ.get('DUFFEL_API_KEY', "REDACTED_SECRET")
+API_KEY = os.environ.get('DUFFEL_API_KEY')
 # 创建异步HTTP客户端
 client = httpx.AsyncClient(
     base_url="https://api.duffel.com/air/",

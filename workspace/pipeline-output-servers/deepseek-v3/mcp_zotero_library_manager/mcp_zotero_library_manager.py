@@ -3,14 +3,14 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 from pyzotero import zotero
 from typing import Any, Dict, List, Union
-
+import os
 # Initialize FastMCP server
 mcp = FastMCP("mcp_zotero_library_manager")
 
 # Zotero API configuration
-ZOTERO_API_KEY = "goIOXCQJi4LP4WIZbJlpb4Ve"
-ZOTERO_LIBRARY_ID = "16026771"
-ZOTERO_LIBRARY_TYPE = "user"  # or "group"
+ZOTERO_API_KEY = os.getenv("ZOTERO_API_KEY")
+ZOTERO_LIBRARY_ID = os.getenv("ZOTERO_LIBRARY_ID")
+ZOTERO_LIBRARY_TYPE = os.getenv("ZOTERO_LIBRARY_TYPE", "user")
 
 # Initialize Zotero client
 zot = zotero.Zotero(ZOTERO_LIBRARY_ID, ZOTERO_LIBRARY_TYPE, ZOTERO_API_KEY)

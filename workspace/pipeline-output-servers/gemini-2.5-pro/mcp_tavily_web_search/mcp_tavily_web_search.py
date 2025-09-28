@@ -11,7 +11,7 @@ load_dotenv()
 
 # --- Configuration Management ---
 # Retrieve Tavily API key from environment variables
-TAVILY_API_KEY = os.environ.get('TAVILY_API_KEY', 'REDACTED_SECRET')
+TAVILY_API_KEY = os.getenv('TAVILY_API_KEY')
 
 # --- Proxy Support (optional) ---
 # Uncomment the following lines if you need to use a proxy

@@ -11,7 +11,7 @@ mcp = FastMCP("mcp_financial_data_processor")
 FINANCIALDATASETS_API_BASE = "https://api.financialdatasets.ai"
 
 # Retrieve API key from environment variables
-API_KEY = os.environ.get('FINANCIALDATASETS_API_KEY', 'REDACTED_SECRET')
+API_KEY = os.getenv('FINANCIALDATASETS_API_KEY')
 
 if not API_KEY:
     raise ValueError("Environment variable 'FINANCIALDATASETS_API_KEY' is not set.")

@@ -12,7 +12,7 @@ os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
 os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 
 # 从环境变量获取 Unsplash Access Key
-UNSPLASH_ACCESS_KEY = os.environ.get('UNSPLASH_ACCESS_KEY', "URla9S3DiHRJJT1zWCn1RxQfUuB2irCq2xiGzj5wlq0")
+UNSPLASH_ACCESS_KEY = os.environ.get('UNSPLASH_ACCESS_KEY')
 if not UNSPLASH_ACCESS_KEY:
     raise ValueError("UNSPLASH_ACCESS_KEY 环境变量未设置")
 

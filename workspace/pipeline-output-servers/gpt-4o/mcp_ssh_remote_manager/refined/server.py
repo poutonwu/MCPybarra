@@ -11,7 +11,7 @@ mcp = FastMCP("mcp_ssh_remote_manager")
 active_sessions = {}
 
 @mcp.tool()
-def connect(hostname: str = "10.70.5.21", username: str = 'pengbocheng', password: str = "123456", private_key_path: str = None, port: int = 26002) -> str:
+def connect(hostname: str = os.getenv('SSH_HOST'), username: str = os.getenv('SSH_USERNAME'), password: str = "123456", private_key_path: str = None, port: int = os.getenv('SSH_PORT')) -> str:
     """
     Establishes an SSH connection to a remote server.
 

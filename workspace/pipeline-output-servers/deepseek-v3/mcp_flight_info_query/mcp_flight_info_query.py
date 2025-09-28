@@ -4,10 +4,10 @@ import json
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, validator
 from typing import List, Optional, Dict, Any
-
+import os
 # Initialize FastMCP server
 mcp = FastMCP("duffeld_flight_mcp")
-DUFFEL_API_TOKEN="REDACTED_SECRET"
+DUFFEL_API_TOKEN=os.getenv("DUFFEL_API_TOKEN")
 # Constants
 DUFFELD_API_BASE = "https://api.duffeld.com"
 USER_AGENT = "duffeld-flight-app/1.0 (contact@example.com)"

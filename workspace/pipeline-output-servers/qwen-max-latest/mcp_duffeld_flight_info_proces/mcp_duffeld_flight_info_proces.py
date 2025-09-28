@@ -12,7 +12,7 @@ mcp = FastMCP("duffeld_flight_info")
 flight_data_client = FlightData()
 
 # Environment variable for API key (if needed)
-API_KEY = os.environ.get('FLIGHT_API_KEY', "REDACTED_SECRET")
+API_KEY = os.environ.get('FLIGHT_API_KEY')
 
 @mcp.tool()
 def search_flights(

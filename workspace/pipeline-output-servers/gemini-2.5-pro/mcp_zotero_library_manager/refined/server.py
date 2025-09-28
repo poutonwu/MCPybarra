@@ -12,8 +12,8 @@ load_dotenv()
 
 # --- Configuration Management ---
 # Retrieve Zotero credentials from environment variables
-ZOTERO_LIBRARY_ID = os.environ.get('ZOTERO_LIBRARY_ID', "16026771")
-ZOTERO_API_KEY = os.environ.get('ZOTERO_API_KEY', "goIOXCQJi4LP4WIZbJlpb4Ve")
+ZOTERO_LIBRARY_ID = os.getenv('ZOTERO_LIBRARY_ID')
+ZOTERO_API_KEY = os.getenv('ZOTERO_API_KEY')
 ZOTERO_LIBRARY_TYPE = os.environ.get('ZOTERO_LIBRARY_TYPE', 'user')  # Default to 'user'
 
 # --- Proxy Support ---

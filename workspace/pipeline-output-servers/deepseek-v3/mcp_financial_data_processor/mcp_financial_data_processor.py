@@ -2,11 +2,11 @@ import sys
 import httpx
 import json
 from mcp.server.fastmcp import FastMCP
-
+import os
 # Initialize FastMCP server
 mcp = FastMCP("financial_data_processor")
 # Financial Datasets API 密钥
-FINANCIAL_DATASETS_API_KEY="REDACTED_SECRET"
+FINANCIAL_DATASETS_API_KEY=os.getenv("FINANCIAL_DATASETS_API_KEY")
 # Constants
 FINANCIAL_DATA_API_BASE = "https://api.financialdatasets.com"
 USER_AGENT = "financial-data-app/1.0 (contact@example.com)"

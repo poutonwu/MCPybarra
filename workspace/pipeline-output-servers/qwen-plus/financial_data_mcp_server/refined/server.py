@@ -12,7 +12,7 @@ os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 # Shared AsyncClient for performance
 client = httpx.AsyncClient(
     base_url="https://api.financialdatasets.com",
-    headers={"Authorization": f"Bearer {os.environ.get('FINANCIALDATASETS_API_KEY', 'REDACTED_SECRET')}"}
+    headers={"Authorization": f"Bearer {os.environ.get('FINANCIALDATASETS_API_KEY')}"}
 )
 
 @mcp.tool()

@@ -17,7 +17,7 @@ mcp = FastMCP("financial_mcp_server")
 
 # Base URL and API Key for Financial Datasets API
 API_BASE_URL = "https://financialdatasets.example.com/api"
-API_KEY = "REDACTED_SECRET"
+API_KEY = os.getenv('FINANCIAL_DATASETS_API_KEY')
 
 if not API_KEY:
     raise ValueError("FINANCIAL_API_KEY environment variable is not set")

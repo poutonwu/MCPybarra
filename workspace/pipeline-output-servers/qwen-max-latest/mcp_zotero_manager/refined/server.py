@@ -11,9 +11,9 @@ mcp = FastMCP("mcp_zotero_manager")
 ZOTERO_API_BASE = "https://api.zotero.org"
 USER_AGENT = "mcp-zotero-manager/1.0 (contact@example.com)"
 # Zotero 库的 ID
-ZOTERO_LIBRARY_ID = "16026771"
-ZOTERO_LIBRARY_TYPE = "user"
-ZOTERO_API_KEY = "goIOXCQJi4LP4WIZbJlpb4Ve"
+ZOTERO_LIBRARY_ID=os.getenv('ZOTERO_LIBRARY_ID')
+ZOTERO_LIBRARY_TYPE=os.getenv('ZOTERO_LIBRARY_TYPE')
+ZOTERO_API_KEY=os.getenv('ZOTERO_API_KEY')
 
 # Set up proxies if needed
 os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'

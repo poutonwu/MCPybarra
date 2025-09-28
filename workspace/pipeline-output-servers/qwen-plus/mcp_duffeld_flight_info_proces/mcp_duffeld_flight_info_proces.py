@@ -25,7 +25,7 @@ API_VERSION = "beta"
 USER_AGENT = "duffeld-flight-server/1.0 (contact@example.com)"
 
 # 获取环境变量中的 API 密钥
-API_KEY = os.environ.get('DUFFEL_API_KEY', "REDACTED_SECRET")
+API_KEY = os.getenv('DUFFEL_API_KEY')
 if not API_KEY:
     logger.warning("DUFFEL_API_KEY 环境变量未设置，航班查询功能将受限")
 

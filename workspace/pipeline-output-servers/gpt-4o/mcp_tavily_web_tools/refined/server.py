@@ -13,7 +13,7 @@ os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
 os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 
 # Load Tavily API Key from environment variables
-TAVILY_API_KEY="REDACTED_SECRET"
+TAVILY_API_KEY= os.getenv('TAVILY_API_KEY')
 if not TAVILY_API_KEY:
     raise ValueError("TAVILY_API_KEY environment variable is not set.")
 

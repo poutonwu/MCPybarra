@@ -10,7 +10,7 @@ import os
 os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'
 os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 
-TAVILY_API_KEY="REDACTED_SECRET"
+TAVILY_API_KEY=os.getenv("TAVILY_API_KEY")
 
 httpx_client = httpx.AsyncClient()
 

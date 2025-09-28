@@ -10,7 +10,7 @@ mcp = FastMCP("unsplash_image_search")
 # Initialize shared AsyncClient for improved performance
 client = httpx.AsyncClient(
     base_url="https://api.unsplash.com",
-    headers={"Authorization": f"Client-ID {os.environ.get('UNSPLASH_ACCESS_KEY', 'URla9S3DiHRJJT1zWCn1RxQfUuB2irCq2xiGzj5wlq0')}"}
+    headers={"Authorization": f"Client-ID {os.getenv('UNSPLASH_ACCESS_KEY')}"}
 )
 
 @mcp.tool()

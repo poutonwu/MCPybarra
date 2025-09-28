@@ -12,9 +12,9 @@ ZOTERO_API_BASE = "https://api.zotero.org"
 USER_AGENT = "mcp_zotero_server/1.0 (contact@example.com)"
 
 # Get Zotero credentials from environment variables
-ZOTERO_LIBRARY_ID = os.environ.get('ZOTERO_LIBRARY_ID', '16026771')
-ZOTERO_API_KEY = os.environ.get('ZOTERO_API_KEY', 'goIOXCQJi4LP4WIZbJlpb4Ve')
-ZOTERO_LIBRARY_TYPE = os.environ.get('ZOTERO_LIBRARY_TYPE', 'user')  # 'user' or 'group'
+ZOTERO_LIBRARY_ID = os.getenv('ZOTERO_LIBRARY_ID')
+ZOTERO_API_KEY = os.getenv('ZOTERO_API_KEY')
+ZOTERO_LIBRARY_TYPE = os.getenv('ZOTERO_LIBRARY_TYPE')  # 'user' or 'group'
 
 # Configure proxy if needed
 os.environ['HTTP_PROXY'] = 'http://127.0.0.1:7890'

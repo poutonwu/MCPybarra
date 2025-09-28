@@ -11,7 +11,7 @@ mcp = FastMCP("mcp_tavily_web_search_tool")
 # Shared AsyncClient for performance optimization
 client = httpx.AsyncClient(
     base_url="https://api.tavily.com",
-    headers={"Authorization": f"Bearer {os.environ.get('TAVILY_API_KEY', 'REDACTED_SECRET')}"}
+    headers={"Authorization": f"Bearer {os.environ.get('TAVILY_API_KEY')}"}
 )
 
 class SearchResult(BaseModel):

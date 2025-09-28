@@ -8,7 +8,7 @@ mcp = FastMCP("mcp_unsplash_photo_search")
 
 # Unsplash API configuration
 UNSPLASH_API_BASE = "https://api.unsplash.com"
-UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "URla9S3DiHRJJT1zWCn1RxQfUuB2irCq2xiGzj5wlq0")
+UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 if not UNSPLASH_ACCESS_KEY:
     raise ValueError("Unsplash API access key not found in environment variables.")
 

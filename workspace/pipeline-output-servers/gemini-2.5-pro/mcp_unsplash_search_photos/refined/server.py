@@ -95,7 +95,7 @@ async def search_photos(
         ]'
     """
     # --- Security: Retrieve API Key from environment variables ---
-    access_key = os.environ.get("UNSPLASH_ACCESS_KEY", "URla9S3DiHRJJT1zWCn1RxQfUuB2irCq2xiGzj5wlq0")
+    access_key = os.getenv("UNSPLASH_ACCESS_KEY")
     if not access_key:
         raise ValueError("UNSPLASH_ACCESS_KEY environment variable not set.")
 

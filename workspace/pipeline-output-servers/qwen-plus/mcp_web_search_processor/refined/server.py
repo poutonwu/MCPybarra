@@ -15,7 +15,7 @@ os.environ['HTTPS_PROXY'] = 'http://127.0.0.1:7890'
 mcp = FastMCP("mcp_web_search_processor")
 
 # 获取 API 密钥
-TAVILY_API_KEY = os.environ.get('TAVILY_API_KEY', "REDACTED_SECRET")
+TAVILY_API_KEY = os.environ.get('TAVILY_API_KEY')
 if not TAVILY_API_KEY:
     raise ValueError("TAVILY_API_KEY 环境变量未设置")
 

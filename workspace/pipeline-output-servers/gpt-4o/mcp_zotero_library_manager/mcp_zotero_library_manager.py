@@ -9,11 +9,11 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("mcp_zotero_library_manager")
 
 # Environment variables for sensitive information
-ZOTERO_LIBRARY_ID="16026771"
+ZOTERO_LIBRARY_ID=os.getenv('ZOTERO_LIBRARY_ID')
 # Zotero 库的类型 ('user' 或 'group')
-ZOTERO_LIBRARY_TYPE="user"
+ZOTERO_LIBRARY_TYPE=os.getenv('ZOTERO_LIBRARY_TYPE')
 # 您的 Zotero API 密钥
-ZOTERO_API_KEY="goIOXCQJi4LP4WIZbJlpb4Ve"
+ZOTERO_API_KEY=os.getenv('ZOTERO_API_KEY')
 # 如果使用本地 Zotero 客户端，设置为 "true"
 ZOTERO_LOCAL=""
 
